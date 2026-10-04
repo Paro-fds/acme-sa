@@ -7,6 +7,7 @@ Les cas d'utilisation sont créés à la demande : remplacer un adaptateur
 
 from datetime import timedelta
 
+from app.admin.application.employee_documents import GetEmployeeDocumentFile, ListEmployeeDocuments
 from app.admin.application.get_employee_folder import GetEmployeeFolder
 from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
@@ -105,6 +106,12 @@ class Container:
 
     def list_employees(self) -> ListEmployees:
         return ListEmployees(self.employees, self.updates)
+
+    def list_employee_documents(self) -> ListEmployeeDocuments:
+        return ListEmployeeDocuments(self.employees, self.documents)
+
+    def get_employee_document_file(self) -> GetEmployeeDocumentFile:
+        return GetEmployeeDocumentFile(self.employees, self.documents, self.file_storage)
 
     def close(self) -> None:
         self.database.dispose()

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFil
 from pydantic import BaseModel
 
 from app.auth.api.dependencies import container, current_employee_id
-from app.document.application.use_cases import DocumentView
+from app.document.application.use_cases import DocumentFile, DocumentView
 
 router = APIRouter(prefix="/api/me/documents", tags=["documents"])
 
@@ -22,6 +22,19 @@ class DocumentOut(BaseModel):
     @classmethod
     def of(cls, view: DocumentView) -> "DocumentOut":
         return cls(**view.__dict__)
+
+
+def file_response(document: DocumentFile) -> Response:
+    return Response(
+        content=document.content,
+        media_type=document.content_type,
+        headers={
+            # Affiché dans le navigateur (aperçu d'image, lecteur PDF) ; nom d'origine encodé (RFC 5987).
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(document.original_name)}",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+        },
+    )
 
 
 @router.get("", response_model=list[DocumentOut])
@@ -50,14 +63,4 @@ def delete_document(document_id: str, request: Request, employee_id: str = Depen
 
 @router.get("/{document_id}/file")
 def get_document_file(document_id: str, request: Request, employee_id: str = Depends(current_employee_id)) -> Response:
-    document = container(request).get_my_document_file().execute(employee_id, document_id)
-    return Response(
-        content=document.content,
-        media_type=document.content_type,
-        headers={
-            # Affiché dans le navigateur (aperçu d'image, lecteur PDF) ; nom d'origine encodé (RFC 5987).
-            "Content-Disposition": f"inline; filename*=UTF-8''{quote(document.original_name)}",
-            "X-Content-Type-Options": "nosniff",
-            "Cache-Control": "private, no-store",
-        },
-    )
+    return file_response(container(request).get_my_document_file().execute(employee_id, document_id))

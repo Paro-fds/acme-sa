@@ -3,10 +3,14 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import EmployeeDetailPage from './EmployeeDetailPage.jsx'
-import { getEmployee } from '../../api/admin.js'
+import { getEmployee, listEmployeeDocuments } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/admin.js', () => ({ getEmployee: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  getEmployee: vi.fn(),
+  listEmployeeDocuments: vi.fn(),
+  employeeDocumentFileUrl: (id) => `/api/admin/documents/${id}/file`,
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
 const BASE = {
@@ -70,6 +74,7 @@ const block = (name) => screen.getByRole('region', { name })
 describe('EmployeeDetailPage (US-20)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    listEmployeeDocuments.mockResolvedValue([])
   })
 
   it('en-tête : badge « Lecture seule », nom, matricule, agence, poste, statut', async () => {
@@ -145,6 +150,33 @@ describe('EmployeeDetailPage (US-20)', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
     const buttons = screen.queryAllByRole('button').map((button) => button.getAttribute('aria-label') ?? button.textContent)
     expect(buttons).toEqual(['Retour', 'Menu du compte'])
+  })
+
+  it('US-21 : bloc « Documents » chargé avec le dossier', async () => {
+    getEmployee.mockResolvedValue(SUBMITTED)
+    listEmployeeDocuments.mockResolvedValue([
+      {
+        id: 'd1',
+        document_type: 'DIPLOME',
+        type_label: 'Diplôme',
+        original_name: 'licence.pdf',
+        content_type: 'application/pdf',
+        size_bytes: 2048,
+        uploaded_at: '2026-10-04T09:00:00',
+      },
+    ])
+    renderAt()
+
+    const documents = await screen.findByRole('region', { name: 'Documents' })
+    expect(within(documents).getByText('licence.pdf')).toBeInTheDocument()
+    expect(listEmployeeDocuments).toHaveBeenCalledWith('1001')
+  })
+
+  it('US-21 : aucun document → « Aucun document transmis »', async () => {
+    getEmployee.mockResolvedValue(BASE)
+    renderAt()
+
+    expect(within(await screen.findByRole('region', { name: 'Documents' })).getByText('Aucun document transmis')).toBeInTheDocument()
   })
 
   it('CA-07 : état du compte', async () => {

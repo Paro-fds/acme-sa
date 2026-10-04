@@ -1,6 +1,5 @@
-import { useId } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
-import { getEmployee } from '../../api/admin.js'
+import { getEmployee, listEmployeeDocuments } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
 import { AdminStatusBadge } from '../../components/StatusBadge.jsx'
@@ -9,21 +8,10 @@ import { formatDateTime, initials } from '../../lib/format.js'
 import { useLoader } from '../../lib/useLoader.js'
 import InfoSection from '../profile/InfoSection.jsx'
 import { profileSections } from '../profile/profileSections.js'
+import AdminDocuments from './AdminDocuments.jsx'
+import Block from './Block.jsx'
 
 export const DECLINED_MENTION = "L'employé a indiqué ne pas souhaiter mettre à jour son dossier"
-
-function Block({ icon, title, children }) {
-  const titleId = useId()
-  return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
-      <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-[20px] text-info-text" aria-hidden="true">{icon}</span>
-        <h3 id={titleId} className="text-lg font-semibold">{title}</h3>
-      </div>
-      {children}
-    </section>
-  )
-}
 
 function ReadOnlyBadge() {
   return (
@@ -109,13 +97,15 @@ function AccessBlock({ activated }) {
   )
 }
 
-/** US-20 : dossier d'un employé, en lecture seule. */
+const loadFolder = (id) => Promise.all([getEmployee(id), listEmployeeDocuments(id)])
+
+/** US-20, US-21 : dossier d'un employé et ses documents, en lecture seule. */
 export default function EmployeeDetailPage() {
   const { id } = useParams()
   const location = useLocation()
   // Retour vers la liste avec la recherche et le filtre en cours (US-18 CA-11).
   const listUrl = `/admin/employes${location.state?.listSearch ?? ''}`
-  const { data: folder, error, loading } = useLoader(() => getEmployee(id), {
+  const { data, error, loading } = useLoader(() => loadFolder(id), {
     loginPath: '/admin/connexion',
     key: id,
   })
@@ -141,6 +131,7 @@ export default function EmployeeDetailPage() {
   }
   if (error) return page(<Alert>{error.message}</Alert>)
 
+  const [folder, documents] = data
   return page(
     <>
       <FolderHeader folder={folder} />
@@ -148,6 +139,7 @@ export default function EmployeeDetailPage() {
       {profileSections(folder).map(({ icon, title, fields }) => (
         <InfoSection key={title} icon={icon} title={title} fields={fields} showEditable={false} />
       ))}
+      <AdminDocuments documents={documents} />
       <AccessBlock activated={folder.account_activated} />
     </>,
   )

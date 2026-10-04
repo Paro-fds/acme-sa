@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | MUST |
 | **PRD** | F-28 |
@@ -55,6 +55,15 @@ Aucun bouton d'ajout ou de suppression n'est affiché.
 | T-21.2 | CA-02 | API | `tests/api/test_us21_admin_documents.py` | contenu identique, `Content-Type` correct |
 | T-21.3 | CA-04, CA-05 | API | `tests/api/test_us21_admin_documents.py` | 401/403/404 |
 | T-21.4 | CA-01, CA-02, CA-03, CA-06 | Composant | `src/features/admin/AdminDocuments.test.jsx` | liste, aperçu image, état vide, aucun bouton d'écriture |
+
+## Notes de réalisation
+
+- Cas d'utilisation du module `admin` (`app/admin/application/employee_documents.py`) : `ListEmployeeDocuments` (employé inactif, inconnu ou `admin` → 404 `EMPLOYEE_NOT_FOUND`) et `GetEmployeeDocumentFile` (document inexistant, fichier absent du disque ou employé devenu inactif → 404 `DOCUMENT_NOT_FOUND`). Ils réutilisent `document_view` et `DocumentFile` du module `document`.
+- Tous les documents du profil sont listés, avant comme après la soumission (SD-02 : documents rattachés au profil).
+- Le fichier est servi avec les mêmes en-têtes que pour l'employé (`file_response` dans `app/document/api/routes.py` : `inline`, nom d'origine encodé, `nosniff`, `no-store`).
+- CA-04 : la route admin refuse sans session (401) et avec une session employé, même celle du propriétaire (403) ; le test paramétré de US-15 couvre aussi les deux nouvelles routes. CA-06 : aucune route d'écriture sur les documents côté admin (vérifié dans le schéma OpenAPI).
+- Écran : `features/admin/AdminDocuments.jsx` (bloc « Documents » avec le nombre de documents, `DocumentItem` avec `fileUrl` et `showDate`, sans `onDelete`), chargé avec le dossier (`Promise.all`). Le composant `Block` du dossier est dans `features/admin/Block.jsx`.
+- Vérifié à 390 px et 1280 px par un test Playwright temporaire (liste, PDF dans un nouvel onglet, aperçu de l'image puis fermeture, état vide).
 
 ## Hors périmètre
 

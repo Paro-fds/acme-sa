@@ -1,9 +1,10 @@
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel
 
 from app.auth.api.dependencies import container, current_admin
+from app.document.api.routes import DocumentOut, file_response
 from app.update.api.routes import ChangeOut
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(current_admin)])
@@ -105,3 +106,13 @@ def get_employee_folder(employee_id: str, request: Request) -> EmployeeFolderOut
     folder = container(request).get_employee_folder().execute(employee_id)
     fields = {key: value for key, value in folder.__dict__.items() if key != "changes"}
     return EmployeeFolderOut(**fields, changes=[ChangeOut(**change.__dict__) for change in folder.changes])
+
+
+@router.get("/employees/{employee_id}/documents", response_model=list[DocumentOut])
+def list_employee_documents(employee_id: str, request: Request) -> list[DocumentOut]:
+    return [DocumentOut.of(view) for view in container(request).list_employee_documents().execute(employee_id)]
+
+
+@router.get("/documents/{document_id}/file")
+def get_employee_document_file(document_id: str, request: Request) -> Response:
+    return file_response(container(request).get_employee_document_file().execute(document_id))
