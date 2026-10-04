@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E03 Mise à jour |
 | **Priorité** | MUST |
 | **PRD** | F-15 |
@@ -59,6 +59,11 @@ Alors l'ancienne valeur est affichée « Non renseigné ».
 | T-11.1 | CA-01, CA-02 | API | `tests/api/test_us11_review.py` | `GET /api/me/update` renvoie libellés, anciennes et nouvelles valeurs |
 | T-11.2 | CA-01 → CA-06 | Composant | `src/features/update/ReviewStep.test.jsx` | comparaisons, documents, cas vides, lien retour |
 | T-11.3 | CA-01 | Composant | `src/components/ValueComparison.test.jsx` | rendu ancienne/nouvelle valeur, « Non renseigné » |
+
+## Notes de réalisation
+
+- CA-02 : l'affichage des documents est testé au niveau composant. Les données viennent de `listMyDocuments()` (`frontend/src/api/documents.js`), qui renvoie une liste vide tant que l'API des documents n'existe pas ; **US-13** la branchera sur `GET /api/me/documents` et ajoutera le test bout en bout avec un vrai document.
+- Les changements sont regroupés par section (« Identité modifiée », « Coordonnées modifiées »).
 
 ## Hors périmètre
 

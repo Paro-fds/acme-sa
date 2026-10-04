@@ -14,17 +14,19 @@ export default function Stepper({ current, steps = UPDATE_STEPS }) {
       </div>
       <ol className="grid grid-cols-4 gap-1 text-center" aria-hidden="true">
         {steps.map((step, position) => {
-          const reached = position <= index
+          const done = position < index
+          const isCurrent = position === index
+          const badge = done
+            ? 'bg-status-done-dot text-white'
+            : isCurrent
+              ? 'bg-primary text-white'
+              : 'bg-status-neutral-bg text-help'
           return (
-            <li key={step} className={`flex flex-col items-center gap-0.5 ${reached ? '' : 'opacity-50'}`}>
-              <span
-                className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${
-                  reached ? 'bg-primary text-white' : 'bg-status-neutral-bg text-help'
-                }`}
-              >
-                {position + 1}
+            <li key={step} className={`flex flex-col items-center gap-0.5 ${done || isCurrent ? '' : 'opacity-50'}`}>
+              <span className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${badge}`}>
+                {done ? <span className="material-symbols-outlined text-[16px]">check</span> : position + 1}
               </span>
-              <span className={`max-w-full truncate text-xs ${position === index ? 'font-bold text-primary' : 'text-help'}`}>
+              <span className={`max-w-full truncate text-xs ${isCurrent ? 'font-bold text-primary' : 'text-help'}`}>
                 {step}
               </span>
             </li>

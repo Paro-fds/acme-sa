@@ -16,7 +16,7 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **En cours** (US-05, 06, 08, 09, 10 faits ; version minimale de US-12 issue du Skeleton) |
+| 3 — Consultation et mise à jour | **En cours** (US-05, 06, 08 → 11 faits ; version minimale de US-12 issue du Skeleton) |
 | 4 — Documents | Pas encore |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
@@ -27,13 +27,13 @@ Langue du projet et de l'interface : **français**.
 |---|---|
 | E01 Identification | **Fait** (US-01 à US-04) |
 | E02 Consultation | **En cours** (US-05, US-06 faites ; reste US-07, phase 4) |
-| E03 Mise à jour | **En cours** (US-08, US-09, US-10 faites ; reste US-11, US-12) |
+| E03 Mise à jour | **En cours** (US-08 → US-11 faites ; reste US-12) |
 | E04 Documents | Pas encore |
 | E05 Administration | **En cours** (versions minimales de US-15, US-17) |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10.
+**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10, US-11.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
@@ -43,11 +43,11 @@ Langue du projet et de l'interface : **français**.
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
-**Pas encore :** US-07, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-07, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-11 — Vérifier ses modifications** (étape 3 `/mise-a-jour/verification` : composant `ValueComparison`, cas « aucune modification » ; maquette `mise_jour_r_capitulatif`).
+**US-12 — Confirmer et soumettre** (dernière story de la phase 3 et de l'epic E03 : verrouillage de toutes les écritures après soumission, redirection des routes `/mise-a-jour/*`, double clic, CSV inchangé, écran de confirmation fidèle à `confirmation_de_soumission`).
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
@@ -55,7 +55,8 @@ Langue du projet et de l'interface : **français**.
 - Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
 - Étape 1 : `features/update/InformationsStep.jsx` (+ `FieldCard`, `FormSection`, `fieldRules.js` qui reprend les règles du registre serveur) ; `components/Stepper.jsx` (4 étapes) à réutiliser dans les étapes suivantes. `TextField` accepte `required`, `labelAside`, `footer`.
 - Brouillon : `features/update/useAutosave.js` (2 s, champs valides seulement, `flush()` au changement d'étape) ; `formatTime` dans `lib/format.js`.
-- US-13 devra remplacer `NEXT_STEP` de `InformationsStep.jsx` par l'étape « Documents » (« Continuer vers les documents »).
+- Vérification : `features/update/ReviewStep.jsx`, `components/ValueComparison.jsx` ; `formatSize` dans `lib/format.js`.
+- US-13 devra brancher `listMyDocuments()` (`api/documents.js`, liste vide pour l'instant) sur `GET /api/me/documents`, et remplacer `NEXT_STEP` de `InformationsStep.jsx` par l'étape « Documents » (« Continuer vers les documents »).
 
 ## 1. Méthode : Spec-Driven Development
 

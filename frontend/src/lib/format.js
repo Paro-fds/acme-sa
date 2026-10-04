@@ -21,6 +21,12 @@ export function formatTime(isoDateTime) {
   return timeFormatter.format(new Date(isoDateTime))
 }
 
+/** 245760 → "240 Ko" ; 2 400 000 → "2,3 Mo". */
+export function formatSize(bytes) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} Ko`
+  return `${(bytes / (1024 * 1024)).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo`
+}
+
 export function displayValue(value) {
   return value ? value : 'Non renseigné'
 }

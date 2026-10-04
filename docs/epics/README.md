@@ -30,7 +30,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | **E03 Mise à jour** | [US-08](E03-mise-a-jour/US-08-choisir-oui-non.md) | Choisir de mettre à jour ou non | F-12 | MUST | Fait |
 | | [US-09](E03-mise-a-jour/US-09-modifier-informations.md) | Modifier ses informations | F-13, F-18 | MUST | Fait |
 | | [US-10](E03-mise-a-jour/US-10-brouillon.md) | Sauvegarder et reprendre un brouillon | F-14 | MUST | Fait |
-| | [US-11](E03-mise-a-jour/US-11-verifier-modifications.md) | Vérifier ses modifications | F-15 | MUST | Pas encore |
+| | [US-11](E03-mise-a-jour/US-11-verifier-modifications.md) | Vérifier ses modifications | F-15 | MUST | Fait |
 | | [US-12](E03-mise-a-jour/US-12-soumettre.md) | Confirmer et soumettre | F-16, F-17 | MUST | En cours |
 | **E04 Documents** | [US-13](E04-documents/US-13-ajouter-document.md) | Ajouter un document | F-19, F-21 | MUST | Pas encore |
 | | [US-14](E04-documents/US-14-supprimer-document.md) | Supprimer un document | F-20 | SHOULD | Pas encore |
