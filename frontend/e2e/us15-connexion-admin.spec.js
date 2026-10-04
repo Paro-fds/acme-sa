@@ -16,10 +16,12 @@ test('connexion admin : refus, accès, déconnexion, routes protégées', async 
   await page.getByRole('button', { name: 'Se connecter' }).click()
   await expect(page.getByRole('alert')).toHaveText(/Identifiant ou mot de passe incorrect\./)
 
-  // CA-01 : connexion
+  // CA-01 : connexion → tableau de bord (US-16)
   await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
   await page.getByRole('button', { name: 'Se connecter' }).click()
-  await expect(page).toHaveURL(/\/admin\/employes$/)
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole('heading', { name: 'Suivi de la campagne' })).toBeVisible()
+  await page.getByRole('link', { name: 'Voir la liste des employés' }).click()
   await expect(page.getByText(/\d+ employés/)).toBeVisible()
 
   // CA-06 : déconnexion

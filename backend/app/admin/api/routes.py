@@ -6,6 +6,13 @@ from app.auth.api.dependencies import container, current_admin
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(current_admin)])
 
 
+class StatisticsOut(BaseModel):
+    total: int
+    updated: int
+    not_updated: int
+    progress: int
+
+
 class EmployeeListItemOut(BaseModel):
     id: str
     employee_code: str
@@ -21,6 +28,14 @@ class EmployeePageOut(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+@router.get("/statistics", response_model=StatisticsOut)
+def statistics(request: Request) -> StatisticsOut:
+    result = container(request).get_statistics().execute()
+    return StatisticsOut(
+        total=result.total, updated=result.updated, not_updated=result.not_updated, progress=result.progress
+    )
 
 
 @router.get("/employees", response_model=EmployeePageOut)

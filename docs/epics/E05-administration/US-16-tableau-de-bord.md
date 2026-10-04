@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | MUST |
 | **PRD** | F-23 |
@@ -55,6 +55,15 @@ Alors la liste des employés s'ouvre filtrée sur « Non effectuée ».
 | T-16.1 | CA-01 → CA-04 | Unitaire | `tests/unit/test_statistics.py` | calcul et arrondi, division par zéro impossible |
 | T-16.2 | CA-01 → CA-05 | API | `tests/api/test_us16_statistics.py` | valeurs avec les fixtures `submitted` / `draft` |
 | T-16.3 | CA-01, CA-06 | Composant | `src/features/admin/DashboardPage.test.jsx` | cartes, barre, liens filtrés |
+
+## Notes de réalisation
+
+- Calcul dans le domaine (`app/admin/domain/statistics.py`, `CampaignStatistics.compute`) : arrondi à l'entier le plus proche, moitié vers le haut (1/8 = 12,5 % → 13 %), en arithmétique entière ; 0 % s'il n'y a aucun employé.
+- Seules les mises à jour des employés **actifs** du CSV sont comptées : une soumission d'un employé devenu inactif n'apparaît nulle part.
+- Réponse : `{total, updated, not_updated, progress}`, sans aucune notion de brouillon.
+- Écran `/admin` (remplace la redirection vers la liste) : carte « Avancement » (barre `progressbar` + « X % de la campagne »), 3 cartes cliquables, « Voir la liste des employés », « Actualiser » (CA-05). Une carte par ligne à toutes les largeurs (3 colonnes trop étroites à 1280 px dans le conteneur de 768 px).
+- CA-06 : les cartes mènent à `/admin/employes?status=UPDATED` / `?status=NOT_UPDATED` (nom de paramètre de US-19). **Le filtrage de la liste lui-même est réalisé dans US-19.**
+- La liste des employés a maintenant un bouton retour vers `/admin`.
 
 ## Hors périmètre
 

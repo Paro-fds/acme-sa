@@ -8,11 +8,11 @@ import { useLoader } from '../../lib/useLoader.js'
 export default function EmployeeListPage() {
   const { data, error, loading } = useLoader(() => listEmployees(), { loginPath: '/admin/connexion' })
 
-  if (loading) return <Page account="admin" title="Employés"><p role="status">Chargement…</p></Page>
-  if (error) return <Page account="admin" title="Employés"><Alert>{error.message}</Alert></Page>
+  if (loading) return <Page account="admin" title="Employés" backTo="/admin"><p role="status">Chargement…</p></Page>
+  if (error) return <Page account="admin" title="Employés" backTo="/admin"><Alert>{error.message}</Alert></Page>
 
   return (
-    <Page account="admin" title="Employés">
+    <Page account="admin" title="Employés" backTo="/admin">
       <p className="text-sm text-muted">{data.total} employés</p>
       <ul className="divide-y divide-border rounded-xl border border-border bg-surface shadow-card">
         {data.items.map((employee) => (

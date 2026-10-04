@@ -42,12 +42,18 @@ test('parcours complet employé → admin', async ({ page }) => {
   await expect(page.getByText('Effectuée', { exact: true })).toBeVisible()
   await expect(page.getByText('+509 3722 2222')).toBeVisible()
 
-  // Admin : connexion et liste (US-15, US-17)
+  // Admin : connexion, tableau de bord et liste (US-15, US-16, US-17)
   await page.context().clearCookies()
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill('admin')
   await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
   await page.getByRole('button', { name: 'Se connecter' }).click()
+  // Base partagée entre les tests E2E : seuls le total (7 employés actifs) et une soumission au moins sont sûrs.
+  await expect(page.getByRole('link', { name: /^Total : 7,/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Effectuées : [1-7],/ })).toBeVisible()
+  await page.getByRole('link', { name: /^Non effectuées/ }).click()
+  await expect(page).toHaveURL(/\/admin\/employes\?status=NOT_UPDATED$/)
+  await page.goto('/admin/employes')
 
   const row = page.getByRole('listitem').filter({ hasText: 'JOSEPH Jean' })
   await expect(row.getByText('Mise à jour effectuée')).toBeVisible()

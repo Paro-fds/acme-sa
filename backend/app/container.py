@@ -7,6 +7,7 @@ Les cas d'utilisation sont créés à la demande : remplacer un adaptateur
 
 from datetime import timedelta
 
+from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
 from app.auth.application.sessions import SessionService
 from app.auth.application.use_cases import IdentifyEmployee, LoginAdmin, LoginEmployee, RegisterPassword
@@ -94,6 +95,9 @@ class Container:
         return SubmitUpdate(self.updates, self.clock)
 
     # --- admin ----------------------------------------------------------------
+
+    def get_statistics(self) -> GetStatistics:
+        return GetStatistics(self.employees, self.updates)
 
     def list_employees(self) -> ListEmployees:
         return ListEmployees(self.employees, self.updates)
