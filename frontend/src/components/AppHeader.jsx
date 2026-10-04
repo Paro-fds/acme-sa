@@ -5,12 +5,12 @@ import AccountMenu from './AccountMenu.jsx'
  * En-tête unique de l'application (logo, titre court, retour optionnel).
  * `account` : écran connecté, affiche l'avatar et son menu (US-04) ; `account="admin"` pour l'espace admin (US-15).
  */
-export default function AppHeader({ title, backTo, actions, account = false }) {
+export default function AppHeader({ title, backTo, actions, account = false, width = 'max-w-3xl' }) {
   const navigate = useNavigate()
 
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-surface">
-      <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4">
+      <div className={`mx-auto flex h-16 ${width} items-center gap-3 px-4`}>
         {backTo && (
           <button
             type="button"

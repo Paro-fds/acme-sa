@@ -4,7 +4,7 @@ export function getStatistics() {
   return request('/admin/statistics')
 }
 
-export function listEmployees({ page = 1, pageSize = 20 } = {}) {
-  const params = new URLSearchParams({ page, page_size: pageSize })
+export function listEmployees({ page = 1 } = {}) {
+  const params = new URLSearchParams({ page })
   return request(`/admin/employees?${params}`)
 }

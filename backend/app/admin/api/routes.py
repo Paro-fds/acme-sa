@@ -18,6 +18,8 @@ class EmployeeListItemOut(BaseModel):
     employee_code: str
     last_name: str
     first_name: str
+    display_name: str
+    previous_name: str | None
     agency_code: str
     position: str
     status: str
@@ -28,6 +30,7 @@ class EmployeePageOut(BaseModel):
     total: int
     page: int
     page_size: int
+    page_count: int
 
 
 @router.get("/statistics", response_model=StatisticsOut)
@@ -50,4 +53,5 @@ def list_employees(
         total=result.total,
         page=result.page,
         page_size=result.page_size,
+        page_count=result.page_count,
     )

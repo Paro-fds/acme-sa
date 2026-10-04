@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from math import ceil
 
 from app.employee.domain.repository import EmployeeRepository
 from app.shared.domain.text import normalize
-from app.update.application.values import current_values
+from app.update.application.values import current_values, reference_values
 from app.update.domain.repository import UpdateRepository
 from app.update.domain.update import AdminStatus, admin_status
 
@@ -13,6 +14,9 @@ class EmployeeListItem:
     employee_code: str
     last_name: str
     first_name: str
+    display_name: str
+    previous_name: str | None
+    """Ancien nom et/ou prénom, si un nouveau a été soumis (SD-03) ; sinon None."""
     agency_code: str
     position: str
     status: AdminStatus
@@ -24,6 +28,17 @@ class EmployeePage:
     total: int
     page: int
     page_size: int
+
+    @property
+    def page_count(self) -> int:
+        """Nombre de pages (au moins 1, même sans employé)."""
+        return max(ceil(self.total / self.page_size), 1)
+
+
+def previous_name(reference: dict[str, str], current: dict[str, str]) -> str | None:
+    """Parties du nom remplacées par une mise à jour soumise, dans l'ordre nom puis prénom."""
+    changed = [reference[code] for code in ("last_name", "first_name") if current[code] != reference[code]]
+    return " ".join(changed) or None
 
 
 class ListEmployees:
@@ -39,12 +54,15 @@ class ListEmployees:
         for employee in self._employees.list_all():
             update = updates.get(employee.id)
             values = current_values(employee, update)
+            reference = reference_values(employee)
             items.append(
                 EmployeeListItem(
                     id=employee.id,
                     employee_code=employee.employee_code,
                     last_name=values["last_name"],
                     first_name=values["first_name"],
+                    display_name=f"{values['last_name']} {values['first_name']}",
+                    previous_name=previous_name(reference, values),
                     agency_code=employee.agency_code,
                     position=employee.position,
                     status=admin_status(update),
