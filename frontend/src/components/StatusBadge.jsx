@@ -14,7 +14,7 @@ const DOTS = {
 export default function StatusBadge({ tone, children }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STYLES[tone]}`}
+      className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STYLES[tone]}`}
     >
       <span className={`size-2 rounded-full ${DOTS[tone]}`} aria-hidden="true" />
       {children}

@@ -16,14 +16,14 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **En cours** (US-05 fait ; versions minimales de US-08, 09, 12 issues du Skeleton) |
+| 3 — Consultation et mise à jour | **En cours** (US-05, US-06 faits ; versions minimales de US-08, 09, 12 issues du Skeleton) |
 | 4 — Documents | Pas encore |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05.
+**Fait :** US-01, US-02, US-03, US-04, US-05, US-06.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
@@ -35,15 +35,16 @@ Langue du projet et de l'interface : **français**.
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
-**Pas encore :** US-06, US-07, US-10, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-07, US-10, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-06 — Voir l'état de sa mise à jour** (carte « Ma mise à jour » de `/profil` : badge, dates, bouton « Reprendre » ; le badge occupe aujourd'hui toute la largeur, à corriger).
+**US-08 — Choisir de mettre à jour ou non** (ajouter « Non, consulter uniquement » à `features/profile/UpdateStateCard.jsx`, changer d'avis, 409 après soumission).
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
+- Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`).
 
 ## 1. Méthode : Spec-Driven Development
 

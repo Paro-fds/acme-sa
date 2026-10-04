@@ -2,13 +2,11 @@ import { useId, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { decide, getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
-import Button from '../../components/Button.jsx'
-import Card from '../../components/Card.jsx'
-import InfoSection from './InfoSection.jsx'
 import Page from '../../components/Page.jsx'
-import { EmployeeStateBadge } from '../../components/StatusBadge.jsx'
-import { formatDate, formatDateTime, formatGender, initials } from '../../lib/format.js'
+import { formatDate, formatGender, initials } from '../../lib/format.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
+import InfoSection from './InfoSection.jsx'
+import UpdateStateCard from './UpdateStateCard.jsx'
 
 function ProfileSummary({ profile }) {
   const titleId = useId()
@@ -43,12 +41,16 @@ export default function ProfilePage() {
   const redirectIfUnauthorized = useUnauthorizedRedirect()
   const { data: profile, error: loadError, loading } = useLoader(getProfile)
   const [error, setError] = useState(null)
+  const [sending, setSending] = useState(false)
 
   async function startUpdate() {
+    setSending(true)
+    setError(null)
     try {
       await decide(true)
       navigate('/mise-a-jour/informations')
     } catch (apiError) {
+      setSending(false)
       if (!redirectIfUnauthorized(apiError)) setError(apiError.message)
     }
   }
@@ -56,32 +58,19 @@ export default function ProfilePage() {
   if (loading) return <Page account title="Mon profil"><p role="status">Chargement…</p></Page>
   if (loadError) return <Page account title="Mon profil"><Alert>{loadError.message}</Alert></Page>
 
-  const { update } = profile
   const editable = (fieldName) => profile.editable_fields.includes(fieldName)
 
   return (
     <Page account title="Mon profil">
       <ProfileSummary profile={profile} />
 
-      <Card title="Ma mise à jour">
-        <div className="flex flex-col gap-4">
-          <EmployeeStateBadge state={update.state} />
-          {update.state === 'DONE' && <p>Mise à jour soumise le {formatDateTime(update.submitted_at)}.</p>}
-          {update.state === 'IN_PROGRESS' && (
-            <>
-              <p>Dernière sauvegarde le {formatDateTime(update.updated_at)}.</p>
-              <Button onClick={() => navigate('/mise-a-jour/informations')}>Reprendre la mise à jour</Button>
-            </>
-          )}
-          {update.state === 'NOT_DONE' && (
-            <>
-              <p className="font-semibold text-heading">Souhaitez-vous mettre à jour votre dossier ?</p>
-              <Button onClick={startUpdate}>Oui, mettre à jour mon dossier</Button>
-            </>
-          )}
-          <Alert>{error}</Alert>
-        </div>
-      </Card>
+      <UpdateStateCard
+        update={profile.update}
+        onStart={startUpdate}
+        onResume={() => navigate('/mise-a-jour/informations')}
+        sending={sending}
+        error={error}
+      />
 
       <InfoSection
         icon="person"

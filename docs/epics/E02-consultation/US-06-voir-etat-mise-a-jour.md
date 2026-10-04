@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E02 Consultation |
 | **Priorité** | MUST |
 | **PRD** | F-10 |
 | **Dépendances de code** | Table `employee_update`, session employé |
-| **API** | `GET /api/me/update` (et champ `update_state` de `GET /api/me/profile`) |
+| **API** | `GET /api/me/update` (et objet `update` de `GET /api/me/profile`, champ `state`) |
 | **Écran** | Carte d'état en haut de `/profil` |
 
 ## Récit
@@ -52,7 +52,7 @@ Alors il voit « Non effectuée » et peut encore choisir « Oui ».
 | ID | CA | Niveau | Fichier | Vérifie |
 |---|---|---|---|---|
 | T-06.1 | CA-01 → CA-04 | Unitaire | `tests/unit/test_update_state.py` | calcul de l'état employé pour chaque situation |
-| T-06.2 | CA-01 → CA-04 | API | `tests/api/test_us06_update_state.py` | `update_state`, dates renvoyées selon les fixtures `draft` / `submitted` |
+| T-06.2 | CA-01 → CA-04 | API | `tests/api/test_us06_update_state.py` | `update.state`, dates renvoyées selon les fixtures `draft` / `submitted` |
 | T-06.3 | CA-01 → CA-04 | Composant | `src/features/profile/UpdateStateCard.test.jsx` | pastille, textes, boutons selon l'état |
 
 ## Hors périmètre
