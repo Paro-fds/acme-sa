@@ -1,6 +1,6 @@
-"""US-05 — Consulter son profil (Walking Skeleton : CA-01, CA-02, CA-03, CA-06)."""
+"""US-05 — Consulter son profil."""
 
-from tests.employees import EMP_A, EMP_B, SECRET_MARKER
+from tests.employees import EMP_A, EMP_B, EMP_E, SECRET_MARKER
 
 URL = "/api/me/profile"
 
@@ -17,7 +17,24 @@ def test_ca01_profile_contains_the_employee_information(employee_client):
     assert profile["agency_code"] == "PV"
     assert profile["position"] == "Agent de crédit"
     assert profile["telephone_number"] == "+50937221111"
+    assert profile["gender"] == "M"
+    assert profile["department"]
+    assert profile["grade"] == "12"
+    assert profile["level"] == "2"
+    assert profile["contract_nature"] == "CDI"
     assert profile["update"]["state"] == "NOT_DONE"
+
+
+def test_ca01_editable_fields_are_listed(employee_client):
+    profile = employee_client(EMP_A).get(URL).json()
+
+    assert profile["editable_fields"] == [
+        "last_name",
+        "first_name",
+        "telephone_number",
+        "email_address",
+        "address_line_1",
+    ]
 
 
 def test_ca02_only_the_connected_employee_data_is_returned(employee_client):
@@ -25,6 +42,14 @@ def test_ca02_only_the_connected_employee_data_is_returned(employee_client):
 
     assert profile["employee_code"] == EMP_B.employee_code
     assert profile["last_name"] == "BAPTISTE"
+
+
+def test_ca02_no_route_gives_access_to_another_employee_profile(employee_client):
+    connected = employee_client(EMP_A)
+
+    for url in (f"/api/me/profile/{EMP_B.id}", f"/api/employees/{EMP_B.id}", f"/api/me/profile?id={EMP_B.id}"):
+        response = connected.get(url)
+        assert EMP_B.last_name not in response.text, url
 
 
 def test_ca03_no_excluded_column_is_exposed(employee_client):
@@ -39,3 +64,25 @@ def test_ca06_profile_requires_a_session(client):
     response = client.get(URL)
 
     assert response.status_code == 401
+
+
+def test_ca04_empty_field_is_returned_empty(employee_client):
+    profile = employee_client(EMP_E).get(URL).json()
+
+    assert profile["email_address"] == ""
+
+
+def test_ca05_submitted_value_replaces_the_reference_value(employee_client, submitted):
+    submitted(EMP_A, {"telephone_number": "+509 3722 2222"})
+
+    profile = employee_client(EMP_A).get(URL).json()
+
+    assert profile["telephone_number"] == "+509 3722 2222"
+
+
+def test_ca05_draft_value_is_not_shown_in_the_profile(employee_client, draft):
+    draft(EMP_A, {"telephone_number": "+509 3722 2222"})
+
+    profile = employee_client(EMP_A).get(URL).json()
+
+    assert profile["telephone_number"] == "+50937221111"

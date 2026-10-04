@@ -18,3 +18,15 @@ export function formatDateTime(isoDateTime) {
 export function displayValue(value) {
   return value ? value : 'Non renseigné'
 }
+
+const GENDERS = { M: 'Masculin', F: 'Féminin' }
+
+/** Code du CSV ("M" / "F") → libellé ; une autre valeur est affichée telle quelle. */
+export function formatGender(code) {
+  return GENDERS[code?.toUpperCase()] ?? code
+}
+
+/** "JOSEPH", "Jean" → "JJ" (avatar sans photo). */
+export function initials(lastName, firstName) {
+  return `${lastName?.[0] ?? ''}${firstName?.[0] ?? ''}`.toUpperCase()
+}

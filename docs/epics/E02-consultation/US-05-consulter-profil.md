@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | En cours |
+| **Statut** | Fait |
 | **Epic** | E02 Consultation |
 | **Priorité** | MUST |
 | **PRD** | F-09 |
@@ -63,6 +63,8 @@ Alors l'utilisateur est redirigé vers l'identification.
 | T-05.3 | CA-03 | API | `tests/api/test_us05_profile.py` | aucune clé ni valeur factice des colonnes exclues dans la réponse |
 | T-05.4 | CA-05 | API | `tests/api/test_us05_profile.py` | nouvelle valeur après soumission |
 | T-05.5 | CA-06 | API | `tests/api/test_us05_profile.py` | sans cookie → 401 |
+| T-05.7 | CA-04 | API | `tests/api/test_us05_profile.py` | EMP-E : email vide renvoyé vide |
+| T-05.8 | CA-05 | API | `tests/api/test_us05_profile.py` | un brouillon ne change pas les valeurs affichées |
 | T-05.6 | CA-01, CA-04, CA-06 | Composant | `src/features/profile/ProfilePage.test.jsx` | sections, « Non renseigné », format de date, redirection |
 
 ## Hors périmètre

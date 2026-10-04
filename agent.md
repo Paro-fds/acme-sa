@@ -16,20 +16,19 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **En cours** (versions minimales de US-05, 08, 09, 12 issues du Skeleton) |
+| 3 — Consultation et mise à jour | **En cours** (US-05 fait ; versions minimales de US-08, 09, 12 issues du Skeleton) |
 | 4 — Documents | Pas encore |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04.
+**Fait :** US-01, US-02, US-03, US-04, US-05.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
 | Story | Déjà fait | Reste à faire |
 |---|---|---|
-| US-05 | CA-01, 02, 03, 06 (API) ; écran simple | CA-04, CA-05, sections et rendu fidèles à la maquette, tests composant |
 | US-08 | CA-01 (« Oui ») | « Non », changer d'avis, 409 après soumission, tests composant |
 | US-09 | Registre des 5 champs, CA-02, 05, 07, 09 (API) ; formulaire simple | Badges « Modifié », ancienne valeur, sections, CA-03, 04, 06, 08, tests composant |
 | US-12 | CA-01, 02, 03 | CA-04 (toutes écritures 409), CA-05, CA-06, CA-07, écran fidèle |
@@ -40,9 +39,11 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**US-05 — Consulter son profil** (première story de la phase 3, maquette `mon_profil_collaborateur`).
+**US-06 — Voir l'état de sa mise à jour** (carte « Ma mise à jour » de `/profil` : badge, dates, bouton « Reprendre » ; le badge occupe aujourd'hui toute la largeur, à corriger).
 
-À savoir : le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
+À savoir :
+- Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
+- Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
 
 ## 1. Méthode : Spec-Driven Development
 
