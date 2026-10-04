@@ -5,6 +5,11 @@ export function listMyDocuments() {
   return request('/me/documents')
 }
 
+/** US-14 : suppression d'un document (avant la soumission seulement). */
+export function deleteDocument(documentId) {
+  return request(`/me/documents/${encodeURIComponent(documentId)}`, { method: 'DELETE' })
+}
+
 /** US-13 : ajout d'un document ; `onProgress` reçoit l'avancement de 0 à 1. */
 export function uploadDocument(file, documentType, { onProgress } = {}) {
   const formData = new FormData()

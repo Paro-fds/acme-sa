@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router'
-import { listMyDocuments, uploadDocument } from '../../api/documents.js'
+import { deleteDocument, listMyDocuments, uploadDocument } from '../../api/documents.js'
 import { getMyUpdate } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
@@ -163,6 +163,30 @@ function DocumentsForm({ initialDocuments }) {
     }
   }
 
+  /** US-14 : renvoie `true` si le document a disparu de la liste. */
+  async function handleDelete(document) {
+    setError(null)
+    try {
+      await deleteDocument(document.id)
+    } catch (apiError) {
+      if (redirectIfUnauthorized(apiError)) return false
+      if (apiError.code === 'UPDATE_ALREADY_SUBMITTED' || apiError.code === 'UPDATE_NOT_STARTED') {
+        navigate('/profil', { replace: true })
+        return false
+      }
+      // Déjà supprimé (autre onglet) : il disparaît aussi de l'écran.
+      if (apiError.status !== 404) {
+        setError({ message: apiError.status === 0 ? 'La suppression a échoué. Réessayez.' : apiError.message })
+        return false
+      }
+    }
+    setDocuments((current) => current.filter((item) => item.id !== document.id))
+    setLimitReached(false)
+    const thumbnail = thumbnails[document.id]
+    if (thumbnail) URL.revokeObjectURL(thumbnail)
+    return true
+  }
+
   async function handleFile(original) {
     setError(null)
     if (!ACCEPTED_EXTENSION.test(original.name)) {
@@ -253,7 +277,12 @@ function DocumentsForm({ initialDocuments }) {
           </div>
           <ul className="flex flex-col gap-2">
             {documents.map((document) => (
-              <DocumentItem key={document.id} document={document} thumbnail={thumbnails[document.id]} />
+              <DocumentItem
+                key={document.id}
+                document={document}
+                thumbnail={thumbnails[document.id]}
+                onDelete={upload ? undefined : handleDelete}
+              />
             ))}
           </ul>
         </section>

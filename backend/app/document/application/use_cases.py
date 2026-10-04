@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from app.document.domain.document import Document, DocumentType
-from app.document.domain.errors import DocumentLimitReached, FileTooLarge
+from app.document.domain.errors import DocumentLimitReached, DocumentNotFound, FileTooLarge
 from app.document.domain.files import SIGNATURE_LENGTH, detect_file_kind
 from app.document.domain.ports import DocumentRepository, FileStorage
 from app.shared.domain.clock import Clock
@@ -104,6 +104,24 @@ class UploadDocument:
             self._storage.delete(document.storage_key)
             raise
         return document_view(document)
+
+
+class DeleteDocument:
+    """US-14 : suppression d'un document de l'employé, tant que la mise à jour n'est pas soumise."""
+
+    def __init__(self, updates: UpdateRepository, documents: DocumentRepository, storage: FileStorage) -> None:
+        self._updates = updates
+        self._documents = documents
+        self._storage = storage
+
+    def execute(self, employee_id: str, document_id: str) -> None:
+        document = self._documents.get(document_id)
+        # Le document d'un autre employé est traité comme inexistant : rien ne révèle son existence.
+        if document is None or document.employee_id != employee_id:
+            raise DocumentNotFound()
+        ensure_update_open(self._updates, employee_id)
+        self._documents.delete(document.id)
+        self._storage.delete(document.storage_key)
 
 
 class ListMyDocuments:

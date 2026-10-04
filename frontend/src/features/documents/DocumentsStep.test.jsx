@@ -3,12 +3,12 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import DocumentsStep from './DocumentsStep.jsx'
-import { listMyDocuments, uploadDocument } from '../../api/documents.js'
+import { deleteDocument, listMyDocuments, uploadDocument } from '../../api/documents.js'
 import { getMyUpdate } from '../../api/employee.js'
 import { ApiError } from '../../api/client.js'
 import { resizeImage } from './resizeImage.js'
 
-vi.mock('../../api/documents.js', () => ({ listMyDocuments: vi.fn(), uploadDocument: vi.fn() }))
+vi.mock('../../api/documents.js', () => ({ listMyDocuments: vi.fn(), uploadDocument: vi.fn(), deleteDocument: vi.fn() }))
 vi.mock('../../api/employee.js', () => ({ getMyUpdate: vi.fn() }))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 vi.mock('./resizeImage.js', () => ({ resizeImage: vi.fn() }))
@@ -226,5 +226,71 @@ describe('DocumentsStep (US-13)', () => {
     renderStep({ state: 'DONE' })
 
     expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+  })
+})
+
+describe('DocumentsStep — suppression (US-14)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  async function confirmDeletion(user, name) {
+    await user.click(screen.getByRole('button', { name: `Supprimer ${name}` }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Supprimer' }))
+  }
+
+  it('CA-01 : le document confirmé disparaît de la liste', async () => {
+    deleteDocument.mockResolvedValue(null)
+    await renderStep({ documents: [stored(1), stored(2)] })
+    const user = userEvent.setup()
+
+    await confirmDeletion(user, 'document1.pdf')
+
+    expect(deleteDocument).toHaveBeenCalledWith('d1')
+    expect(within(addedList()).queryByText('document1.pdf')).not.toBeInTheDocument()
+    expect(within(addedList()).getByText('1 fichier')).toBeInTheDocument()
+  })
+
+  it('CA-01 : supprimer un document sous la limite réactive l’ajout', async () => {
+    deleteDocument.mockResolvedValue(null)
+    await renderStep({ documents: Array.from({ length: 10 }, (_, index) => stored(index)) })
+    const user = userEvent.setup()
+    expect(fileInput()).toBeDisabled()
+
+    await confirmDeletion(user, 'document0.pdf')
+    await user.click(typeChoice('Autre'))
+
+    expect(fileInput()).toBeEnabled()
+    expect(screen.queryByText('Nombre maximum de documents atteint (10).')).not.toBeInTheDocument()
+  })
+
+  it('CA-02 : « Annuler » ne supprime rien', async () => {
+    await renderStep({ documents: [stored(1)] })
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: 'Supprimer document1.pdf' }))
+    await user.click(screen.getByRole('button', { name: 'Annuler' }))
+
+    expect(deleteDocument).not.toHaveBeenCalled()
+    expect(within(addedList()).getByText('document1.pdf')).toBeInTheDocument()
+  })
+
+  it('CA-03 : mise à jour soumise entre-temps (409) : retour au profil', async () => {
+    deleteDocument.mockRejectedValue(
+      new ApiError(409, 'UPDATE_ALREADY_SUBMITTED', 'Votre mise à jour a déjà été soumise : elle ne peut plus être modifiée.'),
+    )
+    await renderStep({ documents: [stored(1)] })
+
+    await confirmDeletion(userEvent.setup(), 'document1.pdf')
+
+    expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+  })
+
+  it('un échec réseau affiche un message et le document reste', async () => {
+    deleteDocument.mockRejectedValue(new ApiError(0, 'NETWORK_ERROR', 'Le serveur est injoignable. Vérifiez votre connexion.'))
+    await renderStep({ documents: [stored(1)] })
+
+    await confirmDeletion(userEvent.setup(), 'document1.pdf')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('La suppression a échoué. Réessayez.')
+    expect(within(addedList()).getByText('document1.pdf')).toBeInTheDocument()
   })
 })

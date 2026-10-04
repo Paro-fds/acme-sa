@@ -72,7 +72,7 @@ Alors le fichier CSV source est inchangé.
 
 ## Notes de réalisation
 
-- CA-04 : les écritures existantes (changements, décision, soumission) et `GET /api/me/update/fields` répondent `409 UPDATE_ALREADY_SUBMITTED` ; les écrans `/mise-a-jour/informations` et `/mise-a-jour/verification` renvoient au profil. L'ajout de document est refusé après soumission depuis US-13 (`test_upload_is_refused_after_submission`, `tests/api/test_us13_upload.py`) ; **US-14** fera de même pour la suppression.
+- CA-04 : les écritures existantes (changements, décision, soumission) et `GET /api/me/update/fields` répondent `409 UPDATE_ALREADY_SUBMITTED` ; les écrans `/mise-a-jour/informations` et `/mise-a-jour/verification` renvoient au profil. L'ajout de document est refusé après soumission depuis US-13 (`test_upload_is_refused_after_submission`, `tests/api/test_us13_upload.py`)  ; la suppression aussi depuis US-14 (`test_ca03_deletion_is_refused_after_submission`, `tests/api/test_us14_delete_document.py`).
 - CA-06 : verrou synchrone côté écran (`useSubmission`, `SubmitSection.jsx`) ; un second envoi reçoit 409 et l'écran de confirmation s'affiche normalement.
 - T-12.6 : `e2e/us12-parcours-complet.spec.js` couvre le parcours complet, ajout d'un diplôme PDF compris (depuis US-13).
 - L'écran de confirmation n'affiche ni référence ni récépissé PDF (absents de la story) et n'annonce pas de notification à l'administration (aucune notification dans le MVP).

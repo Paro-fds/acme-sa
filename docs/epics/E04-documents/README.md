@@ -1,6 +1,6 @@
 # E04 — Documents
 
-**Statut de l'epic :** En cours (US-13 faite ; reste US-14).
+**Statut de l'epic :** Fait (US-13, US-14 faites).
 
 **Objectif :** permettre à l'employé de joindre, depuis son téléphone, ses diplômes, certificats, attestations ou autres documents, de façon facultative.
 

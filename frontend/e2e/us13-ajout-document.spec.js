@@ -53,4 +53,14 @@ test('ajout de documents : un PDF accepté, un format refusé', async ({ page })
   // Le document est retrouvé après rechargement
   await page.reload()
   await expect(page.getByRole('region', { name: 'Documents ajoutés' })).toContainText('diplome-licence.pdf')
+
+  // US-14 : suppression avec confirmation
+  await page.getByRole('button', { name: 'Supprimer diplome-licence.pdf' }).click()
+  const confirmation = page.getByRole('alertdialog', { name: 'Supprimer ce document ?' })
+  await expect(confirmation).toBeVisible()
+  await confirmation.getByRole('button', { name: 'Supprimer' }).click()
+  await expect(page.getByRole('region', { name: 'Documents ajoutés' })).toHaveCount(0)
+  await page.reload()
+  await expect(page.getByText('Nouveau document')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Documents ajoutés' })).toHaveCount(0)
 })

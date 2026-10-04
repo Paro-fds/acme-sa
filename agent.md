@@ -17,7 +17,7 @@ Langue du projet et de l'interface : **français**.
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
 | 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
-| 4 — Documents | **En cours** (US-13 faite ; reste US-14, US-07) |
+| 4 — Documents | **En cours** (US-13, US-14 faites ; reste US-07) |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
@@ -28,12 +28,12 @@ Langue du projet et de l'interface : **français**.
 | E01 Identification | **Fait** (US-01 à US-04) |
 | E02 Consultation | **En cours** (US-05, US-06 faites ; reste US-07, phase 4) |
 | E03 Mise à jour | **Fait** (US-08 → US-12) |
-| E04 Documents | **En cours** (US-13 faite ; reste US-14) |
+| E04 Documents | **Fait** (US-13, US-14) |
 | E05 Administration | **En cours** (versions minimales de US-15, US-17) |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10, US-11, US-12, US-13.
+**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10, US-11, US-12, US-13, US-14.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
@@ -42,11 +42,11 @@ Langue du projet et de l'interface : **français**.
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
-**Pas encore :** US-07, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-07, US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-14 — Supprimer un document** (dialogue « Supprimer ce document ? », ligne et fichier supprimés, 409 après soumission, 404 pour le document d'un autre employé ; bouton « Supprimer » dans `DocumentItem` via la prop `actions`).
+**US-07 — Consulter ses documents** (dernière story de la phase 4 et de l'epic E02 : `GET /api/me/documents/{id}/file`, page `/documents` groupée par type, « Voir » ; maquette `mes_documents_professionnels`, dont seul `code.html` est lisible).
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
@@ -57,8 +57,7 @@ Langue du projet et de l'interface : **français**.
 - Vérification : `features/update/ReviewStep.jsx`, `components/ValueComparison.jsx` ; `formatSize` dans `lib/format.js`.
 - Soumission : `features/update/SubmitSection.jsx` (`useSubmission`, verrou anti double clic) ; confirmation : `ConfirmationStep.jsx`.
 - Tests E2E : une seule base partagée, un employé fictif par test (liste dans `frontend/e2e/start-server.mjs`).
-- Documents (module backend `document`) : `UploadDocument`, `ListMyDocuments`, `ensure_update_open()` (à réutiliser pour la suppression), `LocalFileStorage`, `SqlDocumentRepository` ; frontend `features/documents/` (`DocumentsStep`, `DocumentItem` avec prop `actions`, `resizeImage`) ; `upload()` (XHR avec progression) dans `api/client.js`.
-- **À faire dans US-14** : refuser `DELETE /api/me/documents/{id}` après soumission (409) et pour le document d'un autre employé (404).
+- Documents (module backend `document`) : `UploadDocument`, `DeleteDocument`, `ListMyDocuments`, `ensure_update_open()`, `LocalFileStorage`, `SqlDocumentRepository` ; frontend `features/documents/` (`DocumentsStep`, `DocumentItem` avec prop `onDelete` (bouton « Supprimer » + confirmation ; sans `onDelete`, aucun bouton), `resizeImage`) ; `upload()` (XHR avec progression) dans `api/client.js`.
 - **À faire dans US-07** : `GET /api/me/documents/{id}/file` (miniatures et « Voir »).
 
 ## 1. Méthode : Spec-Driven Development

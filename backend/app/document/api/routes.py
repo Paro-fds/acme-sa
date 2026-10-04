@@ -40,3 +40,8 @@ def upload_document(
     content = file.file.read(max_bytes + 1)
     view = container(request).upload_document().execute(employee_id, document_type, file.filename, content)
     return DocumentOut.of(view)
+
+
+@router.delete("/{document_id}", status_code=204)
+def delete_document(document_id: str, request: Request, employee_id: str = Depends(current_employee_id)) -> None:
+    container(request).delete_document().execute(employee_id, document_id)
