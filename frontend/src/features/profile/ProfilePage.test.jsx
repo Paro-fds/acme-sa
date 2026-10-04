@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import ProfilePage from './ProfilePage.jsx'
-import { getProfile } from '../../api/employee.js'
+import { decide, getProfile } from '../../api/employee.js'
 import { ApiError } from '../../api/client.js'
 
 vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn(), decide: vi.fn() }))
@@ -39,6 +40,7 @@ function renderPage() {
       <Routes>
         <Route path="/" element={<IdentifyProbe />} />
         <Route path="/profil" element={<ProfilePage />} />
+        <Route path="/mise-a-jour/informations" element={<p>Étape 1 : Informations</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -124,5 +126,71 @@ describe('ProfilePage (US-05)', () => {
     renderPage()
 
     expect(await screen.findByText('Écran identification : Vous devez être connecté.')).toBeInTheDocument()
+  })
+})
+
+describe('ProfilePage — choix Oui / Non (US-08)', () => {
+  const yes = () => screen.getByRole('button', { name: 'Oui, mettre à jour mon dossier' })
+  const no = () => screen.getByRole('button', { name: 'Non, consulter uniquement' })
+
+  it('CA-01 : « Oui » ouvre l’étape 1 « Informations »', async () => {
+    decide.mockResolvedValue({ ...PROFILE.update, state: 'IN_PROGRESS', accepted: true })
+    await renderProfile()
+
+    await userEvent.setup().click(yes())
+
+    expect(decide).toHaveBeenCalledWith(true)
+    expect(await screen.findByText('Étape 1 : Informations')).toBeInTheDocument()
+  })
+
+  it('CA-02 : « Non » laisse l’employé sur son profil avec le message', async () => {
+    decide.mockResolvedValue({ ...PROFILE.update, accepted: false })
+    await renderProfile()
+
+    await userEvent.setup().click(no())
+
+    expect(decide).toHaveBeenCalledWith(false)
+    expect(await screen.findByText("C'est noté. Vous pourrez mettre à jour votre dossier à tout moment.")).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'JOSEPH Jean' })).toBeInTheDocument()
+    expect(screen.getByText('Non effectuée')).toBeInTheDocument()
+  })
+
+  it('CA-03 : après « Non », « Oui » reste possible et ouvre l’étape 1', async () => {
+    decide.mockResolvedValueOnce({ ...PROFILE.update, accepted: false })
+    decide.mockResolvedValueOnce({ ...PROFILE.update, state: 'IN_PROGRESS', accepted: true })
+    await renderProfile()
+    const user = userEvent.setup()
+
+    await user.click(no())
+    await screen.findByText("C'est noté. Vous pourrez mettre à jour votre dossier à tout moment.")
+    await user.click(yes())
+
+    expect(await screen.findByText('Étape 1 : Informations')).toBeInTheDocument()
+  })
+
+  it('CA-04 : après soumission, la question n’est plus affichée', async () => {
+    await renderProfile({
+      update: { ...PROFILE.update, state: 'DONE', accepted: true, submitted_at: '2026-10-04T15:10:00' },
+    })
+
+    expect(screen.queryByRole('button', { name: 'Oui, mettre à jour mon dossier' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Non, consulter uniquement' })).not.toBeInTheDocument()
+  })
+
+  it('CA-04 : un 409 (soumise depuis un autre appareil) recharge le profil, qui n’affiche plus la question', async () => {
+    decide.mockRejectedValue(
+      new ApiError(409, 'UPDATE_ALREADY_SUBMITTED', 'Votre mise à jour a déjà été soumise : elle ne peut plus être modifiée.'),
+    )
+    await renderProfile()
+    getProfile.mockResolvedValue({
+      ...PROFILE,
+      update: { ...PROFILE.update, state: 'DONE', accepted: true, submitted_at: '2026-10-04T15:10:00' },
+    })
+
+    await userEvent.setup().click(no())
+
+    expect(await screen.findByText('Effectuée')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Votre mise à jour a déjà été soumise')
+    expect(screen.queryByRole('button', { name: 'Oui, mettre à jour mon dossier' })).not.toBeInTheDocument()
   })
 })

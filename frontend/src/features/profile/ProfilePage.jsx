@@ -35,24 +35,40 @@ function ProfileSummary({ profile }) {
   )
 }
 
-/** US-05 (profil), US-06 (état de la mise à jour) et US-08 (choix Oui). */
+export const DECLINED_NOTICE = "C'est noté. Vous pourrez mettre à jour votre dossier à tout moment."
+
+/** US-05 (profil), US-06 (état de la mise à jour) et US-08 (choix Oui / Non). */
 export default function ProfilePage() {
   const navigate = useNavigate()
   const redirectIfUnauthorized = useUnauthorizedRedirect()
-  const { data: profile, error: loadError, loading } = useLoader(getProfile)
+  const { data: profile, error: loadError, loading, reload } = useLoader(getProfile)
+  const [update, setUpdate] = useState(null)
+  const [notice, setNotice] = useState(null)
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
 
-  async function startUpdate() {
+  async function sendDecision(accepted) {
     setSending(true)
+    setNotice(null)
     setError(null)
     try {
-      await decide(true)
-      navigate('/mise-a-jour/informations')
+      const result = await decide(accepted)
+      if (accepted) {
+        navigate('/mise-a-jour/informations')
+        return
+      }
+      setUpdate(result)
+      setNotice(DECLINED_NOTICE)
     } catch (apiError) {
-      setSending(false)
-      if (!redirectIfUnauthorized(apiError)) setError(apiError.message)
+      if (redirectIfUnauthorized(apiError)) return
+      setError(apiError.message)
+      // Soumise depuis un autre appareil : le profil rechargé n'affiche plus la question.
+      if (apiError.code === 'UPDATE_ALREADY_SUBMITTED') {
+        setUpdate(null)
+        reload()
+      }
     }
+    setSending(false)
   }
 
   if (loading) return <Page account title="Mon profil"><p role="status">Chargement…</p></Page>
@@ -65,10 +81,12 @@ export default function ProfilePage() {
       <ProfileSummary profile={profile} />
 
       <UpdateStateCard
-        update={profile.update}
-        onStart={startUpdate}
+        update={update ?? profile.update}
+        onYes={() => sendDecision(true)}
+        onNo={() => sendDecision(false)}
         onResume={() => navigate('/mise-a-jour/informations')}
         sending={sending}
+        notice={notice}
         error={error}
       />
 

@@ -3,6 +3,7 @@ import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import { EmployeeStateBadge } from '../../components/StatusBadge.jsx'
 import { formatDateTime } from '../../lib/format.js'
+import DecisionCard from './DecisionCard.jsx'
 
 const CONTENT = {
   NOT_DONE: {
@@ -29,8 +30,9 @@ const CONTENT = {
 /**
  * US-06 : carte d'état de la mise à jour en haut du profil.
  * NOT_DONE → question Oui/Non (US-08) ; IN_PROGRESS → « Reprendre » ; DONE → aucune action.
+ * `notice` et `error` : retour de la dernière action (réponse « Non », erreur réseau…).
  */
-export default function UpdateStateCard({ update, onStart, onResume, sending = false, error = null }) {
+export default function UpdateStateCard({ update, onYes, onNo, onResume, sending = false, notice = null, error = null }) {
   const titleId = useId()
   const { icon, iconBox, title, text } = CONTENT[update.state] ?? CONTENT.NOT_DONE
 
@@ -56,13 +58,11 @@ export default function UpdateStateCard({ update, onStart, onResume, sending = f
           Reprendre la mise à jour
         </Button>
       )}
-      {update.state === 'NOT_DONE' && (
-        <Button onClick={onStart} disabled={sending}>
-          <span className="material-symbols-outlined" aria-hidden="true">assignment_turned_in</span>
-          Oui, mettre à jour mon dossier
-        </Button>
+      {update.state === 'NOT_DONE' ? (
+        <DecisionCard onYes={onYes} onNo={onNo} sending={sending} notice={notice} error={error} />
+      ) : (
+        <Alert>{error}</Alert>
       )}
-      <Alert>{error}</Alert>
     </section>
   )
 }

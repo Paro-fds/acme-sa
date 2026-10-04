@@ -16,20 +16,19 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **En cours** (US-05, US-06 faits ; versions minimales de US-08, 09, 12 issues du Skeleton) |
+| 3 — Consultation et mise à jour | **En cours** (US-05, 06, 08 faits ; versions minimales de US-09, 12 issues du Skeleton) |
 | 4 — Documents | Pas encore |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05, US-06.
+**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
 | Story | Déjà fait | Reste à faire |
 |---|---|---|
-| US-08 | CA-01 (« Oui ») | « Non », changer d'avis, 409 après soumission, tests composant |
 | US-09 | Registre des 5 champs, CA-02, 05, 07, 09 (API) ; formulaire simple | Badges « Modifié », ancienne valeur, sections, CA-03, 04, 06, 08, tests composant |
 | US-12 | CA-01, 02, 03 | CA-04 (toutes écritures 409), CA-05, CA-06, CA-07, écran fidèle |
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
@@ -39,12 +38,12 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**US-08 — Choisir de mettre à jour ou non** (ajouter « Non, consulter uniquement » à `features/profile/UpdateStateCard.jsx`, changer d'avis, 409 après soumission).
+**US-09 — Modifier ses informations** (étape 1 `/mise-a-jour/informations` : sections, badge « Modifié », ancienne valeur, validations ; maquette `mise_jour_informations`).
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
-- Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`).
+- Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
 
 ## 1. Méthode : Spec-Driven Development
 

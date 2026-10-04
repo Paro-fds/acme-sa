@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | En cours |
+| **Statut** | Fait |
 | **Epic** | E03 Mise à jour |
 | **Priorité** | MUST |
 | **PRD** | F-12 |
@@ -57,7 +57,8 @@ Alors le brouillon existant est conservé (pas de remise à zéro).
 |---|---|---|---|---|
 | T-08.1 | CA-01, CA-02, CA-03, CA-05 | API | `tests/api/test_us08_decision.py` | état en base après chaque décision |
 | T-08.2 | CA-04 | API | `tests/api/test_us08_decision.py` | 409 après soumission |
-| T-08.3 | CA-01 → CA-04 | Composant | `src/features/profile/DecisionCard.test.jsx` | boutons, navigation, message, masquage après soumission |
+| T-08.3 | CA-01, CA-02 | Composant | `src/features/profile/DecisionCard.test.jsx` | boutons, message, désactivation pendant l'envoi |
+| T-08.4 | CA-01 → CA-04 | Composant | `src/features/profile/ProfilePage.test.jsx` | navigation vers l'étape 1, message du « Non », masquage après soumission (y compris 409) |
 
 ## Hors périmètre
 

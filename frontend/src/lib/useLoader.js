@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 /**
- * Charge des données au montage de l'écran.
+ * Charge des données au montage de l'écran ; `reload()` relance le chargement.
  * Une réponse 401 (pas de session ou session expirée) renvoie vers l'écran de connexion.
  */
 export function useLoader(load, { loginPath = '/' } = {}) {
@@ -30,7 +30,7 @@ export function useLoader(load, { loginPath = '/' } = {}) {
 
   useEffect(run, [run])
 
-  return state
+  return { ...state, reload: run }
 }
 
 /** Pour les actions (envoi de formulaire) : 401 → retour à la connexion, sinon renvoie l'erreur. */

@@ -15,7 +15,7 @@ const DONE = {
 const ANSWERED_NO = { state: 'NOT_DONE', accepted: false, updated_at: '2026-10-04T14:00:00', submitted_at: null }
 
 function renderCard(update, handlers = {}) {
-  const props = { onStart: vi.fn(), onResume: vi.fn(), ...handlers }
+  const props = { onYes: vi.fn(), onNo: vi.fn(), onResume: vi.fn(), ...handlers }
   render(<UpdateStateCard update={update} {...props} />)
   return props
 }
@@ -25,14 +25,14 @@ const resumeButton = () => screen.queryByRole('button', { name: 'Reprendre la mi
 
 describe('UpdateStateCard (US-06)', () => {
   it('CA-01 : sans mise à jour, « Non effectuée » et la question Oui/Non', async () => {
-    const { onStart } = renderCard(NOT_DONE)
+    const { onYes } = renderCard(NOT_DONE)
 
     expect(screen.getByText('Non effectuée')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Souhaitez-vous mettre à jour votre dossier ?' })).toBeInTheDocument()
     expect(resumeButton()).not.toBeInTheDocument()
 
     await userEvent.setup().click(startButton())
-    expect(onStart).toHaveBeenCalledOnce()
+    expect(onYes).toHaveBeenCalledOnce()
   })
 
   it('CA-02 : brouillon, « En cours », date de dernière sauvegarde et bouton « Reprendre »', async () => {
@@ -62,10 +62,16 @@ describe('UpdateStateCard (US-06)', () => {
     expect(resumeButton()).not.toBeInTheDocument()
   })
 
-  it('le bouton « Oui » est désactivé pendant l’envoi et l’erreur est affichée', () => {
-    renderCard(NOT_DONE, { sending: true, error: 'Le serveur est injoignable. Vérifiez votre connexion.' })
+  it('US-08 : sans mise à jour, les choix Oui et Non sont proposés', () => {
+    renderCard(NOT_DONE)
 
-    expect(startButton()).toBeDisabled()
+    expect(startButton()).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Non, consulter uniquement' })).toBeInTheDocument()
+  })
+
+  it('une erreur est affichée quel que soit l’état', () => {
+    renderCard(IN_PROGRESS, { error: 'Le serveur est injoignable. Vérifiez votre connexion.' })
+
     expect(screen.getByRole('alert')).toHaveTextContent('Le serveur est injoignable.')
   })
 })

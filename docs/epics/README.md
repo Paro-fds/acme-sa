@@ -15,7 +15,7 @@ Chaque user story est **indépendante** : elle déclare ses préconditions, que 
 | **E02 Consultation** | [US-05](E02-consultation/US-05-consulter-profil.md) | Consulter son profil | F-09 | MUST | Fait |
 | | [US-06](E02-consultation/US-06-voir-etat-mise-a-jour.md) | Voir l'état de sa mise à jour | F-10 | MUST | Fait |
 | | [US-07](E02-consultation/US-07-consulter-ses-documents.md) | Consulter ses documents | F-11 | MUST | Pas encore |
-| **E03 Mise à jour** | [US-08](E03-mise-a-jour/US-08-choisir-oui-non.md) | Choisir de mettre à jour ou non | F-12 | MUST | En cours |
+| **E03 Mise à jour** | [US-08](E03-mise-a-jour/US-08-choisir-oui-non.md) | Choisir de mettre à jour ou non | F-12 | MUST | Fait |
 | | [US-09](E03-mise-a-jour/US-09-modifier-informations.md) | Modifier ses informations | F-13, F-18 | MUST | En cours |
 | | [US-10](E03-mise-a-jour/US-10-brouillon.md) | Sauvegarder et reprendre un brouillon | F-14 | MUST | Pas encore |
 | | [US-11](E03-mise-a-jour/US-11-verifier-modifications.md) | Vérifier ses modifications | F-15 | MUST | Pas encore |
