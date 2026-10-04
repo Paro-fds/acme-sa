@@ -1,5 +1,7 @@
 # E02 — Consultation
 
+**Statut de l'epic :** En cours (US-05, US-06 faites ; reste US-07 (phase 4)).
+
 **Objectif :** permettre à l'employé connecté de vérifier les informations détenues par ACME, de savoir où en est sa mise à jour et de retrouver ses documents.
 
 **Modules backend :** `employee`, `update`, `document`.

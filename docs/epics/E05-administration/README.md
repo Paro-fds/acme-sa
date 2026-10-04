@@ -1,5 +1,7 @@
 # E05 — Administration
 
+**Statut de l'epic :** En cours (versions minimales de US-15 et US-17 ; reste US-15 à US-22).
+
 **Objectif :** permettre à l'administrateur de suivre l'avancement de la campagne, de retrouver rapidement un employé et de consulter ce qu'il a transmis, **sans jamais modifier un dossier**.
 
 **Module backend :** `admin` (+ `auth` pour la connexion et la réinitialisation d'accès).

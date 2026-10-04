@@ -82,7 +82,10 @@ class GetMyUpdate:
 
 
 class GetEditableFields:
-    """Formulaire de l'étape 1 : valeur d'origine et valeur du brouillon pour chaque champ."""
+    """Formulaire de l'étape 1 : valeur d'origine et valeur du brouillon pour chaque champ.
+
+    Disponible seulement après un « Oui » (US-09 CA-09).
+    """
 
     def __init__(self, employees: EmployeeRepository, updates: UpdateRepository) -> None:
         self._employees = employees
@@ -91,7 +94,9 @@ class GetEditableFields:
     def execute(self, employee_id: str) -> list[FieldView]:
         reference = reference_values(get_employee(self._employees, employee_id))
         update = self._updates.get_for_employee(employee_id)
-        changes = update.changes if update else {}
+        if update is None or not update.accepted:
+            raise UpdateNotStarted()
+        changes = update.changes
         return [
             FieldView(
                 code=code,

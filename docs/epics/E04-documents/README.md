@@ -1,5 +1,7 @@
 # E04 — Documents
 
+**Statut de l'epic :** Pas encore (US-13, US-14).
+
 **Objectif :** permettre à l'employé de joindre, depuis son téléphone, ses diplômes, certificats, attestations ou autres documents, de façon facultative.
 
 **Module backend :** `document` (interface `FileStorage`, implémentation `LocalFileStorage`).

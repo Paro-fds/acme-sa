@@ -70,7 +70,7 @@ EDITABLE_FIELDS: dict[str, EditableField] = {
         ),
         EditableField(
             "first_name", "Prénom", Section.IDENTITY, True, _is_valid_name,
-            "Saisissez un prénom valide (lettres, espaces, tirets).",
+            "Saisissez un nom valide (lettres, espaces, tirets).",
         ),
         EditableField(
             "telephone_number", "Téléphone", Section.CONTACT, True, _is_valid_phone,

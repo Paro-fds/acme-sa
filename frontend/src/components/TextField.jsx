@@ -1,15 +1,40 @@
 import { useId } from 'react'
 
-/** Champ de saisie du design system ; `trailing` affiche un bouton à droite du champ. */
-export default function TextField({ label, error, help, trailing, className = '', ...inputProps }) {
+/**
+ * Champ de saisie du design system.
+ * `trailing` : bouton à droite du champ ; `required` : astérisque + « (obligatoire) » pour les lecteurs d'écran ;
+ * `labelAside` : élément à droite du libellé (badge) ; `footer` : ligne d'information sous le champ.
+ */
+export default function TextField({
+  label,
+  error,
+  help,
+  trailing,
+  required = false,
+  labelAside,
+  footer,
+  className = '',
+  ...inputProps
+}) {
   const id = useId()
   const describedBy = [help && `${id}-help`, error && `${id}-error`].filter(Boolean).join(' ') || undefined
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-base font-semibold text-heading">
-        {label}
-      </label>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-baseline gap-1">
+          <label htmlFor={id} className="text-base font-semibold text-heading">
+            {label}
+          </label>
+          {required && (
+            <>
+              <span className="font-bold text-error-text" aria-hidden="true">*</span>
+              <span className="sr-only">(obligatoire)</span>
+            </>
+          )}
+        </div>
+        {labelAside}
+      </div>
       {help && (
         <p id={`${id}-help`} className="text-sm text-help">
           {help}
@@ -19,6 +44,7 @@ export default function TextField({ label, error, help, trailing, className = ''
         <input
           id={id}
           aria-invalid={Boolean(error)}
+          aria-required={required || undefined}
           aria-describedby={describedBy}
           className={`h-12 w-full rounded-lg border-[1.5px] bg-surface px-4 text-base text-heading outline-none focus:border-2 focus:border-primary focus:shadow-[0_0_0_3px_rgb(15_37_87/0.15)] ${
             error ? 'border-error-border bg-error-bg' : 'border-border-input'
@@ -27,6 +53,7 @@ export default function TextField({ label, error, help, trailing, className = ''
         />
         {trailing && <div className="absolute inset-y-0 right-1 flex items-center">{trailing}</div>}
       </div>
+      {footer}
       {error && (
         <p id={`${id}-error`} className="flex items-center gap-1 text-sm text-error-text">
           <span className="material-symbols-outlined text-[18px]" aria-hidden="true">error</span>

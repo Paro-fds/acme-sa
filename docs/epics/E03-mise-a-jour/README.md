@@ -1,5 +1,7 @@
 # E03 — Mise à jour
 
+**Statut de l'epic :** En cours (US-08, US-09 faites ; reste US-10, US-11, US-12).
+
 **Objectif :** permettre à l'employé de corriger son dossier depuis son téléphone, en plusieurs fois si nécessaire, puis de confirmer et soumettre sa mise à jour, en gardant la trace des anciennes et nouvelles valeurs.
 
 **Module backend :** `update`.

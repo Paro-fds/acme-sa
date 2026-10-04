@@ -2,9 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 1.0 — validé le 2026-10-04 |
+| **Version** | 1.1 — validé le 2026-10-04 ; suivi d'avancement ajouté (statuts des phases, epics et stories) |
 | **Date** | 2026-10-04 |
 | **Entrées** | `01-prd.md` v1.0, `02-solution-design.md` v1.0, `epics/` (22 user stories) |
+| **Avancement mis à jour le** | 2026-10-04 (après US-09) |
 
 ---
 
@@ -63,20 +64,21 @@ infrastructure ──> application ──> domain
 4. Infrastructure + route API → adaptateurs + câblage dans le composition root ; tests API verts
 5. Écran React                → tests composant verts, contrôle visuel à 390 px et 1280 px
 6. Definition of Done         → checklist de epics/README.md + `lint-imports` vert
-7. Commit                     → « US-XX : <titre> »
+7. Statuts                    → story, epic et phase mis à jour (voir §2.1)
+8. Compte rendu               → statut de la story, de l'epic et de la phase ; commit fait par l'utilisateur
 ```
 
 ## 2. Vue d'ensemble
 
-| Phase | Contenu | Stories | Incrément démontrable |
-|---|---|---|---|
-| **0** | Mise en place | — | Application vide qui démarre, tests qui tournent |
-| **1** | **Walking Skeleton** | versions minimales de US-01, 02, 05, 08, 09, 12, 15, 17 | Un employé modifie son téléphone, l'admin le voit « effectué » |
-| **2** | Identification complète | US-01, 02, 03, 04 | Connexion sécurisée : homonymes, doublon, blocage, déconnexion |
-| **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents |
-| **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone |
-| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation |
-| **6** | Finalisation et préparation du test | — | Application prête pour le directeur |
+| Phase | Contenu | Stories | Incrément démontrable | Statut |
+|---|---|---|---|---|
+| **0** | Mise en place | — | Application vide qui démarre, tests qui tournent | **Fait** |
+| **1** | **Walking Skeleton** | versions minimales de US-01, 02, 05, 08, 09, 12, 15, 17 | Un employé modifie son téléphone, l'admin le voit « effectué » | **Fait** |
+| **2** | Identification complète | US-01, 02, 03, 04 | Connexion sécurisée : homonymes, doublon, blocage, déconnexion | **Fait** |
+| **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents | **En cours** (4/7) |
+| **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | Pas encore |
+| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | Pas encore (US-15, 17 en version minimale) |
+| **6** | Finalisation et préparation du test | — | Application prête pour le directeur | Pas encore |
 
 ```text
 Phase 0 ──> Phase 1 (Skeleton) ──> Phase 2 ──> Phase 3 ──> Phase 4
@@ -86,9 +88,37 @@ Phase 0 ──> Phase 1 (Skeleton) ──> Phase 2 ──> Phase 3 ──> Phase
 
 La phase 5 ne dépend que du Skeleton et de la phase 2 (connexion) ; elle peut être avancée si une démonstration admin est demandée plus tôt.
 
+### 2.1 Avancement
+
+**Règles de statut** (mêmes libellés pour les stories, les epics et les phases) :
+
+| Statut | Story | Epic | Phase |
+|---|---|---|---|
+| **Pas encore** | aucun code écrit | aucune story commencée | aucune story de la phase commencée |
+| **En cours** | commencée (y compris version minimale du Skeleton) | au moins une story commencée | au moins une story de la phase commencée |
+| **Fait** | tous les CA couverts par des tests verts, DoD cochée | toutes ses stories « Fait » | toutes ses stories « Fait » et critère de sortie atteint |
+
+À la fin de chaque story, les statuts sont mis à jour dans : le fichier de la story, `epics/README.md` (index et statut des epics), le README de l'epic, ce plan (§2, §2.1, tableau de la phase, §10) et `agent.md` §0. Le compte rendu à l'utilisateur annonce explicitement la fin d'un epic ou d'une phase.
+
+**Epics :**
+
+| Epic | Stories | Phases concernées | Statut |
+|---|---|---|---|
+| E01 Identification | US-01 → US-04 | 1, 2 | **Fait** |
+| E02 Consultation | US-05, 06, 07 | 3 (US-05, 06), 4 (US-07) | **En cours** (2/3) |
+| E03 Mise à jour | US-08 → US-12 | 1, 3 | **En cours** (2/5) |
+| E04 Documents | US-13, 14 | 4 | Pas encore |
+| E05 Administration | US-15 → US-22 | 1, 5 | **En cours** (US-15, 17 en version minimale) |
+
+Un epic et une phase ne coïncident pas toujours : E02 est réparti sur les phases 3 et 4, car la consultation des documents (US-07) a besoin de l'ajout de documents (US-13).
+
+**Stories :** 8 / 22 « Fait » (US-01 → US-06, US-08, US-09) ; 3 « En cours » (US-12, 15, 17 en version minimale) ; 11 « Pas encore ».
+
 ---
 
 ## 3. Phase 0 — Mise en place
+
+**Statut : Fait.**
 
 **Objectif :** une base de projet propre, où l'on peut écrire un test et le voir passer.
 
@@ -111,6 +141,8 @@ La phase 5 ne dépend que du Skeleton et de la phase 2 (connexion) ; elle peut �
 ---
 
 ## 4. Phase 1 — Walking Skeleton
+
+**Statut : Fait** (`e2e/walking-skeleton.spec.js` passe).
 
 **Objectif :** prouver que toutes les couches communiquent, avec le parcours le plus court possible. Chaque élément est **volontairement minimal** ; il sera complété dans les phases suivantes.
 
@@ -143,12 +175,14 @@ Les écrans du Skeleton utilisent déjà le design system, sans viser la fidéli
 
 ## 5. Phase 2 — Identification complète
 
-| Ordre | Story | Points d'attention |
-|---|---|---|
-| 2.1 | US-01 Vérifier son identité | `normalize()`, homonymes, doublon (409), réponses identiques inconnu/inactif, écran `/connexion/homonyme`, sélecteur de date |
-| 2.2 | US-02 Créer son mot de passe | erreurs 422, compte existant, écran fidèle à la maquette |
-| 2.3 | US-03 Se connecter | blocage 5 échecs / 15 min (horloge injectable pour les tests), expiration de session, « Mot de passe oublié ? » |
-| 2.4 | US-04 Se déconnecter | menu avatar dans `AppHeader`, nettoyage des données côté client |
+**Statut : Fait** (epic E01 terminé).
+
+| Ordre | Story | Points d'attention | Statut |
+|---|---|---|---|
+| 2.1 | US-01 Vérifier son identité | `normalize()`, homonymes, doublon (409), réponses identiques inconnu/inactif, écran `/connexion/homonyme`, sélecteur de date | Fait |
+| 2.2 | US-02 Créer son mot de passe | erreurs 422, compte existant, écran fidèle à la maquette | Fait |
+| 2.3 | US-03 Se connecter | blocage 5 échecs / 15 min (horloge injectable pour les tests), expiration de session, « Mot de passe oublié ? » | Fait |
+| 2.4 | US-04 Se déconnecter | menu avatar dans `AppHeader`, nettoyage des données côté client | Fait |
 
 **Critère de sortie :** tous les tests E01 passent ; le parcours de connexion est conforme aux maquettes `identification_collaborateur` et `v_rification_d_identit_homonyme`.
 
@@ -156,15 +190,17 @@ Les écrans du Skeleton utilisent déjà le design system, sans viser la fidéli
 
 ## 6. Phase 3 — Consultation et mise à jour complètes
 
-| Ordre | Story | Points d'attention |
-|---|---|---|
-| 3.1 | US-05 Consulter son profil | 3 sections, valeurs soumises affichées, maquette `mon_profil_collaborateur` |
-| 3.2 | US-06 État de la mise à jour | calcul de l'état employé (`NOT_DONE` / `IN_PROGRESS` / `DONE`) |
-| 3.3 | US-08 Oui/Non | « Non », changer d'avis, 409 après soumission |
-| 3.4 | US-09 Modifier ses informations | registre des 5 champs, validations, badge « Modifié », ancienne valeur, `GET /fields` |
-| 3.5 | US-10 Brouillon | sauvegarde automatique (2 s), bouton manuel, reprise, erreur réseau |
-| 3.6 | US-11 Vérifier | composant `ValueComparison`, cas « aucune modification » |
-| 3.7 | US-12 Soumettre | verrouillage de toutes les écritures après soumission, double clic, CSV inchangé |
+**Statut : En cours** (4 / 7 stories faites).
+
+| Ordre | Story | Points d'attention | Statut |
+|---|---|---|---|
+| 3.1 | US-05 Consulter son profil | 3 sections, valeurs soumises affichées, maquette `mon_profil_collaborateur` | Fait |
+| 3.2 | US-06 État de la mise à jour | calcul de l'état employé (`NOT_DONE` / `IN_PROGRESS` / `DONE`) | Fait |
+| 3.3 | US-08 Oui/Non | « Non », changer d'avis, 409 après soumission | Fait |
+| 3.4 | US-09 Modifier ses informations | registre des 5 champs, validations, badge « Modifié », ancienne valeur, `GET /fields` | Fait |
+| 3.5 | US-10 Brouillon | sauvegarde automatique (2 s), bouton manuel, reprise, erreur réseau | Pas encore |
+| 3.6 | US-11 Vérifier | composant `ValueComparison`, cas « aucune modification » | Pas encore |
+| 3.7 | US-12 Soumettre | verrouillage de toutes les écritures après soumission, double clic, CSV inchangé | En cours (version minimale) |
 
 Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `FieldCard`, `ValueComparison`, `StickyActionBar`.
 
@@ -174,11 +210,13 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 
 ## 7. Phase 4 — Documents
 
-| Ordre | Story | Points d'attention |
-|---|---|---|
-| 4.1 | US-13 Ajouter un document | `LocalFileStorage`, détection par signature, limites 5 Mo / 10 fichiers, redimensionnement des photos, barre de progression, test sur un vrai téléphone (appareil photo) |
-| 4.2 | US-14 Supprimer un document | dialogue de confirmation, suppression du fichier sur disque |
-| 4.3 | US-07 Consulter ses documents | regroupement par type, ouverture PDF/image, isolation entre employés |
+**Statut : Pas encore.**
+
+| Ordre | Story | Points d'attention | Statut |
+|---|---|---|---|
+| 4.1 | US-13 Ajouter un document | `LocalFileStorage`, détection par signature, limites 5 Mo / 10 fichiers, redimensionnement des photos, barre de progression, test sur un vrai téléphone (appareil photo) | Pas encore |
+| 4.2 | US-14 Supprimer un document | dialogue de confirmation, suppression du fichier sur disque | Pas encore |
+| 4.3 | US-07 Consulter ses documents | regroupement par type, ouverture PDF/image, isolation entre employés | Pas encore |
 
 **Critère de sortie :** `e2e/us12-parcours-complet.spec.js` (parcours complet avec document) passe ; ajout d'une photo prise avec un vrai téléphone vérifié manuellement.
 
@@ -186,16 +224,18 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 
 ## 8. Phase 5 — Administration complète
 
-| Ordre | Story | Points d'attention |
-|---|---|---|
-| 5.1 | US-15 Connexion admin | blocage, expiration 2 h, test paramétré sur **toutes** les routes admin |
-| 5.2 | US-16 Tableau de bord | 2 statuts seulement, inactifs exclus, cartes cliquables |
-| 5.3 | US-17 Liste | pagination, cartes (mobile) / tableau (desktop), ancien nom en gris |
-| 5.4 | US-18 **Recherche** | recherche en mémoire normalisée, délai 300 ms, terme dans l'URL, barre collante sur mobile |
-| 5.5 | US-19 Filtre par statut | combinaison avec la recherche, compteurs |
-| 5.6 | US-20 Dossier | lecture seule vérifiée par test sur les routes, brouillon jamais exposé |
-| 5.7 | US-21 Documents de l'employé | aperçu plein écran |
-| 5.8 | US-22 Réinitialiser l'accès | sessions coupées, données intactes |
+**Statut : Pas encore** (US-15 et US-17 existent en version minimale depuis le Skeleton).
+
+| Ordre | Story | Points d'attention | Statut |
+|---|---|---|---|
+| 5.1 | US-15 Connexion admin | blocage, expiration 2 h, test paramétré sur **toutes** les routes admin | En cours (version minimale) |
+| 5.2 | US-16 Tableau de bord | 2 statuts seulement, inactifs exclus, cartes cliquables | Pas encore |
+| 5.3 | US-17 Liste | pagination, cartes (mobile) / tableau (desktop), ancien nom en gris | En cours (version minimale) |
+| 5.4 | US-18 **Recherche** | recherche en mémoire normalisée, délai 300 ms, terme dans l'URL, barre collante sur mobile | Pas encore |
+| 5.5 | US-19 Filtre par statut | combinaison avec la recherche, compteurs | Pas encore |
+| 5.6 | US-20 Dossier | lecture seule vérifiée par test sur les routes, brouillon jamais exposé | Pas encore |
+| 5.7 | US-21 Documents de l'employé | aperçu plein écran | Pas encore |
+| 5.8 | US-22 Réinitialiser l'accès | sessions coupées, données intactes | Pas encore |
 
 Les écrans admin n'ont pas de maquette : ils sont construits directement avec les composants et jetons du design system des phases précédentes, sans étape de validation visuelle intermédiaire.
 
@@ -204,6 +244,8 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 ---
 
 ## 9. Phase 6 — Finalisation et préparation du test
+
+**Statut : Pas encore.**
 
 | # | Tâche |
 |---|---|
@@ -223,18 +265,20 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 
 ## 10. Traçabilité stories → phases
 
-| Story | Phase 1 (minimal) | Phase complète |
-|---|---|---|
-| US-01, US-02 | ✓ | 2 |
-| US-03, US-04 | | 2 |
-| US-05 | ✓ | 3 |
-| US-06 | | 3 |
-| US-07 | | 4 |
-| US-08, US-09, US-12 | ✓ | 3 |
-| US-10, US-11 | | 3 |
-| US-13, US-14 | | 4 |
-| US-15, US-17 | ✓ | 5 |
-| US-16, US-18 → US-22 | | 5 |
+| Story | Epic | Phase 1 (minimal) | Phase complète | Statut |
+|---|---|---|---|---|
+| US-01, US-02 | E01 | ✓ | 2 | Fait |
+| US-03, US-04 | E01 | | 2 | Fait |
+| US-05 | E02 | ✓ | 3 | Fait |
+| US-06 | E02 | | 3 | Fait |
+| US-07 | E02 | | 4 | Pas encore |
+| US-08 | E03 | ✓ | 3 | Fait |
+| US-09 | E03 | ✓ | 3 | Fait |
+| US-12 | E03 | ✓ | 3 | En cours |
+| US-10, US-11 | E03 | | 3 | Pas encore |
+| US-13, US-14 | E04 | | 4 | Pas encore |
+| US-15, US-17 | E05 | ✓ | 5 | En cours |
+| US-16, US-18 → US-22 | E05 | | 5 | Pas encore |
 
 Les 22 stories sont couvertes.
 

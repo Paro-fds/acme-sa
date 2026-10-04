@@ -1,5 +1,7 @@
 # E01 — Identification
 
+**Statut de l'epic :** Fait (US-01 à US-04 faites).
+
 **Objectif :** permettre à un employé actif d'accéder à son dossier de façon sécurisée : vérification de son identité (nom, prénom, date de naissance), puis mot de passe créé à la première connexion.
 
 **Module backend :** `auth` (s'appuie sur `employee` pour la référence CSV).

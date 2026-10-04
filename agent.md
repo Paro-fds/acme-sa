@@ -16,20 +16,29 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **En cours** (US-05, 06, 08 faits ; versions minimales de US-09, 12 issues du Skeleton) |
+| 3 — Consultation et mise à jour | **En cours** (US-05, 06, 08, 09 faits ; version minimale de US-12 issue du Skeleton) |
 | 4 — Documents | Pas encore |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
+### Epics (`docs/epics/README.md`)
+
+| Epic | Statut |
+|---|---|
+| E01 Identification | **Fait** (US-01 à US-04) |
+| E02 Consultation | **En cours** (US-05, US-06 faites ; reste US-07, phase 4) |
+| E03 Mise à jour | **En cours** (US-08, US-09 faites ; reste US-10, US-11, US-12) |
+| E04 Documents | Pas encore |
+| E05 Administration | **En cours** (versions minimales de US-15, US-17) |
+
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08.
+**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
 | Story | Déjà fait | Reste à faire |
 |---|---|---|
-| US-09 | Registre des 5 champs, CA-02, 05, 07, 09 (API) ; formulaire simple | Badges « Modifié », ancienne valeur, sections, CA-03, 04, 06, 08, tests composant |
 | US-12 | CA-01, 02, 03 | CA-04 (toutes écritures 409), CA-05, CA-06, CA-07, écran fidèle |
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
@@ -38,12 +47,14 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**US-09 — Modifier ses informations** (étape 1 `/mise-a-jour/informations` : sections, badge « Modifié », ancienne valeur, validations ; maquette `mise_jour_informations`).
+**US-10 — Sauvegarder et reprendre un brouillon** (sauvegarde automatique après 2 s, bouton « Enregistrer comme brouillon », bandeau « Brouillon enregistré à … », reprise, erreur réseau ; `e2e/us10-brouillon.spec.js`).
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
 - Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
+- Étape 1 : `features/update/InformationsStep.jsx` (+ `FieldCard`, `FormSection`, `fieldRules.js` qui reprend les règles du registre serveur) ; `components/Stepper.jsx` (4 étapes) à réutiliser dans les étapes suivantes. `TextField` accepte `required`, `labelAside`, `footer`.
+- US-13 devra remplacer `NEXT_STEP` de `InformationsStep.jsx` par l'étape « Documents » (« Continuer vers les documents »).
 
 ## 1. Méthode : Spec-Driven Development
 
@@ -55,7 +66,7 @@ Les spécifications font foi. Ordre de lecture avant toute modification :
 | `docs/02-solution-design.md` | Le comment (architecture, modèle de données, API, sécurité) |
 | `docs/epics/README.md` | Index des user stories, **statuts**, jeu de données de test, Definition of Done |
 | `docs/epics/E0x-*/US-xx-*.md` | Une story : règles, critères d'acceptation (CA-xx), tests (T-xx.y) |
-| `docs/03-plan-implementation.md` | Phases, ordre de réalisation, règles de Clean Architecture (§1.1) |
+| `docs/03-plan-implementation.md` | Phases, ordre de réalisation, règles de Clean Architecture (§1.1), **avancement** (§2.1) |
 
 Tous ces documents sont **validés** : ne pas changer une règle métier ou une décision sans l'accord de l'utilisateur. Toute nouvelle demande devient une nouvelle story.
 
@@ -73,7 +84,9 @@ Cycle d'une story :
 6. Écran React → tests composant verts ; vérifier à 390 px et 1280 px.
 7. Lancer **toute** la suite de tests (voir §5) : tout doit être vert.
 8. Cocher la Definition of Done, passer le statut à **Fait** dans **les trois endroits** : le fichier de la story, l'index `docs/epics/README.md` et la section §0 de ce fichier (tableaux, « Prochaine action », date de mise à jour).
+   Mettre aussi à jour le **statut de l'epic** (README de l'epic, tableau « Statut des epics » de `docs/epics/README.md`, §0) et celui de la **phase**, ainsi que les statuts du **plan d'implémentation** (`docs/03-plan-implementation.md` : §2, §2.1, tableau de la phase, §10, date « Avancement mis à jour le »).
 9. S'arrêter et présenter le résultat à l'utilisateur. **Ne pas commiter : l'utilisateur s'en charge.**
+   Le compte rendu indique toujours où en sont l'**epic** et la **phase** de la story ; quand une story termine un epic ou une phase, l'annoncer explicitement (« Epic E0x terminé », « Phase n terminée »).
 
 ### Statuts des stories
 
