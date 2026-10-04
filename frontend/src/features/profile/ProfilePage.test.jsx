@@ -41,6 +41,7 @@ function renderPage() {
         <Route path="/" element={<IdentifyProbe />} />
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/mise-a-jour/informations" element={<p>Étape 1 : Informations</p>} />
+        <Route path="/documents" element={<p>Écran Mes documents</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -119,6 +120,14 @@ describe('ProfilePage (US-05)', () => {
     await renderProfile({ telephone_number: '+509 3722 2222' })
 
     expect(field('Coordonnées', 'Téléphone')).toHaveTextContent('+509 3722 2222')
+  })
+
+  it('US-07 : le lien « Mes documents » ouvre la liste des documents', async () => {
+    await renderProfile()
+
+    await userEvent.setup().click(screen.getByRole('link', { name: /Mes documents/ }))
+
+    expect(await screen.findByText('Écran Mes documents')).toBeInTheDocument()
   })
 
   it('CA-06 : sans session, retour à l’identification', async () => {

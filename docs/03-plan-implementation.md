@@ -5,7 +5,7 @@
 | **Version** | 1.1 — validé le 2026-10-04 ; suivi d'avancement ajouté (statuts des phases, epics et stories) |
 | **Date** | 2026-10-04 |
 | **Entrées** | `01-prd.md` v1.0, `02-solution-design.md` v1.0, `epics/` (22 user stories) |
-| **Avancement mis à jour le** | 2026-10-04 (après US-14 : epic E04 terminé) |
+| **Avancement mis à jour le** | 2026-10-04 (après US-07 : epic E02 et phase 4 terminés) |
 
 ---
 
@@ -76,8 +76,8 @@ infrastructure ──> application ──> domain
 | **1** | **Walking Skeleton** | versions minimales de US-01, 02, 05, 08, 09, 12, 15, 17 | Un employé modifie son téléphone, l'admin le voit « effectué » | **Fait** |
 | **2** | Identification complète | US-01, 02, 03, 04 | Connexion sécurisée : homonymes, doublon, blocage, déconnexion | **Fait** |
 | **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents | **Fait** |
-| **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | **En cours** (2/3) |
-| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | Pas encore (US-15, 17 en version minimale) |
+| **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | **Fait** |
+| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | **En cours** (US-15, 17 en version minimale) |
 | **6** | Finalisation et préparation du test | — | Application prête pour le directeur | Pas encore |
 
 ```text
@@ -105,14 +105,14 @@ La phase 5 ne dépend que du Skeleton et de la phase 2 (connexion) ; elle peut �
 | Epic | Stories | Phases concernées | Statut |
 |---|---|---|---|
 | E01 Identification | US-01 → US-04 | 1, 2 | **Fait** |
-| E02 Consultation | US-05, 06, 07 | 3 (US-05, 06), 4 (US-07) | **En cours** (2/3) |
+| E02 Consultation | US-05, 06, 07 | 3 (US-05, 06), 4 (US-07) | **Fait** |
 | E03 Mise à jour | US-08 → US-12 | 1, 3 | **Fait** |
 | E04 Documents | US-13, 14 | 4 | **Fait** |
 | E05 Administration | US-15 → US-22 | 1, 5 | **En cours** (US-15, 17 en version minimale) |
 
 Un epic et une phase ne coïncident pas toujours : E02 est réparti sur les phases 3 et 4, car la consultation des documents (US-07) a besoin de l'ajout de documents (US-13).
 
-**Stories :** 13 / 22 « Fait » (US-01 → US-06, US-08 → US-14) ; 2 « En cours » (US-15, 17 en version minimale) ; 7 « Pas encore ».
+**Stories :** 14 / 22 « Fait » (US-01 → US-14) ; 2 « En cours » (US-15, 17 en version minimale) ; 6 « Pas encore ».
 
 ---
 
@@ -210,13 +210,13 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 
 ## 7. Phase 4 — Documents
 
-**Statut : En cours** (2 / 3 stories faites ; reste US-07).
+**Statut : Fait** (epics E02 et E04 terminés ; `e2e/us12-parcours-complet.spec.js` passe avec un document ; ajout d'une photo avec un vrai téléphone : contrôle manuel prévu en phase 6, tâche 6.4).
 
 | Ordre | Story | Points d'attention | Statut |
 |---|---|---|---|
 | 4.1 | US-13 Ajouter un document | `LocalFileStorage`, détection par signature, limites 5 Mo / 10 fichiers, redimensionnement des photos, barre de progression, test sur un vrai téléphone (appareil photo) | Fait (test sur vrai téléphone : phase 6) |
 | 4.2 | US-14 Supprimer un document | dialogue de confirmation, suppression du fichier sur disque | Fait |
-| 4.3 | US-07 Consulter ses documents | regroupement par type, ouverture PDF/image, isolation entre employés | Pas encore |
+| 4.3 | US-07 Consulter ses documents | regroupement par type, ouverture PDF/image, isolation entre employés | Fait |
 
 **Critère de sortie :** `e2e/us12-parcours-complet.spec.js` (parcours complet avec document) passe ; ajout d'une photo prise avec un vrai téléphone vérifié manuellement.
 
@@ -224,7 +224,7 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 
 ## 8. Phase 5 — Administration complète
 
-**Statut : Pas encore** (US-15 et US-17 existent en version minimale depuis le Skeleton).
+**Statut : En cours** (0 / 8 stories faites ; US-15 et US-17 existent en version minimale depuis le Skeleton).
 
 | Ordre | Story | Points d'attention | Statut |
 |---|---|---|---|
@@ -271,7 +271,7 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 | US-03, US-04 | E01 | | 2 | Fait |
 | US-05 | E02 | ✓ | 3 | Fait |
 | US-06 | E02 | | 3 | Fait |
-| US-07 | E02 | | 4 | Pas encore |
+| US-07 | E02 | | 4 | Fait |
 | US-08 | E03 | ✓ | 3 | Fait |
 | US-09 | E03 | ✓ | 3 | Fait |
 | US-12 | E03 | ✓ | 3 | Fait |

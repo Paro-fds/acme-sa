@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E02 Consultation |
 | **Priorité** | MUST |
 | **PRD** | F-11 |
@@ -54,6 +54,13 @@ Alors la réponse est `401` et aucun contenu n'est servi.
 | T-07.3 | CA-04 | API | `tests/api/test_us07_my_documents.py` | document d'EMP-B demandé par EMP-A → 404 |
 | T-07.4 | CA-05 | API | `tests/api/test_us07_my_documents.py` | sans cookie → 401 |
 | T-07.5 | CA-01, CA-02 | Composant | `src/features/documents/MyDocumentsPage.test.jsx` | regroupement, état vide |
+
+## Notes de réalisation
+
+- `GET /api/me/documents/{id}/file` : `Content-Disposition: inline` avec le nom d'origine encodé, `X-Content-Type-Options: nosniff`, `Cache-Control: private, no-store` ; le document d'un autre employé donne 404. Les documents restent consultables après la soumission.
+- « Voir » : PDF ouvert dans un nouvel onglet (lecteur du téléphone), image en aperçu plein écran (`components/ImagePreview.jsx`, réutilisable pour US-21). Les miniatures des images viennent de l'API (aussi à l'étape 2).
+- Accès : carte « Mes documents » sur le profil. Le bouton sous la liste mène à l'étape 2 si la mise à jour est en cours, au profil (question Oui / Non) si elle n'est pas commencée, et disparaît après soumission.
+- Non repris de la maquette (hors story) : recherche, onglets, badge « Validé par RH » (validation officielle : WON'T V1), téléchargement séparé.
 
 ## Hors périmètre
 

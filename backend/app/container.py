@@ -14,7 +14,7 @@ from app.auth.domain.model import SubjectType
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
 from app.auth.infrastructure.sql_repositories import SqlAccountRepository, SqlSessionRepository
 from app.config import Settings
-from app.document.application.use_cases import DeleteDocument, ListMyDocuments, UploadDocument
+from app.document.application.use_cases import DeleteDocument, GetMyDocumentFile, ListMyDocuments, UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
 from app.document.infrastructure.sql_document_repository import SqlDocumentRepository
 from app.employee.application.get_profile import GetEmployeeProfile
@@ -113,6 +113,9 @@ class Container:
 
     def delete_document(self) -> DeleteDocument:
         return DeleteDocument(self.updates, self.documents, self.file_storage)
+
+    def get_my_document_file(self) -> GetMyDocumentFile:
+        return GetMyDocumentFile(self.documents, self.file_storage)
 
     def list_my_documents(self) -> ListMyDocuments:
         return ListMyDocuments(self.documents)

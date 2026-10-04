@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router'
-import { deleteDocument, listMyDocuments, uploadDocument } from '../../api/documents.js'
+import { deleteDocument, documentFileUrl, listMyDocuments, uploadDocument } from '../../api/documents.js'
 import { getMyUpdate } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
@@ -281,6 +281,7 @@ function DocumentsForm({ initialDocuments }) {
                 key={document.id}
                 document={document}
                 thumbnail={thumbnails[document.id]}
+                fileUrl={documentFileUrl(document.id)}
                 onDelete={upload ? undefined : handleDelete}
               />
             ))}

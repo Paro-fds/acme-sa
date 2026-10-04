@@ -124,6 +124,31 @@ class DeleteDocument:
         self._storage.delete(document.storage_key)
 
 
+@dataclass(frozen=True)
+class DocumentFile:
+    original_name: str
+    content_type: str
+    content: bytes
+
+
+class GetMyDocumentFile:
+    """US-07 : contenu d'un document de l'employé connecté (consultable même après la soumission)."""
+
+    def __init__(self, documents: DocumentRepository, storage: FileStorage) -> None:
+        self._documents = documents
+        self._storage = storage
+
+    def execute(self, employee_id: str, document_id: str) -> DocumentFile:
+        document = self._documents.get(document_id)
+        if document is None or document.employee_id != employee_id:
+            raise DocumentNotFound()
+        try:
+            content = self._storage.open(document.storage_key)
+        except FileNotFoundError:
+            raise DocumentNotFound() from None
+        return DocumentFile(document.original_name, document.content_type, content)
+
+
 class ListMyDocuments:
     """Documents de l'employé connecté (étape 2, vérification, « Mes documents »)."""
 

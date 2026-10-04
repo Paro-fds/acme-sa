@@ -11,7 +11,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | Epic | Statut |
 |---|---|
 | [E01 Identification](E01-identification/README.md) | Fait |
-| [E02 Consultation](E02-consultation/README.md) | En cours |
+| [E02 Consultation](E02-consultation/README.md) | Fait |
 | [E03 Mise à jour](E03-mise-a-jour/README.md) | Fait |
 | [E04 Documents](E04-documents/README.md) | Fait |
 | [E05 Administration](E05-administration/README.md) | En cours |
@@ -26,7 +26,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | | [US-04](E01-identification/US-04-se-deconnecter.md) | Se déconnecter | F-07 | MUST | Fait |
 | **E02 Consultation** | [US-05](E02-consultation/US-05-consulter-profil.md) | Consulter son profil | F-09 | MUST | Fait |
 | | [US-06](E02-consultation/US-06-voir-etat-mise-a-jour.md) | Voir l'état de sa mise à jour | F-10 | MUST | Fait |
-| | [US-07](E02-consultation/US-07-consulter-ses-documents.md) | Consulter ses documents | F-11 | MUST | Pas encore |
+| | [US-07](E02-consultation/US-07-consulter-ses-documents.md) | Consulter ses documents | F-11 | MUST | Fait |
 | **E03 Mise à jour** | [US-08](E03-mise-a-jour/US-08-choisir-oui-non.md) | Choisir de mettre à jour ou non | F-12 | MUST | Fait |
 | | [US-09](E03-mise-a-jour/US-09-modifier-informations.md) | Modifier ses informations | F-13, F-18 | MUST | Fait |
 | | [US-10](E03-mise-a-jour/US-10-brouillon.md) | Sauvegarder et reprendre un brouillon | F-14 | MUST | Fait |

@@ -8,7 +8,12 @@ import { getMyUpdate } from '../../api/employee.js'
 import { ApiError } from '../../api/client.js'
 import { resizeImage } from './resizeImage.js'
 
-vi.mock('../../api/documents.js', () => ({ listMyDocuments: vi.fn(), uploadDocument: vi.fn(), deleteDocument: vi.fn() }))
+vi.mock('../../api/documents.js', () => ({
+  listMyDocuments: vi.fn(),
+  uploadDocument: vi.fn(),
+  deleteDocument: vi.fn(),
+  documentFileUrl: (id) => `/api/me/documents/${id}/file`,
+}))
 vi.mock('../../api/employee.js', () => ({ getMyUpdate: vi.fn() }))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 vi.mock('./resizeImage.js', () => ({ resizeImage: vi.fn() }))

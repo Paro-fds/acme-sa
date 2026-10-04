@@ -1,5 +1,9 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { formatSize } from '../../lib/format.js'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import ImagePreview from '../../components/ImagePreview.jsx'
+import { formatDate, formatSize } from '../../lib/format.js'
+
+const VIEW_BUTTON =
+  'flex min-h-11 items-center gap-1.5 rounded-lg bg-info-bg px-3 font-semibold text-primary hover:bg-info-border/40'
 
 function FileIcon({ document, thumbnail }) {
   if (thumbnail) {
@@ -77,10 +81,14 @@ function DeleteConfirmation({ document, deleting, onConfirm, onCancel }) {
 
 /**
  * Un document de l'employé : icône (ou miniature), type, nom, taille.
+ * `fileUrl` (US-07) : bouton « Voir » (PDF dans le lecteur du téléphone, image en aperçu intégré)
+ * et miniature des images ; `showDate` : « Ajouté le … » à la place de « Envoyé ».
  * `onDelete(document)` (US-14) ajoute le bouton « Supprimer » ; il renvoie `true` si le document est supprimé.
- * Sans `onDelete` (mise à jour soumise, administration), aucun bouton n'est affiché.
+ * Sans `onDelete` (mise à jour soumise, administration), aucun bouton « Supprimer » n'est affiché.
  */
-export default function DocumentItem({ document, thumbnail, onDelete }) {
+export default function DocumentItem({ document, thumbnail, fileUrl, showDate = false, onDelete }) {
+  const isImage = document.content_type.startsWith('image/')
+  const [previewing, setPreviewing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const deleteButtonRef = useRef(null)
@@ -92,6 +100,8 @@ export default function DocumentItem({ document, thumbnail, onDelete }) {
       mounted.current = false
     }
   }, [])
+
+  const closePreview = useCallback(() => setPreviewing(false), [])
 
   function cancel() {
     setConfirming(false)
@@ -112,35 +122,62 @@ export default function DocumentItem({ document, thumbnail, onDelete }) {
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
       <div className="flex items-start gap-3">
-        <FileIcon document={document} thumbnail={thumbnail} />
+        <FileIcon document={document} thumbnail={thumbnail ?? (isImage ? fileUrl : undefined)} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <div className="flex items-center justify-between gap-2">
             <span className="rounded bg-info-bg px-2 py-0.5 text-xs font-semibold text-info-text">{document.type_label}</span>
             <span className="text-xs text-muted">{formatSize(document.size_bytes)}</span>
           </div>
           <p className="truncate font-semibold text-heading" title={document.original_name}>{document.original_name}</p>
-          <p className="flex items-center gap-1.5 text-sm text-status-done-text">
-            <span className="size-2 rounded-full bg-status-done-dot" aria-hidden="true" />
-            Envoyé
-          </p>
+          {showDate ? (
+            <p className="flex items-center gap-1.5 text-sm text-help">
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">calendar_today</span>
+              Ajouté le {formatDate(document.uploaded_at)}
+            </p>
+          ) : (
+            <p className="flex items-center gap-1.5 text-sm text-status-done-text">
+              <span className="size-2 rounded-full bg-status-done-dot" aria-hidden="true" />
+              Envoyé
+            </p>
+          )}
         </div>
       </div>
 
-      {onDelete && !confirming && (
-        <div className="flex justify-end">
-          <button
-            ref={deleteButtonRef}
-            type="button"
-            onClick={() => setConfirming(true)}
-            aria-label={`Supprimer ${document.original_name}`}
-            className="flex min-h-11 items-center gap-1.5 rounded-lg bg-error-bg px-3 font-semibold text-error-text hover:bg-error-border/40"
-          >
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
-            Supprimer
-          </button>
+      {(fileUrl || onDelete) && !confirming && (
+        <div className="flex justify-end gap-2">
+          {fileUrl &&
+            (isImage ? (
+              <button
+                type="button"
+                onClick={() => setPreviewing(true)}
+                aria-label={`Voir ${document.original_name}`}
+                className={VIEW_BUTTON}
+              >
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">zoom_in</span>
+                Voir
+              </button>
+            ) : (
+              <a href={fileUrl} target="_blank" rel="noopener" aria-label={`Voir ${document.original_name}`} className={VIEW_BUTTON}>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">visibility</span>
+                Voir
+              </a>
+            ))}
+          {onDelete && (
+            <button
+              ref={deleteButtonRef}
+              type="button"
+              onClick={() => setConfirming(true)}
+              aria-label={`Supprimer ${document.original_name}`}
+              className="flex min-h-11 items-center gap-1.5 rounded-lg bg-error-bg px-3 font-semibold text-error-text hover:bg-error-border/40"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
+              Supprimer
+            </button>
+          )}
         </div>
       )}
       {confirming && <DeleteConfirmation document={document} deleting={deleting} onConfirm={confirm} onCancel={cancel} />}
+      {previewing && <ImagePreview src={fileUrl} title={document.original_name} onClose={closePreview} />}
     </li>
   )
 }

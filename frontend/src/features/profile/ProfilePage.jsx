@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { decide, getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
@@ -37,7 +37,7 @@ function ProfileSummary({ profile }) {
 
 export const DECLINED_NOTICE = "C'est noté. Vous pourrez mettre à jour votre dossier à tout moment."
 
-/** US-05 (profil), US-06 (état de la mise à jour) et US-08 (choix Oui / Non). */
+/** US-05 (profil), US-06 (état de la mise à jour), US-08 (choix Oui / Non) et accès à « Mes documents » (US-07). */
 export default function ProfilePage() {
   const navigate = useNavigate()
   const redirectIfUnauthorized = useUnauthorizedRedirect()
@@ -89,6 +89,20 @@ export default function ProfilePage() {
         notice={notice}
         error={error}
       />
+
+      <Link
+        to="/documents"
+        className="flex min-h-16 items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-card hover:bg-canvas"
+      >
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-info-bg text-info-text" aria-hidden="true">
+          <span className="material-symbols-outlined">folder_shared</span>
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="font-semibold text-heading">Mes documents</span>
+          <span className="text-sm text-help">Diplômes, certificats et attestations joints à votre dossier</span>
+        </span>
+        <span className="material-symbols-outlined text-muted" aria-hidden="true">chevron_right</span>
+      </Link>
 
       <InfoSection
         icon="person"

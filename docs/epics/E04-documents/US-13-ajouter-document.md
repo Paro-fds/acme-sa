@@ -90,7 +90,7 @@ Alors le fichier sur disque a un nom UUID, se trouve dans le dossier de l'employ
 ## Notes de réalisation
 
 - API : `POST /api/me/documents` et `GET /api/me/documents` (liste, nécessaire à l'étape 2 et à la vérification). Le service du fichier (`GET /api/me/documents/{id}/file`) relève d'**US-07**.
-- Miniature (CA-02) : construite dans le navigateur à partir de la photo qui vient d'être envoyée. Après rechargement, une icône « image » s'affiche ; US-07 pourra utiliser le fichier servi par l'API.
+- Miniature (CA-02) : construite dans le navigateur à partir de la photo qui vient d'être envoyée. Depuis US-07, la miniature est servie par l'API, y compris après rechargement.
 - L'ajout est refusé sans mise à jour ouverte (`409 UPDATE_NOT_STARTED`) et après soumission (`409 UPDATE_ALREADY_SUBMITTED`, US-12 CA-04).
 - Le nom d'origine est nettoyé (sans chemin ni caractère de contrôle) et ne sert qu'à l'affichage ; le fichier est écrit sous `<uuid>.<ext>` (écriture atomique), puis la ligne en base ; si l'enregistrement en base échoue, le fichier est supprimé.
 

@@ -17,8 +17,8 @@ Langue du projet et de l'interface : **français**.
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
 | 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
-| 4 — Documents | **En cours** (US-13, US-14 faites ; reste US-07) |
-| 5 — Administration | Pas encore |
+| 4 — Documents | **Fait** (US-13, US-14, US-07) |
+| 5 — Administration | **En cours** (prochaine phase ; US-15, US-17 en version minimale depuis le Skeleton) |
 | 6 — Finalisation | Pas encore |
 
 ### Epics (`docs/epics/README.md`)
@@ -26,14 +26,14 @@ Langue du projet et de l'interface : **français**.
 | Epic | Statut |
 |---|---|
 | E01 Identification | **Fait** (US-01 à US-04) |
-| E02 Consultation | **En cours** (US-05, US-06 faites ; reste US-07, phase 4) |
+| E02 Consultation | **Fait** (US-05, US-06, US-07) |
 | E03 Mise à jour | **Fait** (US-08 → US-12) |
 | E04 Documents | **Fait** (US-13, US-14) |
 | E05 Administration | **En cours** (versions minimales de US-15, US-17) |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10, US-11, US-12, US-13, US-14.
+**Fait :** US-01 → US-14 (toutes les stories employé).
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
@@ -42,11 +42,11 @@ Langue du projet et de l'interface : **français**.
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
-**Pas encore :** US-07, US-16, US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-07 — Consulter ses documents** (dernière story de la phase 4 et de l'epic E02 : `GET /api/me/documents/{id}/file`, page `/documents` groupée par type, « Voir » ; maquette `mes_documents_professionnels`, dont seul `code.html` est lisible).
+**Phase 5 — Administration**, en commençant par **US-15 — Se connecter en administrateur** (déjà en version minimale : reste le blocage, l'expiration à 2 h, la déconnexion à l'écran via `AccountMenu`, le test paramétré sur toutes les routes admin). Écrans admin sans maquette ni validation visuelle intermédiaire.
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
@@ -58,7 +58,7 @@ Langue du projet et de l'interface : **français**.
 - Soumission : `features/update/SubmitSection.jsx` (`useSubmission`, verrou anti double clic) ; confirmation : `ConfirmationStep.jsx`.
 - Tests E2E : une seule base partagée, un employé fictif par test (liste dans `frontend/e2e/start-server.mjs`).
 - Documents (module backend `document`) : `UploadDocument`, `DeleteDocument`, `ListMyDocuments`, `ensure_update_open()`, `LocalFileStorage`, `SqlDocumentRepository` ; frontend `features/documents/` (`DocumentsStep`, `DocumentItem` avec prop `onDelete` (bouton « Supprimer » + confirmation ; sans `onDelete`, aucun bouton), `resizeImage`) ; `upload()` (XHR avec progression) dans `api/client.js`.
-- **À faire dans US-07** : `GET /api/me/documents/{id}/file` (miniatures et « Voir »).
+- Consultation : `features/documents/MyDocumentsPage.jsx` (`/documents`) ; `DocumentItem` accepte `fileUrl` (« Voir », miniature) et `showDate` ; `components/ImagePreview.jsx` (aperçu plein écran, à réutiliser pour US-21) ; `documentFileUrl()` dans `api/documents.js`.
 
 ## 1. Méthode : Spec-Driven Development
 

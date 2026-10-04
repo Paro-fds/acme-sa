@@ -1,6 +1,7 @@
 from datetime import datetime
+from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFile
 from pydantic import BaseModel
 
 from app.auth.api.dependencies import container, current_employee_id
@@ -45,3 +46,18 @@ def upload_document(
 @router.delete("/{document_id}", status_code=204)
 def delete_document(document_id: str, request: Request, employee_id: str = Depends(current_employee_id)) -> None:
     container(request).delete_document().execute(employee_id, document_id)
+
+
+@router.get("/{document_id}/file")
+def get_document_file(document_id: str, request: Request, employee_id: str = Depends(current_employee_id)) -> Response:
+    document = container(request).get_my_document_file().execute(employee_id, document_id)
+    return Response(
+        content=document.content,
+        media_type=document.content_type,
+        headers={
+            # Affiché dans le navigateur (aperçu d'image, lecteur PDF) ; nom d'origine encodé (RFC 5987).
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(document.original_name)}",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+        },
+    )
