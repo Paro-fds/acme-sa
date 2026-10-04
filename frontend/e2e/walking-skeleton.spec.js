@@ -48,5 +48,6 @@ test('parcours complet employé → admin', async ({ page }) => {
 
   const row = page.getByRole('listitem').filter({ hasText: 'JOSEPH Jean' })
   await expect(row.getByText('Mise à jour effectuée')).toBeVisible()
-  await expect(page.getByRole('listitem').filter({ hasText: 'BAPTISTE Marc' }).getByText('Mise à jour non effectuée')).toBeVisible()
+  // EMP-E ne soumet dans aucun test E2E (voir e2e/start-server.mjs).
+  await expect(page.getByRole('listitem').filter({ hasText: 'ÉTIENNE Rosé' }).getByText('Mise à jour non effectuée')).toBeVisible()
 })

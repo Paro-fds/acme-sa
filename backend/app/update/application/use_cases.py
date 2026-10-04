@@ -6,7 +6,7 @@ from app.employee.domain.repository import EmployeeRepository, get_employee
 from app.shared.domain.clock import Clock
 from app.update.application.values import reference_values
 from app.update.domain.editable_fields import EDITABLE_FIELDS, Section
-from app.update.domain.errors import UpdateNotStarted
+from app.update.domain.errors import UpdateAlreadySubmitted, UpdateNotStarted
 from app.update.domain.repository import UpdateRepository
 from app.update.domain.update import EmployeeState, EmployeeUpdate, employee_state
 
@@ -84,7 +84,7 @@ class GetMyUpdate:
 class GetEditableFields:
     """Formulaire de l'étape 1 : valeur d'origine et valeur du brouillon pour chaque champ.
 
-    Disponible seulement après un « Oui » (US-09 CA-09).
+    Disponible seulement après un « Oui » (US-09 CA-09) et avant la soumission (US-12 CA-04).
     """
 
     def __init__(self, employees: EmployeeRepository, updates: UpdateRepository) -> None:
@@ -96,6 +96,8 @@ class GetEditableFields:
         update = self._updates.get_for_employee(employee_id)
         if update is None or not update.accepted:
             raise UpdateNotStarted()
+        if update.is_submitted:
+            raise UpdateAlreadySubmitted()
         changes = update.changes
         return [
             FieldView(

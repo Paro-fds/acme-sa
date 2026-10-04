@@ -12,7 +12,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 |---|---|
 | [E01 Identification](E01-identification/README.md) | Fait |
 | [E02 Consultation](E02-consultation/README.md) | En cours |
-| [E03 Mise à jour](E03-mise-a-jour/README.md) | En cours |
+| [E03 Mise à jour](E03-mise-a-jour/README.md) | Fait |
 | [E04 Documents](E04-documents/README.md) | Pas encore |
 | [E05 Administration](E05-administration/README.md) | En cours |
 
@@ -31,7 +31,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | | [US-09](E03-mise-a-jour/US-09-modifier-informations.md) | Modifier ses informations | F-13, F-18 | MUST | Fait |
 | | [US-10](E03-mise-a-jour/US-10-brouillon.md) | Sauvegarder et reprendre un brouillon | F-14 | MUST | Fait |
 | | [US-11](E03-mise-a-jour/US-11-verifier-modifications.md) | Vérifier ses modifications | F-15 | MUST | Fait |
-| | [US-12](E03-mise-a-jour/US-12-soumettre.md) | Confirmer et soumettre | F-16, F-17 | MUST | En cours |
+| | [US-12](E03-mise-a-jour/US-12-soumettre.md) | Confirmer et soumettre | F-16, F-17 | MUST | Fait |
 | **E04 Documents** | [US-13](E04-documents/US-13-ajouter-document.md) | Ajouter un document | F-19, F-21 | MUST | Pas encore |
 | | [US-14](E04-documents/US-14-supprimer-document.md) | Supprimer un document | F-20 | SHOULD | Pas encore |
 | **E05 Administration** | [US-15](E05-administration/US-15-connexion-admin.md) | Se connecter en administrateur | F-22 | MUST | En cours |

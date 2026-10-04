@@ -16,8 +16,8 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **En cours** (US-05, 06, 08 → 11 faits ; version minimale de US-12 issue du Skeleton) |
-| 4 — Documents | Pas encore |
+| 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
+| 4 — Documents | Pas encore (prochaine phase) |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
@@ -27,19 +27,18 @@ Langue du projet et de l'interface : **français**.
 |---|---|
 | E01 Identification | **Fait** (US-01 à US-04) |
 | E02 Consultation | **En cours** (US-05, US-06 faites ; reste US-07, phase 4) |
-| E03 Mise à jour | **En cours** (US-08 → US-11 faites ; reste US-12) |
+| E03 Mise à jour | **Fait** (US-08 → US-12) |
 | E04 Documents | Pas encore |
 | E05 Administration | **En cours** (versions minimales de US-15, US-17) |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10, US-11.
+**Fait :** US-01, US-02, US-03, US-04, US-05, US-06, US-08, US-09, US-10, US-11, US-12.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
 | Story | Déjà fait | Reste à faire |
 |---|---|---|
-| US-12 | CA-01, 02, 03 | CA-04 (toutes écritures 409), CA-05, CA-06, CA-07, écran fidèle |
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
@@ -47,7 +46,7 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**US-12 — Confirmer et soumettre** (dernière story de la phase 3 et de l'epic E03 : verrouillage de toutes les écritures après soumission, redirection des routes `/mise-a-jour/*`, double clic, CSV inchangé, écran de confirmation fidèle à `confirmation_de_soumission`).
+**Phase 4 — Documents**, en commençant par **US-13 — Ajouter un document** (étape 2 `/mise-a-jour/documents`, maquette `mise_jour_documents` ; `LocalFileStorage`, détection par signature, limites 5 Mo / 10 fichiers ; voir les points à reprendre ci-dessous).
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
@@ -56,6 +55,9 @@ Langue du projet et de l'interface : **français**.
 - Étape 1 : `features/update/InformationsStep.jsx` (+ `FieldCard`, `FormSection`, `fieldRules.js` qui reprend les règles du registre serveur) ; `components/Stepper.jsx` (4 étapes) à réutiliser dans les étapes suivantes. `TextField` accepte `required`, `labelAside`, `footer`.
 - Brouillon : `features/update/useAutosave.js` (2 s, champs valides seulement, `flush()` au changement d'étape) ; `formatTime` dans `lib/format.js`.
 - Vérification : `features/update/ReviewStep.jsx`, `components/ValueComparison.jsx` ; `formatSize` dans `lib/format.js`.
+- Soumission : `features/update/SubmitSection.jsx` (`useSubmission`, verrou anti double clic) ; confirmation : `ConfirmationStep.jsx`.
+- Tests E2E : une seule base partagée, un employé fictif par test (liste dans `frontend/e2e/start-server.mjs`).
+- **À reprendre dans US-13 / US-14** : refuser `POST` / `DELETE /api/me/documents` après soumission (409, ajouter à `WRITES_AFTER_SUBMISSION` de `tests/api/test_us12_submit.py`) ; ajouter un document dans `e2e/us12-parcours-complet.spec.js`.
 - US-13 devra brancher `listMyDocuments()` (`api/documents.js`, liste vide pour l'instant) sur `GET /api/me/documents`, et remplacer `NEXT_STEP` de `InformationsStep.jsx` par l'étape « Documents » (« Continuer vers les documents »).
 
 ## 1. Méthode : Spec-Driven Development

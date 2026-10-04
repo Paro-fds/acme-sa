@@ -1,14 +1,15 @@
-import { useId, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useId } from 'react'
+import { Navigate, useNavigate } from 'react-router'
 import { listMyDocuments } from '../../api/documents.js'
-import { getMyUpdate, submitUpdate } from '../../api/employee.js'
+import { getMyUpdate } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import Stepper from '../../components/Stepper.jsx'
 import ValueComparison from '../../components/ValueComparison.jsx'
 import { formatSize } from '../../lib/format.js'
-import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
+import { useLoader } from '../../lib/useLoader.js'
+import { ConfirmationCheckbox, SubmitButton, useSubmission } from './SubmitSection.jsx'
 
 const SECTIONS = [
   { code: 'IDENTITY', title: 'Identité modifiée' },
@@ -116,31 +117,18 @@ function DocumentsSummary({ documents }) {
   )
 }
 
-/** US-11 : étape 3 « Vérification » ; la confirmation et la soumission relèvent d'US-12. */
+/** US-11 : étape 3 « Vérification » ; US-12 : confirmation et soumission. */
 export default function ReviewStep() {
   const navigate = useNavigate()
-  const redirectIfUnauthorized = useUnauthorizedRedirect()
   const { data, error: loadError, loading } = useLoader(loadStep)
-  const [confirmed, setConfirmed] = useState(false)
-  const [error, setError] = useState(null)
-  const [sending, setSending] = useState(false)
-
-  async function handleSubmit() {
-    setSending(true)
-    setError(null)
-    try {
-      await submitUpdate(true)
-      navigate('/mise-a-jour/confirmation', { replace: true })
-    } catch (apiError) {
-      if (!redirectIfUnauthorized(apiError)) setError(apiError.message)
-      setSending(false)
-    }
-  }
+  const submission = useSubmission()
 
   if (loading) return <Page account title="Mise à jour"><p role="status">Chargement…</p></Page>
   if (loadError) return <Page account title="Mise à jour" backTo="/profil"><Alert>{loadError.message}</Alert></Page>
 
   const [update, documents] = data
+  // Mise à jour déjà soumise (US-12 CA-04) ou pas encore ouverte : retour au profil.
+  if (update.state !== 'IN_PROGRESS') return <Navigate to="/profil" replace />
 
   return (
     <Page
@@ -149,10 +137,7 @@ export default function ReviewStep() {
       backTo="/mise-a-jour/informations"
       actions={
         <>
-          <Button onClick={handleSubmit} disabled={!confirmed || sending}>
-            Soumettre ma mise à jour
-            <span className="material-symbols-outlined" aria-hidden="true">send</span>
-          </Button>
+          <SubmitButton onClick={submission.submit} disabled={!submission.confirmed || submission.sending} />
           <Button variant="ghost" onClick={() => navigate('/mise-a-jour/informations')}>
             <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>
             Revenir en arrière et modifier
@@ -169,16 +154,8 @@ export default function ReviewStep() {
       <ChangesSummary changes={update.changes} />
       <DocumentsSummary documents={documents} />
 
-      <label className="flex min-h-11 items-start gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
-        <input
-          type="checkbox"
-          className="mt-1 size-5 shrink-0 accent-primary"
-          checked={confirmed}
-          onChange={(event) => setConfirmed(event.target.checked)}
-        />
-        <span className="font-semibold text-heading">Je confirme que les informations fournies sont exactes et sincères.</span>
-      </label>
-      <Alert>{error}</Alert>
+      <ConfirmationCheckbox checked={submission.confirmed} onChange={submission.setConfirmed} />
+      <Alert>{submission.error}</Alert>
     </Page>
   )
 }

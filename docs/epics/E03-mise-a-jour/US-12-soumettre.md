@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | En cours |
+| **Statut** | Fait |
 | **Epic** | E03 Mise à jour |
 | **Priorité** | MUST |
 | **PRD** | F-16, F-17 |
@@ -69,6 +69,13 @@ Alors le fichier CSV source est inchangé.
 | T-12.4 | CA-07 | API | `tests/api/test_us12_submit.py` | empreinte (hash) du CSV de test identique avant/après |
 | T-12.5 | CA-01, CA-02, CA-06 | Composant | `src/features/update/SubmitSection.test.jsx` | case, bouton, désactivation pendant l'envoi |
 | T-12.6 | CA-02 | E2E | `e2e/us12-parcours-complet.spec.js` | identification → Oui → 2 modifications → document → vérification → soumission → profil « Effectuée » |
+
+## Notes de réalisation
+
+- CA-04 : les écritures existantes (changements, décision, soumission) et `GET /api/me/update/fields` répondent `409 UPDATE_ALREADY_SUBMITTED` ; les écrans `/mise-a-jour/informations` et `/mise-a-jour/verification` renvoient au profil. Les routes des documents (`POST` / `DELETE /api/me/documents`) n'existent pas encore : **US-13 et US-14** devront refuser ces écritures après soumission (même code 409) et l'ajouter à `WRITES_AFTER_SUBMISSION` dans `tests/api/test_us12_submit.py`.
+- CA-06 : verrou synchrone côté écran (`useSubmission`, `SubmitSection.jsx`) ; un second envoi reçoit 409 et l'écran de confirmation s'affiche normalement.
+- T-12.6 : `e2e/us12-parcours-complet.spec.js` couvre le parcours sans document ; **US-13** y ajoutera l'ajout d'un document.
+- L'écran de confirmation n'affiche ni référence ni récépissé PDF (absents de la story) et n'annonce pas de notification à l'administration (aucune notification dans le MVP).
 
 ## Hors périmètre
 

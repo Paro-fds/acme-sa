@@ -22,18 +22,19 @@ const change = (field_name, label, section, old_value, new_value) => ({
 const PHONE = change('telephone_number', 'Téléphone', 'CONTACT', '+50937221111', '+509 3722 2222')
 const ADDRESS = change('address_line_1', 'Adresse', 'CONTACT', '12 rue Capois, Port-au-Prince', '5 rue Pavée, Jacmel')
 
-function renderStep({ changes = [PHONE, ADDRESS], documents = [] } = {}) {
-  getMyUpdate.mockResolvedValue({ state: 'IN_PROGRESS', accepted: true, updated_at: '2026-10-04T14:32:00', changes })
+function renderStep({ changes = [PHONE, ADDRESS], documents = [], state = 'IN_PROGRESS' } = {}) {
+  getMyUpdate.mockResolvedValue({ state, accepted: true, updated_at: '2026-10-04T14:32:00', changes })
   listMyDocuments.mockResolvedValue(documents)
   render(
     <MemoryRouter initialEntries={['/mise-a-jour/verification']}>
       <Routes>
+        <Route path="/profil" element={<p>Écran profil</p>} />
         <Route path="/mise-a-jour/informations" element={<p>Étape 1 : Informations</p>} />
         <Route path="/mise-a-jour/verification" element={<ReviewStep />} />
       </Routes>
     </MemoryRouter>,
   )
-  return screen.findByRole('heading', { name: 'Vérification avant soumission' })
+  return state === 'IN_PROGRESS' ? screen.findByRole('heading', { name: 'Vérification avant soumission' }) : null
 }
 
 const documentsSection = () => screen.getByRole('region', { name: 'Justificatifs joints' })
@@ -119,5 +120,13 @@ describe('ReviewStep (US-11)', () => {
     await renderStep({ changes: [change('email_address', 'Email', 'CONTACT', '', 'rose.etienne@exemple.test')] })
 
     expect(screen.getByText('Non renseigné')).toBeInTheDocument()
+  })
+})
+
+describe('ReviewStep — accès (US-12 CA-04)', () => {
+  it.each(['DONE', 'NOT_DONE'])('mise à jour %s : retour au profil', async (state) => {
+    renderStep({ state })
+
+    expect(await screen.findByText('Écran profil')).toBeInTheDocument()
   })
 })
