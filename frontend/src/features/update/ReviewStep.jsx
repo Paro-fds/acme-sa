@@ -29,11 +29,12 @@ export default function ReviewStep() {
     }
   }
 
-  if (loading) return <Page title="Mise à jour"><p role="status">Chargement…</p></Page>
-  if (loadError) return <Page title="Mise à jour" backTo="/profil"><Alert>{loadError.message}</Alert></Page>
+  if (loading) return <Page account title="Mise à jour"><p role="status">Chargement…</p></Page>
+  if (loadError) return <Page account title="Mise à jour" backTo="/profil"><Alert>{loadError.message}</Alert></Page>
 
   return (
     <Page
+      account
       title="Mise à jour"
       backTo="/mise-a-jour/informations"
       actions={

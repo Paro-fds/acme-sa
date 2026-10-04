@@ -100,4 +100,10 @@ describe('IdentifyPage (US-01)', () => {
 
     expect(screen.getByRole('alert')).toHaveTextContent('Votre session a expiré. Reconnectez-vous.')
   })
+  it('US-04 CA-01 : après déconnexion, « Vous êtes déconnecté. » s’affiche comme information', () => {
+    renderPage({ notice: 'Vous êtes déconnecté.' })
+
+    expect(screen.getByRole('status')).toHaveTextContent('Vous êtes déconnecté.')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
 })

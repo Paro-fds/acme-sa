@@ -38,13 +38,13 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading) return <Page title="Mon profil"><p role="status">Chargement…</p></Page>
-  if (loadError) return <Page title="Mon profil"><Alert>{loadError.message}</Alert></Page>
+  if (loading) return <Page account title="Mon profil"><p role="status">Chargement…</p></Page>
+  if (loadError) return <Page account title="Mon profil"><Alert>{loadError.message}</Alert></Page>
 
   const { update } = profile
 
   return (
-    <Page title="Mon profil">
+    <Page account title="Mon profil">
       <Card>
         <p className="text-xl font-bold text-heading">
           {profile.last_name} {profile.first_name}

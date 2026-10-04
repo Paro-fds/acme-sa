@@ -12,6 +12,7 @@ export default function IdentifyPage() {
   const location = useLocation()
   const [form, setForm] = useState({ last_name: '', first_name: '', birth_date: '' })
   const [error, setError] = useState(location.state?.message ?? null)
+  const [notice, setNotice] = useState(location.state?.notice ?? null)
   const [sending, setSending] = useState(false)
 
   const complete = form.last_name.trim() && form.first_name.trim() && form.birth_date
@@ -22,6 +23,7 @@ export default function IdentifyPage() {
     if (!complete || sending) return
     setSending(true)
     setError(null)
+    setNotice(null)
     try {
       const { next_step: nextStep } = await identify(form)
       navigate('/connexion/mot-de-passe', {
@@ -43,6 +45,8 @@ export default function IdentifyPage() {
         <h2 className="text-[26px] leading-8 font-bold">Accéder à mon dossier</h2>
         <p>Saisissez vos informations telles qu'elles figurent dans votre dossier ACME.</p>
       </div>
+
+      <Alert tone="info">{notice}</Alert>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
         <TextField label="Nom" autoComplete="family-name" value={form.last_name} onChange={update('last_name')} />

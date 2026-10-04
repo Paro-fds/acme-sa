@@ -11,7 +11,7 @@ Chaque user story est **indépendante** : elle déclare ses préconditions, que 
 | **E01 Identification** | [US-01](E01-identification/US-01-verifier-identite.md) | Vérifier son identité | F-01, F-04, F-05 | MUST | Fait |
 | | [US-02](E01-identification/US-02-creer-mot-de-passe.md) | Créer son mot de passe | F-02 | MUST | Fait |
 | | [US-03](E01-identification/US-03-se-connecter.md) | Se connecter avec son mot de passe | F-03, F-06, F-08 | MUST | Fait |
-| | [US-04](E01-identification/US-04-se-deconnecter.md) | Se déconnecter | F-07 | MUST | Pas encore |
+| | [US-04](E01-identification/US-04-se-deconnecter.md) | Se déconnecter | F-07 | MUST | Fait |
 | **E02 Consultation** | [US-05](E02-consultation/US-05-consulter-profil.md) | Consulter son profil | F-09 | MUST | En cours |
 | | [US-06](E02-consultation/US-06-voir-etat-mise-a-jour.md) | Voir l'état de sa mise à jour | F-10 | MUST | Pas encore |
 | | [US-07](E02-consultation/US-07-consulter-ses-documents.md) | Consulter ses documents | F-11 | MUST | Pas encore |

@@ -1,7 +1,11 @@
 import { useNavigate } from 'react-router'
+import AccountMenu from './AccountMenu.jsx'
 
-/** En-tête unique de l'application (logo, titre court, retour optionnel). */
-export default function AppHeader({ title, backTo, actions }) {
+/**
+ * En-tête unique de l'application (logo, titre court, retour optionnel).
+ * `account` : écran connecté, affiche l'avatar et son menu (US-04).
+ */
+export default function AppHeader({ title, backTo, actions, account = false }) {
   const navigate = useNavigate()
 
   return (
@@ -20,6 +24,7 @@ export default function AppHeader({ title, backTo, actions }) {
         <span className="rounded-md bg-primary px-2 py-1 text-sm font-bold tracking-wide text-white">ACME SA</span>
         <h1 className="flex-1 truncate text-lg font-semibold">{title}</h1>
         {actions}
+        {account && <AccountMenu />}
       </div>
     </header>
   )

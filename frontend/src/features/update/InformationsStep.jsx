@@ -30,6 +30,7 @@ function InformationsForm({ fields }) {
 
   return (
     <Page
+      account
       title="Mise à jour"
       backTo="/profil"
       actions={
@@ -58,7 +59,7 @@ function InformationsForm({ fields }) {
 export default function InformationsStep() {
   const { data: fields, error, loading } = useLoader(getEditableFields)
 
-  if (loading) return <Page title="Mise à jour"><p role="status">Chargement…</p></Page>
-  if (error) return <Page title="Mise à jour" backTo="/profil"><Alert>{error.message}</Alert></Page>
+  if (loading) return <Page account title="Mise à jour"><p role="status">Chargement…</p></Page>
+  if (error) return <Page account title="Mise à jour" backTo="/profil"><Alert>{error.message}</Alert></Page>
   return <InformationsForm fields={fields} />
 }

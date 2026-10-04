@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E01 Identification |
 | **Priorité** | MUST |
 | **PRD** | F-07 |
@@ -45,6 +45,8 @@ Alors son brouillon est intact.
 | T-04.1 | CA-01, CA-02 | API | `tests/api/test_us04_logout.py` | session supprimée, cookie effacé, ancien cookie → 401 |
 | T-04.2 | CA-04 | API | `tests/api/test_us04_logout.py` | brouillon toujours présent après reconnexion |
 | T-04.3 | CA-01, CA-03 | Composant | `src/components/AppHeader.test.jsx` | menu avatar, redirection, données effacées du cache client |
+| T-04.4 | CA-01 | Composant | `src/features/auth/IdentifyPage.test.jsx` | « Vous êtes déconnecté. » affiché comme information |
+| T-04.5 | CA-01, CA-02, CA-03 | E2E | `e2e/us04-deconnexion.spec.js` | déconnexion par le menu, cookie supprimé, retour arrière et `/profil` sans données |
 
 ## Hors périmètre
 

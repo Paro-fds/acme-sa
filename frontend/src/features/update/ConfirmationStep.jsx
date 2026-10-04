@@ -11,11 +11,11 @@ export default function ConfirmationStep() {
   const navigate = useNavigate()
   const { data: update, error, loading } = useLoader(getMyUpdate)
 
-  if (loading) return <Page title="Confirmation"><p role="status">Chargement…</p></Page>
-  if (error) return <Page title="Confirmation"><Alert>{error.message}</Alert></Page>
+  if (loading) return <Page account title="Confirmation"><p role="status">Chargement…</p></Page>
+  if (error) return <Page account title="Confirmation"><Alert>{error.message}</Alert></Page>
 
   return (
-    <Page title="Confirmation" actions={<Button onClick={() => navigate('/profil')}>Retour à mon profil</Button>}>
+    <Page account title="Confirmation" actions={<Button onClick={() => navigate('/profil')}>Retour à mon profil</Button>}>
       <p className="text-sm font-semibold text-muted">Étape 4 sur 4 : Confirmation</p>
       <Alert tone="success">Votre mise à jour a bien été transmise le {formatDateTime(update.submitted_at)}.</Alert>
       <p>Ces modifications seront transmises à l'administration ACME pour mise à jour de votre dossier.</p>

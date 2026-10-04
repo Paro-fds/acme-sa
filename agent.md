@@ -15,15 +15,15 @@ Langue du projet et de l'interface : **français**.
 |---|---|
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
-| 2 — Identification complète | **En cours** |
-| 3 — Consultation et mise à jour | Pas encore |
+| 2 — Identification complète | **Fait** (US-01 à US-04) |
+| 3 — Consultation et mise à jour | **En cours** (versions minimales de US-05, 08, 09, 12 issues du Skeleton) |
 | 4 — Documents | Pas encore |
 | 5 — Administration | Pas encore |
 | 6 — Finalisation | Pas encore |
 
 ### Stories
 
-**Fait :** US-01, US-02, US-03.
+**Fait :** US-01, US-02, US-03, US-04.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
@@ -36,11 +36,13 @@ Langue du projet et de l'interface : **français**.
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
-**Pas encore :** US-04, US-06, US-07, US-10, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-06, US-07, US-10, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-04 — Se déconnecter** (dernière story de la phase 2).
+**US-05 — Consulter son profil** (première story de la phase 3, maquette `mon_profil_collaborateur`).
+
+À savoir : le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
 
 ## 1. Méthode : Spec-Driven Development
 
