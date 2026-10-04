@@ -5,7 +5,7 @@
 | **Version** | 1.1 — validé le 2026-10-04 ; suivi d'avancement ajouté (statuts des phases, epics et stories) |
 | **Date** | 2026-10-04 |
 | **Entrées** | `01-prd.md` v1.0, `02-solution-design.md` v1.0, `epics/` (22 user stories) |
-| **Avancement mis à jour le** | 2026-10-04 (après US-09) |
+| **Avancement mis à jour le** | 2026-10-04 (après US-10) |
 
 ---
 
@@ -75,7 +75,7 @@ infrastructure ──> application ──> domain
 | **0** | Mise en place | — | Application vide qui démarre, tests qui tournent | **Fait** |
 | **1** | **Walking Skeleton** | versions minimales de US-01, 02, 05, 08, 09, 12, 15, 17 | Un employé modifie son téléphone, l'admin le voit « effectué » | **Fait** |
 | **2** | Identification complète | US-01, 02, 03, 04 | Connexion sécurisée : homonymes, doublon, blocage, déconnexion | **Fait** |
-| **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents | **En cours** (4/7) |
+| **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents | **En cours** (5/7) |
 | **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | Pas encore |
 | **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | Pas encore (US-15, 17 en version minimale) |
 | **6** | Finalisation et préparation du test | — | Application prête pour le directeur | Pas encore |
@@ -106,13 +106,13 @@ La phase 5 ne dépend que du Skeleton et de la phase 2 (connexion) ; elle peut �
 |---|---|---|---|
 | E01 Identification | US-01 → US-04 | 1, 2 | **Fait** |
 | E02 Consultation | US-05, 06, 07 | 3 (US-05, 06), 4 (US-07) | **En cours** (2/3) |
-| E03 Mise à jour | US-08 → US-12 | 1, 3 | **En cours** (2/5) |
+| E03 Mise à jour | US-08 → US-12 | 1, 3 | **En cours** (3/5) |
 | E04 Documents | US-13, 14 | 4 | Pas encore |
 | E05 Administration | US-15 → US-22 | 1, 5 | **En cours** (US-15, 17 en version minimale) |
 
 Un epic et une phase ne coïncident pas toujours : E02 est réparti sur les phases 3 et 4, car la consultation des documents (US-07) a besoin de l'ajout de documents (US-13).
 
-**Stories :** 8 / 22 « Fait » (US-01 → US-06, US-08, US-09) ; 3 « En cours » (US-12, 15, 17 en version minimale) ; 11 « Pas encore ».
+**Stories :** 9 / 22 « Fait » (US-01 → US-06, US-08 → US-10) ; 3 « En cours » (US-12, 15, 17 en version minimale) ; 10 « Pas encore ».
 
 ---
 
@@ -190,7 +190,7 @@ Les écrans du Skeleton utilisent déjà le design system, sans viser la fidéli
 
 ## 6. Phase 3 — Consultation et mise à jour complètes
 
-**Statut : En cours** (4 / 7 stories faites).
+**Statut : En cours** (5 / 7 stories faites).
 
 | Ordre | Story | Points d'attention | Statut |
 |---|---|---|---|
@@ -198,7 +198,7 @@ Les écrans du Skeleton utilisent déjà le design system, sans viser la fidéli
 | 3.2 | US-06 État de la mise à jour | calcul de l'état employé (`NOT_DONE` / `IN_PROGRESS` / `DONE`) | Fait |
 | 3.3 | US-08 Oui/Non | « Non », changer d'avis, 409 après soumission | Fait |
 | 3.4 | US-09 Modifier ses informations | registre des 5 champs, validations, badge « Modifié », ancienne valeur, `GET /fields` | Fait |
-| 3.5 | US-10 Brouillon | sauvegarde automatique (2 s), bouton manuel, reprise, erreur réseau | Pas encore |
+| 3.5 | US-10 Brouillon | sauvegarde automatique (2 s), bouton manuel, reprise, erreur réseau | Fait |
 | 3.6 | US-11 Vérifier | composant `ValueComparison`, cas « aucune modification » | Pas encore |
 | 3.7 | US-12 Soumettre | verrouillage de toutes les écritures après soumission, double clic, CSV inchangé | En cours (version minimale) |
 
@@ -275,7 +275,8 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 | US-08 | E03 | ✓ | 3 | Fait |
 | US-09 | E03 | ✓ | 3 | Fait |
 | US-12 | E03 | ✓ | 3 | En cours |
-| US-10, US-11 | E03 | | 3 | Pas encore |
+| US-10 | E03 | | 3 | Fait |
+| US-11 | E03 | | 3 | Pas encore |
 | US-13, US-14 | E04 | | 4 | Pas encore |
 | US-15, US-17 | E05 | ✓ | 5 | En cours |
 | US-16, US-18 → US-22 | E05 | | 5 | Pas encore |

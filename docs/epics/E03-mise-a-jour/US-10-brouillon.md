@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E03 Mise à jour |
 | **Priorité** | MUST |
 | **PRD** | F-14 |
@@ -63,6 +63,12 @@ Alors `updated_at` est mis à jour (utilisé par la carte « Dernière sauvegard
 | T-10.1 | CA-01, CA-03, CA-06 | API | `tests/api/test_us10_draft.py` | enregistrement partiel, relecture, `updated_at` |
 | T-10.2 | CA-01, CA-04, CA-05 | Composant | `src/features/update/useAutosave.test.jsx` | délai 2 s (horloge simulée), seuls les champs valides envoyés, statut, erreur réseau |
 | T-10.3 | CA-02, CA-03 | E2E | `e2e/us10-brouillon.spec.js` | modifier → enregistrer → déconnexion → reconnexion → reprise |
+| T-10.4 | CA-01 → CA-05 | Composant | `src/features/update/InformationsStep.test.jsx` | heure affichée, bouton « Enregistrer comme brouillon », reprise, échec réseau |
+
+## Notes de réalisation
+
+- Logique dans `src/features/update/useAutosave.js` : n'envoie que les champs valides qui diffèrent de ce que le serveur a déjà enregistré ; `flush()` pour le changement d'étape et le bouton manuel.
+- « Enregistrer comme brouillon » avec un champ invalide : les champs valides sont enregistrés et l'employé reste sur l'écran, l'erreur affichée, pour ne pas perdre silencieusement sa saisie.
 
 ## Hors périmètre
 

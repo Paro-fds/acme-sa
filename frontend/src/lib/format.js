@@ -15,6 +15,12 @@ export function formatDateTime(isoDateTime) {
   return `${dateFormatter.format(value)} à ${timeFormatter.format(value)}`
 }
 
+/** Horodatage ISO → "14:32" (heure locale du téléphone). */
+export function formatTime(isoDateTime) {
+  if (!isoDateTime) return ''
+  return timeFormatter.format(new Date(isoDateTime))
+}
+
 export function displayValue(value) {
   return value ? value : 'Non renseigné'
 }

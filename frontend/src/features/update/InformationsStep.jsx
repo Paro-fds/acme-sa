@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router'
-import { getEditableFields, getProfile, saveChanges } from '../../api/employee.js'
+import { getEditableFields, getMyUpdate, getProfile, saveChanges } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import Stepper from '../../components/Stepper.jsx'
+import { formatTime } from '../../lib/format.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 import FieldCard from './FieldCard.jsx'
 import FormSection from './FormSection.jsx'
 import { isModified, validate } from './fieldRules.js'
+import { useAutosave } from './useAutosave.js'
 
 // Étape suivante : les documents (étape 2) arrivent avec US-13 ; d'ici là, la vérification.
 const NEXT_STEP = { path: '/mise-a-jour/verification', label: 'Continuer vers la vérification' }
@@ -18,7 +20,7 @@ const SECTIONS = [
   { code: 'CONTACT', title: 'Coordonnées', icon: 'contacts' },
 ]
 
-const loadStep = () => Promise.all([getEditableFields(), getProfile()])
+const loadStep = () => Promise.all([getEditableFields(), getProfile(), getMyUpdate()])
 
 function ReadOnlySection({ profile }) {
   return (
@@ -49,13 +51,42 @@ function ReadOnlySection({ profile }) {
   )
 }
 
-function InformationsForm({ fields, profile }) {
+function SaveStatus({ savedAt, error }) {
+  if (error) return <Alert>{error}</Alert>
+  if (!savedAt) return null
+  return (
+    <p role="status" className="flex items-center gap-2 rounded-lg bg-section px-3 py-2 text-sm text-help">
+      <span className="material-symbols-outlined text-[18px] text-info-text" aria-hidden="true">check_circle</span>
+      <span>
+        Brouillon enregistré automatiquement à <strong className="text-heading">{formatTime(savedAt)}</strong>
+      </span>
+    </p>
+  )
+}
+
+function InformationsForm({ fields, profile, update }) {
   const navigate = useNavigate()
   const redirectIfUnauthorized = useUnauthorizedRedirect()
   const [values, setValues] = useState(() => Object.fromEntries(fields.map((field) => [field.code, field.value])))
   const [touched, setTouched] = useState({})
   const [serverError, setServerError] = useState(null)
   const [sending, setSending] = useState(false)
+
+  function handleApiError(apiError) {
+    if (apiError.code === 'UPDATE_NOT_STARTED' || apiError.code === 'UPDATE_ALREADY_SUBMITTED') {
+      navigate('/profil', { replace: true })
+      return
+    }
+    if (!redirectIfUnauthorized(apiError)) setServerError(apiError)
+  }
+
+  const autosave = useAutosave({
+    fields,
+    values,
+    save: saveChanges,
+    onError: handleApiError,
+    initialSavedAt: update.updated_at,
+  })
 
   // Seules les valeurs saisies par l'employé sont validées et envoyées : une valeur d'origine
   // non conforme (format du CSV) ne bloque pas l'employé s'il n'y touche pas.
@@ -67,7 +98,8 @@ function InformationsForm({ fields, profile }) {
 
   function fieldError(code) {
     if (serverError?.field === code) return serverError.message
-    return touched[code] ? errors[code] : null
+    // Erreur affichée à la sortie du champ, ou dès que la sauvegarde automatique l'a écarté (CA-04).
+    return touched[code] || autosave.invalidCodes.includes(code) ? errors[code] : null
   }
 
   function change(code, value) {
@@ -75,24 +107,24 @@ function InformationsForm({ fields, profile }) {
     if (serverError?.field === code) setServerError(null)
   }
 
-  async function handleContinue() {
-    if (hasErrors || sending) return
+  /** Enregistre puis va à `path` ; reste sur l'écran si l'enregistrement échoue. */
+  async function saveAndGo(path) {
+    if (sending) return
     setSending(true)
     setServerError(null)
-    try {
-      // Un champ déjà modifié dans le brouillon est renvoyé même s'il est revenu à sa valeur
-      // d'origine : le serveur supprime alors le changement (CA-04).
-      const toSend = fields.filter((field) => modified(field) || field.modified)
-      await saveChanges(Object.fromEntries(toSend.map((field) => [field.code, values[field.code]])))
-      navigate(NEXT_STEP.path)
-    } catch (apiError) {
-      setSending(false)
-      if (apiError.code === 'UPDATE_NOT_STARTED' || apiError.code === 'UPDATE_ALREADY_SUBMITTED') {
-        navigate('/profil', { replace: true })
-        return
-      }
-      if (!redirectIfUnauthorized(apiError)) setServerError(apiError)
+    const saved = await autosave.flush()
+    setSending(false)
+    if (saved) navigate(path)
+  }
+
+  function handleSaveDraft() {
+    if (hasErrors) {
+      // Les champs valides sont enregistrés ; l'employé reste pour corriger les autres.
+      setTouched(Object.fromEntries(fields.map((field) => [field.code, true])))
+      autosave.flush()
+      return
     }
+    saveAndGo('/profil')
   }
 
   return (
@@ -101,13 +133,20 @@ function InformationsForm({ fields, profile }) {
       title="Mise à jour"
       backTo="/profil"
       actions={
-        <Button onClick={handleContinue} disabled={hasErrors || sending}>
-          {NEXT_STEP.label}
-          <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-        </Button>
+        <>
+          <Button onClick={() => saveAndGo(NEXT_STEP.path)} disabled={hasErrors || sending}>
+            {NEXT_STEP.label}
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </Button>
+          <Button variant="ghost" onClick={handleSaveDraft} disabled={sending}>
+            <span className="material-symbols-outlined" aria-hidden="true">bookmark</span>
+            Enregistrer comme brouillon
+          </Button>
+        </>
       }
     >
       <Stepper current="Informations" />
+      <SaveStatus savedAt={autosave.savedAt} error={autosave.error} />
 
       {SECTIONS.map((section) => {
         const sectionFields = fields.filter((field) => field.section === section.code)
@@ -135,7 +174,7 @@ function InformationsForm({ fields, profile }) {
   )
 }
 
-/** US-09 : étape 1 « Informations » du parcours de mise à jour. */
+/** US-09 / US-10 : étape 1 « Informations » du parcours de mise à jour, avec sauvegarde du brouillon. */
 export default function InformationsStep() {
   const { data, error, loading } = useLoader(loadStep)
 
@@ -144,6 +183,6 @@ export default function InformationsStep() {
   if (error?.status === 409) return <Navigate to="/profil" replace />
   if (error) return <Page account title="Mise à jour" backTo="/profil"><Alert>{error.message}</Alert></Page>
 
-  const [fields, profile] = data
-  return <InformationsForm fields={fields} profile={profile} />
+  const [fields, profile, update] = data
+  return <InformationsForm fields={fields} profile={profile} update={update} />
 }

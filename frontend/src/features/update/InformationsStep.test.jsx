@@ -3,10 +3,15 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import InformationsStep from './InformationsStep.jsx'
-import { getEditableFields, getProfile, saveChanges } from '../../api/employee.js'
+import { getEditableFields, getMyUpdate, getProfile, saveChanges } from '../../api/employee.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/employee.js', () => ({ getEditableFields: vi.fn(), getProfile: vi.fn(), saveChanges: vi.fn() }))
+vi.mock('../../api/employee.js', () => ({
+  getEditableFields: vi.fn(),
+  getProfile: vi.fn(),
+  getMyUpdate: vi.fn(),
+  saveChanges: vi.fn(),
+}))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 
 const field = (code, label, section, required, value, original = value) => ({
@@ -33,6 +38,7 @@ function renderStep() {
   render(
     <MemoryRouter initialEntries={['/mise-a-jour/informations']}>
       <Routes>
+        <Route path="/" element={<p>Écran identification</p>} />
         <Route path="/profil" element={<p>Écran profil</p>} />
         <Route path="/mise-a-jour/informations" element={<InformationsStep />} />
         <Route path="/mise-a-jour/verification" element={<p>Étape suivante</p>} />
@@ -61,7 +67,8 @@ async function retype(user, label, value) {
 describe('InformationsStep (US-09)', () => {
   beforeEach(() => {
     getProfile.mockResolvedValue(PROFILE)
-    saveChanges.mockResolvedValue({ state: 'IN_PROGRESS', changes: [] })
+    getMyUpdate.mockResolvedValue({ state: 'IN_PROGRESS', updated_at: null, changes: [] })
+    saveChanges.mockResolvedValue({ state: 'IN_PROGRESS', updated_at: '2026-10-04T14:32:00', changes: [] })
   })
 
   it('CA-01 : les champs sont pré-remplis et le stepper indique l’étape 1 sur 4', async () => {
@@ -228,7 +235,8 @@ describe('InformationsStep (US-09)', () => {
     expect(continueButton()).toBeEnabled()
     await user.click(continueButton())
 
-    expect(saveChanges).toHaveBeenCalledWith({})
+    expect(saveChanges).not.toHaveBeenCalled()
+    expect(await screen.findByText('Étape suivante')).toBeInTheDocument()
   })
 
   it('CA-05 : une erreur du serveur est affichée sous le champ concerné', async () => {
@@ -237,6 +245,7 @@ describe('InformationsStep (US-09)', () => {
     )
     await renderForm()
     const user = userEvent.setup()
+    await retype(user, 'Email', 'jean.joseph@exemple.test')
 
     await user.click(continueButton())
 
@@ -251,5 +260,82 @@ describe('InformationsStep (US-09)', () => {
     renderStep()
 
     expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+  })
+})
+
+describe('InformationsStep — brouillon (US-10)', () => {
+  const draftButton = () => screen.getByRole('button', { name: 'Enregistrer comme brouillon' })
+
+  beforeEach(() => {
+    getProfile.mockResolvedValue(PROFILE)
+    getMyUpdate.mockResolvedValue({ state: 'IN_PROGRESS', updated_at: '2026-10-04T14:10:00', changes: [] })
+    saveChanges.mockResolvedValue({ state: 'IN_PROGRESS', updated_at: '2026-10-04T14:32:00', changes: [] })
+  })
+
+  it('CA-01 : l’heure de la dernière sauvegarde est affichée en permanence', async () => {
+    await renderForm()
+
+    expect(screen.getByRole('status')).toHaveTextContent('Brouillon enregistré automatiquement à 14:10')
+  })
+
+  it('CA-02 : « Enregistrer comme brouillon » enregistre puis revient au profil', async () => {
+    await renderForm()
+    const user = userEvent.setup()
+    await retype(user, 'Téléphone', '+509 3722 2222')
+
+    await user.click(draftButton())
+
+    expect(saveChanges).toHaveBeenCalledWith({ telephone_number: '+509 3722 2222' })
+    expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+  })
+
+  it('CA-02 : avec un champ invalide, les champs valides sont enregistrés et l’employé reste pour corriger', async () => {
+    await renderForm()
+    const user = userEvent.setup()
+    await user.clear(input('Téléphone'))
+    await user.type(input('Téléphone'), '12ab')
+    await retype(user, 'Adresse', '5 rue Pavée, Jacmel')
+
+    await user.click(draftButton())
+
+    expect(saveChanges).toHaveBeenCalledWith({ address_line_1: '5 rue Pavée, Jacmel' })
+    expect(within(card('Téléphone')).getByText('Saisissez un numéro valide, par exemple +509 3722 1111.')).toBeInTheDocument()
+    expect(screen.queryByText('Écran profil')).not.toBeInTheDocument()
+  })
+
+  it('CA-03 : la reprise ouvre l’étape 1 avec les valeurs du brouillon', async () => {
+    await renderForm([
+      ...FIELDS.filter((f) => !['telephone_number', 'address_line_1'].includes(f.code)),
+      field('telephone_number', 'Téléphone', 'CONTACT', true, '+509 3722 2222', '+50937221111'),
+      field('address_line_1', 'Adresse', 'CONTACT', false, '5 rue Pavée, Jacmel', '12 rue Capois, Port-au-Prince'),
+    ])
+
+    expect(input('Téléphone')).toHaveValue('+509 3722 2222')
+    expect(input('Adresse')).toHaveValue('5 rue Pavée, Jacmel')
+    expect(within(section('Coordonnées')).getByText('2 modifications en cours')).toBeInTheDocument()
+  })
+
+  it('CA-05 : un échec réseau affiche le message et la saisie reste à l’écran', async () => {
+    saveChanges.mockRejectedValue(new ApiError(0, 'NETWORK_ERROR', 'Le serveur est injoignable. Vérifiez votre connexion.'))
+    await renderForm()
+    const user = userEvent.setup()
+    await retype(user, 'Téléphone', '+509 3722 2222')
+
+    await user.click(continueButton())
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Enregistrement impossible. Vérifiez votre connexion.')
+    expect(input('Téléphone')).toHaveValue('+509 3722 2222')
+    expect(screen.queryByText('Étape suivante')).not.toBeInTheDocument()
+  })
+
+  it('la session expirée pendant une sauvegarde renvoie à l’identification', async () => {
+    saveChanges.mockRejectedValue(new ApiError(401, 'SESSION_EXPIRED', 'Votre session a expiré. Reconnectez-vous.'))
+    await renderForm()
+    const user = userEvent.setup()
+    await retype(user, 'Téléphone', '+509 3722 2222')
+
+    await user.click(continueButton())
+
+    expect(await screen.findByText('Écran identification')).toBeInTheDocument()
   })
 })
