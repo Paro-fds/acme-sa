@@ -1,4 +1,4 @@
-from app.shared.domain.errors import Conflict, Forbidden, InvalidInput, Unauthorized
+from app.shared.domain.errors import Conflict, DomainError, Forbidden, InvalidInput, Unauthorized
 
 
 class IdentityNotRecognized(Unauthorized):
@@ -34,6 +34,22 @@ class PasswordMismatch(InvalidInput):
 class InvalidCredentials(Unauthorized):
     code = "INVALID_CREDENTIALS"
     message = "Mot de passe incorrect."
+
+
+def invalid_credentials(remaining_attempts: int, show_remaining: bool) -> InvalidCredentials:
+    if not show_remaining:
+        return InvalidCredentials(field="password")
+    plural = "s" if remaining_attempts > 1 else ""
+    return InvalidCredentials(
+        f"Mot de passe incorrect. Il vous reste {remaining_attempts} tentative{plural}.",
+        field="password",
+    )
+
+
+class AccountLocked(DomainError):
+    code = "ACCOUNT_LOCKED"
+    message = "Trop de tentatives. Réessayez dans 15 minutes."
+    http_status = 423
 
 
 class InvalidAdminCredentials(Unauthorized):

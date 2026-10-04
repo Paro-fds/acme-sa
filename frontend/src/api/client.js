@@ -7,11 +7,12 @@
  */
 
 export class ApiError extends Error {
-  constructor(status, code, message) {
+  constructor(status, code, message, field = null) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.field = field
   }
 }
 
@@ -36,7 +37,12 @@ export async function request(path, { method = 'GET', body, headers } = {}) {
 
   if (!response.ok) {
     const error = data?.error ?? {}
-    throw new ApiError(response.status, error.code ?? 'UNKNOWN_ERROR', error.message ?? 'Une erreur est survenue.')
+    throw new ApiError(
+      response.status,
+      error.code ?? 'UNKNOWN_ERROR',
+      error.message ?? 'Une erreur est survenue.',
+      error.field ?? null,
+    )
   }
   return data
 }

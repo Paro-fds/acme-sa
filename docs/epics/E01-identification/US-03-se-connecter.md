@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E01 Identification |
 | **Priorité** | MUST |
 | **PRD** | F-03, F-06, F-08 |

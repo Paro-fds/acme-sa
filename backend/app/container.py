@@ -54,7 +54,9 @@ class Container:
         return RegisterPassword(self.employees, self.updates, self.accounts, self.password_hasher, self.session_service())
 
     def login_employee(self) -> LoginEmployee:
-        return LoginEmployee(self.employees, self.updates, self.accounts, self.password_hasher, self.session_service())
+        return LoginEmployee(
+            self.employees, self.updates, self.accounts, self.password_hasher, self.session_service(), self.clock
+        )
 
     def login_admin(self) -> LoginAdmin:
         return LoginAdmin(

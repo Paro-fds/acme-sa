@@ -15,7 +15,7 @@ test('parcours complet employé → admin', async ({ page }) => {
   // Création du mot de passe (US-02)
   await expect(page.getByRole('heading', { name: 'Créez votre mot de passe' })).toBeVisible()
   await page.getByLabel('Mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByLabel('Confirmer le mot de passe').fill('Bonjour-2026')
+  await page.getByLabel('Confirmer le mot de passe', { exact: true }).fill('Bonjour-2026')
   await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
 
   // Profil et choix « Oui » (US-05, US-08)

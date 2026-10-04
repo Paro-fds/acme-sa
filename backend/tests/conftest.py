@@ -18,6 +18,7 @@ from app.config import Settings
 from app.main import create_app
 from app.update.domain.update import EmployeeUpdate
 from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, TestEmployee
+from tests.fake_clock import FakeClock
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 TEST_CSV = FIXTURES_DIR / "employees_test.csv"
@@ -50,6 +51,14 @@ def app(settings: Settings) -> Iterator[FastAPI]:
 @pytest.fixture
 def container(app: FastAPI):
     return app.state.container
+
+
+@pytest.fixture
+def clock(container) -> FakeClock:
+    """Remplace l'horloge de l'application par une horloge que le test fait avancer."""
+    fake = FakeClock()
+    container.clock = fake
+    return fake
 
 
 @pytest.fixture

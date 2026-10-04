@@ -4,7 +4,10 @@ import { login, register } from '../../api/auth.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
-import TextField from '../../components/TextField.jsx'
+import PasswordField from '../../components/PasswordField.jsx'
+
+const FORGOTTEN_PASSWORD_HELP =
+  "Contactez l'administration : elle réinitialisera votre accès et vous pourrez créer un nouveau mot de passe."
 
 /** US-02 (création) et US-03 (saisie) du mot de passe, après l'identification. */
 export default function PasswordPage() {
@@ -14,6 +17,7 @@ export default function PasswordPage() {
   const [confirmation, setConfirmation] = useState('')
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
+  const [showForgottenHelp, setShowForgottenHelp] = useState(false)
 
   if (!state?.identity) return <Navigate to="/" replace />
   const creating = state.mode === 'create'
@@ -29,8 +33,14 @@ export default function PasswordPage() {
       else await login(state.identity, password)
       navigate('/profil', { replace: true })
     } catch (apiError) {
-      setError(apiError)
       setSending(false)
+      if (apiError.code === 'PASSWORD_NOT_SET') {
+        // Accès réinitialisé entre-temps : l'employé doit créer un nouveau mot de passe.
+        setPassword('')
+        navigate('.', { replace: true, state: { ...state, mode: 'create' } })
+        return
+      }
+      setError(apiError)
     }
   }
 
@@ -51,19 +61,17 @@ export default function PasswordPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
-        <TextField
+        <PasswordField
           label="Mot de passe"
-          type="password"
           autoComplete={creating ? 'new-password' : 'current-password'}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          help={creating ? '8 caractères minimum.' : undefined}
+          help={creating ? 'Au moins 8 caractères.' : undefined}
           error={fieldError('password')}
         />
         {creating && (
-          <TextField
+          <PasswordField
             label="Confirmer le mot de passe"
-            type="password"
             autoComplete="new-password"
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
@@ -74,6 +82,19 @@ export default function PasswordPage() {
         <Button type="submit" disabled={!complete || sending}>
           {creating ? 'Créer mon mot de passe' : 'Se connecter'}
         </Button>
+        {!creating && (
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => setShowForgottenHelp(!showForgottenHelp)}
+              aria-expanded={showForgottenHelp}
+              className="min-h-11 self-center px-2 font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              Mot de passe oublié ?
+            </button>
+            {showForgottenHelp && <Alert tone="info">{FORGOTTEN_PASSWORD_HELP}</Alert>}
+          </div>
+        )}
       </form>
     </Page>
   )

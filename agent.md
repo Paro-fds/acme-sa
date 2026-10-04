@@ -23,13 +23,12 @@ Langue du projet et de l'interface : **français**.
 
 ### Stories
 
-**Fait :** US-01.
+**Fait :** US-01, US-02, US-03.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
 | Story | Déjà fait | Reste à faire |
 |---|---|---|
-| US-02 | CA-01, CA-06 | CA-02 à CA-05, CA-07 (afficher/masquer), test E2E dédié |
 | US-05 | CA-01, 02, 03, 06 (API) ; écran simple | CA-04, CA-05, sections et rendu fidèles à la maquette, tests composant |
 | US-08 | CA-01 (« Oui ») | « Non », changer d'avis, 409 après soumission, tests composant |
 | US-09 | Registre des 5 champs, CA-02, 05, 07, 09 (API) ; formulaire simple | Badges « Modifié », ancienne valeur, sections, CA-03, 04, 06, 08, tests composant |
@@ -37,11 +36,11 @@ Langue du projet et de l'interface : **français**.
 | US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
-**Pas encore :** US-03, US-04, US-06, US-07, US-10, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-04, US-06, US-07, US-10, US-11, US-13, US-14, US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-02 — Créer son mot de passe**, version complète (phase 2). Puis, dans l'ordre : US-03, US-04.
+**US-04 — Se déconnecter** (dernière story de la phase 2).
 
 ## 1. Méthode : Spec-Driven Development
 
