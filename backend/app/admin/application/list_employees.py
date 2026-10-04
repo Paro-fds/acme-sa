@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from math import ceil
 
+from app.admin.domain.search import matches_search
 from app.employee.domain.repository import EmployeeRepository
 from app.shared.domain.text import normalize
 from app.update.application.values import current_values, reference_values
@@ -42,19 +43,22 @@ def previous_name(reference: dict[str, str], current: dict[str, str]) -> str | N
 
 
 class ListEmployees:
-    """US-17 : liste des employés actifs avec leur statut, triée par nom puis prénom."""
+    """US-17 : liste des employés actifs avec leur statut, triée par nom puis prénom ; US-18 : recherche."""
 
     def __init__(self, employees: EmployeeRepository, updates: UpdateRepository) -> None:
         self._employees = employees
         self._updates = updates
 
-    def execute(self, page: int = 1, page_size: int = 20) -> EmployeePage:
+    def execute(self, page: int = 1, page_size: int = 20, search: str | None = None) -> EmployeePage:
         updates = {update.employee_id: update for update in self._updates.list_all()}
         items = []
         for employee in self._employees.list_all():
             update = updates.get(employee.id)
             values = current_values(employee, update)
             reference = reference_values(employee)
+            names = {(reference["last_name"], reference["first_name"]), (values["last_name"], values["first_name"])}
+            if not matches_search(search, names=names, employee_code=employee.employee_code):
+                continue
             items.append(
                 EmployeeListItem(
                     id=employee.id,

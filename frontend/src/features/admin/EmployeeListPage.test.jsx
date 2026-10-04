@@ -161,7 +161,7 @@ describe('EmployeeListPage (US-17)', () => {
 
     expect(await screen.findByText('Page 2 sur 3')).toBeInTheDocument()
     expect(within(await cards()).getByText('NOM2 Test')).toBeInTheDocument()
-    expect(listEmployees).toHaveBeenLastCalledWith({ page: 2 })
+    expect(listEmployees).toHaveBeenLastCalledWith({ page: 2, search: '' })
     expect(screen.getByLabelText('adresse')).toHaveTextContent('?page=2')
   })
 
@@ -170,7 +170,7 @@ describe('EmployeeListPage (US-17)', () => {
     renderAt('/admin/employes?page=3')
     await cards()
 
-    expect(listEmployees).toHaveBeenCalledWith({ page: 3 })
+    expect(listEmployees).toHaveBeenCalledWith({ page: 3, search: '' })
     expect(screen.getByRole('button', { name: 'Suivant' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Précédent' })).toBeEnabled()
   })
@@ -197,7 +197,7 @@ describe('EmployeeListPage (US-17)', () => {
     renderAt('/admin/employes?page=abc')
     await cards()
 
-    expect(listEmployees).toHaveBeenCalledWith({ page: 1 })
+    expect(listEmployees).toHaveBeenCalledWith({ page: 1, search: '' })
   })
 
   it('aucun employé → message', async () => {

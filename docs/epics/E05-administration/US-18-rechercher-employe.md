@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | MUST |
 | **PRD** | F-25 |
@@ -79,6 +79,14 @@ Alors la recherche « pierre » et ses résultats sont toujours affichés.
 | T-18.3 | CA-06 | API | `tests/api/test_us18_search.py` | nouveau nom soumis trouvé (fixture `submitted`) |
 | T-18.4 | CA-07, CA-08, CA-11 | Composant | `src/features/admin/EmployeeSearch.test.jsx` | délai 300 ms, état vide, effacer, synchronisation avec l'URL |
 | T-18.5 | CA-01, CA-10 | E2E | `e2e/us18-recherche-admin.spec.js` | recherche sur mobile, barre collante, ouverture d'un résultat |
+
+## Notes de réalisation
+
+- Règle de correspondance dans le domaine : `app/admin/domain/search.py` (`matches_search`), appliquée par `ListEmployees` **avant** la pagination. Les noms comparés sont ceux de la référence et, une fois soumis, les nouveaux (l'ancien nom reste donc trouvable) ; un nom en brouillon n'est pas cherchable. Terme vide (ou espaces) = tout le monde ; plus de 100 caractères → 422.
+- Écran : `features/admin/EmployeeSearch.jsx` (`<form role="search">`, champ `type="search"`, `enterKeyHint="search"`, collé sous l'en-tête). La recherche part 300 ms après la dernière frappe, ou tout de suite avec Entrée (qui ferme aussi le clavier). Le terme va dans l'adresse en **remplaçant** l'entrée d'historique : un seul retour arrière quitte la liste, et le retour depuis un dossier retrouve la recherche (CA-11). Une nouvelle recherche supprime `?page=` et conserve les autres paramètres (`?status=` de US-19).
+- Bouton « Effacer » dans le champ (vide et remet le focus) ; sans résultat : message + « Effacer la recherche », sans le compteur « 0 employé ».
+- À 390 px, le texte d'aide (placeholder) imposé ne tient pas en entier à 16 px et est coupé (« … matricu »).
+- E2E `e2e/us18-recherche-admin.spec.js` : barre pleine largeur et collante, recherche, aucun résultat, effacer, terme repris de l'adresse. L'ouverture d'un résultat et le retour (CA-11) sont couverts par le test composant ; leur vérification de bout en bout sera ajoutée avec l'écran du dossier (US-20).
 
 ## Hors périmètre
 

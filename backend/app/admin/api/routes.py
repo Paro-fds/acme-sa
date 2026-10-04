@@ -46,8 +46,9 @@ def list_employees(
     request: Request,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    search: str = Query("", max_length=100),
 ) -> EmployeePageOut:
-    result = container(request).list_employees().execute(page=page, page_size=page_size)
+    result = container(request).list_employees().execute(page=page, page_size=page_size, search=search)
     return EmployeePageOut(
         items=[EmployeeListItemOut(**item.__dict__) for item in result.items],
         total=result.total,

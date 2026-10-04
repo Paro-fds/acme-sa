@@ -18,7 +18,7 @@ Langue du projet et de l'interface : **français**.
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
 | 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
 | 4 — Documents | **Fait** (US-13, US-14, US-07) |
-| 5 — Administration | **En cours** (US-15, US-16, US-17 faites) |
+| 5 — Administration | **En cours** (US-15 → US-18 faites) |
 | 6 — Finalisation | Pas encore |
 
 ### Epics (`docs/epics/README.md`)
@@ -29,24 +29,25 @@ Langue du projet et de l'interface : **français**.
 | E02 Consultation | **Fait** (US-05, US-06, US-07) |
 | E03 Mise à jour | **Fait** (US-08 → US-12) |
 | E04 Documents | **Fait** (US-13, US-14) |
-| E05 Administration | **En cours** (US-15, US-16, US-17 faites) |
+| E05 Administration | **En cours** (US-15 → US-18 faites) |
 
 ### Stories
 
-**Fait :** US-01 → US-14 (toutes les stories employé), US-15, US-16, US-17.
+**Fait :** US-01 → US-14 (toutes les stories employé), US-15 → US-18.
 
 **En cours :** aucune.
 
-**Pas encore :** US-18, US-19, US-20, US-21, US-22.
+**Pas encore :** US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**US-18 — Rechercher un employé** (phase 5). Écrans admin sans maquette ni validation visuelle intermédiaire.
+**US-19 — Filtrer par statut** (phase 5) : puces « Tous / Effectuée / Non effectuée » avec compteurs, combinées à la recherche, `?status=` déjà utilisé par les cartes du tableau de bord. Écrans admin sans maquette ni validation visuelle intermédiaire.
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
 - Tableau de bord : `features/admin/DashboardPage.jsx` (`/admin`) ; ses cartes mènent à `/admin/employes?status=UPDATED|NOT_UPDATED` : **US-19 doit lire ce paramètre**. Calcul : `app/admin/domain/statistics.py`, `GetStatistics`.
 - Liste admin : `features/admin/EmployeeListPage.jsx` (page dans l'adresse `?page=`, autres paramètres conservés ; cartes `lg:hidden` + tableau `hidden lg:block`, tous deux dans le DOM : dans les tests, viser `getByRole('list'|'table', { name: 'Employés' })`). `Page wide` pour les écrans admin larges. API : `display_name`, `previous_name`, `page_count` (`ListEmployees`).
+- Recherche admin : `features/admin/EmployeeSearch.jsx` (300 ms, `?search=` en `replace`) ; règle `app/admin/domain/search.py`, appliquée dans `ListEmployees` avant la pagination. Le filtre US-19 doit s'appliquer au même endroit (avant pagination) et conserver `search`.
 - Admin : `LoginAdmin` (blocage stocké sous l'identifiant `admin` dans la table des comptes : à exclure si US-20/22 lisent cette table). Le test paramétré `test_us15_admin_auth.py` couvre automatiquement toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé) : une route qui prend un `{id}` reçoit `1001`.
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
 - Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
