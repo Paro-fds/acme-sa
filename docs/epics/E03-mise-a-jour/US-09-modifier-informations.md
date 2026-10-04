@@ -91,7 +91,7 @@ Alors il est redirigé vers son profil (API : `409 UPDATE_NOT_STARTED`).
 ## Notes de réalisation
 
 - Seules les valeurs saisies par l'employé sont validées et envoyées : une valeur d'origine non conforme (format du CSV) ne bloque pas l'employé s'il n'y touche pas. Un champ déjà modifié dans le brouillon et remis à sa valeur d'origine est renvoyé pour que le changement soit supprimé (CA-04).
-- Tant que l'étape 2 « Documents » n'existe pas (US-13), le bouton s'intitule « Continuer vers la vérification » et mène à l'étape 3. US-13 le remplacera par « Continuer vers les documents » (constante `NEXT_STEP` de `InformationsStep.jsx`).
+- Depuis US-13, le bouton s'intitule « Continuer vers les documents » et mène à l'étape 2.
 - `GET /api/me/update/fields` répond aussi `409 UPDATE_NOT_STARTED` sans « Oui » préalable (CA-09).
 
 ## Hors périmètre

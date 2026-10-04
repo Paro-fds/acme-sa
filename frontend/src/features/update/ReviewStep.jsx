@@ -134,7 +134,7 @@ export default function ReviewStep() {
     <Page
       account
       title="Mise à jour"
-      backTo="/mise-a-jour/informations"
+      backTo="/mise-a-jour/documents"
       actions={
         <>
           <SubmitButton onClick={submission.submit} disabled={!submission.confirmed || submission.sending} />

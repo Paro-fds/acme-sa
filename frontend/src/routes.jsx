@@ -4,6 +4,7 @@ import EmployeeListPage from './features/admin/EmployeeListPage.jsx'
 import AmbiguousIdentityPage from './features/auth/AmbiguousIdentityPage.jsx'
 import IdentifyPage from './features/auth/IdentifyPage.jsx'
 import PasswordPage from './features/auth/PasswordPage.jsx'
+import DocumentsStep from './features/documents/DocumentsStep.jsx'
 import ProfilePage from './features/profile/ProfilePage.jsx'
 import ConfirmationStep from './features/update/ConfirmationStep.jsx'
 import InformationsStep from './features/update/InformationsStep.jsx'
@@ -17,6 +18,7 @@ export default function AppRoutes() {
       <Route path="/connexion/homonyme" element={<AmbiguousIdentityPage />} />
       <Route path="/profil" element={<ProfilePage />} />
       <Route path="/mise-a-jour/informations" element={<InformationsStep />} />
+      <Route path="/mise-a-jour/documents" element={<DocumentsStep />} />
       <Route path="/mise-a-jour/verification" element={<ReviewStep />} />
       <Route path="/mise-a-jour/confirmation" element={<ConfirmationStep />} />
       <Route path="/admin/connexion" element={<AdminLoginPage />} />

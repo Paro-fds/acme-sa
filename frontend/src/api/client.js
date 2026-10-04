@@ -18,6 +18,16 @@ export class ApiError extends Error {
 
 const NETWORK_ERROR_MESSAGE = 'Le serveur est injoignable. Vérifiez votre connexion.'
 
+function toApiError(status, data) {
+  const error = data?.error ?? {}
+  return new ApiError(
+    status,
+    error.code ?? 'UNKNOWN_ERROR',
+    error.message ?? 'Une erreur est survenue.',
+    error.field ?? null,
+  )
+}
+
 export async function request(path, { method = 'GET', body, headers } = {}) {
   const isFormData = body instanceof FormData
   let response
@@ -35,14 +45,28 @@ export async function request(path, { method = 'GET', body, headers } = {}) {
   if (response.status === 204) return null
   const data = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    const error = data?.error ?? {}
-    throw new ApiError(
-      response.status,
-      error.code ?? 'UNKNOWN_ERROR',
-      error.message ?? 'Une erreur est survenue.',
-      error.field ?? null,
-    )
-  }
+  if (!response.ok) throw toApiError(response.status, data)
   return data
+}
+
+/**
+ * Envoi d'un formulaire multipart avec suivi de progression (`onProgress(0..1)`).
+ * XMLHttpRequest plutôt que fetch : seul moyen de connaître l'avancement d'un envoi.
+ */
+export function upload(path, formData, { onProgress } = {}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `/api${path}`)
+    xhr.withCredentials = true
+    xhr.responseType = 'json'
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(event.loaded / event.total)
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response)
+      else reject(toApiError(xhr.status, xhr.response))
+    }
+    xhr.onerror = () => reject(new ApiError(0, 'NETWORK_ERROR', NETWORK_ERROR_MESSAGE))
+    xhr.send(formData)
+  })
 }

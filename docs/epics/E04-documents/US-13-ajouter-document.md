@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E04 Documents |
 | **Priorité** | MUST |
 | **PRD** | F-19, F-21 |
@@ -86,6 +86,13 @@ Alors le fichier sur disque a un nom UUID, se trouve dans le dossier de l'employ
 | T-13.5 | CA-02 | Composant | `src/features/documents/resizeImage.test.js` | redimensionnement > 1600 px |
 | T-13.6 | CA-04 → CA-09 | Composant | `src/features/documents/DocumentsStep.test.jsx` | contrôles avant envoi, messages, limite, « Passer cette étape », réessai |
 | T-13.7 | CA-01 | E2E | `e2e/us13-ajout-document.spec.js` | ajout d'un PDF sur mobile |
+
+## Notes de réalisation
+
+- API : `POST /api/me/documents` et `GET /api/me/documents` (liste, nécessaire à l'étape 2 et à la vérification). Le service du fichier (`GET /api/me/documents/{id}/file`) relève d'**US-07**.
+- Miniature (CA-02) : construite dans le navigateur à partir de la photo qui vient d'être envoyée. Après rechargement, une icône « image » s'affiche ; US-07 pourra utiliser le fichier servi par l'API.
+- L'ajout est refusé sans mise à jour ouverte (`409 UPDATE_NOT_STARTED`) et après soumission (`409 UPDATE_ALREADY_SUBMITTED`, US-12 CA-04).
+- Le nom d'origine est nettoyé (sans chemin ni caractère de contrôle) et ne sert qu'à l'affichage ; le fichier est écrit sous `<uuid>.<ext>` (écriture atomique), puis la ligne en base ; si l'enregistrement en base échoue, le fichier est supprimé.
 
 ## Hors périmètre
 

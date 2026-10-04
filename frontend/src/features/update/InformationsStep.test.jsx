@@ -41,7 +41,7 @@ function renderStep() {
         <Route path="/" element={<p>Écran identification</p>} />
         <Route path="/profil" element={<p>Écran profil</p>} />
         <Route path="/mise-a-jour/informations" element={<InformationsStep />} />
-        <Route path="/mise-a-jour/verification" element={<p>Étape suivante</p>} />
+        <Route path="/mise-a-jour/documents" element={<p>Étape suivante</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -55,7 +55,7 @@ async function renderForm(fields = FIELDS) {
 
 const input = (label) => screen.getByLabelText(label, { exact: true })
 const card = (label) => input(label).closest('[data-field]')
-const continueButton = () => screen.getByRole('button', { name: 'Continuer vers la vérification' })
+const continueButton = () => screen.getByRole('button', { name: 'Continuer vers les documents' })
 const section = (name) => screen.getByRole('region', { name })
 
 async function retype(user, label, value) {

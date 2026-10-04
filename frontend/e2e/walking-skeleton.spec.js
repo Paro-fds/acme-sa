@@ -25,7 +25,10 @@ test('parcours complet employé → admin', async ({ page }) => {
 
   // Modification du téléphone (US-09)
   await page.getByLabel('Téléphone').fill('+509 3722 2222')
-  await page.getByRole('button', { name: 'Continuer' }).click()
+  await page.getByRole('button', { name: 'Continuer vers les documents' }).click()
+
+  // Documents facultatifs (US-13)
+  await page.getByRole('button', { name: 'Passer cette étape' }).click()
 
   // Vérification et soumission (US-11, US-12)
   await expect(page.getByText('+509 3722 2222')).toBeVisible()

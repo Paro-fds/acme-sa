@@ -5,6 +5,7 @@
 //   walking-skeleton → EMP-A (soumet)        us02 → EMP-H1           us03 → EMP-B
 //   us04 → EMP-E (ne soumet jamais)          us10 → EMP-H2 (brouillon)
 //   us12 → EMP-B (soumet ; mot de passe créé ou déjà créé par us03)
+//   us13 → EMP-E (documents, ne soumet pas)
 import { execFileSync, spawn } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'

@@ -12,8 +12,7 @@ import FormSection from './FormSection.jsx'
 import { isModified, validate } from './fieldRules.js'
 import { useAutosave } from './useAutosave.js'
 
-// Étape suivante : les documents (étape 2) arrivent avec US-13 ; d'ici là, la vérification.
-const NEXT_STEP = { path: '/mise-a-jour/verification', label: 'Continuer vers la vérification' }
+const NEXT_STEP = { path: '/mise-a-jour/documents', label: 'Continuer vers les documents' }
 
 const SECTIONS = [
   { code: 'IDENTITY', title: 'Identité', icon: 'person' },

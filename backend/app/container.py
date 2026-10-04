@@ -14,6 +14,9 @@ from app.auth.domain.model import SubjectType
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
 from app.auth.infrastructure.sql_repositories import SqlAccountRepository, SqlSessionRepository
 from app.config import Settings
+from app.document.application.use_cases import ListMyDocuments, UploadDocument
+from app.document.infrastructure.local_file_storage import LocalFileStorage
+from app.document.infrastructure.sql_document_repository import SqlDocumentRepository
 from app.employee.application.get_profile import GetEmployeeProfile
 from app.employee.infrastructure.csv_employee_repository import CsvEmployeeRepository
 from app.shared.infrastructure.clock import SystemClock
@@ -36,6 +39,8 @@ class Container:
         self.accounts = SqlAccountRepository(self.database)
         self.sessions = SqlSessionRepository(self.database)
         self.updates = SqlUpdateRepository(self.database)
+        self.documents = SqlDocumentRepository(self.database)
+        self.file_storage = LocalFileStorage(settings.documents_dir)
         self.password_hasher = Argon2PasswordHasher()
 
     # --- auth ---------------------------------------------------------------
@@ -93,3 +98,18 @@ class Container:
 
     def close(self) -> None:
         self.database.dispose()
+
+    # --- document -------------------------------------------------------------
+
+    def upload_document(self) -> UploadDocument:
+        return UploadDocument(
+            self.updates,
+            self.documents,
+            self.file_storage,
+            self.clock,
+            max_bytes=self.settings.max_upload_mb * 1024 * 1024,
+            max_documents=self.settings.max_documents_per_employee,
+        )
+
+    def list_my_documents(self) -> ListMyDocuments:
+        return ListMyDocuments(self.documents)

@@ -21,8 +21,7 @@ async function signIn(page) {
 }
 
 /**
- * US-12 T-12.6 : identification → Oui → 2 modifications → vérification → soumission → profil « Effectuée ».
- * L'étape « document » sera ajoutée avec US-13 (API des documents).
+ * US-12 T-12.6 : identification → Oui → 2 modifications → document → vérification → soumission → profil « Effectuée ».
  */
 test('parcours complet : modification, vérification, soumission puis verrouillage', async ({ page }) => {
   await signIn(page)
@@ -30,11 +29,21 @@ test('parcours complet : modification, vérification, soumission puis verrouilla
 
   await page.getByLabel('Téléphone').fill('+509 3722 8888')
   await page.getByLabel('Adresse').fill('8 rue Lamarre, Cap-Haïtien')
+  await page.getByRole('button', { name: 'Continuer vers les documents' }).click()
+
+  // Étape 2 : ajout d'un diplôme (US-13)
+  await page.locator('label', { hasText: 'Diplôme' }).click()
+  await page.getByLabel('Choisir un fichier du téléphone').setInputFiles({
+    name: 'licence.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.concat([Buffer.from('%PDF-1.7 '), Buffer.alloc(2048, 'x')]),
+  })
+  await expect(page.getByRole('region', { name: 'Documents ajoutés' })).toContainText('licence.pdf')
   await page.getByRole('button', { name: 'Continuer vers la vérification' }).click()
 
   await expect(page.getByText('2 modifications en attente')).toBeVisible()
   await expect(page.getByText('8 rue Lamarre, Cap-Haïtien')).toBeVisible()
-  await expect(page.getByText('Aucun document joint (optionnel)')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Justificatifs joints' })).toContainText('licence.pdf')
 
   const submit = page.getByRole('button', { name: 'Soumettre ma mise à jour' })
   await expect(submit).toBeDisabled()
@@ -51,7 +60,7 @@ test('parcours complet : modification, vérification, soumission puis verrouilla
   await expect(page.getByRole('button', { name: 'Oui, mettre à jour mon dossier' })).toHaveCount(0)
 
   // CA-04 : les écrans de modification renvoient au profil
-  for (const path of ['/mise-a-jour/informations', '/mise-a-jour/verification']) {
+  for (const path of ['/mise-a-jour/informations', '/mise-a-jour/documents', '/mise-a-jour/verification']) {
     await page.goto(path)
     await expect(page).toHaveURL(/\/profil$/)
   }

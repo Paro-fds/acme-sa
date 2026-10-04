@@ -8,6 +8,7 @@ from app.admin.api import routes as admin_routes
 from app.auth.api import routes as auth_routes
 from app.config import Settings
 from app.container import Container
+from app.document.api import routes as document_routes
 from app.employee.api import routes as employee_routes
 from app.shared.api import health
 from app.shared.api.errors import register_error_handlers
@@ -25,6 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_routes.router)
     app.include_router(employee_routes.router)
     app.include_router(update_routes.router)
+    app.include_router(document_routes.router)
     app.include_router(admin_routes.router)
 
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], include_in_schema=False)

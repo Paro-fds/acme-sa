@@ -62,7 +62,7 @@ Alors l'ancienne valeur est affichée « Non renseigné ».
 
 ## Notes de réalisation
 
-- CA-02 : l'affichage des documents est testé au niveau composant. Les données viennent de `listMyDocuments()` (`frontend/src/api/documents.js`), qui renvoie une liste vide tant que l'API des documents n'existe pas ; **US-13** la branchera sur `GET /api/me/documents` et ajoutera le test bout en bout avec un vrai document.
+- CA-02 : l'affichage des documents est testé au niveau composant. Les données viennent de `GET /api/me/documents` (branché par US-13) ; le test bout en bout `e2e/us12-parcours-complet.spec.js` vérifie le diplôme dans « Justificatifs joints ».
 - Les changements sont regroupés par section (« Identité modifiée », « Coordonnées modifiées »).
 
 ## Hors périmètre
