@@ -1,9 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useLogout } from '../lib/useLogout.js'
 
-/** Avatar de l'en-tête et son menu (US-04 : « Se déconnecter »). */
-export default function AccountMenu() {
-  const logout = useLogout()
+/** Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin). */
+export default function AccountMenu({ space = 'employee' }) {
+  const logout = useLogout(space)
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState(null)

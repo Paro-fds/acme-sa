@@ -34,7 +34,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | | [US-12](E03-mise-a-jour/US-12-soumettre.md) | Confirmer et soumettre | F-16, F-17 | MUST | Fait |
 | **E04 Documents** | [US-13](E04-documents/US-13-ajouter-document.md) | Ajouter un document | F-19, F-21 | MUST | Fait |
 | | [US-14](E04-documents/US-14-supprimer-document.md) | Supprimer un document | F-20 | SHOULD | Fait |
-| **E05 Administration** | [US-15](E05-administration/US-15-connexion-admin.md) | Se connecter en administrateur | F-22 | MUST | En cours |
+| **E05 Administration** | [US-15](E05-administration/US-15-connexion-admin.md) | Se connecter en administrateur | F-22 | MUST | Fait |
 | | [US-16](E05-administration/US-16-tableau-de-bord.md) | Voir le tableau de bord | F-23 | MUST | Pas encore |
 | | [US-17](E05-administration/US-17-liste-employes.md) | Consulter la liste des employés | F-24 | MUST | En cours |
 | | [US-18](E05-administration/US-18-rechercher-employe.md) | Rechercher un employé | F-25 | MUST | Pas encore |

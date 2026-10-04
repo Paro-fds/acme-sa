@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | En cours |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | MUST |
 | **PRD** | F-22 |
@@ -64,6 +64,14 @@ Alors la prochaine requête renvoie `401 SESSION_EXPIRED`.
 | T-15.2 | CA-03, CA-07 | API | `tests/api/test_us15_admin_auth.py` | blocage et expiration (horloge simulée) |
 | T-15.3 | CA-04, CA-05 | API | `tests/api/test_us15_admin_auth.py` | **toutes** les routes `/api/admin/*` testées sans session et avec session employé (test paramétré) |
 | T-15.4 | CA-01, CA-02, CA-05 | Composant | `src/features/admin/AdminLoginPage.test.jsx` | formulaire, message, garde de route |
+
+## Notes de réalisation
+
+- Blocage : même règle que les employés (`Account.register_failure`). Le compteur de l'admin est conservé dans la table des comptes sous l'identifiant `admin` (aucun employé n'a cet identifiant) : il survit à un redémarrage. Un identifiant erroné compte aussi comme un échec ; un blocage admin ne bloque aucun employé.
+- Expiration : glissante (`SessionService`), 2 h d'inactivité (`ADMIN_SESSION_MINUTES = 120`).
+- T-15.3 : la liste des routes `/api/admin/*` est lue dans le schéma OpenAPI de l'application ; toute nouvelle route admin (US-16 → US-22) est donc testée automatiquement sans session (401) et avec une session employé (403).
+- Écran : « Se déconnecter » dans le menu de l'avatar (`Page account="admin"`, `useLogout('admin')`), message « Vous êtes déconnecté. » à l'arrivée ; champ mot de passe avec afficher / masquer, effacé après un refus. Après connexion : `/admin` (redirige vers la liste tant que le tableau de bord US-16 n'existe pas).
+- E2E : `e2e/us15-connexion-admin.spec.js` (une seule erreur de mot de passe, pour ne pas bloquer le compte admin partagé par les autres tests).
 
 ## Hors périmètre
 

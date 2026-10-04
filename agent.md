@@ -18,7 +18,7 @@ Langue du projet et de l'interface : **français**.
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
 | 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
 | 4 — Documents | **Fait** (US-13, US-14, US-07) |
-| 5 — Administration | **En cours** (prochaine phase ; US-15, US-17 en version minimale depuis le Skeleton) |
+| 5 — Administration | **En cours** (US-15 faite ; US-17 en version minimale) |
 | 6 — Finalisation | Pas encore |
 
 ### Epics (`docs/epics/README.md`)
@@ -29,27 +29,27 @@ Langue du projet et de l'interface : **français**.
 | E02 Consultation | **Fait** (US-05, US-06, US-07) |
 | E03 Mise à jour | **Fait** (US-08 → US-12) |
 | E04 Documents | **Fait** (US-13, US-14) |
-| E05 Administration | **En cours** (versions minimales de US-15, US-17) |
+| E05 Administration | **En cours** (US-15 faite ; US-17 en version minimale) |
 
 ### Stories
 
-**Fait :** US-01 → US-14 (toutes les stories employé).
+**Fait :** US-01 → US-14 (toutes les stories employé), US-15.
 
 **En cours** (version minimale du Walking Skeleton faite, reste à compléter) :
 
 | Story | Déjà fait | Reste à faire |
 |---|---|---|
-| US-15 | CA-01, 02, 04, 05 | Blocage (CA-03), expiration (CA-07), déconnexion admin à l'écran, test paramétré sur toutes les routes admin |
 | US-17 | CA-01 (sans pagination à l'écran) | Pagination, cartes/tableau, ancien nom (CA-03), tests composant |
 
 **Pas encore :** US-16, US-18, US-19, US-20, US-21, US-22.
 
 ### Prochaine action
 
-**Phase 5 — Administration**, en commençant par **US-15 — Se connecter en administrateur** (déjà en version minimale : reste le blocage, l'expiration à 2 h, la déconnexion à l'écran via `AccountMenu`, le test paramétré sur toutes les routes admin). Écrans admin sans maquette ni validation visuelle intermédiaire.
+**US-16 — Voir le tableau de bord** (phase 5). Après connexion, l'admin arrive sur `/admin`, qui redirige encore vers la liste : US-16 remplace cette redirection par le tableau de bord. Écrans admin sans maquette ni validation visuelle intermédiaire.
 
 À savoir :
-- Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` ; tout nouvel écran employé connecté doit la passer. La déconnexion admin à l'écran reste à faire dans US-15.
+- Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
+- Admin : `LoginAdmin` (blocage stocké sous l'identifiant `admin` dans la table des comptes : à exclure si US-20/22 lisent cette table). Le test paramétré `test_us15_admin_auth.py` couvre automatiquement toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé) : une route qui prend un `{id}` reçoit `1001`.
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
 - Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
 - Étape 1 : `features/update/InformationsStep.jsx` (+ `FieldCard`, `FormSection`, `fieldRules.js` qui reprend les règles du registre serveur) ; `components/Stepper.jsx` (4 étapes) à réutiliser dans les étapes suivantes. `TextField` accepte `required`, `labelAside`, `footer`.

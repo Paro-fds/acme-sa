@@ -67,8 +67,10 @@ class Container:
         return LoginAdmin(
             self.settings.admin_username,
             self.settings.admin_password_hash,
+            self.accounts,
             self.password_hasher,
             self.session_service(),
+            self.clock,
         )
 
     # --- employee / update ----------------------------------------------------
