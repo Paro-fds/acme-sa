@@ -86,7 +86,7 @@ Alors la recherche « pierre » et ses résultats sont toujours affichés.
 - Écran : `features/admin/EmployeeSearch.jsx` (`<form role="search">`, champ `type="search"`, `enterKeyHint="search"`, collé sous l'en-tête). La recherche part 300 ms après la dernière frappe, ou tout de suite avec Entrée (qui ferme aussi le clavier). Le terme va dans l'adresse en **remplaçant** l'entrée d'historique : un seul retour arrière quitte la liste, et le retour depuis un dossier retrouve la recherche (CA-11). Une nouvelle recherche supprime `?page=` et conserve les autres paramètres (`?status=` de US-19).
 - Bouton « Effacer » dans le champ (vide et remet le focus) ; sans résultat : message + « Effacer la recherche », sans le compteur « 0 employé ».
 - À 390 px, le texte d'aide (placeholder) imposé ne tient pas en entier à 16 px et est coupé (« … matricu »).
-- E2E `e2e/us18-recherche-admin.spec.js` : barre pleine largeur et collante, recherche, aucun résultat, effacer, terme repris de l'adresse. L'ouverture d'un résultat et le retour (CA-11) sont couverts par le test composant ; leur vérification de bout en bout sera ajoutée avec l'écran du dossier (US-20).
+- E2E `e2e/us18-recherche-admin.spec.js` : barre pleine largeur et collante, recherche, aucun résultat, effacer, terme repris de l'adresse. Depuis US-20, le test ouvre aussi un résultat puis revient (retour du navigateur et bouton retour de l'en-tête) : la recherche est conservée (CA-11).
 
 ## Hors périmètre
 

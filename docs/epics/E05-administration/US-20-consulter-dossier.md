@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | MUST |
 | **PRD** | F-27 |
@@ -67,6 +67,14 @@ Alors le dossier d'EMP-A indique « Compte activé » et celui d'EMP-B « Compte
 | T-20.3 | CA-04 | API | `tests/api/test_us20_admin_employee.py` | inspection des routes de l'application : aucune méthode d'écriture sur `/api/admin/employees` hormis `reset-access` |
 | T-20.4 | CA-05, CA-06 | API | `tests/api/test_us20_admin_employee.py` | colonnes exclues absentes ; 404 |
 | T-20.5 | CA-01 → CA-04, CA-06 | Composant | `src/features/admin/EmployeeDetailPage.test.jsx` | blocs, mentions, absence de champ de saisie, page introuvable |
+
+## Notes de réalisation
+
+- Cas d'utilisation `GetEmployeeFolder` (module `admin`) : valeurs actuelles (nouvelles si soumises), `status`, `submitted_at`, `declined` (réponse « Non » sans soumission), `changes` (**uniquement** si soumise, dans l'ordre du registre des champs), `account_activated` (mot de passe créé). Un brouillon ne laisse aucune trace dans la réponse (ni valeur, ni date, ni « DRAFT »). Inactif, inconnu ou `admin` → 404 `EMPLOYEE_NOT_FOUND`.
+- `EmployeeFolderOut` liste explicitement les champs exposés (aucune colonne exclue, aucun hash).
+- CA-04 : le test lit le schéma OpenAPI ; seule méthode d'écriture tolérée sous `/api/admin/employees` : `POST …/reset-access` (US-22). Une requête `POST/PUT/PATCH/DELETE` sur un dossier est refusée (404/405) et ne change rien.
+- Écran `/admin/employes/:id` (`features/admin/EmployeeDetailPage.jsx`) : en-tête (initiales, badge « Lecture seule », nom + « anciennement … », matricule · agence · poste, pastille), blocs « Mise à jour » (`ValueComparison`), Identité / Coordonnées / Informations professionnelles (sections partagées avec le profil employé : `features/profile/profileSections.js`, `InfoSection showEditable={false}`), « Accès ». Le bloc « Documents » viendra avec US-21.
+- La liste transmet sa recherche et son filtre au dossier (`state.listSearch`) : le bouton retour de l'en-tête y ramène, comme le retour arrière du navigateur. E2E : `us18-recherche-admin.spec.js` (CA-11 de US-18) et `walking-skeleton.spec.js` (dossier de JOSEPH Jean avec son changement).
 
 ## Hors périmètre
 

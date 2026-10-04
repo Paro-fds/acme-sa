@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-/** US-18 : recherche sur mobile (390 px), barre collante. */
+/** US-18 : recherche sur mobile (390 px), barre collante, retour depuis un dossier (US-20). */
 test('recherche admin : barre collante, résultats, aucun résultat, effacer', async ({ page }) => {
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill('admin')
@@ -28,6 +28,21 @@ test('recherche admin : barre collante, résultats, aucun résultat, effacer', a
   const cards = page.getByRole('list', { name: 'Employés' }).getByRole('listitem')
   await expect(cards).toHaveCount(2)
   await expect(cards.first()).toContainText('PIERRE Marie')
+
+  // CA-11 : ouvrir un résultat (US-20) puis revenir en arrière → même recherche
+  await cards.first().getByRole('link').click()
+  await expect(page).toHaveURL(/\/admin\/employes\/1002$/)
+  await expect(page.getByRole('heading', { name: 'PIERRE Marie' })).toBeVisible()
+  await page.goBack()
+  await expect(page).toHaveURL(/\?search=pierre$/)
+  await expect(search).toHaveValue('pierre')
+  await expect(page.getByText('2 employés')).toBeVisible()
+  // Même chose avec le bouton retour de l'en-tête du dossier
+  await cards.nth(1).getByRole('link').click()
+  await expect(page.getByRole('heading', { name: 'PIERRE Marie' })).toBeVisible()
+  await page.getByRole('button', { name: 'Retour' }).click()
+  await expect(page).toHaveURL(/\?search=pierre$/)
+  await expect(page.getByText('2 employés')).toBeVisible()
 
   // CA-07 puis CA-08
   await search.fill('zzz')

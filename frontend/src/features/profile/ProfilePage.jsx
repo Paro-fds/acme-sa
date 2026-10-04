@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router'
 import { decide, getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
-import { formatDate, formatGender, initials } from '../../lib/format.js'
+import { initials } from '../../lib/format.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 import InfoSection from './InfoSection.jsx'
+import { profileSections } from './profileSections.js'
 import UpdateStateCard from './UpdateStateCard.jsx'
 
 function ProfileSummary({ profile }) {
@@ -104,41 +105,14 @@ export default function ProfilePage() {
         <span className="material-symbols-outlined text-muted" aria-hidden="true">chevron_right</span>
       </Link>
 
-      <InfoSection
-        icon="person"
-        title="Identité"
-        fields={[
-          { label: 'Nom', value: profile.last_name, editable: editable('last_name') },
-          { label: 'Prénom', value: profile.first_name, editable: editable('first_name') },
-          { label: 'Sexe', value: formatGender(profile.gender) },
-          { label: 'Date de naissance', value: formatDate(profile.birth_date) },
-        ]}
-      />
-
-      <InfoSection
-        icon="contacts"
-        title="Coordonnées"
-        fields={[
-          { label: 'Téléphone', value: profile.telephone_number, editable: editable('telephone_number') },
-          { label: 'Email', value: profile.email_address, editable: editable('email_address') },
-          { label: 'Adresse', value: profile.address_line_1, editable: editable('address_line_1') },
-        ]}
-      />
-
-      <InfoSection
-        icon="business_center"
-        title="Informations professionnelles"
-        fields={[
-          { label: 'Matricule', value: profile.employee_code },
-          { label: 'Agence', value: profile.agency_code },
-          { label: 'Département', value: profile.department },
-          { label: 'Poste', value: profile.position },
-          { label: 'Grade', value: profile.grade },
-          { label: 'Niveau', value: profile.level },
-          { label: 'Contrat', value: profile.contract_nature },
-          { label: "Date d'embauche", value: formatDate(profile.hire_date) },
-        ]}
-      />
+      {profileSections(profile).map(({ icon, title, fields }) => (
+        <InfoSection
+          key={title}
+          icon={icon}
+          title={title}
+          fields={fields.map(({ field, ...rest }) => ({ ...rest, editable: Boolean(field) && editable(field) }))}
+        />
+      ))}
     </Page>
   )
 }

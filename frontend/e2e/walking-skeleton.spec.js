@@ -59,4 +59,10 @@ test('parcours complet employé → admin', async ({ page }) => {
   await expect(row.getByText('Mise à jour effectuée')).toBeVisible()
   // EMP-E ne soumet dans aucun test E2E (voir e2e/start-server.mjs).
   await expect(page.getByRole('listitem').filter({ hasText: 'ÉTIENNE Rosé' }).getByText('Mise à jour non effectuée')).toBeVisible()
+
+  // Dossier en lecture seule (US-20) : le changement soumis est visible
+  await row.getByRole('link').click()
+  await expect(page.getByRole('heading', { name: 'JOSEPH Jean' })).toBeVisible()
+  await expect(page.getByText(/^Mise à jour effectuée le \d{2}\/\d{2}\/\d{4} à \d{2}:\d{2}$/)).toBeVisible()
+  await expect(page.getByRole('article').filter({ hasText: 'Téléphone' })).toContainText('+509 3722 2222')
 })

@@ -7,6 +7,7 @@ Les cas d'utilisation sont créés à la demande : remplacer un adaptateur
 
 from datetime import timedelta
 
+from app.admin.application.get_employee_folder import GetEmployeeFolder
 from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
 from app.auth.application.sessions import SessionService
@@ -98,6 +99,9 @@ class Container:
 
     def get_statistics(self) -> GetStatistics:
         return GetStatistics(self.employees, self.updates)
+
+    def get_employee_folder(self) -> GetEmployeeFolder:
+        return GetEmployeeFolder(self.employees, self.updates, self.accounts)
 
     def list_employees(self) -> ListEmployees:
         return ListEmployees(self.employees, self.updates)

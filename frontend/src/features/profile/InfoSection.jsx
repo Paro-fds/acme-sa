@@ -21,8 +21,9 @@ function LockedMark() {
 /**
  * Section du profil (US-05) : en-tête teinté avec icône, puis une liste « libellé / valeur ».
  * `fields` : [{ label, value, editable }] ; chaque champ indique s'il est modifiable.
+ * `showEditable={false}` : sans les mentions « Modifiable » / cadenas (dossier vu par l'admin, US-20).
  */
-export default function InfoSection({ icon, title, fields }) {
+export default function InfoSection({ icon, title, fields, showEditable = true }) {
   const titleId = useId()
 
   return (
@@ -39,7 +40,7 @@ export default function InfoSection({ icon, title, fields }) {
               <span className={`min-w-0 break-words ${value ? 'text-heading' : 'text-muted italic'}`}>
                 {displayValue(value)}
               </span>
-              {editable ? <EditableMark /> : <LockedMark />}
+              {showEditable && (editable ? <EditableMark /> : <LockedMark />)}
             </dd>
           </div>
         ))}

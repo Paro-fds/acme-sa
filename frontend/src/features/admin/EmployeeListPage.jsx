@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { listEmployees } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
@@ -27,13 +27,20 @@ function EmployeeName({ employee }) {
 }
 
 /** Mobile : une carte par employé, entièrement cliquable. */
+/** Le dossier reçoit la recherche et le filtre en cours, pour son bouton retour (US-18 CA-11). */
+function useFolderState() {
+  return { listSearch: useLocation().search }
+}
+
 function EmployeeCards({ employees }) {
+  const state = useFolderState()
   return (
     <ul aria-label="Employés" className="flex flex-col gap-2 lg:hidden">
       {employees.map((employee) => (
         <li key={employee.id}>
           <Link
             to={folderUrl(employee)}
+            state={state}
             className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-card hover:border-primary"
           >
             <span className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -54,6 +61,7 @@ function EmployeeCards({ employees }) {
 /** Desktop (≥ 1024 px) : tableau ; toute la ligne ouvre le dossier, le nom est le lien accessible. */
 function EmployeeTable({ employees }) {
   const navigate = useNavigate()
+  const state = useFolderState()
   return (
     <div className="hidden overflow-hidden rounded-xl border border-border bg-surface shadow-card lg:block">
       <table aria-label="Employés" className="w-full text-left">
@@ -71,11 +79,11 @@ function EmployeeTable({ employees }) {
           {employees.map((employee) => (
             <tr
               key={employee.id}
-              onClick={() => navigate(folderUrl(employee))}
+              onClick={() => navigate(folderUrl(employee), { state })}
               className="cursor-pointer hover:bg-canvas"
             >
               <td className="px-4 py-3">
-                <Link to={folderUrl(employee)} className="hover:underline" onClick={(event) => event.stopPropagation()}>
+                <Link to={folderUrl(employee)} state={state} className="hover:underline" onClick={(event) => event.stopPropagation()}>
                   <EmployeeName employee={employee} />
                 </Link>
               </td>

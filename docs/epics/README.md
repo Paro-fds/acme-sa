@@ -39,7 +39,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | | [US-17](E05-administration/US-17-liste-employes.md) | Consulter la liste des employés | F-24 | MUST | Fait |
 | | [US-18](E05-administration/US-18-rechercher-employe.md) | Rechercher un employé | F-25 | MUST | Fait |
 | | [US-19](E05-administration/US-19-filtrer-statut.md) | Filtrer par statut | F-26 | SHOULD | Fait |
-| | [US-20](E05-administration/US-20-consulter-dossier.md) | Consulter le dossier d'un employé | F-27 | MUST | Pas encore |
+| | [US-20](E05-administration/US-20-consulter-dossier.md) | Consulter le dossier d'un employé | F-27 | MUST | Fait |
 | | [US-21](E05-administration/US-21-consulter-documents-employe.md) | Consulter les documents d'un employé | F-28 | MUST | Pas encore |
 | | [US-22](E05-administration/US-22-reinitialiser-acces.md) | Réinitialiser l'accès d'un employé | F-29 | SHOULD | Pas encore |
 
