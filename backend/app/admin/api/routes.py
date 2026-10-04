@@ -25,12 +25,19 @@ class EmployeeListItemOut(BaseModel):
     status: str
 
 
+class StatusCountsOut(BaseModel):
+    all: int
+    updated: int
+    not_updated: int
+
+
 class EmployeePageOut(BaseModel):
     items: list[EmployeeListItemOut]
     total: int
     page: int
     page_size: int
     page_count: int
+    counts: StatusCountsOut
 
 
 @router.get("/statistics", response_model=StatisticsOut)
@@ -47,12 +54,16 @@ def list_employees(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     search: str = Query("", max_length=100),
+    status: str = Query("", pattern="^(UPDATED|NOT_UPDATED)?$"),
 ) -> EmployeePageOut:
-    result = container(request).list_employees().execute(page=page, page_size=page_size, search=search)
+    result = container(request).list_employees().execute(
+        page=page, page_size=page_size, search=search, status=status or None
+    )
     return EmployeePageOut(
         items=[EmployeeListItemOut(**item.__dict__) for item in result.items],
         total=result.total,
         page=result.page,
         page_size=result.page_size,
         page_count=result.page_count,
+        counts=StatusCountsOut(**result.counts.__dict__),
     )

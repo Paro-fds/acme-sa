@@ -103,7 +103,7 @@ describe('EmployeeSearch (US-18)', () => {
     act(() => vi.advanceTimersByTime(100))
     expect(await screen.findByText('2 employés')).toBeInTheDocument()
     expect(listEmployees).toHaveBeenCalledTimes(1)
-    expect(listEmployees).toHaveBeenCalledWith({ page: 1, search: 'pierre' })
+    expect(listEmployees).toHaveBeenCalledWith({ page: 1, search: 'pierre', status: '' })
     expect(cardNames()).toEqual(['PIERRE Marie', 'PIERRE Marie'])
   })
 

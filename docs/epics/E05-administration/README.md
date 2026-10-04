@@ -1,6 +1,6 @@
 # E05 — Administration
 
-**Statut de l'epic :** En cours (US-15 à US-18 faites ; reste US-19 à US-22).
+**Statut de l'epic :** En cours (US-15 à US-19 faites ; reste US-20 à US-22).
 
 **Objectif :** permettre à l'administrateur de suivre l'avancement de la campagne, de retrouver rapidement un employé et de consulter ce qu'il a transmis, **sans jamais modifier un dossier**.
 

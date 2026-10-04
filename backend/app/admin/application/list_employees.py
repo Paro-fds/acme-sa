@@ -24,11 +24,21 @@ class EmployeeListItem:
 
 
 @dataclass(frozen=True)
+class StatusCounts:
+    """US-19 : nombre d'employés par statut, après la recherche et avant le filtre de statut."""
+
+    all: int
+    updated: int
+    not_updated: int
+
+
+@dataclass(frozen=True)
 class EmployeePage:
     items: list[EmployeeListItem]
     total: int
     page: int
     page_size: int
+    counts: StatusCounts
 
     @property
     def page_count(self) -> int:
@@ -43,13 +53,22 @@ def previous_name(reference: dict[str, str], current: dict[str, str]) -> str | N
 
 
 class ListEmployees:
-    """US-17 : liste des employés actifs avec leur statut, triée par nom puis prénom ; US-18 : recherche."""
+    """US-17 : liste des employés actifs avec leur statut, triée par nom puis prénom ;
+    US-18 : recherche ; US-19 : filtre par statut. Recherche et filtre s'appliquent avant la pagination.
+    """
 
     def __init__(self, employees: EmployeeRepository, updates: UpdateRepository) -> None:
         self._employees = employees
         self._updates = updates
 
-    def execute(self, page: int = 1, page_size: int = 20, search: str | None = None) -> EmployeePage:
+    def execute(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        search: str | None = None,
+        status: str | None = None,
+    ) -> EmployeePage:
+        """`status` : `UPDATED` ou `NOT_UPDATED` (validé par la route) ; None = tous."""
         updates = {update.employee_id: update for update in self._updates.list_all()}
         items = []
         for employee in self._employees.list_all():
@@ -74,5 +93,13 @@ class ListEmployees:
             )
         items.sort(key=lambda item: (normalize(item.last_name), normalize(item.first_name), item.id))
 
+        updated = sum(1 for item in items if item.status == AdminStatus.UPDATED)
+        counts = StatusCounts(all=len(items), updated=updated, not_updated=len(items) - updated)
+        if status:
+            wanted = AdminStatus(status)
+            items = [item for item in items if item.status == wanted]
+
         start = (page - 1) * page_size
-        return EmployeePage(items=items[start : start + page_size], total=len(items), page=page, page_size=page_size)
+        return EmployeePage(
+            items=items[start : start + page_size], total=len(items), page=page, page_size=page_size, counts=counts
+        )

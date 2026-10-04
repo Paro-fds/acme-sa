@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | SHOULD |
 | **PRD** | F-26 |
@@ -53,6 +53,13 @@ Alors la réponse est `422`.
 |---|---|---|---|---|
 | T-19.1 | CA-01 → CA-04, CA-06 | API | `tests/api/test_us19_status_filter.py` | filtres, combinaison, compteurs, 422 |
 | T-19.2 | CA-01, CA-04, CA-05 | Composant | `src/features/admin/StatusFilter.test.jsx` | puces, compteurs, lecture de l'URL |
+
+## Notes de réalisation
+
+- API : `status` accepte `UPDATED`, `NOT_UPDATED` ou vide (= tous) ; toute autre valeur → 422 `INVALID_INPUT`. La réponse contient `counts: {all, updated, not_updated}`, calculés **après la recherche et avant le filtre** (les trois puces gardent leur nombre quel que soit le filtre choisi). Le filtre s'applique avant la pagination (`ListEmployees`).
+- Écran : `features/admin/StatusFilter.jsx` (groupe de boutons `aria-pressed`, pastille de couleur + texte). Le filtre va dans l'adresse en remplaçant l'entrée d'historique, revient à la page 1 et conserve la recherche. Une valeur inconnue dans l'adresse revient à « Tous » sans être envoyée. Sans résultat : « Aucun employé avec ce statut. ».
+- `useLoader` accepte `key` : le chargement est relancé quand la clé change, les résultats précédents restent affichés pendant ce temps (les puces ne clignotent pas), une réponse arrivée en retard est ignorée.
+- À 390 px, la puce « Non effectuée » passe à la ligne (zones tactiles de 44 px conservées).
 
 ## Hors périmètre
 

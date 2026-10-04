@@ -5,6 +5,7 @@ import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import { AdminStatusBadge } from '../../components/StatusBadge.jsx'
 import EmployeeSearch from './EmployeeSearch.jsx'
+import StatusFilter, { readStatus } from './StatusFilter.jsx'
 import { useLoader } from '../../lib/useLoader.js'
 
 const folderUrl = (employee) => `/admin/employes/${employee.id}`
@@ -110,43 +111,35 @@ function Pagination({ page, pageCount, onChange }) {
   )
 }
 
-function EmployeeList({ page, search, onPageChange, onClearSearch }) {
-  const { data, error, loading } = useLoader(() => listEmployees({ page, search }), { loginPath: '/admin/connexion' })
-
-  if (loading) return <p role="status">Chargement…</p>
-  if (error) return <Alert>{error.message}</Alert>
-
-  return (
-    <>
-      {data.total > 0 && <p className="text-help">{plural(data.total)}</p>}
-      {data.items.length === 0 && search.trim() ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-card">
-          <span className="material-symbols-outlined text-[32px] text-muted" aria-hidden="true">search_off</span>
-          <p className="font-semibold text-heading">Aucun employé ne correspond à votre recherche.</p>
-          <div className="w-full max-w-xs">
-            <Button variant="secondary" onClick={onClearSearch}>Effacer la recherche</Button>
-          </div>
+function EmptyState({ search, status, onClearSearch }) {
+  if (search.trim()) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-card">
+        <span className="material-symbols-outlined text-[32px] text-muted" aria-hidden="true">search_off</span>
+        <p className="font-semibold text-heading">Aucun employé ne correspond à votre recherche.</p>
+        <div className="w-full max-w-xs">
+          <Button variant="secondary" onClick={onClearSearch}>Effacer la recherche</Button>
         </div>
-      ) : data.items.length === 0 ? (
-        <p className="rounded-xl border border-border bg-surface p-6 text-center text-help shadow-card">
-          Aucun employé à afficher.
-        </p>
-      ) : (
-        <>
-          <EmployeeCards employees={data.items} />
-          <EmployeeTable employees={data.items} />
-        </>
-      )}
-      <Pagination page={data.page} pageCount={data.page_count} onChange={onPageChange} />
-    </>
+      </div>
+    )
+  }
+  return (
+    <p className="rounded-xl border border-border bg-surface p-6 text-center text-help shadow-card">
+      {status ? 'Aucun employé avec ce statut.' : 'Aucun employé à afficher.'}
+    </p>
   )
 }
 
-/** US-17 : liste des employés actifs, paginée, en lecture seule. */
+/** US-17 : liste paginée ; US-18 : recherche ; US-19 : filtre par statut. Lecture seule. */
 export default function EmployeeListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const page = readPage(searchParams)
   const search = searchParams.get('search') ?? ''
+  const status = readStatus(searchParams)
+  const { data, error, loading } = useLoader(() => listEmployees({ page, search, status }), {
+    loginPath: '/admin/connexion',
+    key: `${search}|${status}|${page}`,
+  })
 
   function changePage(next) {
     const params = new URLSearchParams(searchParams)
@@ -155,11 +148,14 @@ export default function EmployeeListPage() {
     window.scrollTo?.({ top: 0 })
   }
 
-  /** Nouvelle recherche : retour à la page 1 ; l'entrée d'historique est remplacée (le retour arrière quitte la liste). */
-  function changeSearch(term) {
+  /**
+   * Nouvelle recherche ou nouveau filtre : retour à la page 1. L'entrée d'historique est remplacée :
+   * le retour arrière quitte la liste, et revenir d'un dossier retrouve la recherche et le filtre.
+   */
+  function changeCriteria(name, value) {
     const params = new URLSearchParams(searchParams)
-    if (term.trim()) params.set('search', term)
-    else params.delete('search')
+    if (value.trim()) params.set(name, value)
+    else params.delete(name)
     params.delete('page')
     setSearchParams(params, { replace: true })
   }
@@ -167,15 +163,27 @@ export default function EmployeeListPage() {
   return (
     <Page account="admin" wide title="Employés" backTo="/admin">
       <h2 className="text-[26px] leading-8 font-bold">Liste des employés</h2>
-      <EmployeeSearch value={search} onSearch={changeSearch} />
-      {/* Remonté à chaque page ou recherche : nouveau chargement. */}
-      <EmployeeList
-        key={`${search}|${page}`}
-        page={page}
-        search={search}
-        onPageChange={changePage}
-        onClearSearch={() => changeSearch('')}
-      />
+      <EmployeeSearch value={search} onSearch={(term) => changeCriteria('search', term)} />
+      <StatusFilter value={status} counts={data?.counts} onChange={(value) => changeCriteria('status', value)} />
+
+      {loading ? (
+        <p role="status">Chargement…</p>
+      ) : error ? (
+        <Alert>{error.message}</Alert>
+      ) : (
+        <>
+          {data.total > 0 && <p className="text-help">{plural(data.total)}</p>}
+          {data.items.length === 0 ? (
+            <EmptyState search={search} status={status} onClearSearch={() => changeCriteria('search', '')} />
+          ) : (
+            <>
+              <EmployeeCards employees={data.items} />
+              <EmployeeTable employees={data.items} />
+            </>
+          )}
+          <Pagination page={data.page} pageCount={data.page_count} onChange={changePage} />
+        </>
+      )}
     </Page>
   )
 }
