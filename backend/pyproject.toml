@@ -1,0 +1,101 @@
+[project]
+name = "acme-portail-backend"
+version = "0.1.0"
+description = "API du portail de mise à jour des dossiers employés ACME SA (MVP)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy>=2",
+    "pydantic>=2",
+    "pydantic-settings",
+    "argon2-cffi",
+    "python-multipart",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx", "import-linter"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+# ---------------------------------------------------------------------------
+# Clean Architecture : règles de dépendance vérifiées par `lint-imports`
+# (docs/03-plan-implementation.md §1.1)
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Couches : api | infrastructure -> application -> domain"
+type = "layers"
+layers = ["api | infrastructure", "application", "domain"]
+containers = [
+    "app.shared",
+    "app.employee",
+    "app.auth",
+    "app.update",
+    "app.document",
+    "app.admin",
+]
+
+[[tool.importlinter.contracts]]
+name = "Domaine et application sans framework"
+type = "forbidden"
+source_modules = [
+    "app.shared.domain",
+    "app.employee.domain",
+    "app.auth.domain",
+    "app.update.domain",
+    "app.document.domain",
+    "app.admin.domain",
+    "app.shared.application",
+    "app.employee.application",
+    "app.auth.application",
+    "app.update.application",
+    "app.document.application",
+    "app.admin.application",
+]
+forbidden_modules = ["fastapi", "starlette", "pydantic", "sqlalchemy"]
+
+[[tool.importlinter.contracts]]
+name = "Infrastructure accessible uniquement depuis le composition root"
+type = "forbidden"
+source_modules = [
+    "app.shared.domain",
+    "app.shared.application",
+    "app.shared.api",
+    "app.employee.domain",
+    "app.employee.application",
+    "app.employee.api",
+    "app.auth.domain",
+    "app.auth.application",
+    "app.auth.api",
+    "app.update.domain",
+    "app.update.application",
+    "app.update.api",
+    "app.document.domain",
+    "app.document.application",
+    "app.document.api",
+    "app.admin.domain",
+    "app.admin.application",
+    "app.admin.api",
+]
+forbidden_modules = [
+    "app.shared.infrastructure",
+    "app.employee.infrastructure",
+    "app.auth.infrastructure",
+    "app.update.infrastructure",
+    "app.document.infrastructure",
+    "app.admin.infrastructure",
+    "app.container",
+]

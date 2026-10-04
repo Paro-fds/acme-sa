@@ -1,0 +1,19 @@
+# Données réelles des employés : ne jamais versionner
+data/
+
+# Configuration locale (secrets)
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.import_linter_cache/
+
+# Node / frontend
+node_modules/
+dist/
+test-results/
+playwright-report/

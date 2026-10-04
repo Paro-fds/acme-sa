@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+/*
+ * Design system « ACME Enterprise Clarity »
+ * (stitch_portail_dossier_collaborateur_acme/acme_enterprise_clarity/DESIGN.md)
+ */
+@theme {
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+
+  /* Couleurs principales */
+  --color-primary: #0f2557;
+  --color-primary-active: #1e3a8a;
+  --color-info-bg: #eff6ff;
+  --color-info-text: #1d4ed8;
+  --color-info-border: #bfdbfe;
+
+  /* Neutres et surfaces */
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-input: #cbd5e1;
+  --color-heading: #0f172a;
+  --color-body: #334155;
+  --color-muted: #64748b;
+  --color-help: #475569;
+
+  /* Statuts */
+  --color-status-neutral-bg: #f1f5f9;
+  --color-status-neutral-border: #cbd5e1;
+  --color-status-neutral-text: #475569;
+  --color-status-neutral-dot: #94a3b8;
+  --color-status-progress-bg: #fef3c7;
+  --color-status-progress-border: #fcd34d;
+  --color-status-progress-text: #b45309;
+  --color-status-progress-dot: #d97706;
+  --color-status-done-bg: #dcfce7;
+  --color-status-done-border: #86efac;
+  --color-status-done-text: #15803d;
+  --color-status-done-dot: #16a34a;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fca5a5;
+  --color-error-text: #b91c1c;
+  --color-error-dot: #dc2626;
+
+  /* Ombres */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-sticky: 0 -4px 12px 0 rgb(15 23 42 / 0.08);
+  --shadow-modal: 0 10px 25px -5px rgb(15 23 42 / 0.12);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-base text-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply text-heading;
+  }
+}

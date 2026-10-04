@@ -1,0 +1,35 @@
+import { useId } from 'react'
+
+export default function TextField({ label, error, help, className = '', ...inputProps }) {
+  const id = useId()
+  const describedBy = error ? `${id}-error` : help ? `${id}-help` : undefined
+
+  return (
+    <div className={`flex flex-col gap-1.5 ${className}`}>
+      <label htmlFor={id} className="text-base font-semibold text-heading">
+        {label}
+      </label>
+      <input
+        id={id}
+        aria-invalid={Boolean(error)}
+        aria-describedby={describedBy}
+        className={`h-12 rounded-lg border-[1.5px] bg-surface px-4 text-base text-heading outline-none focus:border-2 focus:border-primary focus:shadow-[0_0_0_3px_rgb(15_37_87/0.15)] ${
+          error ? 'border-error-border bg-error-bg' : 'border-border-input'
+        }`}
+        {...inputProps}
+      />
+      {error ? (
+        <p id={`${id}-error`} className="flex items-center gap-1 text-sm text-error-text">
+          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">error</span>
+          {error}
+        </p>
+      ) : (
+        help && (
+          <p id={`${id}-help`} className="text-sm text-help">
+            {help}
+          </p>
+        )
+      )}
+    </div>
+  )
+}
