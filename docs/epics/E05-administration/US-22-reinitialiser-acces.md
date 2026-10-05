@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E05 Administration |
 | **Priorité** | SHOULD |
 | **PRD** | F-29 (D-06) |
@@ -67,6 +67,14 @@ Alors rien n'est modifié.
 | T-22.3 | CA-04 | API | `tests/api/test_us22_reset_access.py` | mise à jour, changements, documents inchangés |
 | T-22.4 | CA-06 | API | `tests/api/test_us22_reset_access.py` | 409 sans compte |
 | T-22.5 | CA-01, CA-06, CA-07 | Composant | `src/features/admin/ResetAccess.test.jsx` | bouton conditionnel, dialogue, message |
+
+## Notes de réalisation
+
+- Cas d'utilisation `ResetAccess` (module `admin`, `app/admin/application/reset_access.py`) : efface `password_hash`, remet le compteur d'échecs et le blocage à zéro (`register_success`), ferme toutes les sessions **employé** de la personne (`SessionService.close_all_for`). Aucun accès aux tables de mise à jour ni de documents.
+- Seul un employé actif du CSV est accepté (sinon 404 `EMPLOYEE_NOT_FOUND`) : la ligne `admin` de la table des comptes (blocage de la connexion admin) n'est jamais touchée, ce que vérifie un test.
+- `POST /api/admin/employees/{id}/reset-access` → `204` ; compte inexistant ou sans mot de passe (y compris une deuxième réinitialisation) → `409 ACCOUNT_NOT_ACTIVATED`. Seule route d'écriture de l'administration (test CA-04 de US-20) ; le test paramétré de US-15 la couvre (401/403).
+- Écran : `features/admin/ResetAccess.jsx` remplace le bloc « Accès » du dossier : bouton « Réinitialiser l'accès » (compte activé seulement), confirmation dans le bloc (« Annuler » ou Échap ne modifient rien, boutons désactivés pendant l'envoi), message de succès, puis rechargement du dossier (« Compte non activé »). Erreur 409 affichée près du bouton ; 401 → connexion admin.
+- Vérifié à 390 px et 1280 px par un test Playwright temporaire (réinitialisation de EMP-E : session ouverte coupée, `identify` → `CREATE_PASSWORD`).
 
 ## Hors périmètre
 

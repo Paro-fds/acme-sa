@@ -116,3 +116,9 @@ def list_employee_documents(employee_id: str, request: Request) -> list[Document
 @router.get("/documents/{document_id}/file")
 def get_employee_document_file(document_id: str, request: Request) -> Response:
     return file_response(container(request).get_employee_document_file().execute(document_id))
+
+
+@router.post("/employees/{employee_id}/reset-access", status_code=204)
+def reset_access(employee_id: str, request: Request) -> None:
+    """US-22 : seule route d'écriture de l'administration."""
+    container(request).reset_access().execute(employee_id)

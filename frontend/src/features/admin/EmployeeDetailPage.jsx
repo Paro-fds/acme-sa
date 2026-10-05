@@ -10,6 +10,7 @@ import InfoSection from '../profile/InfoSection.jsx'
 import { profileSections } from '../profile/profileSections.js'
 import AdminDocuments from './AdminDocuments.jsx'
 import Block from './Block.jsx'
+import ResetAccess from './ResetAccess.jsx'
 
 export const DECLINED_MENTION = "L'employé a indiqué ne pas souhaiter mettre à jour son dossier"
 
@@ -78,25 +79,6 @@ function UpdateBlock({ folder }) {
   )
 }
 
-function AccessBlock({ activated }) {
-  return (
-    <Block icon="key" title="Accès">
-      <p className="flex items-center gap-2 text-heading">
-        <span
-          className={`material-symbols-outlined text-[20px] ${activated ? 'text-status-done-text' : 'text-muted'}`}
-          aria-hidden="true"
-        >
-          {activated ? 'verified_user' : 'no_accounts'}
-        </span>
-        {activated ? 'Compte activé' : 'Compte non activé'}
-      </p>
-      <p className="text-sm text-help">
-        {activated ? "L'employé a créé son mot de passe." : "L'employé n'a pas encore créé de mot de passe."}
-      </p>
-    </Block>
-  )
-}
-
 const loadFolder = (id) => Promise.all([getEmployee(id), listEmployeeDocuments(id)])
 
 /** US-20, US-21 : dossier d'un employé et ses documents, en lecture seule. */
@@ -105,7 +87,7 @@ export default function EmployeeDetailPage() {
   const location = useLocation()
   // Retour vers la liste avec la recherche et le filtre en cours (US-18 CA-11).
   const listUrl = `/admin/employes${location.state?.listSearch ?? ''}`
-  const { data, error, loading } = useLoader(() => loadFolder(id), {
+  const { data, error, loading, reload } = useLoader(() => loadFolder(id), {
     loginPath: '/admin/connexion',
     key: id,
   })
@@ -140,7 +122,12 @@ export default function EmployeeDetailPage() {
         <InfoSection key={title} icon={icon} title={title} fields={fields} showEditable={false} />
       ))}
       <AdminDocuments documents={documents} />
-      <AccessBlock activated={folder.account_activated} />
+      <ResetAccess
+        employeeId={folder.id}
+        name={folder.display_name}
+        activated={folder.account_activated}
+        onReset={reload}
+      />
     </>,
   )
 }

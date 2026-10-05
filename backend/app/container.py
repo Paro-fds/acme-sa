@@ -11,6 +11,7 @@ from app.admin.application.employee_documents import GetEmployeeDocumentFile, Li
 from app.admin.application.get_employee_folder import GetEmployeeFolder
 from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
+from app.admin.application.reset_access import ResetAccess
 from app.auth.application.sessions import SessionService
 from app.auth.application.use_cases import IdentifyEmployee, LoginAdmin, LoginEmployee, RegisterPassword
 from app.auth.domain.model import SubjectType
@@ -106,6 +107,9 @@ class Container:
 
     def list_employees(self) -> ListEmployees:
         return ListEmployees(self.employees, self.updates)
+
+    def reset_access(self) -> ResetAccess:
+        return ResetAccess(self.employees, self.accounts, self.session_service())
 
     def list_employee_documents(self) -> ListEmployeeDocuments:
         return ListEmployeeDocuments(self.employees, self.documents)

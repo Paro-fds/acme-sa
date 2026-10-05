@@ -18,7 +18,7 @@ Langue du projet et de l'interface : **français**.
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
 | 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
 | 4 — Documents | **Fait** (US-13, US-14, US-07) |
-| 5 — Administration | **En cours** (US-15 → US-21 faites) |
+| 5 — Administration | **Fait** (US-15 → US-22) |
 | 6 — Finalisation | Pas encore |
 
 ### Epics (`docs/epics/README.md`)
@@ -29,26 +29,26 @@ Langue du projet et de l'interface : **français**.
 | E02 Consultation | **Fait** (US-05, US-06, US-07) |
 | E03 Mise à jour | **Fait** (US-08 → US-12) |
 | E04 Documents | **Fait** (US-13, US-14) |
-| E05 Administration | **En cours** (US-15 → US-21 faites) |
+| E05 Administration | **Fait** (US-15 → US-22) |
 
 ### Stories
 
-**Fait :** US-01 → US-14 (toutes les stories employé), US-15 → US-21.
+**Fait :** US-01 → US-22 (toutes les stories).
 
 **En cours :** aucune.
 
-**Pas encore :** US-22.
+**Pas encore :** aucune.
 
 ### Prochaine action
 
-**US-22 — Réinitialiser l'accès d'un employé** (phase 5, dernière story de E05) : `POST /api/admin/employees/{id}/reset-access` (seule écriture admin, déjà tolérée par le test CA-04 de US-20) ; supprimer les sessions de l'employé, effacer mot de passe et blocage ; ne jamais toucher la ligne `admin` de la table des comptes. Bouton dans le bloc « Accès » du dossier. Écrans admin sans maquette ni validation visuelle intermédiaire.
+**Phase 6 — Finalisation et préparation du test** (`docs/03-plan-implementation.md` §9, tâches 6.1 → 6.9) : toutes les stories sont faites. Plusieurs tâches demandent l'utilisateur (vrai CSV en 6.2–6.3, téléphones réels en 6.4, configuration de la machine en 6.6, tunnel en 6.7) : se mettre d'accord avec lui sur l'ordre avant de commencer. Le vrai CSV (`data/`) ne doit jamais être versionné ni copié dans les tests.
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
 - Tableau de bord : `features/admin/DashboardPage.jsx` (`/admin`) ; ses cartes mènent à `/admin/employes?status=UPDATED|NOT_UPDATED` : **US-19 doit lire ce paramètre**. Calcul : `app/admin/domain/statistics.py`, `GetStatistics`.
 - Liste admin : `features/admin/EmployeeListPage.jsx` (page dans l'adresse `?page=`, autres paramètres conservés ; cartes `lg:hidden` + tableau `hidden lg:block`, tous deux dans le DOM : dans les tests, viser `getByRole('list'|'table', { name: 'Employés' })`). `Page wide` pour les écrans admin larges. API : `display_name`, `previous_name`, `page_count` (`ListEmployees`).
 - Recherche admin : `features/admin/EmployeeSearch.jsx` (300 ms, `?search=` en `replace`) ; règle `app/admin/domain/search.py`, appliquée dans `ListEmployees` avant la pagination. Filtre de statut : `features/admin/StatusFilter.jsx` (`?status=`, compteurs `counts` de l'API). `useLoader(load, { key })` relance le chargement quand la clé change.
-- Dossier admin : `features/admin/EmployeeDetailPage.jsx` (`/admin/employes/:id`, blocs `Block`, retour vers la liste via `state.listSearch`) ; `GetEmployeeFolder` ; sections partagées avec le profil : `features/profile/profileSections.js` (`InfoSection showEditable={false}` côté admin). Documents (US-21) : `features/admin/AdminDocuments.jsx`, chargés avec le dossier ; `ListEmployeeDocuments`, `GetEmployeeDocumentFile` ; bloc titré réutilisable `features/admin/Block.jsx` (prop `aside`).
+- Dossier admin : `features/admin/EmployeeDetailPage.jsx` (`/admin/employes/:id`, blocs `Block`, retour vers la liste via `state.listSearch`) ; `GetEmployeeFolder` ; sections partagées avec le profil : `features/profile/profileSections.js` (`InfoSection showEditable={false}` côté admin). Documents (US-21) : `features/admin/AdminDocuments.jsx`, chargés avec le dossier ; `ListEmployeeDocuments`, `GetEmployeeDocumentFile` ; bloc titré réutilisable `features/admin/Block.jsx` (prop `aside`). Bloc « Accès » et réinitialisation (US-22) : `features/admin/ResetAccess.jsx`, `ResetAccess` (module `admin`), `POST /api/admin/employees/{id}/reset-access`, seule écriture de l'administration.
 - Admin : `LoginAdmin` (blocage stocké sous l'identifiant `admin` dans la table des comptes : à exclure si US-20/22 lisent cette table). Le test paramétré `test_us15_admin_auth.py` couvre automatiquement toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé) : une route qui prend un `{id}` reçoit `1001`.
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
 - Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).

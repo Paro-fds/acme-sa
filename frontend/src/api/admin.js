@@ -24,3 +24,8 @@ export function listEmployees({ page = 1, search = '', status = '' } = {}) {
   if (status) params.set('status', status)
   return request(`/admin/employees?${params}`)
 }
+
+/** US-22 : efface le mot de passe de l'employé et ferme ses sessions (seule écriture de l'administration). */
+export function resetAccess(id) {
+  return request(`/admin/employees/${encodeURIComponent(id)}/reset-access`, { method: 'POST' })
+}

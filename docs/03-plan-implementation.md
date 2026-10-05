@@ -5,7 +5,7 @@
 | **Version** | 1.1 — validé le 2026-10-04 ; suivi d'avancement ajouté (statuts des phases, epics et stories) |
 | **Date** | 2026-10-04 |
 | **Entrées** | `01-prd.md` v1.0, `02-solution-design.md` v1.0, `epics/` (22 user stories) |
-| **Avancement mis à jour le** | 2026-10-04 (après US-21) |
+| **Avancement mis à jour le** | 2026-10-04 (après US-22 : phase 5 terminée) |
 
 ---
 
@@ -77,7 +77,7 @@ infrastructure ──> application ──> domain
 | **2** | Identification complète | US-01, 02, 03, 04 | Connexion sécurisée : homonymes, doublon, blocage, déconnexion | **Fait** |
 | **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents | **Fait** |
 | **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | **Fait** |
-| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | **En cours** (7/8 : US-15 → US-21) |
+| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | **Fait** |
 | **6** | Finalisation et préparation du test | — | Application prête pour le directeur | Pas encore |
 
 ```text
@@ -108,11 +108,11 @@ La phase 5 ne dépend que du Skeleton et de la phase 2 (connexion) ; elle peut �
 | E02 Consultation | US-05, 06, 07 | 3 (US-05, 06), 4 (US-07) | **Fait** |
 | E03 Mise à jour | US-08 → US-12 | 1, 3 | **Fait** |
 | E04 Documents | US-13, 14 | 4 | **Fait** |
-| E05 Administration | US-15 → US-22 | 1, 5 | **En cours** (7/8 : US-15 → US-21) |
+| E05 Administration | US-15 → US-22 | 1, 5 | **Fait** |
 
 Un epic et une phase ne coïncident pas toujours : E02 est réparti sur les phases 3 et 4, car la consultation des documents (US-07) a besoin de l'ajout de documents (US-13).
 
-**Stories :** 21 / 22 « Fait » (US-01 → US-21) ; 0 « En cours » ; 1 « Pas encore » (US-22).
+**Stories :** 22 / 22 « Fait » (US-01 → US-22) ; tous les epics sont terminés. Reste la phase 6 (finalisation).
 
 ---
 
@@ -224,7 +224,7 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 
 ## 8. Phase 5 — Administration complète
 
-**Statut : En cours** (7 / 8 stories faites : US-15 → US-21).
+**Statut : Fait** (epic E05 terminé ; tous les tests E05 et `e2e/us18-recherche-admin.spec.js` passent).
 
 | Ordre | Story | Points d'attention | Statut |
 |---|---|---|---|
@@ -235,7 +235,7 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 | 5.5 | US-19 Filtre par statut | combinaison avec la recherche, compteurs | Fait |
 | 5.6 | US-20 Dossier | lecture seule vérifiée par test sur les routes, brouillon jamais exposé | Fait |
 | 5.7 | US-21 Documents de l'employé | aperçu plein écran | Fait |
-| 5.8 | US-22 Réinitialiser l'accès | sessions coupées, données intactes | Pas encore |
+| 5.8 | US-22 Réinitialiser l'accès | sessions coupées, données intactes | Fait |
 
 Les écrans admin n'ont pas de maquette : ils sont construits directement avec les composants et jetons du design system des phases précédentes, sans étape de validation visuelle intermédiaire.
 
@@ -286,7 +286,7 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 | US-19 | E05 | | 5 | Fait |
 | US-20 | E05 | | 5 | Fait |
 | US-21 | E05 | | 5 | Fait |
-| US-22 | E05 | | 5 | Pas encore |
+| US-22 | E05 | | 5 | Fait |
 
 Les 22 stories sont couvertes.
 

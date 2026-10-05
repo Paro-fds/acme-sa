@@ -148,8 +148,12 @@ describe('EmployeeDetailPage (US-20)', () => {
 
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-    const buttons = screen.queryAllByRole('button').map((button) => button.getAttribute('aria-label') ?? button.textContent)
-    expect(buttons).toEqual(['Retour', 'Menu du compte'])
+    // Seule action possible sur le dossier : la réinitialisation de l'accès (US-22).
+    const buttons = screen.queryAllByRole('button')
+    expect(buttons).toHaveLength(3)
+    expect(buttons[0]).toHaveAccessibleName('Retour')
+    expect(buttons[1]).toHaveAccessibleName('Menu du compte')
+    expect(buttons[2]).toHaveAccessibleName("Réinitialiser l'accès")
   })
 
   it('US-21 : bloc « Documents » chargé avec le dossier', async () => {
