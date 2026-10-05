@@ -5,7 +5,7 @@
 | **Version** | 1.1 — validé le 2026-10-04 ; suivi d'avancement ajouté (statuts des phases, epics et stories) |
 | **Date** | 2026-10-04 |
 | **Entrées** | `01-prd.md` v1.0, `02-solution-design.md` v1.0, `epics/` (22 user stories) |
-| **Avancement mis à jour le** | 2026-10-05 (après US-24 ; phase 6 en cours : 6.1, 6.2, 6.3, 6.7, 6.8, 6.9 faites) |
+| **Avancement mis à jour le** | 2026-10-05 (phase 6 terminée ; test du directeur reporté par l'utilisateur ; suite : V2, `docs/v2/03-plan-implementation.md`) |
 
 ---
 
@@ -78,7 +78,7 @@ infrastructure ──> application ──> domain
 | **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12, 24 | Parcours employé complet sans documents | **Fait** |
 | **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | **Fait** |
 | **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22, 23 | Tableau de bord, recherche, dossiers, documents, réinitialisation, comptes admin | **Fait** |
-| **6** | Finalisation et préparation du test | — | Application prête pour le directeur | **En cours** |
+| **6** | Finalisation et préparation du test | — | Application prête pour le directeur | **Fait** |
 
 ```text
 Phase 0 ──> Phase 1 (Skeleton) ──> Phase 2 ──> Phase 3 ──> Phase 4
@@ -247,21 +247,23 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 
 ## 9. Phase 6 — Finalisation et préparation du test
 
-**Statut : En cours.**
+**Statut : Fait.**
 
 | # | Tâche | Statut |
 |---|---|---|
 | 6.1 | Exécution de **tous** les tests (unitaires, API, composants, E2E) et des contrats d'architecture (`lint-imports`) | Fait (455 tests backend, 3 contrats, 242 tests composants, 11 E2E, build) |
 | 6.2 | Démarrage avec le **vrai CSV** : vérification du chargement (364 actifs), des accents, des formats de téléphone, du doublon (écran « Contactez l'administration ») | Fait : vrai CSV contrôlé (364 actifs, dates et accents corrects, téléphones à 11 chiffres sans « + », 1 doublon) |
 | 6.3 | Contrôle de sécurité : aucune colonne exclue dans les réponses (test automatique sur le vrai CSV : recherche des valeurs des colonnes exclues dans toutes les réponses JSON), cookies `HttpOnly`, aucun mot de passe dans les logs | Fait : aucune colonne exclue dans 2 192 réponses, aucun mot de passe dans les journaux, cookie `HttpOnly`/`SameSite=Strict` (`Secure` en HTTPS) |
-| 6.4 | Contrôle mobile sur au moins un téléphone Android et un iPhone : zones tactiles, clavier, appareil photo, sélecteur de date | Pas encore (utilisateur, téléphones réels) |
-| 6.5 | Revue visuelle par rapport aux maquettes Stitch, écran par écran | Pas encore |
-| 6.6 | Configuration de la machine : `ACME_DATA_DIR` hors OneDrive, règle de pare-feu Windows (port 8000), mise en veille désactivée, mot de passe admin définitif | Pas encore (utilisateur) |
+| 6.4 | Contrôle mobile sur au moins un téléphone Android et un iPhone : zones tactiles, clavier, appareil photo, sélecteur de date | Fait (utilisateur, 2026-10-05) |
+| 6.5 | Revue visuelle par rapport aux maquettes Stitch, écran par écran | Fait (utilisateur, 2026-10-05) ; écrans admin (sans maquette) testés par l'utilisateur : aucun problème |
+| 6.6 | Configuration de la machine : `ACME_DATA_DIR` hors OneDrive, règle de pare-feu Windows (port 8000), mise en veille désactivée, mot de passe admin définitif | Fait (utilisateur, 2026-10-05) |
 | 6.7 | Option tunnel (Cloudflare Tunnel ou ngrok) si le directeur teste hors du réseau local | Fait : `.\run.ps1 -Tunnel` (Cloudflare Tunnel rapide, HTTPS, refusé sans mot de passe admin ; `/api/docs` désactivée) ; guide §8 |
 | 6.8 | `docs/guide-demarrage.md` : lancer, arrêter, sauvegarder `ACME_DATA_DIR`, remplacer le CSV | Fait (`docs/guide-demarrage.md`) |
 | 6.9 | `docs/scenario-test-directeur.md` : scénario guidé reprenant les 7 critères de succès du PRD (§9), avec une fiche d'observation (temps, demandes d'aide, incidents) | Fait (`docs/scenario-test-directeur.md`) |
 
 **Critère de sortie :** les 7 critères de succès du PRD sont vérifiés en répétition générale ; l'application est remise au directeur.
+
+**Phase terminée le 2026-10-05** (6.4, 6.5, 6.6 faites par l'utilisateur). Le **test du directeur est reporté** par l'utilisateur ; le MVP reste en service sur sa machine pendant le développement de la V2.
 
 ---
 

@@ -6,7 +6,7 @@ Langue du projet et de l'interface : **français**.
 
 ## 0. Où en est le projet ? (à lire en premier)
 
-> **Dernière mise à jour : 2026-10-04.** Cette section est mise à jour à la fin de chaque story (voir §2, étape 8).
+> **Dernière mise à jour : 2026-10-05.** Cette section est mise à jour à la fin de chaque story (voir §2, étape 8).
 > En cas de doute, la source de vérité est la colonne « Statut » de `docs/epics/README.md`.
 
 ### Phases (`docs/03-plan-implementation.md`)
@@ -19,7 +19,7 @@ Langue du projet et de l'interface : **français**.
 | 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12, US-24) |
 | 4 — Documents | **Fait** (US-13, US-14, US-07) |
 | 5 — Administration | **Fait** (US-15 → US-23) |
-| 6 — Finalisation | **En cours** |
+| 6 — Finalisation | **Fait** (test du directeur reporté par l'utilisateur) |
 
 ### Epics (`docs/epics/README.md`)
 
@@ -41,7 +41,9 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**Phase 6 — Finalisation** (`docs/03-plan-implementation.md` §9). Faites : 6.1, 6.2, 6.3, 6.7 (`.\run.ps1 -Tunnel`), 6.8, 6.9. Restent : 6.4 (téléphones réels, utilisateur), 6.5 (revue visuelle par rapport aux maquettes), 6.6 (pare-feu, veille ; le premier administrateur est demandé par `run.ps1`). Le vrai CSV ne se lit qu'à travers les outils qui n'affichent aucune donnée ; ne jamais le copier.
+**MVP terminé** (phase 6 faite le 2026-10-05 ; `.\run.ps1 -Tunnel` pour un accès Internet). Le test du directeur est **reporté** par l'utilisateur ; le MVP reste en service. **Suite : V2, phase 7** (`docs/v2/03-plan-implementation.md` §4), à commencer par 7.1 (dossier `app-web-v2`). Le vrai CSV ne se lit qu'à travers les outils qui n'affichent aucune donnée ; ne jamais le copier.
+
+**V2 — Parcours professionnel :** spécifications dans `docs/v2/` : PRD v1.2 et Solution Design v1.0 validés le 2026-10-05 ; epics E06 (US-25 → US-31) et E07 (US-32 → US-35), toutes « Pas encore » ; plan `docs/v2/03-plan-implementation.md` (phases 7 → 10) validé le 2026-10-05 ; le MVP **reste en service** pendant le développement V2. Le code V2 se fait dans `ACME SA\app-web-v2` (git worktree, port 8002, `C:\acme-data-v2`). Dans `app-web` tant que le MVP est en service : ni code, ni `npm run build`, ni `npx playwright test` (recompile `dist`), ni changement de branche.
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
