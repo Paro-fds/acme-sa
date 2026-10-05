@@ -24,6 +24,7 @@ class UpdateOut(BaseModel):
     created_at: datetime | None
     updated_at: datetime | None
     submitted_at: datetime | None
+    reopened: bool
     changes: list[ChangeOut]
 
     @classmethod
@@ -34,6 +35,7 @@ class UpdateOut(BaseModel):
             created_at=view.created_at,
             updated_at=view.updated_at,
             submitted_at=view.submitted_at,
+            reopened=view.reopened,
             changes=[ChangeOut(**change.__dict__) for change in view.changes],
         )
 
@@ -89,3 +91,15 @@ def save_changes(payload: ChangesIn, request: Request, employee_id: str = Depend
 @router.post("/submit", response_model=UpdateOut)
 def submit(payload: SubmitIn, request: Request, employee_id: str = Depends(current_employee_id)) -> UpdateOut:
     return UpdateOut.of(container(request).submit_update().execute(employee_id, payload.confirmed))
+
+
+@router.post("/reopen", response_model=UpdateOut)
+def reopen(request: Request, employee_id: str = Depends(current_employee_id)) -> UpdateOut:
+    """US-24 « Modifier à nouveau »."""
+    return UpdateOut.of(container(request).reopen_update().execute(employee_id))
+
+
+@router.post("/discard", response_model=UpdateOut)
+def discard(request: Request, employee_id: str = Depends(current_employee_id)) -> UpdateOut:
+    """US-24 « Annuler les modifications »."""
+    return UpdateOut.of(container(request).discard_update().execute(employee_id))

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router'
+import logo from '../assets/logo-acme.png'
 import AccountMenu from './AccountMenu.jsx'
 
 /**
@@ -21,7 +22,7 @@ export default function AppHeader({ title, backTo, actions, account = false, wid
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
         )}
-        <span className="rounded-md bg-primary px-2 py-1 text-sm font-bold tracking-wide text-white">ACME SA</span>
+        <img src={logo} alt="ACME SA" width="40" height="40" className="size-10 shrink-0 rounded-full" />
         <h1 className="flex-1 truncate text-lg font-semibold">{title}</h1>
         {actions}
         {account && <AccountMenu space={account === 'admin' ? 'admin' : 'employee'} />}

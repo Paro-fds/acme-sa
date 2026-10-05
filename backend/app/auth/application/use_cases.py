@@ -5,12 +5,11 @@ from app.auth.application.sessions import SessionService
 from app.auth.domain.errors import (
     AccountAlreadyExists,
     AccountLocked,
-    InvalidAdminCredentials,
     PasswordNotSet,
     invalid_credentials,
 )
 from app.auth.domain.lockout import SHOW_REMAINING_FROM
-from app.auth.domain.model import ADMIN_SUBJECT_ID, Account, SubjectType
+from app.auth.domain.model import Account, SubjectType
 from app.auth.domain.password import validate_new_password
 from app.auth.domain.ports import AccountRepository, PasswordHasher
 from app.employee.domain.repository import EmployeeRepository
@@ -107,51 +106,3 @@ class LoginEmployee:
         account.register_success()
         self._accounts.save(account)
         return self._sessions.open(SubjectType.EMPLOYEE, employee.id)
-
-
-class LoginAdmin:
-    """US-15 : connexion du compte administrateur unique défini dans la configuration.
-
-    Même blocage que les employés (5 échecs consécutifs → 15 minutes). Le compteur est
-    conservé dans le dépôt des comptes sous l'identifiant `admin` (aucun employé n'a cet
-    identifiant) : il survit à un redémarrage. Un identifiant erroné compte aussi comme un échec.
-    """
-
-    def __init__(
-        self,
-        username: str,
-        password_hash: str,
-        accounts: AccountRepository,
-        hasher: PasswordHasher,
-        sessions: SessionService,
-        clock: Clock,
-    ) -> None:
-        self._username = username
-        self._password_hash = password_hash
-        self._accounts = accounts
-        self._hasher = hasher
-        self._sessions = sessions
-        self._clock = clock
-
-    def execute(self, username: str, password: str) -> str:
-        lockout = self._accounts.get(ADMIN_SUBJECT_ID) or Account(employee_id=ADMIN_SUBJECT_ID, password_hash=None)
-        now = self._clock.now()
-        if lockout.is_locked(now):
-            raise AccountLocked()
-
-        valid = (
-            bool(self._password_hash)
-            and username == self._username
-            and self._hasher.verify(self._password_hash, password)
-        )
-        if not valid:
-            lockout.register_failure(now)
-            self._accounts.save(lockout)
-            if lockout.is_locked(now):
-                raise AccountLocked()
-            raise InvalidAdminCredentials()
-
-        if lockout.failed_attempts:
-            lockout.register_success()
-            self._accounts.save(lockout)
-        return self._sessions.open(SubjectType.ADMIN, ADMIN_SUBJECT_ID)

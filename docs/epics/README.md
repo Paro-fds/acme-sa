@@ -32,6 +32,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | | [US-10](E03-mise-a-jour/US-10-brouillon.md) | Sauvegarder et reprendre un brouillon | F-14 | MUST | Fait |
 | | [US-11](E03-mise-a-jour/US-11-verifier-modifications.md) | Vérifier ses modifications | F-15 | MUST | Fait |
 | | [US-12](E03-mise-a-jour/US-12-soumettre.md) | Confirmer et soumettre | F-16, F-17 | MUST | Fait |
+| | [US-24](E03-mise-a-jour/US-24-modifier-a-nouveau.md) | Modifier à nouveau son dossier après l'envoi | F-31 | SHOULD | Fait |
 | **E04 Documents** | [US-13](E04-documents/US-13-ajouter-document.md) | Ajouter un document | F-19, F-21 | MUST | Fait |
 | | [US-14](E04-documents/US-14-supprimer-document.md) | Supprimer un document | F-20 | SHOULD | Fait |
 | **E05 Administration** | [US-15](E05-administration/US-15-connexion-admin.md) | Se connecter en administrateur | F-22 | MUST | Fait |
@@ -42,6 +43,7 @@ Un epic est **Fait** quand toutes ses stories sont « Fait » ; **En cours** dè
 | | [US-20](E05-administration/US-20-consulter-dossier.md) | Consulter le dossier d'un employé | F-27 | MUST | Fait |
 | | [US-21](E05-administration/US-21-consulter-documents-employe.md) | Consulter les documents d'un employé | F-28 | MUST | Fait |
 | | [US-22](E05-administration/US-22-reinitialiser-acces.md) | Réinitialiser l'accès d'un employé | F-29 | SHOULD | Fait |
+| | [US-23](E05-administration/US-23-gerer-administrateurs.md) | Gérer les comptes administrateurs | F-30 | SHOULD | Fait |
 
 > La numérotation des stories est propre à ces spécifications et remplace celle du cahier des charges (US-01 à US-14).
 

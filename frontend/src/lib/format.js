@@ -8,6 +8,12 @@ export function formatDate(isoDate) {
   return `${day}/${month}/${year}`
 }
 
+/** Horodatage ISO → "04/10/2026" (jour local du téléphone, contrairement à `formatDate` qui lit une date sans heure). */
+export function formatLocalDate(isoDateTime) {
+  if (!isoDateTime) return ''
+  return dateFormatter.format(new Date(isoDateTime))
+}
+
 /** Horodatage ISO → "04/10/2026 à 14:32" (heure locale du téléphone). */
 export function formatDateTime(isoDateTime) {
   if (!isoDateTime) return ''

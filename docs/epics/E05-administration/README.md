@@ -1,6 +1,6 @@
 # E05 — Administration
 
-**Statut de l'epic :** Fait (US-15 à US-22).
+**Statut de l'epic :** Fait (US-15 à US-23).
 
 **Objectif :** permettre à l'administrateur de suivre l'avancement de la campagne, de retrouver rapidement un employé et de consulter ce qu'il a transmis, **sans jamais modifier un dossier**.
 
@@ -19,6 +19,7 @@
 | [US-20](US-20-consulter-dossier.md) | Consulter le dossier d'un employé | MUST |
 | [US-21](US-21-consulter-documents-employe.md) | Consulter les documents d'un employé | MUST |
 | [US-22](US-22-reinitialiser-acces.md) | Réinitialiser l'accès d'un employé | SHOULD |
+| [US-23](US-23-gerer-administrateurs.md) | Gérer les comptes administrateurs | SHOULD |
 
 ```text
 Connexion admin --> Tableau de bord --> Liste des employés --> Dossier (lecture seule)

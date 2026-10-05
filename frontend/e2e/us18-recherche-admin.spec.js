@@ -17,9 +17,10 @@ test('recherche admin : barre collante, résultats, aucun résultat, effacer', a
   await page.mouse.wheel(0, 2000)
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200)
   await expect(search).toBeInViewport()
-  const top = (await page.getByRole('search').boundingBox()).y
-  expect(top).toBeGreaterThanOrEqual(60)
-  expect(top).toBeLessThan(80)
+  // Mesure répétée : sous charge, le défilement peut être encore en cours au premier relevé.
+  const top = () => page.getByRole('search').boundingBox().then((box) => box.y)
+  await expect.poll(top).toBeGreaterThanOrEqual(60)
+  expect(await top()).toBeLessThan(80)
 
   // CA-01 : recherche par nom
   await search.fill('pierre')

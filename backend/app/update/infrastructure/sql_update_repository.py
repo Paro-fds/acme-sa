@@ -18,6 +18,7 @@ class UpdateRow(Base):
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime)
     submitted_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
     changes: Mapped[list["ChangeRow"]] = relationship(lazy="selectin", viewonly=True)
+    submitted_changes: Mapped[list["SubmittedChangeRow"]] = relationship(lazy="selectin", viewonly=True)
 
 
 class ChangeRow(Base):
@@ -32,7 +33,30 @@ class ChangeRow(Base):
     changed_at: Mapped[datetime] = mapped_column(UtcDateTime)
 
 
+class SubmittedChangeRow(Base):
+    """Copie des changements du dernier envoi (US-24) : lue par l'administration et l'identification."""
+
+    __tablename__ = "employee_submitted_change"
+    __table_args__ = (UniqueConstraint("update_id", "field_name"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    update_id: Mapped[int] = mapped_column(ForeignKey("employee_update.id", ondelete="CASCADE"))
+    field_name: Mapped[str] = mapped_column(String)
+    old_value: Mapped[str] = mapped_column(String)
+    new_value: Mapped[str] = mapped_column(String)
+    changed_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+def _changes(rows) -> dict[str, FieldChange]:
+    return {row.field_name: FieldChange(row.field_name, row.old_value, row.new_value, row.changed_at) for row in rows}
+
+
 def _to_domain(row: UpdateRow) -> EmployeeUpdate:
+    changes = _changes(row.changes)
+    submitted_changes = _changes(row.submitted_changes)
+    if row.status == UpdateStatus.SUBMITTED and not row.submitted_changes:
+        # Envoi enregistré avant US-24 (pas de copie) : les changements sont ceux de l'envoi.
+        submitted_changes = _changes(row.changes)
     return EmployeeUpdate(
         employee_id=row.employee_id,
         status=UpdateStatus(row.status),
@@ -40,10 +64,8 @@ def _to_domain(row: UpdateRow) -> EmployeeUpdate:
         created_at=row.created_at,
         updated_at=row.updated_at,
         submitted_at=row.submitted_at,
-        changes={
-            change.field_name: FieldChange(change.field_name, change.old_value, change.new_value, change.changed_at)
-            for change in row.changes
-        },
+        changes=changes,
+        submitted_changes=submitted_changes,
     )
 
 
@@ -73,15 +95,16 @@ class SqlUpdateRepository:
             row.submitted_at = update.submitted_at
             session.flush()
 
-            session.execute(delete(ChangeRow).where(ChangeRow.update_id == row.id))
-            session.expire(row, ["changes"])
-            session.add_all(
-                ChangeRow(
-                    update_id=row.id,
-                    field_name=change.field_name,
-                    old_value=change.old_value,
-                    new_value=change.new_value,
-                    changed_at=change.changed_at,
+            for table, changes in ((ChangeRow, update.changes), (SubmittedChangeRow, update.submitted_changes)):
+                session.execute(delete(table).where(table.update_id == row.id))
+                session.add_all(
+                    table(
+                        update_id=row.id,
+                        field_name=change.field_name,
+                        old_value=change.old_value,
+                        new_value=change.new_value,
+                        changed_at=change.changed_at,
+                    )
+                    for change in changes.values()
                 )
-                for change in update.changes.values()
-            )
+            session.expire(row, ["changes", "submitted_changes"])

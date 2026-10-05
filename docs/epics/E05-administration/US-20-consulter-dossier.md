@@ -76,6 +76,8 @@ Alors le dossier d'EMP-A indique « Compte activé » et celui d'EMP-B « Compte
 - Écran `/admin/employes/:id` (`features/admin/EmployeeDetailPage.jsx`) : en-tête (initiales, badge « Lecture seule », nom + « anciennement … », matricule · agence · poste, pastille), blocs « Mise à jour » (`ValueComparison`), Identité / Coordonnées / Informations professionnelles (sections partagées avec le profil employé : `features/profile/profileSections.js`, `InfoSection showEditable={false}`), « Accès ». Le bloc « Documents » viendra avec US-21.
 - La liste transmet sa recherche et son filtre au dossier (`state.listSearch`) : le bouton retour de l'en-tête y ramène, comme le retour arrière du navigateur. E2E : `us18-recherche-admin.spec.js` (CA-11 de US-18) et `walking-skeleton.spec.js` (dossier de JOSEPH Jean avec son changement).
 
+- **Depuis US-24 :** le dossier montre la **dernière version envoyée** (valeurs, changements, date) ; une nouvelle modification en cours reste invisible.
+
 ## Hors périmètre
 
 - Modification du dossier par l'admin (WON'T V1).

@@ -7,7 +7,7 @@ from app.auth.api.dependencies import (
     SESSION_COOKIE,
     clear_session_cookie,
     container,
-    current_admin,
+    current_admin_pending,
     current_employee_id,
     set_session_cookie,
 )
@@ -83,7 +83,7 @@ def admin_login(payload: AdminLoginIn, request: Request, response: Response) -> 
     set_session_cookie(request, response, token)
 
 
-@router.post("/api/admin/auth/logout", status_code=204, dependencies=[Depends(current_admin)])
+@router.post("/api/admin/auth/logout", status_code=204, dependencies=[Depends(current_admin_pending)])
 def admin_logout(request: Request, response: Response) -> None:
     container(request).session_service().close(request.cookies.get(SESSION_COOKIE))
     clear_session_cookie(response)

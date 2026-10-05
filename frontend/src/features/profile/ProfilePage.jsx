@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { decide, getProfile } from '../../api/employee.js'
+import { decide, discardUpdate, getProfile, reopenUpdate } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
 import { initials } from '../../lib/format.js'
@@ -37,6 +37,7 @@ function ProfileSummary({ profile }) {
 }
 
 export const DECLINED_NOTICE = "C'est noté. Vous pourrez mettre à jour votre dossier à tout moment."
+export const DISCARDED_NOTICE = 'Modifications annulées : votre dernier envoi est conservé.'
 
 /** US-05 (profil), US-06 (état de la mise à jour), US-08 (choix Oui / Non) et accès à « Mes documents » (US-07). */
 export default function ProfilePage() {
@@ -72,6 +73,30 @@ export default function ProfilePage() {
     setSending(false)
   }
 
+  /** US-24 : « Modifier à nouveau » (reopen) et « Annuler les modifications » (discard). */
+  async function sendAction(action) {
+    setSending(true)
+    setNotice(null)
+    setError(null)
+    try {
+      if (action === 'reopen') {
+        await reopenUpdate()
+        navigate('/mise-a-jour/informations')
+        return
+      }
+      setUpdate(await discardUpdate())
+      setNotice(DISCARDED_NOTICE)
+      reload()
+    } catch (apiError) {
+      if (redirectIfUnauthorized(apiError)) return
+      setError(apiError.message)
+      // État changé depuis un autre appareil : on affiche l'état réel.
+      setUpdate(null)
+      reload()
+    }
+    setSending(false)
+  }
+
   if (loading) return <Page account title="Mon profil"><p role="status">Chargement…</p></Page>
   if (loadError) return <Page account title="Mon profil"><Alert>{loadError.message}</Alert></Page>
 
@@ -86,6 +111,8 @@ export default function ProfilePage() {
         onYes={() => sendDecision(true)}
         onNo={() => sendDecision(false)}
         onResume={() => navigate('/mise-a-jour/informations')}
+        onReopen={() => sendAction('reopen')}
+        onDiscard={() => sendAction('discard')}
         sending={sending}
         notice={notice}
         error={error}

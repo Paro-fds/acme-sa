@@ -10,21 +10,14 @@ class SubjectType(StrEnum):
     ADMIN = "ADMIN"
 
 
-ADMIN_SUBJECT_ID = "admin"
+class Lockable:
+    """Blocage après des mots de passe erronés (US-03, US-15), partagé par les comptes employé et admin.
 
+    La classe qui l'utilise porte les attributs `failed_attempts` et `locked_until`.
+    """
 
-@dataclass
-class Account:
-    """Compte d'accès d'un employé : mot de passe et état du blocage."""
-
-    employee_id: str
-    password_hash: str | None
-    failed_attempts: int = 0
-    locked_until: datetime | None = None
-
-    @property
-    def has_password(self) -> bool:
-        return bool(self.password_hash)
+    failed_attempts: int
+    locked_until: datetime | None
 
     @property
     def remaining_attempts(self) -> int:
@@ -44,6 +37,20 @@ class Account:
     def register_success(self) -> None:
         self.failed_attempts = 0
         self.locked_until = None
+
+
+@dataclass
+class Account(Lockable):
+    """Compte d'accès d'un employé : mot de passe et état du blocage."""
+
+    employee_id: str
+    password_hash: str | None
+    failed_attempts: int = 0
+    locked_until: datetime | None = None
+
+    @property
+    def has_password(self) -> bool:
+        return bool(self.password_hash)
 
 
 @dataclass

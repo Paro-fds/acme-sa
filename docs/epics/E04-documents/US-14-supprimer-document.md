@@ -52,6 +52,8 @@ Alors la réponse est `404` et rien n'est supprimé.
 - La ligne est supprimée en base, puis le fichier sur disque.
 - Test bout en bout ajouté à la fin de `e2e/us13-ajout-document.spec.js` (ajout puis suppression, vérifiée après rechargement).
 
+- **Depuis US-24 :** la suppression est de nouveau possible pendant une nouvelle modification (« Modifier à nouveau »).
+
 ## Hors périmètre
 
 - Corbeille ou restauration.

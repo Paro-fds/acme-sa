@@ -162,7 +162,7 @@ employee_account                      session
 -----------------                     -------
 employee_id      PK                   token_hash     PK   (SHA-256 du jeton)
 password_hash                         subject_type        EMPLOYEE | ADMIN
-failed_attempts  int                  subject_id          employee_id ou "admin"
+failed_attempts  int                  subject_id          employee_id ou id admin
 locked_until     datetime | null      created_at
 created_at                            last_seen_at
 updated_at                            expires_at
@@ -176,6 +176,18 @@ accepted         bool                 old_value           valeur de référence 
 created_at                            new_value
 updated_at                            changed_at
 submitted_at     datetime | null      UNIQUE(update_id, field_name)
+
+admin_account (US-23)
+---------------------
+id               PK (UUID)
+username         unique (comparaison sans majuscules)
+password_hash
+must_change_password bool          mot de passe provisoire
+failed_attempts  int
+locked_until     datetime | null
+created_at
+created_by       id admin | null   (null : premier compte ou migration)
+last_login_at    datetime | null
 
 document
 --------
@@ -206,7 +218,8 @@ Un employé ayant répondu « Non » peut revenir et répondre « Oui » plus ta
 
 - `old_value` = valeur du CSV au moment de la modification ; `new_value` = valeur saisie.
 - Un champ remis à sa valeur d'origine est **supprimé** de `employee_change` (pas de faux changement).
-- Après `SUBMITTED`, plus aucune écriture n'est acceptée (D-04).
+- Après `SUBMITTED`, plus aucune écriture n'est acceptée **tant que l'employé n'a pas rouvert** sa mise à jour (D-04 révisée, US-24).
+- **Dernier envoi (US-24)** : chaque envoi copie les changements dans `employee_submitted_change` (même structure que `employee_change`) ; `submitted_at` = date du dernier envoi. « Modifier à nouveau » repasse le statut à `DRAFT` en gardant cette copie ; l'administration, l'identification et le profil lisent la copie, le brouillon reste dans `employee_change`. « Annuler les modifications » remet le brouillon à la copie et le statut à `SUBMITTED`. Statut admin `UPDATED` = au moins un envoi.
 
 ## 7. Registre des champs modifiables
 
@@ -245,8 +258,9 @@ POST /api/auth/login      {last_name, first_name, birth_date, password}
 
 ### 8.2 Administrateur
 
-- Compte unique : `ADMIN_USERNAME` et `ADMIN_PASSWORD_HASH` (hash Argon2) dans la configuration.
-- `POST /api/admin/auth/login {username, password}` → cookie de session `ADMIN`.
+- Comptes enregistrés dans la table `admin_account` (US-23, F-30) : identifiant unique (sans tenir compte des majuscules), hash Argon2, blocage **par compte**, mot de passe provisoire à changer à la première connexion (`403 PASSWORD_CHANGE_REQUIRED` sur les autres routes tant qu'il n'est pas changé).
+- Premier compte : demandé par `run.ps1` dans la console (`python -m app.tools.create_admin --if-missing`) ; aucune route web ne crée de compte sans session admin. Migration : si la table est vide, `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` de la configuration sont importés au démarrage.
+- `POST /api/admin/auth/login {username, password}` → cookie de session `ADMIN` (`subject_id` = identifiant du compte admin). Identifiant inconnu : même message qu'un mauvais mot de passe.
 - Même mécanisme de blocage que les employés.
 
 ### 8.3 Sessions
@@ -308,7 +322,9 @@ Format d'erreur commun : `{"error": {"code": "IDENTITY_NOT_RECOGNIZED", "message
 | GET | `/api/me/update/fields` | Registre des champs modifiables |
 | POST | `/api/me/update/decision` | `{accepted: true\|false}` — choix Oui/Non |
 | PUT | `/api/me/update/changes` | `{changes: {field: value, ...}}` — enregistre le brouillon |
-| POST | `/api/me/update/submit` | `{confirmed: true}` — soumission définitive |
+| POST | `/api/me/update/submit` | `{confirmed: true}` — envoi (remplace le précédent, US-24) |
+| POST | `/api/me/update/reopen` | « Modifier à nouveau » après un envoi (US-24) |
+| POST | `/api/me/update/discard` | « Annuler les modifications » : retour au dernier envoi (US-24) |
 | GET | `/api/me/documents` | Liste des documents |
 | POST | `/api/me/documents` | Envoi (multipart : `file`, `document_type`) |
 | DELETE | `/api/me/documents/{id}` | Suppression (si non soumis) |
@@ -358,7 +374,7 @@ Les écrans admin sont conçus directement en code, avec les composants et jeton
 
 - **Composants partagés** issus des maquettes : `AppHeader`, `Stepper`, `StatusBadge`, `FieldCard`, `ValueComparison`, `StickyActionBar`, `DocumentItem`, `EmptyState`.
 - Garde de route : redirection vers `/` (ou `/admin/connexion`) si l'API répond 401.
-- Après soumission, les routes `/mise-a-jour/*` redirigent vers `/profil`.
+- Après soumission, les routes `/mise-a-jour/*` redirigent vers `/profil` (sauf après « Modifier à nouveau », US-24).
 - Images et polices servies localement (pas de dépendance aux URL Google des maquettes).
 
 ## 12. Configuration
@@ -369,8 +385,8 @@ Fichier `.env` (hors git), avec un `.env.example` versionné :
 |---|---|---|
 | `ACME_CSV_PATH` | `data/vault-employee-list_20261001-1400.csv` | Source de référence |
 | `ACME_DATA_DIR` | `C:\acme-data` | Base SQLite + documents (hors OneDrive) |
-| `ADMIN_USERNAME` | `admin` | Compte admin |
-| `ADMIN_PASSWORD_HASH` | `$argon2id$...` | Généré par `python -m app.tools.hash_password` |
+| `ADMIN_USERNAME` | `admin` | Facultatif (migration) : compte importé si aucun administrateur n'existe en base (US-23) |
+| `ADMIN_PASSWORD_HASH` | `$argon2id$...` | Facultatif (migration), avec `ADMIN_USERNAME` |
 | `EMPLOYEE_SESSION_MINUTES` | `30` | |
 | `ADMIN_SESSION_MINUTES` | `120` | |
 | `MAX_UPLOAD_MB` | `5` | |

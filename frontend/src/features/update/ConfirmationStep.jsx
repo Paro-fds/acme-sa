@@ -76,7 +76,7 @@ export default function ConfirmationStep() {
         </dl>
       </section>
 
-      <Alert tone="info">Votre mise à jour ne peut plus être modifiée.</Alert>
+      <Alert tone="info">Une erreur ou un changement ? Vous pourrez modifier à nouveau votre dossier depuis votre profil.</Alert>
     </Page>
   )
 }

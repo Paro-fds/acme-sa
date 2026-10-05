@@ -1,6 +1,5 @@
 """US-22 — Réinitialiser l'accès d'un employé (T-22.1 → T-22.4)."""
 
-from app.auth.domain.model import ADMIN_SUBJECT_ID
 from tests.employees import EMP_A, EMP_B, EMP_I
 
 PDF = b"%PDF-1.7\n" + b"contenu du diplome" * 50
@@ -150,16 +149,15 @@ def test_ca06_reset_twice_gives_409_the_second_time(admin_client, account):
 # --- Sécurité --------------------------------------------------------------------------
 
 
-def test_unknown_inactive_or_admin_id_gives_404(admin_client, client, container):
-    # Le blocage de l'administrateur est stocké sous l'identifiant « admin » : il n'est jamais touché.
-    client.post("/api/admin/auth/login", json={"username": "admin", "password": "mauvais"})
-    admin_lock = container.accounts.get(ADMIN_SUBJECT_ID)
+def test_unknown_inactive_or_admin_id_gives_404(admin_client, container):
+    # Seuls les employés actifs du CSV sont concernés : jamais un compte administrateur (US-23).
+    admin = container.admin_accounts.find_by_username("admin")
 
-    for employee_id in (EMP_I.id, "9999", ADMIN_SUBJECT_ID):
+    for employee_id in (EMP_I.id, "9999", "admin", admin.id):
         response = admin_client.post(url(employee_id))
         assert response.status_code == 404
         assert response.json()["error"]["code"] == "EMPLOYEE_NOT_FOUND"
-    assert container.accounts.get(ADMIN_SUBJECT_ID) == admin_lock
+    assert container.admin_accounts.get(admin.id) == admin
 
 
 def test_reset_requires_an_admin_session(account, client, employee_client, container):

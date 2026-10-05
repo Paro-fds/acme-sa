@@ -23,6 +23,7 @@ function renderWith(load) {
     <MemoryRouter initialEntries={['/profil']}>
       <Routes>
         <Route path="/" element={<LoginProbe />} />
+        <Route path="/admin/mot-de-passe" element={<p>Choix du mot de passe</p>} />
         <Route path="/profil" element={<Screen load={load} />} />
       </Routes>
     </MemoryRouter>,
@@ -40,6 +41,12 @@ describe('useLoader', () => {
     renderWith(() => Promise.reject(new ApiError(401, 'SESSION_EXPIRED', 'Votre session a expiré. Reconnectez-vous.')))
 
     expect(await screen.findByText('Connexion : Votre session a expiré. Reconnectez-vous.')).toBeInTheDocument()
+  })
+
+  it('US-23 CA-07 : mot de passe admin provisoire → écran de choix du mot de passe', async () => {
+    renderWith(() => Promise.reject(new ApiError(403, 'PASSWORD_CHANGE_REQUIRED', 'Choisissez votre mot de passe pour continuer.')))
+
+    expect(await screen.findByText('Choix du mot de passe')).toBeInTheDocument()
   })
 
   it("les autres erreurs restent affichées sur l'écran", async () => {

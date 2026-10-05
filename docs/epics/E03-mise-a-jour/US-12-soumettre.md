@@ -77,6 +77,8 @@ Alors le fichier CSV source est inchangé.
 - T-12.6 : `e2e/us12-parcours-complet.spec.js` couvre le parcours complet, ajout d'un diplôme PDF compris (depuis US-13).
 - L'écran de confirmation n'affiche ni référence ni récépissé PDF (absents de la story) et n'annonce pas de notification à l'administration (aucune notification dans le MVP).
 
+- **Depuis US-24 :** l'envoi n'est plus définitif : « Modifier à nouveau » permet de corriger puis de renvoyer ; chaque envoi remplace le précédent.
+
 ## Hors périmètre
 
 - Accusé de réception par email ou SMS.

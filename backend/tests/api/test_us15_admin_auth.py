@@ -127,11 +127,12 @@ def test_ca03_lock_ends_after_15_minutes(client, clock):
     assert _login(client).status_code == 204
 
 
-def test_ca03_wrong_username_also_counts(client, clock):
+def test_ca03_wrong_username_locks_no_account(client, clock):
+    # Depuis US-23 : blocage par compte ; un identifiant inconnu ne bloque personne.
     for _ in range(5):
-        _login(client, {"username": "inconnu", "password": "x"})
+        assert _login(client, {"username": "inconnu", "password": "x"}).status_code == 401
 
-    assert _login(client).status_code == 423
+    assert _login(client).status_code == 204
 
 
 def test_ca03_success_resets_the_counter(client, clock):

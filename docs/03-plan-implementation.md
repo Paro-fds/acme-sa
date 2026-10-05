@@ -5,7 +5,7 @@
 | **Version** | 1.1 — validé le 2026-10-04 ; suivi d'avancement ajouté (statuts des phases, epics et stories) |
 | **Date** | 2026-10-04 |
 | **Entrées** | `01-prd.md` v1.0, `02-solution-design.md` v1.0, `epics/` (22 user stories) |
-| **Avancement mis à jour le** | 2026-10-04 (après US-22 : phase 5 terminée) |
+| **Avancement mis à jour le** | 2026-10-05 (après US-24 ; phase 6 en cours : 6.1, 6.2, 6.3, 6.7, 6.8, 6.9 faites) |
 
 ---
 
@@ -75,10 +75,10 @@ infrastructure ──> application ──> domain
 | **0** | Mise en place | — | Application vide qui démarre, tests qui tournent | **Fait** |
 | **1** | **Walking Skeleton** | versions minimales de US-01, 02, 05, 08, 09, 12, 15, 17 | Un employé modifie son téléphone, l'admin le voit « effectué » | **Fait** |
 | **2** | Identification complète | US-01, 02, 03, 04 | Connexion sécurisée : homonymes, doublon, blocage, déconnexion | **Fait** |
-| **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12 | Parcours employé complet sans documents | **Fait** |
+| **3** | Consultation et mise à jour complètes | US-05, 06, 08, 09, 10, 11, 12, 24 | Parcours employé complet sans documents | **Fait** |
 | **4** | Documents | US-13, 14, 07 | Ajout et consultation de documents depuis le téléphone | **Fait** |
-| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22 | Tableau de bord, recherche, dossiers, documents, réinitialisation | **Fait** |
-| **6** | Finalisation et préparation du test | — | Application prête pour le directeur | Pas encore |
+| **5** | Administration complète | US-15, 16, 17, 18, 19, 20, 21, 22, 23 | Tableau de bord, recherche, dossiers, documents, réinitialisation, comptes admin | **Fait** |
+| **6** | Finalisation et préparation du test | — | Application prête pour le directeur | **En cours** |
 
 ```text
 Phase 0 ──> Phase 1 (Skeleton) ──> Phase 2 ──> Phase 3 ──> Phase 4
@@ -106,13 +106,13 @@ La phase 5 ne dépend que du Skeleton et de la phase 2 (connexion) ; elle peut �
 |---|---|---|---|
 | E01 Identification | US-01 → US-04 | 1, 2 | **Fait** |
 | E02 Consultation | US-05, 06, 07 | 3 (US-05, 06), 4 (US-07) | **Fait** |
-| E03 Mise à jour | US-08 → US-12 | 1, 3 | **Fait** |
+| E03 Mise à jour | US-08 → US-12, US-24 | 1, 3 | **Fait** |
 | E04 Documents | US-13, 14 | 4 | **Fait** |
-| E05 Administration | US-15 → US-22 | 1, 5 | **Fait** |
+| E05 Administration | US-15 → US-23 | 1, 5 | **Fait** |
 
 Un epic et une phase ne coïncident pas toujours : E02 est réparti sur les phases 3 et 4, car la consultation des documents (US-07) a besoin de l'ajout de documents (US-13).
 
-**Stories :** 22 / 22 « Fait » (US-01 → US-22) ; tous les epics sont terminés. Reste la phase 6 (finalisation).
+**Stories :** 24 / 24 « Fait » (US-01 → US-24) ; tous les epics sont terminés. Reste la phase 6 (finalisation).
 
 ---
 
@@ -190,7 +190,7 @@ Les écrans du Skeleton utilisent déjà le design system, sans viser la fidéli
 
 ## 6. Phase 3 — Consultation et mise à jour complètes
 
-**Statut : Fait** (epic E03 terminé ; `e2e/us10-brouillon.spec.js` et `e2e/us12-parcours-complet.spec.js` passent).
+**Statut : Fait** (epic E03 terminé, US-24 comprise ; `e2e/us10-brouillon.spec.js`, `e2e/us12-parcours-complet.spec.js` et `e2e/us24-modifier-a-nouveau.spec.js` passent).
 
 | Ordre | Story | Points d'attention | Statut |
 |---|---|---|---|
@@ -201,6 +201,7 @@ Les écrans du Skeleton utilisent déjà le design system, sans viser la fidéli
 | 3.5 | US-10 Brouillon | sauvegarde automatique (2 s), bouton manuel, reprise, erreur réseau | Fait |
 | 3.6 | US-11 Vérifier | composant `ValueComparison`, cas « aucune modification » | Fait |
 | 3.7 | US-12 Soumettre | verrouillage de toutes les écritures après soumission, double clic, CSV inchangé | Fait |
+| 3.8 | US-24 Modifier à nouveau | copie du dernier envoi pour l'admin et l'identification, brouillon invisible, abandon | Fait |
 
 Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `FieldCard`, `ValueComparison`, `StickyActionBar`.
 
@@ -224,7 +225,7 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 
 ## 8. Phase 5 — Administration complète
 
-**Statut : Fait** (epic E05 terminé ; tous les tests E05 et `e2e/us18-recherche-admin.spec.js` passent).
+**Statut : Fait** (epic E05 terminé, US-23 comprise ; tous les tests E05 et `e2e/us18-recherche-admin.spec.js` passent).
 
 | Ordre | Story | Points d'attention | Statut |
 |---|---|---|---|
@@ -236,6 +237,7 @@ Composants partagés créés dans cette phase : `Stepper`, `StatusBadge`, `Field
 | 5.6 | US-20 Dossier | lecture seule vérifiée par test sur les routes, brouillon jamais exposé | Fait |
 | 5.7 | US-21 Documents de l'employé | aperçu plein écran | Fait |
 | 5.8 | US-22 Réinitialiser l'accès | sessions coupées, données intactes | Fait |
+| 5.9 | US-23 Comptes administrateurs | premier compte en console (jamais par le web), mot de passe provisoire, blocage par compte | Fait |
 
 Les écrans admin n'ont pas de maquette : ils sont construits directement avec les composants et jetons du design system des phases précédentes, sans étape de validation visuelle intermédiaire.
 
@@ -245,19 +247,19 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 
 ## 9. Phase 6 — Finalisation et préparation du test
 
-**Statut : Pas encore.**
+**Statut : En cours.**
 
-| # | Tâche |
-|---|---|
-| 6.1 | Exécution de **tous** les tests (unitaires, API, composants, E2E) et des contrats d'architecture (`lint-imports`) |
-| 6.2 | Démarrage avec le **vrai CSV** : vérification du chargement (364 actifs), des accents, des formats de téléphone, du doublon (écran « Contactez l'administration ») |
-| 6.3 | Contrôle de sécurité : aucune colonne exclue dans les réponses (test automatique sur le vrai CSV : recherche des valeurs des colonnes exclues dans toutes les réponses JSON), cookies `HttpOnly`, aucun mot de passe dans les logs |
-| 6.4 | Contrôle mobile sur au moins un téléphone Android et un iPhone : zones tactiles, clavier, appareil photo, sélecteur de date |
-| 6.5 | Revue visuelle par rapport aux maquettes Stitch, écran par écran |
-| 6.6 | Configuration de la machine : `ACME_DATA_DIR` hors OneDrive, règle de pare-feu Windows (port 8000), mise en veille désactivée, mot de passe admin définitif |
-| 6.7 | Option tunnel (Cloudflare Tunnel ou ngrok) si le directeur teste hors du réseau local |
-| 6.8 | `docs/guide-demarrage.md` : lancer, arrêter, sauvegarder `ACME_DATA_DIR`, remplacer le CSV |
-| 6.9 | `docs/scenario-test-directeur.md` : scénario guidé reprenant les 7 critères de succès du PRD (§9), avec une fiche d'observation (temps, demandes d'aide, incidents) |
+| # | Tâche | Statut |
+|---|---|---|
+| 6.1 | Exécution de **tous** les tests (unitaires, API, composants, E2E) et des contrats d'architecture (`lint-imports`) | Fait (455 tests backend, 3 contrats, 242 tests composants, 11 E2E, build) |
+| 6.2 | Démarrage avec le **vrai CSV** : vérification du chargement (364 actifs), des accents, des formats de téléphone, du doublon (écran « Contactez l'administration ») | Fait : vrai CSV contrôlé (364 actifs, dates et accents corrects, téléphones à 11 chiffres sans « + », 1 doublon) |
+| 6.3 | Contrôle de sécurité : aucune colonne exclue dans les réponses (test automatique sur le vrai CSV : recherche des valeurs des colonnes exclues dans toutes les réponses JSON), cookies `HttpOnly`, aucun mot de passe dans les logs | Fait : aucune colonne exclue dans 2 192 réponses, aucun mot de passe dans les journaux, cookie `HttpOnly`/`SameSite=Strict` (`Secure` en HTTPS) |
+| 6.4 | Contrôle mobile sur au moins un téléphone Android et un iPhone : zones tactiles, clavier, appareil photo, sélecteur de date | Pas encore (utilisateur, téléphones réels) |
+| 6.5 | Revue visuelle par rapport aux maquettes Stitch, écran par écran | Pas encore |
+| 6.6 | Configuration de la machine : `ACME_DATA_DIR` hors OneDrive, règle de pare-feu Windows (port 8000), mise en veille désactivée, mot de passe admin définitif | Pas encore (utilisateur) |
+| 6.7 | Option tunnel (Cloudflare Tunnel ou ngrok) si le directeur teste hors du réseau local | Fait : `.\run.ps1 -Tunnel` (Cloudflare Tunnel rapide, HTTPS, refusé sans mot de passe admin ; `/api/docs` désactivée) ; guide §8 |
+| 6.8 | `docs/guide-demarrage.md` : lancer, arrêter, sauvegarder `ACME_DATA_DIR`, remplacer le CSV | Fait (`docs/guide-demarrage.md`) |
+| 6.9 | `docs/scenario-test-directeur.md` : scénario guidé reprenant les 7 critères de succès du PRD (§9), avec une fiche d'observation (temps, demandes d'aide, incidents) | Fait (`docs/scenario-test-directeur.md`) |
 
 **Critère de sortie :** les 7 critères de succès du PRD sont vérifiés en répétition générale ; l'application est remise au directeur.
 
@@ -275,6 +277,7 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 | US-08 | E03 | ✓ | 3 | Fait |
 | US-09 | E03 | ✓ | 3 | Fait |
 | US-12 | E03 | ✓ | 3 | Fait |
+| US-24 | E03 | | 3 | Fait |
 | US-10 | E03 | | 3 | Fait |
 | US-11 | E03 | | 3 | Fait |
 | US-13 | E04 | | 4 | Fait |
@@ -287,6 +290,7 @@ Les écrans admin n'ont pas de maquette : ils sont construits directement avec l
 | US-20 | E05 | | 5 | Fait |
 | US-21 | E05 | | 5 | Fait |
 | US-22 | E05 | | 5 | Fait |
+| US-23 | E05 | | 5 | Fait |
 
 Les 22 stories sont couvertes.
 

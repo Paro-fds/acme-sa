@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     max_upload_mb: int = 5
     max_documents_per_employee: int = 10
     frontend_dist_dir: Path = PROJECT_DIR / "frontend" / "dist"
+    api_docs: bool = False
+    """Documentation interactive de l'API (/api/docs) : désactivée par défaut, le portail pouvant être exposé par un tunnel."""
 
     @property
     def database_url(self) -> str:

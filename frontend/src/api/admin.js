@@ -29,3 +29,34 @@ export function listEmployees({ page = 1, search = '', status = '' } = {}) {
 export function resetAccess(id) {
   return request(`/admin/employees/${encodeURIComponent(id)}/reset-access`, { method: 'POST' })
 }
+
+/** US-23 : compte de la session admin ({ id, username, must_change_password }). */
+export function getAdminMe() {
+  return request('/admin/me')
+}
+
+/** US-23 : nouveau mot de passe (le provisoire, ou l'actuel) ; la session est renouvelée. */
+export function changeMyAdminPassword(currentPassword, newPassword, newPasswordConfirmation) {
+  return request('/admin/me/password', {
+    method: 'POST',
+    body: {
+      current_password: currentPassword,
+      new_password: newPassword,
+      new_password_confirmation: newPasswordConfirmation,
+    },
+  })
+}
+
+/** US-23 : comptes administrateurs, du plus ancien au plus récent. */
+export function listAdmins() {
+  return request('/admin/admins')
+}
+
+/** US-23 : ajout avec un mot de passe provisoire (à changer à la première connexion). */
+export function addAdmin(username, password) {
+  return request('/admin/admins', { method: 'POST', body: { username, password } })
+}
+
+export function deleteAdmin(id) {
+  return request(`/admin/admins/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}

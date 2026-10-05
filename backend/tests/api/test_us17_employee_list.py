@@ -7,9 +7,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.auth.api.dependencies import SESSION_COOKIE
-from app.auth.domain.model import SubjectType
 from app.main import create_app
-from tests.conftest import TEST_CSV
+from tests.conftest import TEST_CSV, admin_session
 from tests.employees import ACTIVE_EMPLOYEES, EMP_A, EMP_B, EMP_E, EMP_I
 
 URL = "/api/admin/employees"
@@ -146,7 +145,7 @@ def csv_45(tmp_path: Path) -> Path:
 @pytest.fixture
 def admin_45(settings, csv_45):
     app = create_app(settings.model_copy(update={"acme_csv_path": csv_45}))
-    token = app.state.container.session_service().open(SubjectType.ADMIN, "admin")
+    token = admin_session(app.state.container)
     try:
         with TestClient(app, cookies={SESSION_COOKIE: token}) as client:
             yield client

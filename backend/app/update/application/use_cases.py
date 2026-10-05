@@ -6,9 +6,9 @@ from app.employee.domain.repository import EmployeeRepository, get_employee
 from app.shared.domain.clock import Clock
 from app.update.application.values import reference_values
 from app.update.domain.editable_fields import EDITABLE_FIELDS, Section
-from app.update.domain.errors import UpdateAlreadySubmitted, UpdateNotStarted
+from app.update.domain.errors import NoReopenedUpdate, UpdateAlreadySubmitted, UpdateNotStarted, UpdateNotSubmitted
 from app.update.domain.repository import UpdateRepository
-from app.update.domain.update import EmployeeState, EmployeeUpdate, employee_state
+from app.update.domain.update import EmployeeState, EmployeeUpdate, FieldChange, employee_state
 
 
 @dataclass(frozen=True)
@@ -28,6 +28,9 @@ class UpdateView:
     created_at: datetime | None
     updated_at: datetime | None
     submitted_at: datetime | None
+    """Date du dernier envoi (US-24 : conservée pendant une nouvelle modification)."""
+    reopened: bool
+    """« Modifier à nouveau » en cours (US-24)."""
     changes: list[ChangeView]
 
 
@@ -45,20 +48,19 @@ class FieldView:
         return self.value != self.original_value
 
 
-def change_views(update: EmployeeUpdate | None) -> list[ChangeView]:
-    if update is None:
-        return []
+def change_views(changes: Mapping[str, FieldChange]) -> list[ChangeView]:
+    """Changements dans l'ordre du registre des champs."""
     return [
         ChangeView(
             field_name=code,
             label=field.label,
             section=field.section,
-            old_value=update.changes[code].old_value,
-            new_value=update.changes[code].new_value,
-            changed_at=update.changes[code].changed_at,
+            old_value=changes[code].old_value,
+            new_value=changes[code].new_value,
+            changed_at=changes[code].changed_at,
         )
         for code, field in EDITABLE_FIELDS.items()
-        if code in update.changes
+        if code in changes
     ]
 
 
@@ -69,7 +71,8 @@ def update_view(update: EmployeeUpdate | None) -> UpdateView:
         created_at=update.created_at if update else None,
         updated_at=update.updated_at if update else None,
         submitted_at=update.submitted_at if update else None,
-        changes=change_views(update),
+        reopened=update.is_reopened if update else False,
+        changes=change_views(update.changes) if update else [],
     )
 
 
@@ -160,5 +163,37 @@ class SubmitUpdate:
         if update is None:
             raise UpdateNotStarted()
         update.submit(confirmed, self._clock.now())
+        self._updates.save(update)
+        return update_view(update)
+
+
+class ReopenUpdate:
+    """US-24 « Modifier à nouveau » : nouveau brouillon à partir des valeurs envoyées."""
+
+    def __init__(self, updates: UpdateRepository, clock: Clock) -> None:
+        self._updates = updates
+        self._clock = clock
+
+    def execute(self, employee_id: str) -> UpdateView:
+        update = self._updates.get_for_employee(employee_id)
+        if update is None:
+            raise UpdateNotSubmitted()
+        update.reopen(self._clock.now())
+        self._updates.save(update)
+        return update_view(update)
+
+
+class DiscardUpdate:
+    """US-24 « Annuler les modifications » : retour à la dernière version envoyée."""
+
+    def __init__(self, updates: UpdateRepository, clock: Clock) -> None:
+        self._updates = updates
+        self._clock = clock
+
+    def execute(self, employee_id: str) -> UpdateView:
+        update = self._updates.get_for_employee(employee_id)
+        if update is None or not update.is_reopened:
+            raise NoReopenedUpdate()
+        update.discard(self._clock.now())
         self._updates.save(update)
         return update_view(update)

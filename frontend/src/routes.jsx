@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router'
+import AdminAccountsPage from './features/admin/AdminAccountsPage.jsx'
 import AdminLoginPage from './features/admin/AdminLoginPage.jsx'
+import AdminPasswordPage from './features/admin/AdminPasswordPage.jsx'
 import DashboardPage from './features/admin/DashboardPage.jsx'
 import EmployeeDetailPage from './features/admin/EmployeeDetailPage.jsx'
 import EmployeeListPage from './features/admin/EmployeeListPage.jsx'
@@ -29,6 +31,8 @@ export default function AppRoutes() {
       <Route path="/admin" element={<DashboardPage />} />
       <Route path="/admin/employes" element={<EmployeeListPage />} />
       <Route path="/admin/employes/:id" element={<EmployeeDetailPage />} />
+      <Route path="/admin/administrateurs" element={<AdminAccountsPage />} />
+      <Route path="/admin/mot-de-passe" element={<AdminPasswordPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

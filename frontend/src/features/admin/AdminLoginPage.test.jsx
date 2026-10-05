@@ -5,11 +5,11 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import AdminLoginPage from './AdminLoginPage.jsx'
 import EmployeeListPage from './EmployeeListPage.jsx'
 import { adminLogin, adminLogout } from '../../api/auth.js'
-import { listEmployees } from '../../api/admin.js'
+import { getAdminMe, listEmployees } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
 vi.mock('../../api/auth.js', () => ({ adminLogin: vi.fn(), adminLogout: vi.fn(), logout: vi.fn() }))
-vi.mock('../../api/admin.js', () => ({ listEmployees: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({ getAdminMe: vi.fn(), listEmployees: vi.fn() }))
 
 const INVALID = new ApiError(401, 'INVALID_CREDENTIALS', 'Identifiant ou mot de passe incorrect.')
 const LOCKED = new ApiError(423, 'ACCOUNT_LOCKED', 'Trop de tentatives. Réessayez dans 15 minutes.')
@@ -20,6 +20,7 @@ function renderAt(path, state) {
       <Routes>
         <Route path="/admin/connexion" element={<AdminLoginPage />} />
         <Route path="/admin" element={<p>Tableau de bord</p>} />
+        <Route path="/admin/mot-de-passe" element={<p>Choix du mot de passe</p>} />
         <Route path="/admin/employes" element={<EmployeeListPage />} />
       </Routes>
     </MemoryRouter>,
@@ -35,6 +36,19 @@ async function fillAndSubmit(user, username = 'admin', password = 'Admin-Test-20
 describe('AdminLoginPage (US-15)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    getAdminMe.mockResolvedValue({ id: 'a1', username: 'admin', must_change_password: false })
+  })
+
+  it('US-23 CA-07 : mot de passe provisoire → écran de choix du mot de passe', async () => {
+    adminLogin.mockResolvedValue(null)
+    getAdminMe.mockResolvedValue({ id: 'a2', username: 'marie.pierre', must_change_password: true })
+    const user = userEvent.setup()
+    renderAt('/admin/connexion')
+
+    await fillAndSubmit(user, 'marie.pierre', 'Provisoire-2026!')
+
+    expect(await screen.findByText('Choix du mot de passe')).toBeInTheDocument()
+    expect(screen.queryByText('Tableau de bord')).not.toBeInTheDocument()
   })
 
   it('le bouton reste inactif tant que l’identifiant et le mot de passe ne sont pas saisis', async () => {

@@ -3,7 +3,17 @@ from app.shared.domain.errors import Conflict, InvalidInput
 
 class UpdateAlreadySubmitted(Conflict):
     code = "UPDATE_ALREADY_SUBMITTED"
-    message = "Votre mise à jour a déjà été soumise : elle ne peut plus être modifiée."
+    message = "Votre mise à jour a déjà été envoyée : touchez « Modifier à nouveau » pour la corriger."
+
+
+class UpdateNotSubmitted(Conflict):
+    code = "UPDATE_NOT_SUBMITTED"
+    message = "Votre mise à jour n'a pas encore été envoyée : vous pouvez la modifier directement."
+
+
+class NoReopenedUpdate(Conflict):
+    code = "NO_REOPENED_UPDATE"
+    message = "Aucune modification en cours à annuler."
 
 
 class UpdateNotStarted(Conflict):

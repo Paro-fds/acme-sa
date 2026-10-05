@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.admin.api import routes as admin_routes
+from app.auth.api import admin_account_routes
 from app.auth.api import routes as auth_routes
 from app.config import Settings
 from app.container import Container
@@ -18,7 +19,13 @@ from app.update.api import routes as update_routes
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
-    app = FastAPI(title="Portail employés ACME SA", docs_url="/api/docs", openapi_url="/api/openapi.json")
+    docs = settings.api_docs
+    app = FastAPI(
+        title="Portail employés ACME SA",
+        docs_url="/api/docs" if docs else None,
+        redoc_url=None,
+        openapi_url="/api/openapi.json" if docs else None,
+    )
     app.state.container = Container(settings)
 
     register_error_handlers(app)
@@ -28,6 +35,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(update_routes.router)
     app.include_router(document_routes.router)
     app.include_router(admin_routes.router)
+    app.include_router(admin_account_routes.router)
 
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], include_in_schema=False)
     def unknown_api_route(path: str) -> None:

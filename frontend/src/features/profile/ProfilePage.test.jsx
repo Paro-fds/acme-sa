@@ -2,11 +2,16 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
-import ProfilePage from './ProfilePage.jsx'
-import { decide, getProfile } from '../../api/employee.js'
+import ProfilePage, { DISCARDED_NOTICE } from './ProfilePage.jsx'
+import { decide, discardUpdate, getProfile, reopenUpdate } from '../../api/employee.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn(), decide: vi.fn() }))
+vi.mock('../../api/employee.js', () => ({
+  getProfile: vi.fn(),
+  decide: vi.fn(),
+  reopenUpdate: vi.fn(),
+  discardUpdate: vi.fn(),
+}))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 
 const PROFILE = {
@@ -201,5 +206,53 @@ describe('ProfilePage — choix Oui / Non (US-08)', () => {
     expect(await screen.findByText('Effectuée')).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('Votre mise à jour a déjà été soumise')
     expect(screen.queryByRole('button', { name: 'Oui, mettre à jour mon dossier' })).not.toBeInTheDocument()
+  })
+})
+
+describe('ProfilePage — modifier à nouveau (US-24)', () => {
+  const SENT = {
+    state: 'DONE',
+    accepted: true,
+    reopened: false,
+    created_at: '2026-10-04T09:00:00',
+    updated_at: '2026-10-04T15:10:00',
+    submitted_at: '2026-10-04T15:10:00',
+    changes: [],
+  }
+  const REOPENED = { ...SENT, state: 'IN_PROGRESS', reopened: true, updated_at: '2026-10-06T09:00:00' }
+
+  it('CA-01, CA-02 : « Modifier à nouveau » rouvre la mise à jour puis ouvre l’étape 1', async () => {
+    reopenUpdate.mockResolvedValue(REOPENED)
+    await renderProfile({ update: SENT })
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Modifier à nouveau' }))
+
+    expect(reopenUpdate).toHaveBeenCalledOnce()
+    expect(await screen.findByText('Étape 1 : Informations')).toBeInTheDocument()
+  })
+
+  it('CA-05 : « Annuler les modifications » confirmé → message, retour à l’état envoyé', async () => {
+    discardUpdate.mockResolvedValue(SENT)
+    const user = userEvent.setup()
+    await renderProfile({ update: REOPENED })
+    getProfile.mockResolvedValue({ ...PROFILE, update: SENT })
+
+    await user.click(screen.getByRole('button', { name: 'Annuler les modifications' }))
+    await user.click(screen.getByRole('button', { name: 'Tout annuler' }))
+
+    expect(discardUpdate).toHaveBeenCalledOnce()
+    expect(await screen.findByText(DISCARDED_NOTICE)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Modifier à nouveau' })).toBeInTheDocument()
+  })
+
+  it('une erreur (état changé ailleurs) est affichée et le profil rechargé', async () => {
+    reopenUpdate.mockRejectedValue(new ApiError(409, 'UPDATE_NOT_SUBMITTED', "Votre mise à jour n'a pas encore été envoyée : vous pouvez la modifier directement."))
+    await renderProfile({ update: SENT })
+    getProfile.mockResolvedValue({ ...PROFILE, update: REOPENED })
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Modifier à nouveau' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("pas encore été envoyée")
+    expect(await screen.findByRole('button', { name: 'Reprendre la modification' })).toBeInTheDocument()
   })
 })

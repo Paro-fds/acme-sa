@@ -18,10 +18,10 @@ class Identity:
 
 def _known_names(employee: Employee, updates: dict) -> set[tuple[str, str]]:
     """Noms sous lesquels l'employé peut s'identifier : ceux de la référence
-    et, une fois soumis, ses nouveaux nom et prénom (D-03). Un brouillon ne compte pas."""
+    et, une fois envoyés, les nom et prénom du dernier envoi (D-03, US-24). Un brouillon ne compte pas."""
     names = {(normalize(employee.last_name), normalize(employee.first_name))}
     update = updates.get(employee.id)
-    if update is not None and update.is_submitted:
+    if update is not None and update.has_submission:
         values = current_values(employee, update)
         names.add((normalize(values["last_name"]), normalize(values["first_name"])))
     return names

@@ -1,6 +1,6 @@
 # E03 — Mise à jour
 
-**Statut de l'epic :** Fait (US-08 → US-12 faites).
+**Statut de l'epic :** Fait (US-08 → US-12, US-24).
 
 **Objectif :** permettre à l'employé de corriger son dossier depuis son téléphone, en plusieurs fois si nécessaire, puis de confirmer et soumettre sa mise à jour, en gardant la trace des anciennes et nouvelles valeurs.
 
@@ -14,6 +14,7 @@
 | [US-10](US-10-brouillon.md) | Sauvegarder et reprendre un brouillon | MUST |
 | [US-11](US-11-verifier-modifications.md) | Vérifier ses modifications | MUST |
 | [US-12](US-12-soumettre.md) | Confirmer et soumettre | MUST |
+| [US-24](US-24-modifier-a-nouveau.md) | Modifier à nouveau son dossier après l'envoi | SHOULD |
 
 ```text
 Profil -- Oui --> 1. Informations --> 2. Documents --> 3. Vérification --> 4. Confirmation

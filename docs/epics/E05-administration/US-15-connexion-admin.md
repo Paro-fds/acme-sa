@@ -16,7 +16,7 @@
 
 ## Règles
 
-- Compte unique défini dans la configuration ; mot de passe stocké uniquement sous forme de hash Argon2.
+- Compte unique défini dans la configuration ; mot de passe stocké uniquement sous forme de hash Argon2. **Depuis US-23 :** comptes enregistrés en base (le compte de la configuration n'est plus qu'une migration), blocage par compte.
 - Blocage 15 minutes après 5 échecs consécutifs.
 - Session admin : expiration après 2 heures d'inactivité.
 - Une session employé ne donne **aucun** accès à `/api/admin/*`, et inversement.

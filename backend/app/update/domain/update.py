@@ -1,10 +1,16 @@
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from enum import StrEnum
 
 from app.update.domain.editable_fields import editable_field
-from app.update.domain.errors import ConfirmationRequired, UpdateAlreadySubmitted, UpdateNotStarted
+from app.update.domain.errors import (
+    ConfirmationRequired,
+    NoReopenedUpdate,
+    UpdateAlreadySubmitted,
+    UpdateNotStarted,
+    UpdateNotSubmitted,
+)
 
 
 class UpdateStatus(StrEnum):
@@ -43,7 +49,11 @@ class EmployeeUpdate:
     created_at: datetime
     updated_at: datetime
     submitted_at: datetime | None = None
+    """Date du **dernier** envoi (conservée pendant une nouvelle modification, US-24)."""
     changes: dict[str, FieldChange] = field(default_factory=dict)
+    """Changements en cours d'édition (brouillon), ou ceux de l'envoi quand le statut est SUBMITTED."""
+    submitted_changes: dict[str, FieldChange] = field(default_factory=dict)
+    """Copie du dernier envoi : ce que voient l'administration et l'identification (US-24)."""
 
     @classmethod
     def start(cls, employee_id: str, accepted: bool, now: datetime) -> "EmployeeUpdate":
@@ -51,11 +61,24 @@ class EmployeeUpdate:
 
     @property
     def is_submitted(self) -> bool:
+        """Envoyée et pas rouverte : aucune écriture acceptée."""
         return self.status == UpdateStatus.SUBMITTED
+
+    @property
+    def has_submission(self) -> bool:
+        """Au moins un envoi, même si une nouvelle modification est en cours (US-24)."""
+        return self.submitted_at is not None
+
+    @property
+    def is_reopened(self) -> bool:
+        """« Modifier à nouveau » : brouillon en cours après un envoi (US-24)."""
+        return self.has_submission and not self.is_submitted
 
     def decide(self, accepted: bool, now: datetime) -> None:
         """Réponse Oui/Non (US-08). Un « Oui » répété conserve le brouillon existant."""
         self._ensure_open()
+        if self.has_submission:
+            raise UpdateAlreadySubmitted()
         self.accepted = accepted
         self.updated_at = now
 
@@ -81,7 +104,7 @@ class EmployeeUpdate:
         self.updated_at = now
 
     def submit(self, confirmed: bool, now: datetime) -> None:
-        """Soumission définitive (US-12, D-04)."""
+        """Envoi (US-12) ; il remplace l'envoi précédent (US-24)."""
         self._ensure_open()
         if not self.accepted:
             raise UpdateNotStarted()
@@ -89,6 +112,24 @@ class EmployeeUpdate:
             raise ConfirmationRequired(field="confirmed")
         self.status = UpdateStatus.SUBMITTED
         self.submitted_at = now
+        self.submitted_changes = _copy(self.changes)
+        self.updated_at = now
+
+    def reopen(self, now: datetime) -> None:
+        """US-24 « Modifier à nouveau » : brouillon repris des valeurs envoyées, copie conservée."""
+        if not self.is_submitted:
+            raise UpdateNotSubmitted()
+        self.status = UpdateStatus.DRAFT
+        self.accepted = True
+        self.changes = _copy(self.submitted_changes)
+        self.updated_at = now
+
+    def discard(self, now: datetime) -> None:
+        """US-24 « Annuler les modifications » : retour à la dernière version envoyée."""
+        if not self.is_reopened:
+            raise NoReopenedUpdate()
+        self.status = UpdateStatus.SUBMITTED
+        self.changes = _copy(self.submitted_changes)
         self.updated_at = now
 
     def _ensure_open(self) -> None:
@@ -96,8 +137,13 @@ class EmployeeUpdate:
             raise UpdateAlreadySubmitted()
 
 
+def _copy(changes: Mapping[str, FieldChange]) -> dict[str, FieldChange]:
+    return {code: replace(change) for code, change in changes.items()}
+
+
 def admin_status(update: EmployeeUpdate | None) -> AdminStatus:
-    return AdminStatus.UPDATED if update is not None and update.is_submitted else AdminStatus.NOT_UPDATED
+    """`UPDATED` dès le premier envoi, y compris pendant une nouvelle modification (US-24)."""
+    return AdminStatus.UPDATED if update is not None and update.has_submission else AdminStatus.NOT_UPDATED
 
 
 def employee_state(update: EmployeeUpdate | None) -> EmployeeState:

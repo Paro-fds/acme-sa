@@ -1,5 +1,6 @@
 from typing import Protocol
 
+from app.auth.domain.admin import AdminAccount
 from app.auth.domain.model import Account, Session, SubjectType
 
 
@@ -23,3 +24,27 @@ class PasswordHasher(Protocol):
     def hash(self, password: str) -> str: ...
 
     def verify(self, password_hash: str, password: str) -> bool: ...
+
+
+class AdminAccountRepository(Protocol):
+    def list_all(self) -> list[AdminAccount]:
+        """Comptes administrateurs, du plus ancien au plus récent."""
+        ...
+
+    def get(self, admin_id: str) -> AdminAccount | None: ...
+
+    def find_by_username(self, username: str) -> AdminAccount | None:
+        """Recherche exacte (majuscules comprises), comme à la connexion."""
+        ...
+
+    def username_taken(self, username: str) -> bool:
+        """Identifiant déjà utilisé, sans tenir compte des majuscules."""
+        ...
+
+    def add(self, account: AdminAccount) -> None: ...
+
+    def save(self, account: AdminAccount) -> None: ...
+
+    def delete(self, admin_id: str) -> None: ...
+
+    def count(self) -> int: ...

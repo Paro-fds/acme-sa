@@ -52,7 +52,7 @@ class GetEmployeeFolder:
     def execute(self, employee_id: str) -> EmployeeFolder:
         employee = get_employee(self._employees, employee_id)
         update = self._updates.get_for_employee(employee.id)
-        submitted = update is not None and update.is_submitted
+        submitted = update is not None and update.has_submission
         values = current_values(employee, update)
         account = self._accounts.get(employee.id)
         return EmployeeFolder(
@@ -77,6 +77,6 @@ class GetEmployeeFolder:
             status=admin_status(update),
             submitted_at=update.submitted_at if submitted else None,
             declined=update is not None and not submitted and not update.accepted,
-            changes=change_views(update) if submitted else [],
+            changes=change_views(update.submitted_changes) if submitted else [],
             account_activated=account is not None and account.has_password,
         )

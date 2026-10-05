@@ -13,10 +13,20 @@ from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
 from app.admin.application.reset_access import ResetAccess
 from app.auth.application.sessions import SessionService
-from app.auth.application.use_cases import IdentifyEmployee, LoginAdmin, LoginEmployee, RegisterPassword
+from app.auth.application.admin_accounts import (
+    AddAdmin,
+    ChangeAdminPassword,
+    CreateFirstAdmin,
+    DeleteAdmin,
+    GetCurrentAdmin,
+    ImportConfiguredAdmin,
+    ListAdmins,
+    LoginAdmin,
+)
+from app.auth.application.use_cases import IdentifyEmployee, LoginEmployee, RegisterPassword
 from app.auth.domain.model import SubjectType
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
-from app.auth.infrastructure.sql_repositories import SqlAccountRepository, SqlSessionRepository
+from app.auth.infrastructure.sql_repositories import SqlAccountRepository, SqlAdminAccountRepository, SqlSessionRepository
 from app.config import Settings
 from app.document.application.use_cases import DeleteDocument, GetMyDocumentFile, ListMyDocuments, UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
@@ -25,7 +35,15 @@ from app.employee.application.get_profile import GetEmployeeProfile
 from app.employee.infrastructure.csv_employee_repository import CsvEmployeeRepository
 from app.shared.infrastructure.clock import SystemClock
 from app.shared.infrastructure.database import Database
-from app.update.application.use_cases import GetEditableFields, GetMyUpdate, RecordDecision, SaveDraft, SubmitUpdate
+from app.update.application.use_cases import (
+    DiscardUpdate,
+    GetEditableFields,
+    GetMyUpdate,
+    RecordDecision,
+    ReopenUpdate,
+    SaveDraft,
+    SubmitUpdate,
+)
 from app.update.infrastructure.sql_update_repository import SqlUpdateRepository
 
 
@@ -41,11 +59,17 @@ class Container:
         self.clock = SystemClock()
         self.employees = CsvEmployeeRepository(settings.acme_csv_path)
         self.accounts = SqlAccountRepository(self.database)
+        self.admin_accounts = SqlAdminAccountRepository(self.database)
         self.sessions = SqlSessionRepository(self.database)
         self.updates = SqlUpdateRepository(self.database)
         self.documents = SqlDocumentRepository(self.database)
         self.file_storage = LocalFileStorage(settings.documents_dir)
         self.password_hasher = Argon2PasswordHasher()
+
+        # US-23 CA-03 : le compte de la configuration devient le premier administrateur en base.
+        ImportConfiguredAdmin(
+            self.admin_accounts, self.clock, settings.admin_username, settings.admin_password_hash
+        ).execute()
 
     # --- auth ---------------------------------------------------------------
 
@@ -68,14 +92,25 @@ class Container:
         )
 
     def login_admin(self) -> LoginAdmin:
-        return LoginAdmin(
-            self.settings.admin_username,
-            self.settings.admin_password_hash,
-            self.accounts,
-            self.password_hasher,
-            self.session_service(),
-            self.clock,
-        )
+        return LoginAdmin(self.admin_accounts, self.password_hasher, self.session_service(), self.clock)
+
+    def get_current_admin(self) -> GetCurrentAdmin:
+        return GetCurrentAdmin(self.admin_accounts)
+
+    def create_first_admin(self) -> CreateFirstAdmin:
+        return CreateFirstAdmin(self.admin_accounts, self.password_hasher, self.clock)
+
+    def list_admins(self) -> ListAdmins:
+        return ListAdmins(self.admin_accounts)
+
+    def add_admin(self) -> AddAdmin:
+        return AddAdmin(self.admin_accounts, self.password_hasher, self.clock)
+
+    def delete_admin(self) -> DeleteAdmin:
+        return DeleteAdmin(self.admin_accounts, self.session_service())
+
+    def change_admin_password(self) -> ChangeAdminPassword:
+        return ChangeAdminPassword(self.admin_accounts, self.password_hasher, self.session_service())
 
     # --- employee / update ----------------------------------------------------
 
@@ -96,6 +131,12 @@ class Container:
 
     def submit_update(self) -> SubmitUpdate:
         return SubmitUpdate(self.updates, self.clock)
+
+    def reopen_update(self) -> ReopenUpdate:
+        return ReopenUpdate(self.updates, self.clock)
+
+    def discard_update(self) -> DiscardUpdate:
+        return DiscardUpdate(self.updates, self.clock)
 
     # --- admin ----------------------------------------------------------------
 

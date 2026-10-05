@@ -93,9 +93,15 @@ def employee_client(app: FastAPI, container) -> Iterator[Callable[[TestEmployee]
         test_client.close()
 
 
+def admin_session(container) -> str:
+    """Jeton d'une session ouverte pour le compte admin de test (importé de la configuration, US-23)."""
+    admin = container.admin_accounts.find_by_username(ADMIN_USERNAME)
+    return container.session_service().open(SubjectType.ADMIN, admin.id)
+
+
 @pytest.fixture
 def admin_client(app: FastAPI, container) -> Iterator[TestClient]:
-    token = container.session_service().open(SubjectType.ADMIN, "admin")
+    token = admin_session(container)
     with TestClient(app, cookies={SESSION_COOKIE: token}) as test_client:
         yield test_client
 

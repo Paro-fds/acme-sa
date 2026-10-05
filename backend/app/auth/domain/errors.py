@@ -1,4 +1,4 @@
-from app.shared.domain.errors import Conflict, DomainError, Forbidden, InvalidInput, Unauthorized
+from app.shared.domain.errors import Conflict, DomainError, Forbidden, InvalidInput, NotFound, Unauthorized
 
 
 class IdentityNotRecognized(Unauthorized):
@@ -70,3 +70,56 @@ class SessionExpired(Unauthorized):
 class AdminOnly(Forbidden):
     code = "ADMIN_ONLY"
     message = "Accès réservé à l'administration."
+
+
+# --- Comptes administrateurs (US-23) ------------------------------------------------
+
+
+class InvalidUsername(InvalidInput):
+    code = "INVALID_USERNAME"
+    message = "L'identifiant doit contenir de 3 à 50 caractères : lettres sans accents, chiffres, point, tiret ou trait bas."
+
+
+class UsernameTaken(Conflict):
+    code = "USERNAME_TAKEN"
+    message = "Cet identifiant est déjà utilisé."
+
+
+class AdminPasswordTooShort(InvalidInput):
+    code = "PASSWORD_TOO_SHORT"
+    message = "Le mot de passe doit contenir au moins 12 caractères."
+
+
+class WrongCurrentPassword(InvalidInput):
+    code = "WRONG_PASSWORD"
+    message = "Mot de passe actuel incorrect."
+
+
+class PasswordUnchanged(InvalidInput):
+    code = "PASSWORD_UNCHANGED"
+    message = "Choisissez un mot de passe différent de l'actuel."
+
+
+class PasswordChangeRequired(Forbidden):
+    code = "PASSWORD_CHANGE_REQUIRED"
+    message = "Choisissez votre mot de passe pour continuer."
+
+
+class AdminNotFound(NotFound):
+    code = "ADMIN_NOT_FOUND"
+    message = "Administrateur introuvable."
+
+
+class CannotDeleteSelf(Conflict):
+    code = "CANNOT_DELETE_SELF"
+    message = "Vous ne pouvez pas supprimer votre propre compte."
+
+
+class LastAdmin(Conflict):
+    code = "LAST_ADMIN"
+    message = "Le dernier administrateur ne peut pas être supprimé."
+
+
+class AdminAlreadyExists(Conflict):
+    code = "ADMIN_ALREADY_EXISTS"
+    message = "Un administrateur existe déjà : les suivants s'ajoutent depuis l'écran « Administrateurs »."

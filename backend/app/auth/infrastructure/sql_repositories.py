@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import Integer, String, delete
+from sqlalchemy import Boolean, Integer, String, delete, func, select
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.auth.domain.admin import AdminAccount
 from app.auth.domain.model import Account, Session, SubjectType
 from app.shared.infrastructure.database import Base, Database, UtcDateTime
 
@@ -98,3 +99,89 @@ class SqlSessionRepository:
                     SessionRow.subject_id == subject_id,
                 )
             )
+
+
+class AdminAccountRow(Base):
+    __tablename__ = "admin_account"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    username: Mapped[str] = mapped_column(String)
+    username_key: Mapped[str] = mapped_column(String, unique=True)
+    """Identifiant en minuscules : unicité sans tenir compte des majuscules (US-23)."""
+    password_hash: Mapped[str] = mapped_column(String)
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=False)
+    failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    created_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+
+
+def _admin(row: AdminAccountRow) -> AdminAccount:
+    return AdminAccount(
+        id=row.id,
+        username=row.username,
+        password_hash=row.password_hash,
+        created_at=row.created_at,
+        created_by=row.created_by,
+        must_change_password=row.must_change_password,
+        failed_attempts=row.failed_attempts,
+        locked_until=row.locked_until,
+        last_login_at=row.last_login_at,
+    )
+
+
+def _admin_row(account: AdminAccount) -> AdminAccountRow:
+    return AdminAccountRow(
+        id=account.id,
+        username=account.username,
+        username_key=account.username.casefold(),
+        password_hash=account.password_hash,
+        must_change_password=account.must_change_password,
+        failed_attempts=account.failed_attempts,
+        locked_until=account.locked_until,
+        created_at=account.created_at,
+        created_by=account.created_by,
+        last_login_at=account.last_login_at,
+    )
+
+
+class SqlAdminAccountRepository:
+    def __init__(self, database: Database) -> None:
+        self._database = database
+
+    def list_all(self) -> list[AdminAccount]:
+        with self._database.session() as session:
+            rows = session.scalars(select(AdminAccountRow).order_by(AdminAccountRow.created_at, AdminAccountRow.username))
+            return [_admin(row) for row in rows]
+
+    def get(self, admin_id: str) -> AdminAccount | None:
+        with self._database.session() as session:
+            row = session.get(AdminAccountRow, admin_id)
+            return _admin(row) if row else None
+
+    def find_by_username(self, username: str) -> AdminAccount | None:
+        with self._database.session() as session:
+            row = session.scalars(select(AdminAccountRow).where(AdminAccountRow.username == username)).first()
+            return _admin(row) if row else None
+
+    def username_taken(self, username: str) -> bool:
+        with self._database.session() as session:
+            key = username.casefold()
+            return session.scalars(select(AdminAccountRow.id).where(AdminAccountRow.username_key == key)).first() is not None
+
+    def add(self, account: AdminAccount) -> None:
+        with self._database.session() as session:
+            session.add(_admin_row(account))
+
+    def save(self, account: AdminAccount) -> None:
+        with self._database.session() as session:
+            session.merge(_admin_row(account))
+
+    def delete(self, admin_id: str) -> None:
+        with self._database.session() as session:
+            session.execute(delete(AdminAccountRow).where(AdminAccountRow.id == admin_id))
+
+    def count(self) -> int:
+        with self._database.session() as session:
+            return session.scalar(select(func.count()).select_from(AdminAccountRow)) or 0

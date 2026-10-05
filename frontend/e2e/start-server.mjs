@@ -6,6 +6,8 @@
 //   us04 → EMP-E (ne soumet jamais)          us10 → EMP-H2 (brouillon)
 //   us12 → EMP-B (soumet ; mot de passe créé ou déjà créé par us03)
 //   us13 → EMP-E (documents, ne soumet pas)
+//   us23 → compte admin e2e.marie (créé par le test)
+//   us24 → EMP-B (modifie à nouveau après us12)
 import { execFileSync, spawn } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'

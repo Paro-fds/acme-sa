@@ -16,10 +16,10 @@ Langue du projet et de l'interface : **français**.
 | 0 — Mise en place | **Fait** |
 | 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
 | 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12) |
+| 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12, US-24) |
 | 4 — Documents | **Fait** (US-13, US-14, US-07) |
-| 5 — Administration | **Fait** (US-15 → US-22) |
-| 6 — Finalisation | Pas encore |
+| 5 — Administration | **Fait** (US-15 → US-23) |
+| 6 — Finalisation | **En cours** |
 
 ### Epics (`docs/epics/README.md`)
 
@@ -27,13 +27,13 @@ Langue du projet et de l'interface : **français**.
 |---|---|
 | E01 Identification | **Fait** (US-01 à US-04) |
 | E02 Consultation | **Fait** (US-05, US-06, US-07) |
-| E03 Mise à jour | **Fait** (US-08 → US-12) |
+| E03 Mise à jour | **Fait** (US-08 → US-12, US-24) |
 | E04 Documents | **Fait** (US-13, US-14) |
-| E05 Administration | **Fait** (US-15 → US-22) |
+| E05 Administration | **Fait** (US-15 → US-23) |
 
 ### Stories
 
-**Fait :** US-01 → US-22 (toutes les stories).
+**Fait :** US-01 → US-24 (toutes les stories).
 
 **En cours :** aucune.
 
@@ -41,7 +41,7 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**Phase 6 — Finalisation et préparation du test** (`docs/03-plan-implementation.md` §9, tâches 6.1 → 6.9) : toutes les stories sont faites. Plusieurs tâches demandent l'utilisateur (vrai CSV en 6.2–6.3, téléphones réels en 6.4, configuration de la machine en 6.6, tunnel en 6.7) : se mettre d'accord avec lui sur l'ordre avant de commencer. Le vrai CSV (`data/`) ne doit jamais être versionné ni copié dans les tests.
+**Phase 6 — Finalisation** (`docs/03-plan-implementation.md` §9). Faites : 6.1, 6.2, 6.3, 6.7 (`.\run.ps1 -Tunnel`), 6.8, 6.9. Restent : 6.4 (téléphones réels, utilisateur), 6.5 (revue visuelle par rapport aux maquettes), 6.6 (pare-feu, veille ; le premier administrateur est demandé par `run.ps1`). Le vrai CSV ne se lit qu'à travers les outils qui n'affichent aucune donnée ; ne jamais le copier.
 
 À savoir :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
@@ -49,8 +49,10 @@ Langue du projet et de l'interface : **français**.
 - Liste admin : `features/admin/EmployeeListPage.jsx` (page dans l'adresse `?page=`, autres paramètres conservés ; cartes `lg:hidden` + tableau `hidden lg:block`, tous deux dans le DOM : dans les tests, viser `getByRole('list'|'table', { name: 'Employés' })`). `Page wide` pour les écrans admin larges. API : `display_name`, `previous_name`, `page_count` (`ListEmployees`).
 - Recherche admin : `features/admin/EmployeeSearch.jsx` (300 ms, `?search=` en `replace`) ; règle `app/admin/domain/search.py`, appliquée dans `ListEmployees` avant la pagination. Filtre de statut : `features/admin/StatusFilter.jsx` (`?status=`, compteurs `counts` de l'API). `useLoader(load, { key })` relance le chargement quand la clé change.
 - Dossier admin : `features/admin/EmployeeDetailPage.jsx` (`/admin/employes/:id`, blocs `Block`, retour vers la liste via `state.listSearch`) ; `GetEmployeeFolder` ; sections partagées avec le profil : `features/profile/profileSections.js` (`InfoSection showEditable={false}` côté admin). Documents (US-21) : `features/admin/AdminDocuments.jsx`, chargés avec le dossier ; `ListEmployeeDocuments`, `GetEmployeeDocumentFile` ; bloc titré réutilisable `features/admin/Block.jsx` (prop `aside`). Bloc « Accès » et réinitialisation (US-22) : `features/admin/ResetAccess.jsx`, `ResetAccess` (module `admin`), `POST /api/admin/employees/{id}/reset-access`, seule écriture de l'administration.
-- Admin : `LoginAdmin` (blocage stocké sous l'identifiant `admin` dans la table des comptes : à exclure si US-20/22 lisent cette table). Le test paramétré `test_us15_admin_auth.py` couvre automatiquement toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé) : une route qui prend un `{id}` reçoit `1001`.
+- Admin : comptes en base (US-23, table `admin_account`, `app/auth/application/admin_accounts.py`) ; `current_admin` (refuse un mot de passe provisoire : `403 PASSWORD_CHANGE_REQUIRED`) / `current_admin_pending` ; fixture `admin_session(container)` dans `tests/conftest.py` (compte de test importé de la configuration). Écrans `/admin/administrateurs`, `/admin/mot-de-passe` ; liens du menu du compte admin. Le test paramétré `test_us15_admin_auth.py` couvre automatiquement toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé) : une route qui prend un `{id}` reçoit `1001`.
+- Contrôle d'un CSV (phase 6) : `app/tools/check_csv.py` (chargement, dates, accents, formats de téléphone, doublons, puis recherche des valeurs des colonnes exclues dans toutes les réponses de l'API sur une base temporaire) ; rapport sans aucune donnée du CSV ; testé sur le CSV fictif (`tests/test_check_csv_tool.py`).
 - Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
+- Modifier à nouveau (US-24) : `EmployeeUpdate.submitted_changes` = copie du dernier envoi, lue par l'admin, le profil et l'identification (`current_values`, `has_submission`) ; le brouillon reste dans `changes`. Ne jamais lire `changes` côté admin. Routes `reopen` / `discard` ; carte d'état (`reopened`).
 - Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
 - Étape 1 : `features/update/InformationsStep.jsx` (+ `FieldCard`, `FormSection`, `fieldRules.js` qui reprend les règles du registre serveur) ; `components/Stepper.jsx` (4 étapes) à réutiliser dans les étapes suivantes. `TextField` accepte `required`, `labelAside`, `footer`.
 - Brouillon : `features/update/useAutosave.js` (2 s, champs valides seulement, `flush()` au changement d'étape) ; `formatTime` dans `lib/format.js`.
@@ -141,8 +143,9 @@ npm test                                  # tests unitaires et composants (Vites
 npx playwright test                       # tests bout en bout (mobile 390 px, CSV fictif)
 
 # Lancer l'application (depuis la racine)
-.\run.ps1                                 # ou .\run.ps1 -Build pour recompiler le frontend
-python -m app.tools.hash_password         # (depuis backend/) hash du mot de passe admin pour .env
+.\run.ps1                                 # ou -Build (recompiler le frontend), -Tunnel (accès Internet HTTPS)
+python -m app.tools.create_admin          # (depuis backend/) premier administrateur (run.ps1 le demande s'il manque)
+python -m app.tools.check_csv             # (depuis backend/) contrôle du CSV avant un test (voir docs/guide-demarrage.md)
 ```
 
 ## 6. Données et environnement

@@ -100,14 +100,14 @@ Nom + Prénom + Date de naissance
 | ID | Fonctionnalité | Priorité |
 |---|---|---|
 | F-19 | L'employé ajoute un ou plusieurs documents typés (Diplôme, Certificat, Attestation, Autre), facultatifs | MUST |
-| F-20 | L'employé supprime un document tant que la mise à jour n'est pas soumise | SHOULD |
+| F-20 | L'employé supprime un document tant que la mise à jour (ou sa nouvelle modification, F-31) n'est pas envoyée | SHOULD |
 | F-21 | Contrôle du type (PDF, JPG, PNG) et de la taille maximale des fichiers | SHOULD |
 
 ### E05 — Administration
 
 | ID | Fonctionnalité | Priorité |
 |---|---|---|
-| F-22 | Connexion administrateur (compte unique configuré sur le serveur) | MUST |
+| F-22 | Connexion administrateur (comptes enregistrés dans la base du portail, cf. F-30) | MUST |
 | F-23 | Tableau de bord : total, mises à jour effectuées, non effectuées, % d'avancement | MUST |
 | F-24 | Liste des employés avec leur statut | MUST |
 | F-25 | **Barre de recherche** par nom, prénom ou matricule (partielle, insensible à la casse et aux accents) | MUST |
@@ -115,6 +115,8 @@ Nom + Prénom + Date de naissance
 | F-27 | Consultation en lecture seule du dossier d'un employé, avec les changements soumis | MUST |
 | F-28 | Consultation des documents transmis par un employé | MUST |
 | F-29 | Réinitialisation de l'accès d'un employé (efface son mot de passe ; ne touche pas au dossier), cf. D-06 | SHOULD |
+| F-31 | Après l'envoi, l'employé peut modifier à nouveau son dossier et le renvoyer ; l'administration voit la dernière version envoyée, jamais le brouillon (US-24, validée le 2026-10-05) | SHOULD |
+| F-30 | Gestion des comptes administrateurs depuis l'administration : liste, ajout avec mot de passe provisoire, suppression, changement de son mot de passe ; premier compte créé au lancement sur l'ordinateur du portail (US-23, validée le 2026-10-05) | SHOULD |
 
 ## 6. Hors périmètre du MVP
 
@@ -199,7 +201,7 @@ Indicateurs observés (hypothèses du cahier des charges) : temps pour compléte
 | **D-01** | Quelle population est concernée par la campagne ? | ✅ **Validé** : uniquement les employés `active = true` (364). Les inactifs ne peuvent pas se connecter et sont exclus des statistiques. |
 | **D-02** | Comment identifier l'employé ? | ✅ **Validé** : nom + prénom + date de naissance, puis création d'un mot de passe à la première connexion et saisie de ce mot de passe ensuite (F-01 à F-03). |
 | **D-03** | Quels champs l'employé peut-il modifier ? | ✅ **Validé** : nom, prénom, téléphone, email, adresse (cf. 7.2). Un employé ayant soumis un nouveau nom ou prénom peut se connecter avec l'ancien ou le nouveau. |
-| **D-04** | Après soumission, l'employé peut-il refaire une mise à jour ? | ✅ **Validé** : non pour le MVP : une soumission par employé ; le dossier passe en consultation seule. |
+| **D-04** | Après soumission, l'employé peut-il refaire une mise à jour ? | ✅ **Validé** : ~~non pour le MVP : une soumission par employé~~ **Révisé le 2026-10-05 (US-24, F-31)** : oui, « Modifier à nouveau » ; l'administration voit la dernière version envoyée (sans historique) ; le brouillon reste invisible. |
 | **D-05** | Que montrer à l'employé après soumission : les valeurs du CSV ou ses nouvelles valeurs ? | ✅ **Validé** : ses nouvelles valeurs, avec la mention « Mise à jour soumise le … ». |
 | **D-06** | Mot de passe oublié : l'admin peut-il réinitialiser l'accès d'un employé ? | ✅ **Validé** : oui, un bouton « Réinitialiser l'accès » efface le mot de passe, l'employé en recrée un à sa prochaine connexion. C'est une action sur le **compte**, pas sur les données du dossier : la règle « admin en lecture seule » reste respectée. |
 

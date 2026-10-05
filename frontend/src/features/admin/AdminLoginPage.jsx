@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { getAdminMe } from '../../api/admin.js'
 import { adminLogin } from '../../api/auth.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import PasswordField from '../../components/PasswordField.jsx'
 import TextField from '../../components/TextField.jsx'
+import { ADMIN_PASSWORD_PATH } from '../../lib/useLoader.js'
 
-/** US-15 : connexion du compte administrateur ; mène au tableau de bord. */
+/** US-15 : connexion d'un administrateur ; mène au tableau de bord, ou au choix du mot de passe s'il est provisoire (US-23). */
 export default function AdminLoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -26,7 +28,8 @@ export default function AdminLoginPage() {
     setNotice(null)
     try {
       await adminLogin(username.trim(), password)
-      navigate('/admin', { replace: true })
+      const me = await getAdminMe()
+      navigate(me.must_change_password ? ADMIN_PASSWORD_PATH : '/admin', { replace: true })
     } catch (apiError) {
       setError(apiError.message)
       setPassword('')

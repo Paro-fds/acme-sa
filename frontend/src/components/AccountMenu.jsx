@@ -1,7 +1,17 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { Link } from 'react-router'
 import { useLogout } from '../lib/useLogout.js'
 
-/** Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin). */
+const MENU_ITEM =
+  'flex min-h-11 items-center gap-3 rounded-md px-3 text-left font-semibold text-heading hover:bg-canvas disabled:opacity-60'
+
+/** Liens supplémentaires de l'espace admin (US-23). */
+const ADMIN_LINKS = [
+  { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs' },
+  { to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' },
+]
+
+/** Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23). */
 export default function AccountMenu({ space = 'employee' }) {
   const logout = useLogout(space)
   const [open, setOpen] = useState(false)
@@ -55,13 +65,14 @@ export default function AccountMenu({ space = 'employee' }) {
           role="menu"
           className="absolute right-0 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
         >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={handleLogout}
-            disabled={sending}
-            className="flex min-h-11 items-center gap-3 rounded-md px-3 text-left font-semibold text-heading hover:bg-canvas disabled:opacity-60"
-          >
+          {space === 'admin' &&
+            ADMIN_LINKS.map((link) => (
+              <Link key={link.to} to={link.to} role="menuitem" onClick={() => setOpen(false)} className={MENU_ITEM}>
+                <span className="material-symbols-outlined" aria-hidden="true">{link.icon}</span>
+                {link.label}
+              </Link>
+            ))}
+          <button type="button" role="menuitem" onClick={handleLogout} disabled={sending} className={MENU_ITEM}>
             <span className="material-symbols-outlined" aria-hidden="true">logout</span>
             {sending ? 'Déconnexion…' : 'Se déconnecter'}
           </button>
