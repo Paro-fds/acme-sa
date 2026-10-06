@@ -148,6 +148,7 @@ describe('AppHeader — menu du compte admin (US-23)', () => {
       { path: '/', element: <AppHeader title="Tableau de bord" account={account} /> },
       { path: '/admin/administrateurs', element: <p>Écran administrateurs</p> },
       { path: '/admin/mot-de-passe', element: <p>Écran mot de passe</p> },
+      { path: '/parcours', element: <p>Écran Mon parcours</p> },
     ])
     render(<RouterProvider router={router} />)
   }
@@ -164,12 +165,23 @@ describe('AppHeader — menu du compte admin (US-23)', () => {
     expect(await screen.findByText('Écran administrateurs')).toBeInTheDocument()
   })
 
-  it('le menu employé ne contient que « Se déconnecter »', async () => {
+  it('le menu employé ne contient que « Mon parcours » (US-25) et « Se déconnecter »', async () => {
     const user = userEvent.setup()
     renderHeader(true)
 
     await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
-    expect(screen.getAllByRole('menuitem')).toHaveLength(1)
+    const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
+    expect(items).toEqual(['workspace_premiumMon parcours', 'logoutSe déconnecter'])
     expect(screen.queryByRole('menuitem', { name: 'Administrateurs' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('menuitem', { name: 'Mon parcours' }))
+    expect(await screen.findByText('Écran Mon parcours')).toBeInTheDocument()
+  })
+
+  it('le menu admin ne propose pas « Mon parcours »', async () => {
+    renderHeader('admin')
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Menu du compte' }))
+    expect(screen.queryByRole('menuitem', { name: 'Mon parcours' })).not.toBeInTheDocument()
   })
 })

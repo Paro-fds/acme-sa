@@ -197,7 +197,7 @@ Format d'erreur et sessions inchangés (MVP §8, §10). Toutes les routes `/api/
 | Méthode | Route | Description |
 |---|---|---|
 | GET | `/api/me/career/fields` | Registre : rubriques, libellés, champs, obligatoires, limites (formulaires générés) |
-| GET | `/api/me/career` | Parcours : `{QUALIFICATION: [...], TRAINING: [...], EXPERIENCE: [...], SKILL: [...]}`, chaque liste triée (§3.2), avec `limit` et `count` par rubrique |
+| GET | `/api/me/career` | Parcours : `{kinds: [{kind, label, count, limit, items}], last_changed_at}`, les quatre rubriques dans l'ordre du registre, chaque liste triée (§3.2) |
 | POST | `/api/me/career/entries` | `{kind, qualification_type?, title, organization?, location?, start_month?, end_month?, duration_hours?, description?, skill_level?}` → `201` + élément |
 | PUT | `/api/me/career/entries/{id}` | Mêmes champs, sans `kind` → élément |
 | DELETE | `/api/me/career/entries/{id}` | `204` ; supprime aussi le justificatif |

@@ -23,14 +23,14 @@ Mêmes principes que le MVP (`docs/epics/README.md`) : chaque story est **indép
 
 | Epic | Statut |
 |---|---|
-| [E06 Parcours professionnel](E06-parcours/README.md) | Pas encore |
+| [E06 Parcours professionnel](E06-parcours/README.md) | En cours |
 | [E07 Recherche de profils](E07-recherche-profils/README.md) | Pas encore |
 
 ## Index
 
 | Epic | Story | Titre | Fonctionnalités PRD | Priorité | Statut |
 |---|---|---|---|---|---|
-| **E06 Parcours professionnel** | [US-25](E06-parcours/US-25-consulter-parcours.md) | Consulter son parcours | F-32 | MUST | Pas encore |
+| **E06 Parcours professionnel** | [US-25](E06-parcours/US-25-consulter-parcours.md) | Consulter son parcours | F-32 | MUST | Fait |
 | | [US-26](E06-parcours/US-26-diplomes-certifications.md) | Gérer ses diplômes et certifications | F-33, F-38 | MUST | Pas encore |
 | | [US-27](E06-parcours/US-27-formations.md) | Gérer ses formations | F-34, F-38 | MUST | Pas encore |
 | | [US-28](E06-parcours/US-28-experiences.md) | Gérer ses expériences professionnelles | F-35, F-38 | MUST | Pas encore |

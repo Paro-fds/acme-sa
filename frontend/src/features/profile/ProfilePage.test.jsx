@@ -47,6 +47,7 @@ function renderPage() {
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/mise-a-jour/informations" element={<p>Étape 1 : Informations</p>} />
         <Route path="/documents" element={<p>Écran Mes documents</p>} />
+        <Route path="/parcours" element={<p>Écran Mon parcours</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -133,6 +134,18 @@ describe('ProfilePage (US-05)', () => {
     await userEvent.setup().click(screen.getByRole('link', { name: /Mes documents/ }))
 
     expect(await screen.findByText('Écran Mes documents')).toBeInTheDocument()
+  })
+
+  it('US-25 CA-03 : la carte « Mon parcours », sous « Mes documents », ouvre le parcours', async () => {
+    await renderProfile()
+
+    const documents = screen.getByRole('link', { name: /Mes documents/ })
+    const career = screen.getByRole('link', { name: /Mon parcours/ })
+    expect(documents.compareDocumentPosition(career) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(career).toHaveTextContent('Diplômes, formations, expériences et compétences')
+
+    await userEvent.setup().click(career)
+    expect(await screen.findByText('Écran Mon parcours')).toBeInTheDocument()
   })
 
   it('CA-06 : sans session, retour à l’identification', async () => {

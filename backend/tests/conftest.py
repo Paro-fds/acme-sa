@@ -5,6 +5,7 @@ et le CSV fictif `fixtures/employees_test.csv` : aucun test ne dépend d'un autr
 """
 
 from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -14,14 +15,19 @@ from fastapi.testclient import TestClient
 
 from app.auth.api.dependencies import SESSION_COOKIE
 from app.auth.domain.model import Account, SubjectType
+from app.career.domain.career_entry import CareerEntry
+from app.career.domain.entry_kinds import EntryKind, SkillLevel
 from app.config import Settings
 from app.main import create_app
 from app.update.domain.update import EmployeeUpdate
-from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, TestEmployee
+from tests.career import make_entry
+from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A, EMP_B, EMP_I, TestEmployee
 from tests.fake_clock import FakeClock
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 TEST_CSV = FIXTURES_DIR / "employees_test.csv"
+CAREER_NOW = datetime(2026, 10, 15, 12, 0, tzinfo=UTC)
+"""Heure de référence des tests du parcours (mois courant 2026-10)."""
 
 
 @pytest.fixture(scope="session")
@@ -129,3 +135,47 @@ def submitted(container, draft) -> Callable[[TestEmployee, dict[str, str]], Empl
         return container.updates.get_for_employee(employee.id)
 
     return create
+
+
+# --- V2 : parcours professionnel (docs/v2/epics/README.md) -------------------------
+
+
+@pytest.fixture
+def frozen_clock(container) -> Callable[[datetime], FakeClock]:
+    """Fixe l'horloge de l'application (ex. 2026-10-15 : mois courant 2026-10)."""
+
+    def freeze(moment: datetime = CAREER_NOW) -> FakeClock:
+        fake = FakeClock(moment)
+        container.clock = fake
+        return fake
+
+    return freeze
+
+
+@pytest.fixture
+def career_entry(container) -> Callable[..., CareerEntry]:
+    """Crée un élément du parcours de l'employé (valeurs par défaut de sa rubrique) et met à jour `career_profile`."""
+
+    def create(employee: TestEmployee, kind: EntryKind, **fields) -> CareerEntry:
+        entry = make_entry(employee.id, kind, **fields)
+        container.careers.add(entry, changed_at=entry.updated_at)
+        return entry
+
+    return create
+
+
+@pytest.fixture
+def career_reference(career_entry) -> dict[str, list[CareerEntry]]:
+    """Parcours de référence P-A, P-B, P-I (EMP-I est inactif). Le justificatif de P-A arrive avec US-29."""
+    return {
+        "P-A": [
+            career_entry(EMP_A, EntryKind.SKILL, title="Analyse de crédit", skill_level=SkillLevel.EXPERT),
+            career_entry(EMP_A, EntryKind.QUALIFICATION),
+            career_entry(EMP_A, EntryKind.EXPERIENCE),
+        ],
+        "P-B": [
+            career_entry(EMP_B, EntryKind.SKILL, title="Anglais", skill_level=SkillLevel.GOOD),
+            career_entry(EMP_B, EntryKind.TRAINING),
+        ],
+        "P-I": [career_entry(EMP_I, EntryKind.SKILL, title="Analyse de crédit", skill_level=SkillLevel.EXPERT)],
+    }

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | E06 Parcours professionnel |
 | **Priorité** | MUST |
 | **PRD** | F-32, RM-V2-01, RM-V2-02, D-12, D-17 |
@@ -72,6 +72,14 @@ Alors il renvoie les quatre rubriques avec, pour chacune, ses champs (code, libe
 | T-25.4 | CA-01, CA-02 | Composant | `src/features/career/CareerPage.test.jsx` | rubriques, messages d'accueil, mention de visibilité, ordre |
 | T-25.5 | CA-03 | Composant | `src/features/profile/ProfilePage.test.jsx`, `src/components/AppHeader.test.jsx` | carte « Mon parcours », lien du menu |
 | T-25.6 | — | Architecture | `tests/test_architecture.py` | `app.career` dans les contrats ; contrat « Parcours indépendant de la campagne » |
+
+## Notes de réalisation
+
+- **Réponse de `GET /api/me/career`** : `{kinds: [{kind, label, count, limit, items}], last_changed_at}` : une **liste ordonnée** des quatre rubriques (ordre du registre) plutôt qu'un objet indexé par rubrique ; `last_changed_at` vient de `career_profile` (null si l'employé n'a jamais rien enregistré). Chaque élément porte aussi `qualification_type_label` et `skill_level_label`.
+- **Registre** (`app/career/domain/entry_kinds.py`) : `FieldSpec` (type `TEXT`, `LONG_TEXT`, `CHOICE`, `MONTH`, `INTEGER`, longueurs, bornes, choix, `only_when`, `open_label`) ; exposé tel quel par `GET /api/me/career/fields` avec la limite `MAX_CAREER_ENTRIES_PER_KIND`.
+- **Bouton « Ajouter »** : lien vers `/parcours/ajouter/{diplomes|formations|experiences|competences}` ; ces écrans arrivent avec US-26, US-27, US-28 et US-31. Rubrique pleine : bouton désactivé et message de limite (affichage préparé pour US-26 CA-08).
+- Affichage des éléments : `describeEntry` (`features/career/careerKinds.js`) et `formatMonth` (`lib/format.js`, « juin 2021 », forme courte « janv. 2016 ») ; compétences en étiquettes (`SkillTag`).
+- Vérifié à 390 px et 1280 px (parcours vide et rempli, carte du profil, menu) : aucun défilement horizontal.
 
 ## Hors périmètre
 

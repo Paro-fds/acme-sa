@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     admin_session_minutes: int = 120
     max_upload_mb: int = 5
     max_documents_per_employee: int = 10
+    max_career_entries_per_kind: int = 30
+    """V2 (D-10) : éléments au plus par rubrique du parcours professionnel."""
+    career_recent_days: int = 7
+    """V2 (D-15) : fenêtre « ces derniers jours » de la carte « Parcours enrichis »."""
     frontend_dist_dir: Path = PROJECT_DIR / "frontend" / "dist"
     api_docs: bool = False
     """Documentation interactive de l'API (/api/docs) : désactivée par défaut, le portail pouvant être exposé par un tunnel."""
@@ -30,3 +34,8 @@ class Settings(BaseSettings):
     @property
     def documents_dir(self) -> Path:
         return self.acme_data_dir / "documents"
+
+    @property
+    def career_dir(self) -> Path:
+        """Justificatifs du parcours professionnel (V2, AD-V2-04), séparés des documents de la campagne."""
+        return self.acme_data_dir / "career"

@@ -1,6 +1,6 @@
 # E06 — Parcours professionnel
 
-**Statut de l'epic :** Pas encore.
+**Statut de l'epic :** En cours (US-25 faite).
 
 **Objectif :** donner à chaque employé un espace « Mon parcours », disponible à tout moment, pour déclarer ses diplômes et certifications, formations, expériences et compétences, et permettre à l'administration de le consulter en lecture seule.
 

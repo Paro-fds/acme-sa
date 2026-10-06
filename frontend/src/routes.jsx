@@ -6,6 +6,7 @@ import DashboardPage from './features/admin/DashboardPage.jsx'
 import EmployeeDetailPage from './features/admin/EmployeeDetailPage.jsx'
 import EmployeeListPage from './features/admin/EmployeeListPage.jsx'
 import AmbiguousIdentityPage from './features/auth/AmbiguousIdentityPage.jsx'
+import CareerPage from './features/career/CareerPage.jsx'
 import IdentifyPage from './features/auth/IdentifyPage.jsx'
 import PasswordPage from './features/auth/PasswordPage.jsx'
 import DocumentsStep from './features/documents/DocumentsStep.jsx'
@@ -23,6 +24,7 @@ export default function AppRoutes() {
       <Route path="/connexion/homonyme" element={<AmbiguousIdentityPage />} />
       <Route path="/profil" element={<ProfilePage />} />
       <Route path="/documents" element={<MyDocumentsPage />} />
+      <Route path="/parcours" element={<CareerPage />} />
       <Route path="/mise-a-jour/informations" element={<InformationsStep />} />
       <Route path="/mise-a-jour/documents" element={<DocumentsStep />} />
       <Route path="/mise-a-jour/verification" element={<ReviewStep />} />

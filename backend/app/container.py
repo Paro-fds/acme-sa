@@ -27,6 +27,8 @@ from app.auth.application.use_cases import IdentifyEmployee, LoginEmployee, Regi
 from app.auth.domain.model import SubjectType
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
 from app.auth.infrastructure.sql_repositories import SqlAccountRepository, SqlAdminAccountRepository, SqlSessionRepository
+from app.career.application.use_cases import GetCareerFields, GetMyCareer
+from app.career.infrastructure.sql_career_repository import SqlCareerRepository
 from app.config import Settings
 from app.document.application.use_cases import DeleteDocument, GetMyDocumentFile, ListMyDocuments, UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
@@ -52,6 +54,7 @@ class Container:
         self.settings = settings
         settings.acme_data_dir.mkdir(parents=True, exist_ok=True)
         settings.documents_dir.mkdir(parents=True, exist_ok=True)
+        settings.career_dir.mkdir(parents=True, exist_ok=True)
 
         self.database = Database(settings.database_url)
         self.database.create_schema()
@@ -63,6 +66,7 @@ class Container:
         self.sessions = SqlSessionRepository(self.database)
         self.updates = SqlUpdateRepository(self.database)
         self.documents = SqlDocumentRepository(self.database)
+        self.careers = SqlCareerRepository(self.database)
         self.file_storage = LocalFileStorage(settings.documents_dir)
         self.password_hasher = Argon2PasswordHasher()
 
@@ -160,6 +164,14 @@ class Container:
 
     def close(self) -> None:
         self.database.dispose()
+
+    # --- career (V2) -----------------------------------------------------------
+
+    def get_my_career(self) -> GetMyCareer:
+        return GetMyCareer(self.careers, self.settings.max_career_entries_per_kind)
+
+    def get_career_fields(self) -> GetCareerFields:
+        return GetCareerFields(self.settings.max_career_entries_per_kind)
 
     # --- document -------------------------------------------------------------
 
