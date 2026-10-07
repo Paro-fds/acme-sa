@@ -1,0 +1,389 @@
+<!DOCTYPE html><html lang="fr"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>A3 — File de validation des certificats · ACME SA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 15px;
+      color: #1f2937;
+      background-color: #f8fafc;
+      width: 1440px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+    .brand-navy {
+      background-color: #1E1E82;
+    }
+    .text-navy {
+      color: #1E1E82;
+    }
+    .border-navy {
+      border-color: #1E1E82;
+    }
+    .logo-red {
+      color: #CC1111;
+    }
+    .state-orange {
+      color: #B45309;
+      background-color: #FFFBEB;
+      border-color: #FDE68A;
+    }
+    .state-blue {
+      color: #1D4ED8;
+      background-color: #EFF6FF;
+      border-color: #BFDBFE;
+    }
+    .state-green {
+      color: #15803D;
+      background-color: #F0FDF4;
+      border-color: #BBF7D0;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen antialiased bg-slate-50 text-slate-800">
+
+  <!-- EN-TÊTE FIXE COMMUNE -->
+  <header class="w-full h-16 brand-navy text-white px-8 flex items-center justify-between select-none shadow-sm">
+    <!-- En haut à gauche : le logo texte « acme sa » et « Portail RH » -->
+    <div class="flex items-center space-x-4">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh3BFwDvKIaqQsSnOeTrN-IUtCS7moxkb3cgxAmhpJdL8xFnS1vcp4J9fkA6sHESBOztnf14Fls-7fFZvmkMaoUiKjZwUOunl78K42v50usDZf_igWvRNZWGBTee2P75f3ncoRDorsdu0R7qjRhenJEZLgqpuvE7KCXCGzhdP7iI3VNHWQoc8sf8tYJjR6JhZoPN03CjzJF1bOvsS1kZQknRi1hIP5QAzhhnkig4lXFNb5nBzUvgOr" alt="ACME SA" class="h-8 object-contain bg-white rounded p-0.5">
+      <span class="text-indigo-300 text-lg font-light">|</span>
+      <span class="text-white font-medium text-base tracking-wide">Portail RH</span>
+    </div>
+
+    <!-- En haut à droite : « Administrateur Démo · Administrateur » et le lien « Se déconnecter ». Rien d'autre. -->
+    <div class="flex items-center space-x-4 text-sm font-normal">
+      <span class="text-indigo-100">Administrateur Démo · Administrateur</span>
+      <span class="text-indigo-300">·</span>
+      <a href="#" class="text-indigo-200 hover:text-white underline underline-offset-4 transition-colors">Se déconnecter</a>
+    </div>
+  </header>
+
+  <!-- CORPS DE LA PAGE AVEC MENU LATÉRAL -->
+  <div class="flex flex-1 w-full">
+    
+    <!-- MENU LATÉRAL GAUCHE DANS L'ORDRE EXACT -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col py-6 shrink-0">
+      <nav class="flex flex-col space-y-1 px-3">
+        <!-- 1. Tableau de bord -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md text-slate-700 hover:bg-slate-100 font-medium transition-colors">
+          <span class="">Tableau de bord</span>
+        </a>
+
+        <!-- 2. File de validation (27) — ACTIF -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md brand-navy text-white font-semibold shadow-sm">
+          <span class="">File de validation</span>
+          <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full font-bold">27</span>
+        </a>
+
+        <!-- 3. Employés -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md text-slate-700 hover:bg-slate-100 font-medium transition-colors">
+          <span class="">Employés</span>
+        </a>
+
+        <!-- 4. Signalements (9) -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md text-slate-700 hover:bg-slate-100 font-medium transition-colors">
+          <span class="">Signalements</span>
+          <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-bold">9</span>
+        </a>
+
+        <!-- 5. À rattacher (2) -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md text-slate-700 hover:bg-slate-100 font-medium transition-colors">
+          <span class="">À rattacher</span>
+          <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-bold">2</span>
+        </a>
+
+        <!-- 6. Comptes et rôles -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md text-slate-700 hover:bg-slate-100 font-medium transition-colors">
+          <span class="">Comptes et rôles</span>
+        </a>
+
+        <!-- 7. Journal d'audit -->
+        <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-md text-slate-700 hover:bg-slate-100 font-medium transition-colors">
+          <span class="">Journal d'audit</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ZONE DE CONTENU PRINCIPAL : 1440px - 256px = 1184px -->
+    <main class="flex-1 bg-slate-50 p-8 flex flex-col min-w-0">
+      
+      <!-- HAUT DE PAGE -->
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-navy tracking-tight">File de validation des certificats</h1>
+          <p class="text-slate-600 mt-1 font-medium">27 certificats en attente · 4 en retard</p>
+        </div>
+        
+        <!-- Bouton principal à droite : « Prendre le suivant » -->
+        <button class="brand-navy hover:bg-[#151566] text-white font-medium px-5 py-2.5 rounded-md shadow-sm transition-colors text-sm">
+          Prendre le suivant
+        </button>
+      </div>
+
+      <!-- Note discrète avec une icône d'information -->
+      <div class="flex items-center space-x-2.5 bg-blue-50/70 border border-blue-200/80 rounded-md px-4 py-2.5 text-sm text-slate-700 mb-6">
+        <svg class="w-4 h-4 text-navy shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="">Vos propres certificats n'apparaissent pas dans votre file : ils sont traités par un autre valideur.</span>
+      </div>
+
+      <!-- FILTRES SUR UNE LIGNE -->
+      <div class="bg-white border border-slate-200 rounded-lg p-4 mb-6 shadow-xs flex items-center justify-between gap-4">
+        <div class="flex items-center gap-6 flex-wrap">
+          <!-- Agence (Toutes) -->
+          <div class="flex items-center space-x-2 text-sm">
+            <label class="text-slate-600 font-medium">Agence :</label>
+            <select class="bg-slate-50 border border-slate-300 text-slate-800 rounded px-2.5 py-1.5 focus:outline-none focus:border-navy text-sm font-medium">
+              <option selected="">Toutes</option>
+              <option>Agence Démo Nord</option>
+              <option>Agence Démo Sud</option>
+              <option>Agence Démo Centre</option>
+            </select>
+          </div>
+
+          <!-- Niveau déclaré (Tous) -->
+          <div class="flex items-center space-x-2 text-sm">
+            <label class="text-slate-600 font-medium">Niveau déclaré :</label>
+            <select class="bg-slate-50 border border-slate-300 text-slate-800 rounded px-2.5 py-1.5 focus:outline-none focus:border-navy text-sm font-medium">
+              <option selected="">Tous</option>
+              <option>Licence</option>
+              <option>Master</option>
+              <option>Technicien supérieur / Bac + 2</option>
+              <option>Certification professionnelle</option>
+            </select>
+          </div>
+
+          <!-- Type de document (Tous : Diplôme, Certificat, Attestation) -->
+          <div class="flex items-center space-x-2 text-sm">
+            <label class="text-slate-600 font-medium">Type de document :</label>
+            <select class="bg-slate-50 border border-slate-300 text-slate-800 rounded px-2.5 py-1.5 focus:outline-none focus:border-navy text-sm font-medium">
+              <option selected="">Tous : Diplôme, Certificat, Attestation</option>
+              <option>Diplôme</option>
+              <option>Certificat</option>
+              <option>Attestation</option>
+            </select>
+          </div>
+
+          <!-- Case à cocher « En retard seulement » -->
+          <div class="flex items-center space-x-2 text-sm">
+            <input type="checkbox" id="retard-only" class="w-4 h-4 rounded border-slate-300 text-[#1E1E82] focus:ring-0 cursor-pointer">
+            <label for="retard-only" class="text-slate-700 font-medium cursor-pointer">En retard seulement</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLEAU DES CERTIFICATS -->
+      <div class="bg-white border border-slate-200 rounded-lg shadow-xs overflow-hidden flex flex-col flex-1">
+        <div class="overflow-x-auto flex-1">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100/80 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <th class="py-3 px-4">Employé</th>
+                <th class="py-3 px-4">Agence</th>
+                <th class="py-3 px-4">Certificat</th>
+                <th class="py-3 px-4">Niveau déclaré</th>
+                <th class="py-3 px-4">Déposé le</th>
+                <th class="py-3 px-4">Délai</th>
+                <th class="py-3 px-4">Statut</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-sm">
+              
+              <!-- Ligne 1 : Paul Démo -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Paul Démo · EMP-0204</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Sud</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Licence en Finance · Diplôme</td>
+                <td class="py-3.5 px-4 text-slate-700">Licence</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">24/09/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">9 j ouvrables</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold state-orange border">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9"></circle>
+                      <polyline points="12 7 12 12 15 15"></polyline>
+                    </svg>
+                    <span class="">En retard (9 j)</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="brand-navy hover:bg-[#151566] text-white text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Traiter
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Ligne 2 : Nadia Test -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Nadia Test · EMP-0311</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Centre</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Master en Audit · Diplôme</td>
+                <td class="py-3.5 px-4 text-slate-700">Master</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">25/09/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">8 j ouvrables</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold state-orange border">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9"></circle>
+                      <polyline points="12 7 12 12 15 15"></polyline>
+                    </svg>
+                    <span class="">En retard (8 j)</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="brand-navy hover:bg-[#151566] text-white text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Traiter
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Ligne 3 : Rose Exemple -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Rose Exemple · EMP-0233</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Nord</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Licence en Gestion · Diplôme</td>
+                <td class="py-3.5 px-4 text-slate-700">Licence</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">28/09/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">7 j ouvrables</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold state-orange border">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9"></circle>
+                      <polyline points="12 7 12 12 15 15"></polyline>
+                    </svg>
+                    <span class="">En retard (7 j)</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="brand-navy hover:bg-[#151566] text-white text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Traiter
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Ligne 4 : Jean Test -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Jean Test · EMP-0389</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Sud</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Technicien supérieur en Comptabilité · Diplôme</td>
+                <td class="py-3.5 px-4 text-slate-700">Technicien supérieur / Bac + 2</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">29/09/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">6 j ouvrables</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold state-orange border">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9"></circle>
+                      <polyline points="12 7 12 12 15 15"></polyline>
+                    </svg>
+                    <span class="">En retard (6 j)</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="brand-navy hover:bg-[#151566] text-white text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Traiter
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Ligne 5 : Lucie Exemple -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Lucie Exemple · EMP-0418</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Nord</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Licence en Sciences comptables · Diplôme</td>
+                <td class="py-3.5 px-4 text-slate-700">Licence</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">03/10/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">3 j ouvrables</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold state-blue border">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="">En cours — Agent RH Démo 1</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Réaffecter
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Ligne 6 : Marc Démo -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Marc Démo · EMP-0127</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Nord</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Comptabilité en microfinance · Certificat</td>
+                <td class="py-3.5 px-4 text-slate-700">Certification professionnelle</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">05/10/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">2 j ouvrables</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold state-blue border">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="">En cours — Agent RH Démo 2</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Réaffecter
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Ligne 7 : Sophie Test -->
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">Sophie Test · EMP-0562</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">Agence Démo Sud</td>
+                <td class="py-3.5 px-4 text-slate-800 font-medium">Licence en Économie · Diplôme</td>
+                <td class="py-3.5 px-4 text-slate-700">Licence</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">06/10/2026</td>
+                <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap font-medium">1 j ouvrable</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    <span class="">Nouveau</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <button class="brand-navy hover:bg-[#151566] text-white text-xs font-semibold px-3.5 py-1.5 rounded transition-colors">
+                    Traiter
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SOUS LE TABLEAU : « 1 à 7 sur 27 » et la pagination -->
+        <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-sm text-slate-600">
+          <span class="font-medium">1 à 7 sur 27</span>
+          <div class="flex items-center space-x-1">
+            <button class="px-2.5 py-1 rounded border border-slate-200 bg-white text-slate-400 cursor-not-allowed text-xs font-medium" disabled="">Précédent</button>
+            <button class="px-2.5 py-1 rounded brand-navy text-white text-xs font-semibold">1</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium">2</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium">3</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium">4</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium">Suivant</button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+
+
+
+
+</body></html>
