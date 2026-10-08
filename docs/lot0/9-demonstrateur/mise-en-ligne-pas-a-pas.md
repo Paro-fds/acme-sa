@@ -41,11 +41,11 @@ Vous avez déjà un compte.
 
 ## 2. GitHub : la branche de démonstration
 
-Render et Vercel déploient automatiquement la branche `demo` (US-001 CA-01).
+Render et Vercel déploient automatiquement la branche **`v2`**, qui sert de branche de démonstration (US-001 CA-01 ; choix du développeur, 2026-10-08).
 
 1. Vérifiez qu'aucune vraie donnée n'est suivie par git : le dossier `data/` doit rester ignoré (`.gitignore`).
-2. Commitez le travail de `v2`, créez la branche `demo` à partir de `v2`, puis poussez-la sur GitHub.
-3. Ensuite, chaque envoi sur `demo` remet le démonstrateur à jour.
+2. Commitez, puis poussez `v2` sur GitHub.
+3. Ensuite, chaque envoi sur `v2` remet le démonstrateur à jour : ne poussez sur `v2` que du travail dont les tests passent.
 
 ## 3. Render : l'API
 
@@ -72,12 +72,12 @@ Les autres valeurs sont déjà dans `render.yaml` : `APP_ENV=demo`, `MFA_METHODS
 
 ## 4. Vercel : le site
 
-1. Si l'adresse Render diffère de `acme-portail-api.onrender.com`, corrigez-la dans `frontend/vercel.json`, puis commitez et poussez sur `demo`.
+1. Si l'adresse Render diffère de `acme-portail-api.onrender.com`, corrigez-la dans `frontend/vercel.json`, puis commitez et poussez sur `v2`.
 2. Sur vercel.com, connectez-vous avec GitHub, puis **Add New** → **Project** → dépôt `acme-sa`, et réglez :
    - **Root Directory** : `frontend` ;
    - **Framework** : Vite (détecté automatiquement) ;
    - **Environment Variables** : `VITE_APP_ENV` = `demo` (cette variable affiche le bandeau « Démonstration · données fictives ») ;
-   - après le premier déploiement : **Settings** → **Git** → **Production Branch** = `demo`.
+   - après le premier déploiement : **Settings** → **Git** → **Production Branch** = `v2`.
 3. Ouvrez l'adresse Vercel (`https://….vercel.app`). Le bandeau jaune doit apparaître en haut de chaque écran.
 
 ## 5. Contrôles avant de montrer
@@ -112,7 +112,7 @@ Les règles à souligner devant lui :
 
 | Point | Story | Pourquoi ce n'est pas fait |
 |---|---|---|
-| Comptes Supabase, Render et Vercel, branche `demo` | US-001 CA-01 | Ces actions sont à faire avec vos accès (§1 à §4) |
+| Comptes Supabase, Render et Vercel | US-001 CA-01 | Ces actions sont à faire avec vos accès (§1 à §4) |
 | Dépôt **signé** des fichiers, envoyés directement au stockage | US-001 CA-07 | Aujourd'hui, les fichiers passent par l'API. Le dépôt signé viendra avec les certificats (D3). |
 | Envoi réel des codes par WhatsApp et par email | US-102 | Le service reste à choisir avec la DIT (D-41) ; il suffira d'un adaptateur derrière le port `CodeSender` |
 | Double authentification des employés | US-106 | Nouvelle exigence du 2026-10-08 ; méthodes et récupération à confirmer (P-15) |

@@ -6,7 +6,7 @@ services:
     runtime: docker
     plan: free
     region: oregon
-    branch: demo
+    branch: v2
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     healthCheckPath: /api/health
