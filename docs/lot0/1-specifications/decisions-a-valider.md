@@ -69,6 +69,7 @@
 | D-31 | Que devient le dossier d'un employé qui **quitte** l'institution ? | Conservé, marqué « parti », visible des RH seulement ; durée selon les règles d'archivage RH, à préciser | Cahier §8.6 |
 | D-32 | Combien de temps garder un **certificat rejeté** jamais redéposé, le **journal d'audit**, les **messages envoyés** ? | Comme le reste du dossier, sans suppression, jusqu'à une règle d'archivage RH | Cahier §8.6 |
 | D-33 | Les lettres d'origine (avec salaires) sont-elles gardées dans le portail ? | Non : champs extraits et validés seulement, plus une référence à la lettre ou une copie masquée | S-01 |
+| D-41 | **Double authentification** : la personne choisit-elle sa méthode (WhatsApp, email, application TOTP) ? Les employés en ont-ils une aussi ? | Oui au choix, pour les comptes RH ; employés : non au lancement. Technologie à choisir avec la DIT | P-14 ; RG-82 |
 | D-39 | **Photo de l'employé** : l'institution en conserve pour une partie des employés, sans que tous l'aient donnée. Le portail doit-il en afficher ou en collecter ? | Non au lancement : le registre n'en parle pas ; à rouvrir avec une mention d'information et un consentement si le besoin est confirmé | Modèle de données DM-08 |
 
 ## F. Valeurs du registre encore entre crochets

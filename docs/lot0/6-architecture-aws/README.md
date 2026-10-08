@@ -1,3 +1,7 @@
 # 6-architecture-aws
 
-Livrable du lot 0, pas encore commencé. Tâches du backlog : B-09 (voir `../backlog-lot0.md` et `../README.md`).
+Livrable 6 du lot 0 (tâche B-09) : architecture AWS en une page.
+
+| Fichier | Rôle |
+|---|---|
+| `architecture-aws.html` | Page publiée : schéma, choix, coûts mensuels estimés, options VPN, base de données, questions à la DIT |

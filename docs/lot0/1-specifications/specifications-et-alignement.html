@@ -1,0 +1,511 @@
+<title>Spécifications du portail Carrière</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Mise en page : document de travail, sommaire collé à gauche sur grand écran, une colonne sur téléphone */
+:root {
+  --bg: #f7f7fb; --paper: #ffffff; --fg: #1b1b2e; --muted: #5a5a74; --line: #dcdce8;
+  --navy: #1e1e82; --navy-soft: #ebebf8; --red: #cc1111;
+  --ok: #1d6b3a; --ok-soft: #e4f2e9; --warn: #8a5a00; --warn-soft: #fbf0d9; --ask: #5b2a86; --ask-soft: #f1e8f8;
+  --f-head: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12121c; --paper: #1a1a28; --fg: #e8e8f2; --muted: #a2a2bc; --line: #33334a;
+  --navy: #a9a9ff; --navy-soft: #24244a; --red: #ff6b6b;
+  --ok: #7fd49c; --ok-soft: #173525; --warn: #f0c26a; --warn-soft: #3a2d12; --ask: #d2a8f5; --ask-soft: #2e2040;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #12121c; --paper: #1a1a28; --fg: #e8e8f2; --muted: #a2a2bc; --line: #33334a;
+  --navy: #a9a9ff; --navy-soft: #24244a; --red: #ff6b6b;
+  --ok: #7fd49c; --ok-soft: #173525; --warn: #f0c26a; --warn-soft: #3a2d12; --ask: #d2a8f5; --ask-soft: #2e2040;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--f-body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px;
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } nav.toc { position: static; } }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; font-size: 14px; }
+nav.toc p { font: 600 12px var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+nav.toc ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+nav.toc a { color: var(--fg); text-decoration: none; }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--navy); text-decoration: underline; }
+main { min-width: 0; display: grid; gap: 28px; }
+header.doc { border-bottom: 3px solid var(--navy); padding-bottom: 18px; }
+.eyebrow { font: 600 12px var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--red); margin: 0 0 6px; }
+h1, h2, h3 { font-family: var(--f-head); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(28px, 4vw, 38px); color: var(--navy); }
+h2 { font-size: 24px; color: var(--navy); }
+h3 { font-size: 18px; margin-top: 6px; }
+section { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 22px 22px 18px; display: grid; gap: 14px; min-width: 0; }
+section > p, section li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: 14px; margin-top: 10px; }
+.meta b { color: var(--fg); }
+.lede { font-size: 19px; font-family: var(--f-head); border-left: 4px solid var(--red); padding: 4px 0 4px 16px; max-width: 70ch; }
+.callout { background: var(--navy-soft); border-radius: 6px; padding: 12px 16px; }
+.ask { background: var(--ask-soft); color: var(--fg); border-radius: 6px; padding: 10px 14px; font-style: italic; }
+.ask::before { content: "À demander à M. Hilaire · "; font-style: normal; font-weight: 700; color: var(--ask); }
+.table { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { background: var(--navy-soft); font-weight: 700; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.c { text-align: center; }
+code, .id { font: 500 13px var(--f-mono); white-space: nowrap; }
+.id { color: var(--navy); }
+.pill { display: inline-block; font: 600 12px var(--f-body); padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.must { background: var(--navy-soft); color: var(--navy); }
+.should { background: var(--warn-soft); color: var(--warn); }
+.done { background: var(--ok-soft); color: var(--ok); }
+.open { background: var(--ask-soft); color: var(--ask); }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.card { border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.card .n { font: 700 13px var(--f-mono); color: var(--red); }
+.card h3 { margin: 0; font-size: 17px; }
+.small { font-size: 14px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--muted); }
+a { color: var(--navy); }
+:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sommaire">
+  <p>Sommaire</p>
+  <ol>
+    <li><a href="#alignement">Note d'alignement</a></li>
+    <li><a href="#besoin">Le besoin</a></li>
+    <li><a href="#criteres">Critères de réussite</a></li>
+    <li><a href="#perimetre">Périmètre et lots</a></li>
+    <li><a href="#roles">Personas et rôles</a></li>
+    <li><a href="#parcours">Parcours clés</a></li>
+    <li><a href="#exigences">Exigences fonctionnelles</a></li>
+    <li><a href="#donnees">Données</a></li>
+    <li><a href="#enf">Exigences non fonctionnelles</a></li>
+    <li><a href="#contraintes">Contraintes</a></li>
+    <li><a href="#decisions">Décisions à valider</a></li>
+    <li><a href="#dependances">Ce qui est attendu</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="doc">
+  <p class="eyebrow">ACME SA · Refonte du portail · Lot 0, cadrage</p>
+  <h1>Spécifications du portail Carrière</h1>
+  <div class="meta">
+    <span><b>État :</b> brouillon complet, à valider par M. Hilaire</span>
+    <span><b>Date :</b> 7 octobre 2026</span>
+    <span><b>Fait foi :</b> registre des décisions v1.8</span>
+  </div>
+  <p class="small" style="margin-top:10px">Chaque élément cite sa source : « Demande » (demande initiale de M. Hilaire), Q1 à Q10 (registre des décisions). Ce qui vient de nous est une <b>proposition</b> (P-xx) ou une <b>hypothèse</b> (H), à confirmer. Aucune donnée personnelle dans cette page.</p>
+</header>
+
+<!-- 1. ALIGNEMENT -->
+<section id="alignement">
+  <p class="eyebrow">À vérifier en premier</p>
+  <h2>1. Note d'alignement : ce que nous avons compris</h2>
+  <p>But : vérifier avec M. Hilaire que notre compréhension du <b>pourquoi</b> est la sienne, avant de construire un dossier de décision chiffré pour la direction. Ce n'est ni une présentation, ni un engagement sur des chiffres.</p>
+
+  <h3>Notre compréhension en trois phrases</h3>
+  <ol>
+    <li><b>Le but réel</b> est d'obtenir de chaque employé un dossier <b>complet, vérifié et à jour</b>, avec des certificats validés par les RH (Demande, « objectif réel »).</li>
+    <li><b>Le moyen</b> est de donner à l'employé une raison personnelle de le faire : sa carrière, c'est-à-dire des promotions traitées plus vite, être repéré pour les postes vacants, voir où il en est (Demande, « objectif affiché »). Le <b>verrou</b> relie les deux : pour faire valoir ses qualifications, il faut d'abord un dossier propre. Ce verrou est présenté comme un service rendu.</li>
+    <li><b>Pour l'institution</b>, l'enjeu est que les décisions RH (promotions, mobilités, postes) reposent sur des <b>qualifications prouvées et tracées</b>, et non sur des dossiers incomplets ou des souvenirs.</li>
+  </ol>
+  <p class="ask">Est-ce bien cela ? Qu'est-ce qui manque ou qui est de trop ?</p>
+
+  <h3>Ce que le projet apporte à l'institution (hypothèses)</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>Valeur pour l'institution</th><th>Critère lié</th><th>Mesure</th><th>Chiffre de départ à obtenir</th></tr></thead>
+    <tbody>
+      <tr><td class="id">H1</td><td>Les RH trouvent et vérifient les qualifications <b>sans fouiller les dossiers papier</b></td><td>Critère 1 : une liste en une minute</td><td>Temps pour produire une liste de candidats qualifiés</td><td>Combien de temps cela prend aujourd'hui</td></tr>
+      <tr><td class="id">H2</td><td>Promotions et mobilités décidées <b>plus vite</b> ; postes moins longtemps vacants</td><td>Critère 2 : quelques jours au lieu de quelques semaines</td><td>Délai entre la demande et la décision</td><td>Délai actuel ; nombre de demandes par an</td></tr>
+      <tr><td class="id">H3</td><td>Plus de postes <b>pourvus en interne</b> plutôt que par recrutement externe</td><td>Critère 3 ; lot 4</td><td>Part des postes pourvus en interne</td><td>Postes pourvus par an, dont en externe ; coût moyen d'un recrutement externe</td></tr>
+      <tr><td class="id">H4</td><td>Des décisions RH <b>défendables</b> : tout est tracé, les données personnelles sont protégées, les salaires ne sont jamais extraits</td><td>Q2 (audit), Q8 (sécurité)</td><td>Journal d'audit complet ; aucun incident</td><td>Attentes du contrôle interne et de l'audit</td></tr>
+      <tr><td class="id">H5</td><td>Des employés <b>plus engagés</b>, qui voient un avenir dans l'institution</td><td>Critère 3 ; critère « plaisir »</td><td>Connexions spontanées ; réponse en un clic après un dépôt</td><td>À définir (par exemple les départs volontaires par an)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="ask">Laquelle de ces valeurs compte le plus pour vous ? Et pour la Direction Générale ?</p>
+
+  <h3>Questions à poser</h3>
+  <div class="grid3">
+    <div class="card"><span class="n">Alignement</span>
+      <ol><li>Notre résumé en trois phrases est-il juste ?</li><li>Parmi H1 à H5, lesquelles comptent vraiment ? En manque-t-il une plus importante ?</li><li>Qu'est-ce qui serait un <b>échec</b> dans six mois ?</li></ol></div>
+    <div class="card"><span class="n">Décision</span>
+      <ol start="4"><li>Qui décide du budget : M. Hilaire, la Direction Générale, un comité ?</li><li>Qu'est-ce qui convainc ce décideur : un gain chiffré, la maîtrise des risques, ou la stratégie RH ?</li><li>Y a-t-il un budget envisagé, ou une limite ?</li></ol></div>
+    <div class="card"><span class="n">Chiffres de départ</span>
+      <ol start="7"><li>Combien de demandes de promotion ou de mobilité par an, et quel délai moyen ?</li><li>Combien de postes pourvus par an, dont en externe, et à quel coût ?</li><li>Combien de temps les RH passent-elles à tenir et vérifier les dossiers ?</li></ol>
+      <p class="small">Des ordres de grandeur suffisent, sans données personnelles.</p></div>
+  </div>
+
+  <div class="callout">
+    <p><b>Ce que nous ne savons pas encore :</b> le coût complet du projet (hébergement AWS estimé à ~135 $ par mois, à confirmer avec la DIT ; WhatsApp ; temps de développement et maintenance) et le point de départ des indicateurs, sans lequel aucun gain ne pourra être démontré.</p>
+    <p style="margin-top:8px"><b>La suite :</b> si nous sommes alignés, nous construisons un dossier de décision pour la direction (problème et coût, solution par lots, gains chiffrés, coût, risques, indicateurs, décision demandée). Sinon, nous corrigeons d'abord le besoin et les objectifs ci-dessous.</p>
+  </div>
+</section>
+
+<!-- 2. BESOIN -->
+<section id="besoin">
+  <h2>2. Le besoin</h2>
+  <p>ACME SA est une institution de microfinance d'environ 500 employés, répartis dans 28 agences et au siège, en Haïti. Le premier portail (MVP) fonctionnait comme un simple formulaire d'envoi : rien ne donnait envie de l'utiliser, et les certificats reçus arrivaient dans des dossiers qui pouvaient être incomplets ou faux.</p>
+  <p class="lede">Obtenir de chaque employé un dossier complet, vérifié et à jour, avec ses certificats validés, pour que les RH décident vite et bien des promotions, des mobilités et des postes vacants, en donnant à l'employé une vraie raison personnelle, et du plaisir, à le faire.</p>
+  <div class="grid3">
+    <div class="card"><span class="n">Besoin 1</span><h3>Des données fiables</h3><p>Complètes, cohérentes, confirmées par l'employé.</p><p class="small">Sans lui, les décisions RH reposent sur des dossiers faux ou vides.</p></div>
+    <div class="card"><span class="n">Besoin 2</span><h3>Des qualifications prouvées</h3><p>Certificats vérifiés par les RH.</p><p class="small">Sans lui, on ne sait pas qui est qualifié pour quel poste.</p></div>
+    <div class="card"><span class="n">Besoin 3</span><h3>Une raison de participer</h3><p>L'employé voit ce qu'il y gagne.</p><p class="small">Sans lui, personne n'utilise l'application.</p></div>
+  </div>
+  <p>Le <b>verrou</b> relie les trois : pour faire valoir ses qualifications (2), qui lui ouvrent des opportunités (3), l'employé doit d'abord avoir un dossier propre (1). Il est présenté comme un service, jamais comme une sanction. <b>Leçon du MVP :</b> il traitait le besoin 1 sans le besoin 3, donc sans motivation, et ne traitait pas le besoin 2.</p>
+</section>
+
+<!-- 3. CRITÈRES -->
+<section id="criteres">
+  <h2>3. Critères de réussite, dans 6 mois</h2>
+  <div class="table"><table>
+    <thead><tr><th>#</th><th>Critère</th><th>Mesure</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Un agent RH trouve <b>en une minute</b> tous les titulaires d'une Licence en comptabilité de la région Sud</td><td>Temps pour obtenir la liste ; seuls les certificats validés comptent</td><td>Q3, Q4</td></tr>
+      <tr><td>2</td><td>Une demande de promotion est traitée <b>en quelques jours</b> au lieu de quelques semaines</td><td>Délai entre réception et décision</td><td>Q6</td></tr>
+      <tr><td>3</td><td>Les employés <b>ouvrent l'application d'eux-mêmes</b> pour voir les postes ouverts</td><td>Part des employés qui se connectent dans le mois sans relance</td><td>Q5</td></tr>
+      <tr><td>4</td><td><b>9 employés actifs sur 10</b> ont un dossier complet</td><td>% de dossiers complets au tableau de bord</td><td>Q1</td></tr>
+      <tr><td>+</td><td>L'employé <b>prend plaisir</b> à utiliser l'application</td><td>Question en un clic après le dépôt ; profil complété en moins de 10 minutes sur téléphone</td><td>Q9</td></tr>
+      <tr><td>+</td><td>Moins de temps de traitement et moins d'erreurs côté RH</td><td>Délai de validation d'un certificat ; taux de rejet</td><td>Q2</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Tensions repérées</h3>
+  <ul>
+    <li><b>T1</b> Le domaine d'un certificat est facultatif : la recherche « comptabilité » raterait des employés. <span class="pill done">Tranché : P-01</span></li>
+    <li><b>T2</b> Les postes ouverts n'arrivent qu'au lot 4 : quel aimant avant ? <span class="pill done">Tranché : progression, suivi, « ce que ça débloque »</span></li>
+    <li><b>T3</b> « 9 actifs sur 10 » : sur 364 actifs de l'export, ou sur ~500 employés ? <span class="pill open">À confirmer avec la DRH</span></li>
+    <li><b>T4</b> Le portail ne maîtrise qu'une partie du délai de promotion, et le délai actuel est inconnu. <span class="pill open">À discuter</span></li>
+  </ul>
+</section>
+
+<!-- 4. PÉRIMÈTRE -->
+<section id="perimetre">
+  <h2>4. Périmètre et lots</h2>
+  <div class="table"><table>
+    <thead><tr><th>Lot</th><th>But</th><th>Contenu</th><th class="c">Must</th><th class="c">Should</th></tr></thead>
+    <tbody>
+      <tr><td><b>0. Cadrage</b></td><td>Spécifications et maquettes validées</td><td>Spécifications, maquettes, modèle de données, référentiel des unités, test d'extraction des lettres, architecture AWS, WhatsApp, guide de style</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td><b>1. Parcours « certificat »</b></td><td>Un employé complète son profil et dépose ses certificats</td><td>Accueil et progression, connexion, profil confirmé, verrou, dépôt, statut, consentement, référentiel</td><td class="c">23</td><td class="c">4</td></tr>
+      <tr><td><b>2. Traitement RH</b></td><td>Les RH valident, pilotent et enregistrent les demandes</td><td>File de validation, signalements, rôles, tableau de bord, liste et export, journal d'audit, demandes reçues par lettre, mouvements extraits</td><td class="c">18</td><td class="c">5</td></tr>
+      <tr><td><b>3. Mise en service</b></td><td>Le portail est hébergé, sécurisé et annoncé</td><td>AWS (recette et production), sécurité, sauvegardes, message de lancement, guide RH</td><td class="c">3</td><td class="c">—</td></tr>
+      <tr><td><b>4. Carrière et engagement</b></td><td>L'employé voit ses postes éligibles et suit ses demandes</td><td>« Ma carrière », postes et éligibilité, demandes en ligne, péremption, règles modifiables sans code</td><td class="c">10</td><td class="c">5</td></tr>
+      <tr><td><b>Lot distinct</b></td><td colspan="2">Lettres de promotion produites par le portail ; mouvements renvoyés au système RH</td><td class="c">—</td><td class="c">—</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Ouverture aux employés : à la fin du lot 3, pas avant.</b> Les lots 1 et 2 sont démontrés en recette, sur données fictives.</p>
+  <h3>Hors périmètre</h3>
+  <ul>
+    <li>Vérifier les certificats auprès des établissements ; double validation ; validation groupée (Q2).</li>
+    <li>Décision automatique d'une nomination : l'éligibilité reste informative (Q5).</li>
+    <li>Modifier l'export RH, qui reste en lecture seule (Q4).</li>
+    <li>Outils WhatsApp non officiels (Q7).</li>
+    <li><b>Extraire ou stocker les salaires</b>, y compris dans les lettres scannées (message de lancement §5).</li>
+    <li><b>Données réelles d'employés en test</b> (message de lancement §5 ; Q8).</li>
+  </ul>
+</section>
+
+<!-- 5. RÔLES -->
+<section id="roles">
+  <h2>5. Personas et rôles</h2>
+  <p>Seulement ce que M. Hilaire a écrit. Les personnes sont désignées par leur rôle.</p>
+  <div class="grid3">
+    <div class="card"><span class="n">P1</span><h3>L'employé</h3><p>Environ 500 employés, 28 agences. Beaucoup sur téléphone, parfois avec une connexion limitée ; un quart sans email ; WhatsApp en priorité.</p><p class="small">Complète et confirme son dossier, dépose ses certificats, suit leur statut, voit ses postes éligibles (lot 4).</p></div>
+    <div class="card"><span class="n">P2</span><h3>L'Agent RH</h3><p>Deux personnes de la DRH, avec les mêmes droits ; d'autres pourront être désignées (Q2).</p><p class="small">Valide ou rejette les certificats sous 5 jours ouvrables, traite les signalements, enregistre les demandes reçues par lettre, contrôle les mouvements extraits.</p></div>
+    <div class="card"><span class="n">P3</span><h3>Le responsable du référentiel</h3><p>Une responsable à la DRH, assistée d'une collègue (Q4). La DIT ne modifie pas le référentiel seule.</p><p class="small">Tient les agences, régions et directions ; valide la correspondance avec l'export.</p></div>
+    <div class="card"><span class="n">P4</span><h3>L'Administrateur</h3><p>M. Gregory Hilaire, DRH, suppléé par son supérieur hiérarchique (Q2).</p><p class="small">Valide aussi, réaffecte un dossier, gère les comptes, réinitialise un accès, publie les postes.</p></div>
+    <div class="card"><span class="n">P5</span><h3>La Lecture seule</h3><p>Par exemple la Direction Générale ou l'audit (Q2).</p><p class="small">Consulte les dossiers et les tableaux de bord, sans valider.</p></div>
+  </div>
+  <h3>Qui peut faire quoi</h3>
+  <p class="legend"><span>✅ autorisé</span><span>❌ interdit</span><span>❓ non dit, à trancher (décisions D-15 → D-19)</span><span>« comme employé » : sur son propre dossier</span></p>
+  <div class="table"><table>
+    <thead><tr><th>Action</th><th class="c">Employé</th><th class="c">Agent RH</th><th class="c">Référentiel</th><th class="c">Admin.</th><th class="c">Lecture seule</th></tr></thead>
+    <tbody>
+      <tr><td>Voir et compléter son propre dossier, déposer ses certificats</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td></tr>
+      <tr><td>Consulter les dossiers des employés</td><td class="c">❌</td><td class="c">✅</td><td class="c">❓</td><td class="c">✅</td><td class="c">✅</td></tr>
+      <tr><td>Valider ou rejeter un certificat</td><td class="c">❌</td><td class="c">✅ sauf le sien</td><td class="c">—</td><td class="c">✅</td><td class="c">❌</td></tr>
+      <tr><td>Réaffecter un dossier</td><td class="c">❌</td><td class="c">❌</td><td class="c">—</td><td class="c">✅</td><td class="c">❌</td></tr>
+      <tr><td>Modifier le référentiel ; rattacher une valeur inconnue</td><td class="c">❌</td><td class="c">❌</td><td class="c">✅</td><td class="c">✅</td><td class="c">❌</td></tr>
+      <tr><td>Traiter les signalements ; enregistrer une demande reçue par lettre</td><td class="c">❌</td><td class="c">✅</td><td class="c">—</td><td class="c">❓</td><td class="c">❌</td></tr>
+      <tr><td>Saisir un poste ouvert (lot 4)</td><td class="c">❌</td><td class="c">✅</td><td class="c">—</td><td class="c">❓</td><td class="c">❌</td></tr>
+      <tr><td>Publier un poste, le marquer confidentiel (lot 4)</td><td class="c">❌</td><td class="c">❌</td><td class="c">—</td><td class="c">✅</td><td class="c">❌</td></tr>
+      <tr><td>Voir les tableaux de bord</td><td class="c">❌</td><td class="c">❓</td><td class="c">❓</td><td class="c">✅</td><td class="c">✅</td></tr>
+      <tr><td>Exporter des listes</td><td class="c">❌</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td></tr>
+      <tr><td>Gérer les comptes, réinitialiser un accès</td><td class="c">❌</td><td class="c">❌</td><td class="c">❌</td><td class="c">✅</td><td class="c">❌</td></tr>
+      <tr><td>Consulter le journal d'audit</td><td class="c">❌</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Règles transversales :</b> un employé ne voit que ses propres données ; un Agent RH ne valide jamais son propre certificat ; toute consultation et toute décision sont tracées ; les comptes RH ont la double authentification et ne s'ouvrent que depuis les bureaux de l'institution.</p>
+</section>
+
+<!-- 6. PARCOURS -->
+<section id="parcours">
+  <h2>6. Parcours clés</h2>
+  <h3>L'employé</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>Étape</th><th>Ce qui se passe</th><th>Lot</th></tr></thead>
+    <tbody>
+      <tr><td class="id">E1</td><td>Découvrir</td><td>Accueil chaleureux avec les 3 bénéfices (promotion, postes vacants, carrière) ; après connexion, « Votre dossier est complet à 60 % » ; mascotte « La Penseuse »</td><td>1</td></tr>
+      <tr><td class="id">E2</td><td>Se connecter</td><td>Nom, prénom, date de naissance, mot de passe (Q8)</td><td>1</td></tr>
+      <tr><td class="id">E3</td><td>Compléter son profil</td><td>Saisit ou confirme téléphone, adresse, email (ou « pas d'email »), contact d'urgence, niveau d'études ; <b>confirme sans modifier</b> agence, poste, date d'embauche, ou signale une erreur ; consentement</td><td>1</td></tr>
+      <tr><td class="id">E4</td><td>Déposer un certificat</td><td>Débloqué quand le profil est complet ; sinon « Il reste 2 informations à compléter » avec un lien vers chaque champ ; PDF, JPG, PNG ; aperçu ; plusieurs certificats</td><td>1</td></tr>
+      <tr><td class="id">E5</td><td>Suivre son certificat</td><td>Merci et récapitulatif ; statuts Reçu → Validé ou À corriger (motif poli, redépôt) ; notification WhatsApp</td><td>1 et 2</td></tr>
+      <tr><td class="id">E6</td><td>« Ma carrière »</td><td>Qualifications, postes ouverts avec indicateur vert ou orange et ce qui manque ; n'empêche jamais de manifester son intérêt</td><td>4</td></tr>
+      <tr><td class="id">E7</td><td>Faire une demande</td><td>Promotion ou mobilité en ligne, même sans poste ouvert ; accusé de réception ; suivi</td><td>4</td></tr>
+      <tr><td class="id">E8</td><td>Être relancé</td><td>Relances limitées, arrêtées dès que le dossier est complet ; confirmation annuelle en un clic</td><td>1 à 4</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Les RH</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>Étape</th><th>Ce qui se passe</th><th>Lot</th></tr></thead>
+    <tbody>
+      <tr><td class="id">R1</td><td>Valider un certificat</td><td>File commune, alerte au-delà de 5 jours ouvrables ; document à gauche, profil à droite ; Valider ou Rejeter avec un des 10 motifs ; correction du niveau ; tout est tracé</td><td>2</td></tr>
+      <tr><td class="id">R2</td><td>Traiter un signalement</td><td>Enregistrés dès le lot 1, traités dans une file au lot 2</td><td>2</td></tr>
+      <tr><td class="id">R3</td><td>Tenir le référentiel</td><td>Correspondance entre l'export et les unités officielles ; valeurs inconnues « À rattacher »</td><td>0 et 1</td></tr>
+      <tr><td class="id">R4</td><td>Enregistrer une demande</td><td>Demande reçue par lettre, scannée en pièce jointe ; circuit en 7 étapes jusqu'à l'approbation de la Direction Générale</td><td>2 et 4</td></tr>
+      <tr><td class="id">R5</td><td>Contrôler les mouvements</td><td>Les lettres de promotion sont lues automatiquement ; rien n'est enregistré sans validation humaine ; <b>salaires ignorés</b></td><td>2</td></tr>
+      <tr><td class="id">R6</td><td>Publier un poste</td><td>L'Agent RH saisit, l'Administrateur valide ; poste confidentiel possible</td><td>4</td></tr>
+      <tr><td class="id">R7</td><td>Piloter</td><td>Tableau de bord, liste filtrée et export, relances, journal d'audit, gestion des rôles</td><td>2</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 7. EXIGENCES -->
+<section id="exigences">
+  <h2>7. Exigences fonctionnelles</h2>
+  <p>62 exigences en 9 domaines ; chaque domaine deviendra un epic, chaque exigence une ou plusieurs user stories. Les 49 règles métier chiffrées sont dans un tableau unique à part.</p>
+  <p class="legend"><span><span class="pill must">Must</span> exigé, le lot ne tient pas sans</span><span><span class="pill should">Should</span> exigé, mais le lot reste utile sans</span><span>⚖ priorité proposée, à confirmer par M. Hilaire</span></p>
+
+  <h3>D1 · Accès et compte</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-101</td><td>Connexion avec nom, prénom, date de naissance et mot de passe</td><td>Q8</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-102</td><td>Tentatives limitées ; matricules impossibles à deviner en série</td><td>Demande</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-103</td><td>Trois rôles RH : Administrateur, Agent RH, Lecture seule</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-104</td><td>Comptes RH : double authentification, accès depuis le réseau de l'institution</td><td>Q8</td><td>3</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-105</td><td>L'Administrateur gère les comptes et réinitialise un accès</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D2 · Dossier de l'employé</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-201</td><td>L'employé voit ses informations RH, avec les libellés officiels</td><td>Demande ; Q4</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-202</td><td>Il saisit ou confirme téléphone, adresse, email, contact d'urgence, niveau d'études</td><td>Q1</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-203</td><td>Il confirme agence, poste, date d'embauche, ou signale une erreur, sans les modifier</td><td>Q1</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-204</td><td>Un signalement garde la date, l'ancienne valeur et le motif</td><td>Q1</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-205</td><td>Formats et cohérence contrôlés, messages actionnables ; une erreur sur une donnée non modifiable crée un signalement sans bloquer</td><td>Demande ; P-02</td><td>1</td><td><span class="pill must">Must</span> formats · <span class="pill should">Should ⚖</span> cohérence</td></tr>
+    <tr><td class="id">EF-206</td><td>« Votre dossier est complet à X % »</td><td>Demande ; Q1</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-207</td><td>Verrou : le dépôt attend un profil complet ; liste de ce qui manque avec un lien vers chaque champ</td><td>Demande ; Q1</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-208</td><td>Mention d'information et consentement</td><td>Demande ; Q1</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-209</td><td>Date de dernière confirmation de chaque information</td><td>Q10</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-210</td><td>Information périmée après 12 mois sans confirmation ; rappel ; confirmation en un clic</td><td>Q10</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D3 · Certificats</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-301</td><td>Dépôt d'un ou plusieurs certificats en PDF, JPG ou PNG, avec aperçu</td><td>Demande</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-302</td><td>Type, niveau, intitulé, établissement, année, domaine, pays si étranger</td><td>Q3</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-303</td><td>Statut toujours visible : Reçu, Validé, À corriger</td><td>Q2</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-304</td><td>Après un rejet : motif poli et redépôt possible</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-305</td><td>Un certificat validé n'est jamais supprimé ; un remplacé reste archivé</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-306</td><td>Niveau d'études recalculé sur le plus élevé validé ; écart signalé aux RH</td><td>Q3</td><td>2</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-307</td><td>Après l'envoi : merci, récapitulatif, statut, « ce que ce certificat débloque »</td><td>Demande</td><td>1</td><td><span class="pill must">Must</span> · <span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-308</td><td>Fichiers protégés : type vérifié, antivirus, noms aléatoires, stockage chiffré</td><td>Demande ; Q8</td><td>1 et 3</td><td><span class="pill must">Must</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D4 · Validation RH</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-401</td><td>File de validation commune ; alerte au-delà de 5 jours ouvrables ; un document à la fois</td><td>Q2 ; P-03</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-402</td><td>Visionneuse : document à gauche, profil à droite</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-403</td><td>Valider, ou Rejeter avec un des 10 motifs</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-404</td><td>Corriger le niveau ; apprécier l'équivalence d'un diplôme étranger</td><td>Q3</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-405</td><td>Un Agent RH ne valide jamais son propre certificat</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-406</td><td>L'Administrateur peut réaffecter un dossier</td><td>Q2</td><td>2</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-407</td><td>Historique par dossier : qui, quand, décision, motif</td><td>Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-408</td><td>Les signalements alimentent une file de traitement RH</td><td>Q1</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D5 · Référentiel des unités</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-501</td><td>Référentiel unique des agences, régions, directions et siège : code stable, libellé officiel, rattachement, dates, anciens libellés</td><td>Q4</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-502</td><td>Tableau de correspondance entre l'export et les unités officielles</td><td>Q4</td><td>0 et 1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-503</td><td>Rattachement agence → région importé avec une date ; historique gardé</td><td>Q4</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-504</td><td>Valeur inconnue → « À rattacher » ; employé « Unité à confirmer »</td><td>Q4</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-505</td><td>Référentiel modifiable par la responsable et les Administrateurs ; interface au lot 4</td><td>Q4</td><td>1 et 4</td><td><span class="pill must">Must</span> · <span class="pill should">Should</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D6 · Pilotage</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-601</td><td>Tableau de bord : employés, % de dossiers complets, certificats reçus, en attente, rejetés, par agence, région, direction</td><td>Demande ; Q4</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-602</td><td>Liste des employés filtrée par agence, statut du dossier, niveau d'études</td><td>Demande</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-603</td><td>Recherche par niveau validé, domaine et unité (critère n°1)</td><td>Q3 ; Q4</td><td>2</td><td><span class="pill must">Must ⚖</span></td></tr>
+    <tr><td class="id">EF-604</td><td>Export Excel / CSV</td><td>Demande</td><td>2</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-605</td><td>Journal d'audit : qui a modifié quoi, qui a consulté quel document</td><td>Demande ; Q2</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-606</td><td>Règles et listes modifiables sans code</td><td>Demande ; Q3</td><td>4</td><td><span class="pill should">Should</span></td></tr>
+    <tr><td class="id">EF-607</td><td>Connexions et avis en un clic enregistrés, pour mesurer les critères de réussite</td><td>Critères 3 et « plaisir »</td><td>1</td><td><span class="pill must">Must ⚖</span> · <span class="pill should">Should ⚖</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D7 · Notifications</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-701</td><td>Canaux : WhatsApp (API officielle), email institutionnel, email personnel avec consentement</td><td>Q7</td><td>1</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-702</td><td>Consentement WhatsApp dans le profil</td><td>Q7</td><td>1</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-703</td><td>Notifications de changement de statut</td><td>Q7</td><td>1 et 4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-704</td><td>Relances limitées, aux heures ouvrables, arrêtées dès que le dossier est complet</td><td>Demande ; Q7</td><td>1</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-705</td><td>Message de lancement aux employés</td><td>Q7</td><td>3</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-706</td><td>Résumé périodique des postes ouverts</td><td>Q7</td><td>4</td><td><span class="pill should">Should</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D8 · Carrière et postes</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-801</td><td>« Ma carrière » : qualifications, postes éligibles, état des demandes</td><td>Demande</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-802</td><td>Formations, expériences et compétences, hors verrou</td><td>Q1</td><td>4</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-803</td><td>L'Agent RH saisit un poste, l'Administrateur le publie ; statuts tracés</td><td>Q5</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-804</td><td>Fiche de poste : intitulé, unité, grade, mission, critères, dates</td><td>Q5</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-805</td><td>Éligibilité calculée sur les seules données validées</td><td>Q5</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-806</td><td>Indicateur vert ou orange avec ce qui manque ; l'intérêt reste toujours possible</td><td>Q5</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-807</td><td>Poste confidentiel, motif tracé</td><td>Q5</td><td>4</td><td><span class="pill should">Should ⚖</span></td></tr>
+  </tbody></table></div>
+
+  <h3>D9 · Demandes et mouvements de carrière</h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Exigence</th><th>Source</th><th>Lot</th><th>Priorité</th></tr></thead><tbody>
+    <tr><td class="id">EF-901</td><td>Registre des demandes, alimenté par le portail et par les lettres enregistrées par les RH</td><td>Q6</td><td>2 et 4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-902</td><td>Circuit en 7 étapes, de la réception à la clôture</td><td>Q6</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-903</td><td>Fiche de demande ; aucune demande supprimée</td><td>Q6</td><td>2</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-904</td><td>Demande en ligne, accusé de réception, suivi dans « Mes demandes »</td><td>Q6</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+    <tr><td class="id">EF-905</td><td>Import de l'historique des demandes depuis Excel</td><td>Message de lancement</td><td>2</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-906</td><td>Extraction des mouvements depuis les lettres scannées, validée par les RH ; salaires jamais extraits</td><td>Q5</td><td>2</td><td><span class="pill should">Should ⚖</span></td></tr>
+    <tr><td class="id">EF-907</td><td>Ancienneté dans le poste = depuis le dernier mouvement, ou l'embauche</td><td>Q5</td><td>4</td><td><span class="pill must">Must</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 8. DONNÉES -->
+<section id="donnees">
+  <h2>8. Données</h2>
+  <div class="grid3">
+    <div class="card"><span class="n">Lues, jamais modifiées</span><h3>Export RH</h3><p>Seulement les employés actifs et une liste blanche de colonnes : identité, grade, contrat, agence, direction, poste, date d'embauche, coordonnées.</p><p class="small">Jamais chargées : colonnes bancaires, prêts, licenciement, pièce d'identité, références, épargne retraite (P-11).</p></div>
+    <div class="card"><span class="n">Collectées</span><h3>Par le portail</h3><p>Coordonnées corrigées, contact d'urgence, niveau d'études, confirmations, signalements, consentements, certificats, décisions RH, messages envoyés.</p></div>
+    <div class="card"><span class="n">Jamais stockées</span><h3>Interdits</h3><p><b>Salaires et rémunérations</b>, y compris dans les lettres ; colonnes exclues ; <b>données réelles en test</b> ; lettre d'origine non masquée.</p></div>
+  </div>
+  <h3>Qualité des données de départ (export du 1er octobre 2026)</h3>
+  <ul>
+    <li><b>364 actifs</b> dans l'export pour ~500 employés : cause à confirmer avec la DRH.</li>
+    <li><b>26 % des actifs sans email</b>, 2 seulement avec une adresse @acmehaiti.com : WhatsApp et la mention « pas d'email » sont indispensables.</li>
+    <li>2 matricules en double, à corriger dans le système RH.</li>
+    <li>2 codes d'agence absents du fichier des agences (85 actifs) et des noms de direction en double : à rattacher avant le lancement.</li>
+  </ul>
+  <p class="small">Conservation : certificats validés et demandes jamais supprimés ; sauvegardes 30 jours ; documents versionnés. Le sort du dossier d'un employé qui part reste à décider (D-31).</p>
+</section>
+
+<!-- 9. ENF -->
+<section id="enf">
+  <h2>9. Exigences non fonctionnelles</h2>
+  <div class="table"><table>
+    <thead><tr><th>Thème</th><th>Ce que le portail garantit</th><th>Lot</th></tr></thead>
+    <tbody>
+      <tr><td><b>Sécurité</b></td><td>HTTPS seulement ; base et documents chiffrés ; accès par rôle ; fichiers vérifiés et analysés par antivirus ; tentatives limitées ; double authentification RH ; secrets hors du code ; journal d'audit</td><td>1 à 3</td></tr>
+      <tr><td><b>Données personnelles</b></td><td>Consentement et mention d'information ; salaires jamais extraits ; aucune donnée réelle en test ; colonnes sensibles jamais lues</td><td>Tous</td></tr>
+      <tr><td><b>Continuité</b></td><td>Sauvegarde quotidienne gardée 30 jours ; documents versionnés ; tests de restauration (fréquence à fixer) ; disponibilité : quelques heures d'arrêt acceptables (à confirmer)</td><td>3</td></tr>
+      <tr><td><b>Performance</b></td><td>Pages légères : moins de 500 Ko, affichage en moins de 5 s en 3G (P-12) ; profil complété en moins de 10 minutes sur téléphone</td><td>1</td></tr>
+      <tr><td><b>Ton et accessibilité</b></td><td>Français, téléphone d'abord ; ton valorisant, jamais culpabilisant ; messages actionnables ; contrastes ; un indicateur ne repose jamais sur la seule couleur ; bleu marine principal, rouge en accent mais jamais pour une erreur</td><td>1</td></tr>
+      <tr><td><b>Maintenabilité</b></td><td>Code lisible et documenté (M. Hilaire développe en Python et VBA) ; règles dans un tableau unique ; migration sans perte ; réutiliser ce qui fonctionne dans le MVP</td><td>Tous</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 10. CONTRAINTES -->
+<section id="contraintes">
+  <h2>10. Contraintes</h2>
+  <ul>
+    <li><b>Rien n'est développé avant la validation des spécifications et des maquettes</b> par M. Hilaire (message de lancement §1). Exception proposée : un démonstrateur sur données fictives pour la Direction Générale (D-40, à noter).</li>
+    <li>Rien n'est modifié en production sans plan présenté et validé.</li>
+    <li>Cycles de 48 heures au plus, backlog unique que M. Hilaire peut réordonner ; chaque lot se termine par une démonstration et une validation écrite.</li>
+    <li>Le registre des décisions fait foi ; les valeurs entre crochets ne sont pas tranchées.</li>
+    <li>L'export RH reste en lecture seule ; le référentiel appartient à la DRH, la DIT ne le modifie pas seule.</li>
+    <li>Hébergement sur le compte AWS existant d'ACME SA, à l'adresse carriere.acmehaiti.com ; recette séparée, protégée, sur données fictives ; PostgreSQL géré recommandé.</li>
+    <li>WhatsApp uniquement par l'API officielle de Meta.</li>
+  </ul>
+</section>
+
+<!-- 11. DÉCISIONS -->
+<section id="decisions">
+  <h2>11. Décisions à valider par M. Hilaire</h2>
+  <p>39 décisions, chacune avec une proposition par défaut. Sans réponse contraire, la proposition sert de base. Les groupes A et B ont déjà servi aux maquettes ; M. Hilaire garde le dernier mot sur toutes.</p>
+
+  <h3>A et B · Déjà appliquées dans les maquettes <span class="pill done">proposition retenue</span></h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Question</th><th>Proposition</th></tr></thead><tbody>
+    <tr><td class="id">D-01</td><td>Distinguer profil complet et dossier complet ?</td><td>Oui : le profil complet débloque le dépôt ; le dossier complet ajoute au moins un certificat validé</td></tr>
+    <tr><td class="id">D-02</td><td>Bloquer l'employé sur une donnée qu'il ne peut pas modifier ?</td><td>Non : signalement automatique aux RH</td></tr>
+    <tr><td class="id">D-03</td><td>Calcul du pourcentage ?</td><td>8 éléments, un point chacun</td></tr>
+    <tr><td class="id">D-04</td><td>Domaine d'un certificat ?</td><td>Choisi dans une liste, obligatoire à partir de Bac + 2</td></tr>
+    <tr><td class="id">D-05</td><td>Formats ?</td><td>Téléphone 8 chiffres ou +509 ; email standard ; adresse de 5 à 200 caractères</td></tr>
+    <tr><td class="id">D-06</td><td>Lien du contact d'urgence ?</td><td>Liste : Conjoint·e, Parent, Enfant, Frère / Sœur, Autre</td></tr>
+    <tr><td class="id">D-07</td><td>Taille, nombre, année ?</td><td>5 Mo, 20 certificats au plus, année pas dans le futur</td></tr>
+    <tr><td class="id">D-08</td><td>Accueil avant la connexion ?</td><td>Oui, avec les 3 bénéfices ; le pourcentage après la connexion</td></tr>
+    <tr><td class="id">D-09</td><td>Quand le consentement ?</td><td>À la première connexion</td></tr>
+    <tr><td class="id">D-10</td><td>« Ce que ce certificat débloque » avant le lot 4 ?</td><td>Le niveau validé, et apparaître dans les recherches des RH</td></tr>
+    <tr><td class="id">D-11</td><td>Niveaux et rangs ?</td><td>Liste du registre, alignée ensuite sur la grille de classification</td></tr>
+    <tr><td class="id">D-12</td><td>File de validation commune ou attribuée ?</td><td>Commune ; un dossier pris passe « en cours » ; l'Administrateur peut réaffecter</td></tr>
+    <tr><td class="id">D-13</td><td>Le valideur corrige-t-il d'autres champs que le niveau ?</td><td>Oui, chaque correction tracée</td></tr>
+    <tr><td class="id">D-14</td><td>Un Agent RH peut-il réaffecter ?</td><td>Non, l'Administrateur seul</td></tr>
+  </tbody></table></div>
+
+  <h3>C · Droits encore ouverts <span class="pill open">à trancher</span></h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Question</th><th>Proposition</th></tr></thead><tbody>
+    <tr><td class="id">D-15</td><td>La responsable du référentiel consulte-t-elle les dossiers ?</td><td>Seulement à travers un rôle d'Agent RH</td></tr>
+    <tr><td class="id">D-16</td><td>L'Administrateur peut-il tout ce que fait un Agent RH ?</td><td>Oui</td></tr>
+    <tr><td class="id">D-17</td><td>Qui voit les tableaux de bord ?</td><td>Agent RH, référentiel, Administrateur, Lecture seule</td></tr>
+    <tr><td class="id">D-18</td><td>Qui exporte, quelles colonnes ?</td><td>L'Administrateur seul ; jamais le contact d'urgence ; chaque export tracé</td></tr>
+    <tr><td class="id">D-19</td><td>Qui consulte le journal d'audit ?</td><td>Administrateur et Lecture seule</td></tr>
+  </tbody></table></div>
+
+  <h3>D · Lots 2 à 4 <span class="pill open">à trancher</span></h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Question</th><th>Proposition</th></tr></thead><tbody>
+    <tr><td class="id">D-20</td><td>Comment une correction revient-elle dans le système RH ?</td><td>Export des corrections à réimporter ; en attendant, valeur marquée « en attente du système RH »</td></tr>
+    <tr><td class="id">D-21</td><td>Relances automatiques ou campagnes ?</td><td>Automatiques ; l'Administrateur peut les suspendre</td></tr>
+    <tr><td class="id">D-22</td><td>Valeurs du filtre « statut du dossier » ?</td><td>Profil incomplet · Profil complet · Dossier complet</td></tr>
+    <tr><td class="id">D-23</td><td>Demande en ligne réservée aux profils complets ?</td><td>Oui, comme le verrou</td></tr>
+    <tr><td class="id">D-24</td><td>Responsable de département, évaluateur, Direction Générale ont-ils un accès ?</td><td>Non au départ : les RH saisissent leurs réponses</td></tr>
+    <tr><td class="id">D-25</td><td>La DIT a-t-elle un compte dans le portail ?</td><td>Non : infrastructure seulement</td></tr>
+    <tr><td class="id">D-26</td><td>Garder le responsable de chaque agence et région ?</td><td>Oui</td></tr>
+    <tr><td class="id">D-27</td><td>Gestion du référentiel au lot 1 ?</td><td>Fichier Excel importé par un Administrateur</td></tr>
+    <tr><td class="id">D-38</td><td>Qui numérise les lettres de promotion, combien, pour quand ?</td><td>Les RH, pour les actifs seulement, une lettre par PDF, avant le lot 2</td></tr>
+  </tbody></table></div>
+
+  <h3>E · Données, sécurité, conservation <span class="pill open">à trancher</span></h3>
+  <div class="table"><table><thead><tr><th>N°</th><th>Question</th><th>Proposition</th></tr></thead><tbody>
+    <tr><td class="id">D-28</td><td>Ne lire que les colonnes utiles de l'export ?</td><td>Oui</td></tr>
+    <tr><td class="id">D-29</td><td>Seuils de légèreté ?</td><td>500 Ko par page, moins de 5 s en 3G</td></tr>
+    <tr><td class="id">D-30</td><td>Tentatives de connexion ?</td><td>Blocage de 15 minutes après 5 erreurs</td></tr>
+    <tr><td class="id">D-31</td><td>Dossier d'un employé qui part ?</td><td>Conservé, marqué « parti », visible des RH seulement</td></tr>
+    <tr><td class="id">D-32</td><td>Durée de conservation des rejets, de l'audit, des messages ?</td><td>Sans suppression, jusqu'à une règle d'archivage RH</td></tr>
+    <tr><td class="id">D-33</td><td>Garder les lettres d'origine (avec salaires) ?</td><td>Non : champs validés et copie masquée seulement</td></tr>
+    <tr><td class="id">D-39</td><td>Photo de l'employé ?</td><td>Non au lancement ; à rouvrir avec consentement si besoin</td></tr>
+  </tbody></table></div>
+
+  <h3>F · Valeurs du registre à confirmer</h3>
+  <p>D-34 : 3 relances au plus · D-35 : envois de 8 h à 18 h en semaine · D-36 : rappel 30 jours avant péremption · D-37 : accusé de réception d'une demande sous 2 jours ouvrables.</p>
+  <p class="small">Douze priorités marquées ⚖ peuvent être confirmées en bloc. Deux idées « Could have » sont aussi à proposer : une fiche de qualifications téléchargeable, et une liste simple des postes ouverts dès le lot 2.</p>
+</section>
+
+<!-- 12. DÉPENDANCES -->
+<section id="dependances">
+  <h2>12. Ce qui est attendu d'autres personnes</h2>
+  <div class="table"><table>
+    <thead><tr><th>Pièce</th><th>Fournie par</th><th>Pour</th><th>État</th></tr></thead>
+    <tbody>
+      <tr><td>Export RH</td><td>M. Hilaire</td><td>Lot 1</td><td><span class="pill done">Reçu le 1er octobre</span></td></tr>
+      <tr><td>Fichier agence → région</td><td>DRH</td><td>Référentiel</td><td><span class="pill done">Reçu</span> sans dates ni directions</td></tr>
+      <tr><td>Liste officielle des directions ; deux codes d'agence inconnus</td><td>Responsable du référentiel</td><td>Référentiel</td><td><span class="pill open">Demandée</span></td></tr>
+      <tr><td>Grille de classification des postes</td><td>DRH</td><td>Niveaux, maquettes</td><td><span class="pill open">Attendue</span></td></tr>
+      <tr><td>Mascotte, police</td><td>M. Hilaire</td><td>Guide de style</td><td><span class="pill open">Attendues</span> (logo reçu)</td></tr>
+      <tr><td>Échantillon de 20 à 30 lettres, environnement sécurisé</td><td>M. Hilaire, DIT</td><td>Test d'extraction</td><td><span class="pill open">Attendus</span></td></tr>
+      <tr><td>Région AWS, DNS, adresses IP fixes des bureaux, accès au compte</td><td>DIT</td><td>Lot 3</td><td><span class="pill open">Attendus</span></td></tr>
+      <tr><td>Prestataire et budget WhatsApp</td><td>M. Hilaire</td><td>Notifications</td><td><span class="pill open">À décider</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+</main>
+</div>

@@ -291,7 +291,7 @@ Chaque domaine deviendra un **epic** ; chaque exigence (EF) deviendra une ou plu
 | EF-101 | L'employé se connecte avec nom, prénom, date de naissance et mot de passe | Q8 §4 | 1 | Must |
 | EF-102 | Le nombre de tentatives de connexion est limité ; les matricules ne peuvent pas être énumérés | Demande phase 4 | 1 | Must |
 | EF-103 | Trois rôles RH : Administrateur, Agent RH, Lecture seule, avec les droits du §4.3 | Demande 3.7 ; Q2 | 2 | Must |
-| EF-104 | Les comptes RH ont la double authentification et ne sont accessibles que depuis le réseau de l'institution ou par VPN | Q8 §4 | 3 | Must |
+| EF-104 | Les comptes RH ont la double authentification, avec une méthode au choix de la personne : code par WhatsApp, code par email, ou application TOTP (Microsoft Authenticator ou équivalent) ; ils ne sont accessibles que depuis le réseau de l'institution | Q8 §4 ; **P-14** (RG-82) | 3 | Must |
 | EF-105 | L'Administrateur gère les comptes et réinitialise l'accès d'un employé | Q2 §1 | 2 | Must |
 
 ### D2 — Dossier de l'employé
@@ -511,7 +511,7 @@ Ce que le portail doit garantir, quelle que soit la fonction. Même règle qu'au
 | ENF-03 | Accès restreints par rôle (§4.3) ; un employé ne voit que son propre dossier | Demande phase 4 ; Q2 §1 | 1 et 2 |
 | ENF-04 | Fichiers déposés : type vérifié sur le contenu, analyse antivirus, noms aléatoires, espace S3 privé, liens temporaires | Demande phase 4 ; Q8 §3 | 1 et 3 |
 | ENF-05 | Protection contre l'énumération des matricules ; tentatives de connexion limitées (RG-80) | Demande phase 4 | 1 |
-| ENF-06 | Comptes RH : double authentification ; administration accessible depuis le réseau de l'institution ou par VPN | Q8 §4 | 3 |
+| ENF-06 | Comptes RH : double authentification au choix (WhatsApp, email ou application TOTP, P-14) ; administration accessible depuis le réseau de l'institution | Q8 §4 | 3 |
 | ENF-07 | Secrets (mots de passe de service, clés) dans AWS Secrets Manager, jamais dans le code | Q8 §4 | 3 |
 | ENF-08 | Journal d'audit des modifications, décisions et consultations de documents (EF-605) | Demande 3.6 ; Q2 §1 | 2 |
 
@@ -736,4 +736,5 @@ Elles modifient ou précisent le registre : elles ne s'appliquent qu'après son 
 | P-10 | Le référentiel garde, pour chaque agence et chaque région, son **responsable** (directeur d'agence, directeur régional) | Le fichier des agences les fournit déjà ; le circuit des demandes consulte « le responsable du département concerné » (Q6 §3) et l'information du responsable hiérarchique reste à trancher (Q6, points ouverts ; §4.2) |
 | P-11 | Le portail ne lit de l'export que les colonnes dont il a besoin ; les colonnes bancaires, de prêts, de licenciement et de pièce d'identité ne sont jamais chargées (liste blanche du portail actuel) | « Accès restreints » et données « sensibles » (Demande phase 4) ; l'export contient ces colonnes (ENF-13) |
 | P-12 | Chaque page pèse moins de 500 Ko hors documents et s'affiche en moins de 5 secondes sur une connexion 3G | « Pages légères » (Demande phase 5) n'est pas chiffré (ENF-31) |
+| P-14 | La double authentification des comptes RH laisse **chaque personne choisir sa méthode** : code par WhatsApp, code par email, ou application TOTP (Microsoft Authenticator ou équivalent). La technologie (Cognito seul, ou Cognito et un développement pour WhatsApp) reste à choisir avec la DIT | Demande du développeur, 2026-10-07 : ne dépendre ni d'un seul canal ni d'un seul appareil ; Q8 ne cite que Cognito et SES |
 | P-13 | Au lot 1, la responsable du référentiel tient le référentiel et le tableau de correspondance dans un **fichier Excel** ; un Administrateur l'importe à chaque modification ; l'import refuse un fichier incohérent (code en double, agence sans région) et produit la liste « À rattacher », envoyée à la responsable | Q4 §5 prévoit « un fichier ou une table modifiable » au lot 1 sans dire comment, alors que l'espace RH n'arrive qu'au lot 2 (analyse de conformité, point 8) |
