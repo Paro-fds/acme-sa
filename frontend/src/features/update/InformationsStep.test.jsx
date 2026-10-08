@@ -38,7 +38,7 @@ function renderStep() {
   render(
     <MemoryRouter initialEntries={['/mise-a-jour/informations']}>
       <Routes>
-        <Route path="/" element={<p>Écran identification</p>} />
+        <Route path="/connexion" element={<p>Écran identification</p>} />
         <Route path="/profil" element={<p>Écran profil</p>} />
         <Route path="/mise-a-jour/informations" element={<InformationsStep />} />
         <Route path="/mise-a-jour/documents" element={<p>Étape suivante</p>} />

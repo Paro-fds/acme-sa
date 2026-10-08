@@ -1,24 +1,8 @@
 import { expect, test } from '@playwright/test'
+import { EMP_E, signIn as signInAs } from './auth.js'
 
-const PASSWORD = 'Bonjour-2026'
-
-/** Connexion d'EMP-E (ÉTIENNE Rosé) : création du mot de passe ou saisie s'il existe déjà. */
-async function signIn(page) {
-  await page.goto('/')
-  await page.getByLabel('Nom', { exact: true }).fill('ÉTIENNE')
-  await page.getByLabel('Prénom').fill('Rosé')
-  await page.getByLabel('Date de naissance').fill('1979-09-30')
-  await page.getByRole('button', { name: 'Continuer' }).click()
-  await page.getByLabel('Mot de passe', { exact: true }).fill(PASSWORD)
-  const confirmation = page.getByLabel('Confirmer le mot de passe', { exact: true })
-  if (await confirmation.isVisible()) {
-    await confirmation.fill(PASSWORD)
-    await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
-  } else {
-    await page.getByRole('button', { name: 'Se connecter' }).click()
-  }
-  await expect(page).toHaveURL(/\/profil$/)
-}
+/** Connexion de l'employé réservé à ce test, ou création de son mot de passe. */
+const signIn = (page) => signInAs(page, EMP_E)
 
 /** US-13 T-13.7 : ajout d'un PDF sur mobile ; un format refusé est signalé. */
 test('ajout de documents : un PDF accepté, un format refusé', async ({ page }) => {

@@ -1,24 +1,9 @@
 import { expect, test } from '@playwright/test'
+import { adminLogin } from './admin.js'
+import { EMP_B, signIn as signInAs } from './auth.js'
 
-const PASSWORD = 'Bonjour-2026'
-
-/** Connexion d'EMP-B (BAPTISTE Marc) : création du mot de passe ou saisie s'il existe déjà. */
-async function signIn(page) {
-  await page.goto('/')
-  await page.getByLabel('Nom', { exact: true }).fill('BAPTISTE')
-  await page.getByLabel('Prénom').fill('Marc')
-  await page.getByLabel('Date de naissance').fill('2000-12-01')
-  await page.getByRole('button', { name: 'Continuer' }).click()
-  await page.getByLabel('Mot de passe', { exact: true }).fill(PASSWORD)
-  const confirmation = page.getByLabel('Confirmer le mot de passe', { exact: true })
-  if (await confirmation.isVisible()) {
-    await confirmation.fill(PASSWORD)
-    await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
-  } else {
-    await page.getByRole('button', { name: 'Se connecter' }).click()
-  }
-  await expect(page).toHaveURL(/\/profil$/)
-}
+/** Connexion de l'employé réservé à ce test, ou création de son mot de passe. */
+const signIn = (page) => signInAs(page, EMP_B)
 
 /** Étapes 1 → 4 depuis l'étape 1, avec ce téléphone. */
 async function sendWithPhone(page, phone) {
@@ -35,10 +20,7 @@ async function sendWithPhone(page, phone) {
 async function adminFolderOfBaptiste(browser) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const admin = await context.newPage()
-  await admin.goto('/admin/connexion')
-  await admin.getByLabel('Identifiant').fill('admin')
-  await admin.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
-  await admin.getByRole('button', { name: 'Se connecter' }).click()
+  await adminLogin(admin)
   await expect(admin).toHaveURL(/\/admin$/)
   await admin.goto('/admin/employes/1008')
   return { admin, context }

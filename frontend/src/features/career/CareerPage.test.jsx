@@ -56,7 +56,7 @@ function renderPage(data = career()) {
   render(
     <MemoryRouter initialEntries={['/parcours']}>
       <Routes>
-        <Route path="/" element={<IdentifyProbe />} />
+        <Route path="/connexion" element={<IdentifyProbe />} />
         <Route path="/profil" element={<p>Écran profil</p>} />
         <Route path="/parcours" element={<CareerPage />} />
       </Routes>
@@ -187,7 +187,7 @@ describe('CareerPage (US-25)', () => {
     render(
       <MemoryRouter initialEntries={['/parcours']}>
         <Routes>
-          <Route path="/" element={<IdentifyProbe />} />
+          <Route path="/connexion" element={<IdentifyProbe />} />
           <Route path="/parcours" element={<CareerPage />} />
         </Routes>
       </MemoryRouter>,

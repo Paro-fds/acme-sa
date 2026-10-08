@@ -4,6 +4,7 @@ Chaque test démarre avec une base SQLite vide, un dossier de documents vide
 et le CSV fictif `fixtures/employees_test.csv` : aucun test ne dépend d'un autre.
 """
 
+import os
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
@@ -12,12 +13,13 @@ import pytest
 from argon2 import PasswordHasher
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 
 from app.auth.api.dependencies import SESSION_COOKIE
 from app.auth.domain.model import Account, SubjectType
 from app.career.domain.career_entry import CareerEntry
 from app.career.domain.entry_kinds import EntryKind, SkillLevel
-from app.config import Settings
+from app.config import Settings, normalize_database_url
 from app.main import create_app
 from app.update.domain.update import EmployeeUpdate
 from tests.career import make_entry
@@ -35,15 +37,31 @@ def admin_password_hash() -> str:
     return PasswordHasher().hash(ADMIN_PASSWORD)
 
 
+POSTGRES_URL = os.environ.get("TEST_POSTGRES_URL", "")
+"""US-001 CA-08 : avec cette variable, toute la suite tourne sur une base PostgreSQL de répétition (vidée à chaque test)."""
+
+
+def _empty_postgres(url: str) -> str:
+    url = normalize_database_url(url)
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+    engine.dispose()
+    return url
+
+
 @pytest.fixture
 def settings(tmp_path: Path, admin_password_hash: str) -> Settings:
     return Settings(
         _env_file=None,
         acme_csv_path=TEST_CSV,
         acme_data_dir=tmp_path / "acme-data",
+        database_url=_empty_postgres(POSTGRES_URL) if POSTGRES_URL else "",
         frontend_dist_dir=tmp_path / "no-frontend",
         admin_username=ADMIN_USERNAME,
         admin_password_hash=admin_password_hash,
+        # Les suites d'avant US-102 testent la connexion RH en une étape ; tests/api/test_us102_*.py l'active.
+        admin_mfa_required=False,
     )
 
 

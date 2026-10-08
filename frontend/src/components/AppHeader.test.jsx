@@ -29,7 +29,7 @@ function ProfileProbe() {
 function renderAt(entries) {
   const router = createMemoryRouter(
     [
-      { path: '/', element: <IdentifyProbe /> },
+      { path: '/connexion', element: <IdentifyProbe /> },
       { path: '/profil', element: <ProfileProbe /> },
       { path: '/mise-a-jour', element: <AppHeader title="Mise à jour" account /> },
     ],
@@ -153,13 +153,18 @@ describe('AppHeader — menu du compte admin (US-23)', () => {
     render(<RouterProvider router={router} />)
   }
 
-  it('propose « Administrateurs » et « Changer mon mot de passe »', async () => {
+  it('propose « Administrateurs », « Changer mon mot de passe » et « Ma double authentification » (US-102)', async () => {
     const user = userEvent.setup()
     renderHeader('admin')
 
     await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
     const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
-    expect(items).toEqual(['manage_accountsAdministrateurs', 'passwordChanger mon mot de passe', 'logoutSe déconnecter'])
+    expect(items).toEqual([
+      'manage_accountsAdministrateurs',
+      'passwordChanger mon mot de passe',
+      'verified_userMa double authentification',
+      'logoutSe déconnecter',
+    ])
 
     await user.click(screen.getByRole('menuitem', { name: 'Administrateurs' }))
     expect(await screen.findByText('Écran administrateurs')).toBeInTheDocument()

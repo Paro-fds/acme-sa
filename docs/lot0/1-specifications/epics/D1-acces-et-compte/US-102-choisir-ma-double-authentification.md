@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | En cours |
 | **Epic** | D1 Accès et compte |
 | **Lot** | 3 |
 | **Priorité** | Must |

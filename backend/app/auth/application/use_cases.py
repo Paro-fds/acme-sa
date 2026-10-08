@@ -1,14 +1,6 @@
-from enum import StrEnum
-
 from app.auth.application.identity import Identity, find_employee
 from app.auth.application.sessions import SessionService
-from app.auth.domain.errors import (
-    AccountAlreadyExists,
-    AccountLocked,
-    PasswordNotSet,
-    invalid_credentials,
-)
-from app.auth.domain.lockout import SHOW_REMAINING_FROM
+from app.auth.domain.errors import AccountLocked, IdentityNotRecognized, LoginFailed, RegistrationRefused
 from app.auth.domain.model import Account, SubjectType
 from app.auth.domain.password import validate_new_password
 from app.auth.domain.ports import AccountRepository, PasswordHasher
@@ -17,27 +9,11 @@ from app.shared.domain.clock import Clock
 from app.update.domain.repository import UpdateRepository
 
 
-class NextStep(StrEnum):
-    CREATE_PASSWORD = "CREATE_PASSWORD"
-    ENTER_PASSWORD = "ENTER_PASSWORD"
-
-
-class IdentifyEmployee:
-    """US-01 : vérifie l'identité et indique l'étape suivante, sans ouvrir de session."""
-
-    def __init__(self, employees: EmployeeRepository, updates: UpdateRepository, accounts: AccountRepository) -> None:
-        self._employees = employees
-        self._updates = updates
-        self._accounts = accounts
-
-    def execute(self, identity: Identity) -> NextStep:
-        employee = find_employee(self._employees, self._updates, identity)
-        account = self._accounts.get(employee.id)
-        return NextStep.ENTER_PASSWORD if account and account.has_password else NextStep.CREATE_PASSWORD
-
-
 class RegisterPassword:
-    """US-02 : crée le mot de passe à la première connexion et ouvre une session."""
+    """US-02, US-101 : crée le mot de passe à la première connexion et ouvre une session.
+
+    Les règles du mot de passe sont vérifiées avant l'identité, et une personne inconnue reçoit
+    la même réponse qu'un employé qui a déjà un mot de passe : on ne peut pas deviner qui est employé."""
 
     def __init__(
         self,
@@ -54,11 +30,14 @@ class RegisterPassword:
         self._sessions = sessions
 
     def execute(self, identity: Identity, password: str, confirmation: str) -> str:
-        employee = find_employee(self._employees, self._updates, identity)
+        validate_new_password(password, confirmation)
+        try:
+            employee = find_employee(self._employees, self._updates, identity)
+        except IdentityNotRecognized:
+            raise RegistrationRefused() from None
         account = self._accounts.get(employee.id) or Account(employee_id=employee.id, password_hash=None)
         if account.has_password:
-            raise AccountAlreadyExists()
-        validate_new_password(password, confirmation)
+            raise RegistrationRefused()
 
         account.password_hash = self._hasher.hash(password)
         account.failed_attempts = 0
@@ -68,7 +47,8 @@ class RegisterPassword:
 
 
 class LoginEmployee:
-    """US-03 : connexion avec le mot de passe, blocage 15 minutes après 5 erreurs consécutives."""
+    """US-03, US-101 : connexion en une étape (identité et mot de passe), blocage 15 minutes après
+    5 erreurs consécutives. Un seul message d'échec, quelle qu'en soit la cause (CA-03)."""
 
     def __init__(
         self,
@@ -87,21 +67,24 @@ class LoginEmployee:
         self._clock = clock
 
     def execute(self, identity: Identity, password: str) -> str:
-        employee = find_employee(self._employees, self._updates, identity)
+        try:
+            employee = find_employee(self._employees, self._updates, identity)
+        except IdentityNotRecognized:
+            raise LoginFailed() from None
         account = self._accounts.get(employee.id)
         if account is None or not account.has_password:
-            raise PasswordNotSet()
+            raise LoginFailed()
 
         now = self._clock.now()
         if account.is_locked(now):
-            raise AccountLocked()
+            raise AccountLocked(account.seconds_until_unlock(now))
 
         if not self._hasher.verify(account.password_hash, password):
             account.register_failure(now)
             self._accounts.save(account)
             if account.is_locked(now):
-                raise AccountLocked()
-            raise invalid_credentials(account.remaining_attempts, account.failed_attempts >= SHOW_REMAINING_FROM)
+                raise AccountLocked(account.seconds_until_unlock(now))
+            raise LoginFailed()
 
         account.register_success()
         self._accounts.save(account)

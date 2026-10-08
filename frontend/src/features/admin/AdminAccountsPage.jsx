@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { addAdmin, deleteAdmin, listAdmins } from '../../api/admin.js'
+import { resetAdminMfa } from '../../api/mfa.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
@@ -8,6 +9,7 @@ import TextField from '../../components/TextField.jsx'
 import { formatDateTime, formatLocalDate } from '../../lib/format.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 import Block from './Block.jsx'
+import { METHODS } from './mfa/methods.js'
 
 const LOGIN_PATH = '/admin/connexion'
 
@@ -65,7 +67,43 @@ function DeleteConfirmation({ username, deleting, onConfirm, onCancel }) {
   )
 }
 
-function AdminItem({ admin, deletable, onDelete }) {
+/** US-102 CA-05 : téléphone perdu ; la personne choisira une nouvelle méthode à sa prochaine connexion. */
+function ResetMfaConfirmation({ username, resetting, onConfirm, onCancel }) {
+  const titleId = useId()
+  return (
+    <div role="alertdialog" aria-labelledby={titleId} className="flex flex-col gap-3 rounded-lg border border-info-border bg-info-bg p-3">
+      <div className="flex flex-col gap-0.5">
+        <p id={titleId} className="font-semibold text-heading">
+          Réinitialiser la double authentification de {username}{' '}?
+        </p>
+        <p className="text-sm text-help">
+          Ses connexions en cours seront fermées ; à sa prochaine connexion, il choisira une nouvelle méthode.
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={resetting}
+          className="min-h-11 rounded-lg border border-border bg-surface font-semibold text-heading disabled:opacity-60"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={resetting}
+          className="min-h-11 rounded-lg bg-primary font-semibold text-white disabled:opacity-60"
+        >
+          {resetting ? 'Réinitialisation…' : 'Réinitialiser'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function AdminItem({ admin, deletable, onDelete, onResetMfa }) {
+  const [resettingMfa, setResettingMfa] = useState(null)
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const buttonRef = useRef(null)
@@ -106,8 +144,37 @@ function AdminItem({ admin, deletable, onDelete }) {
           <p className="text-sm text-help">
             {admin.last_login_at ? `Dernière connexion le ${formatDateTime(admin.last_login_at)}` : 'Jamais connecté'}
           </p>
+          <p className="text-sm text-help">
+            Double authentification{' '}:{' '}
+            {admin.mfa_method ? METHODS[admin.mfa_method].title : 'à choisir à la prochaine connexion'}
+          </p>
         </div>
       </div>
+      {!admin.is_me && admin.mfa_method && resettingMfa !== null && (
+        <ResetMfaConfirmation
+          username={admin.username}
+          resetting={resettingMfa}
+          onCancel={() => setResettingMfa(null)}
+          onConfirm={async () => {
+            setResettingMfa(true)
+            await onResetMfa(admin)
+            setResettingMfa(null)
+          }}
+        />
+      )}
+      {!admin.is_me && admin.mfa_method && resettingMfa === null && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setResettingMfa(false)}
+            aria-label={`Réinitialiser la double authentification de ${admin.username}`}
+            className="flex min-h-11 items-center gap-1.5 rounded-lg px-3 font-semibold text-primary hover:bg-info-bg"
+          >
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">phonelink_erase</span>
+            Réinitialiser la double authentification
+          </button>
+        </div>
+      )}
       {deletable &&
         (confirming ? (
           <DeleteConfirmation username={admin.username} deleting={deleting} onConfirm={confirm} onCancel={cancel} />
@@ -229,6 +296,19 @@ export default function AdminAccountsPage() {
     }
   }
 
+  async function handleResetMfa(admin) {
+    setNotice(null)
+    setFailure(null)
+    try {
+      await resetAdminMfa(admin.id)
+      setNotice(`Double authentification de « ${admin.username} » réinitialisée.`)
+    } catch (apiError) {
+      if (redirectIfUnauthorized(apiError)) return
+      setFailure(apiError.message)
+    }
+    reload()
+  }
+
   function handleAdded(created) {
     setFailure(null)
     setNotice(`Administrateur « ${created.username} » ajouté. Transmettez-lui son identifiant et son mot de passe provisoire.`)
@@ -251,7 +331,13 @@ export default function AdminAccountsPage() {
         </h3>
         <ul aria-label="Comptes administrateurs" className="flex flex-col gap-2">
           {admins.map((admin) => (
-            <AdminItem key={admin.id} admin={admin} deletable={!admin.is_me && admins.length > 1} onDelete={handleDelete} />
+            <AdminItem
+              key={admin.id}
+              admin={admin}
+              deletable={!admin.is_me && admins.length > 1}
+              onDelete={handleDelete}
+              onResetMfa={handleResetMfa}
+            />
           ))}
         </ul>
       </section>

@@ -11,10 +11,16 @@ dependencies = [
     "pydantic-settings",
     "argon2-cffi",
     "python-multipart",
+    "psycopg[binary]",
+    "alembic",
+    "httpx",
+    "boto3",
+    "pyotp",
+    "segno",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "httpx", "import-linter"]
+dev = ["pytest", "import-linter"]
 
 [build-system]
 requires = ["setuptools>=68"]

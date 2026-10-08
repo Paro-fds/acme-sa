@@ -64,6 +64,8 @@ Simplifications assumées pour la démonstration :
 
 ## 5. Hébergement : gratuit d'abord, même forme que la cible AWS
 
+> **Détail et procédure de migration :** `deploiement-gratuit-et-migration-aws.md` (Vercel pour le site, Render pour l'API en conteneur, Supabase pour PostgreSQL et les fichiers).
+
 Seuls les fournisseurs changent entre les deux colonnes ; le passage se fait par la configuration (variables d'environnement), sans réécriture.
 
 | Brique | Pont gratuit | Cible AWS (`6-architecture-aws/`) | Ce qui rend le passage simple |
@@ -71,7 +73,7 @@ Seuls les fournisseurs changent entre les deux colonnes ; le passage se fait par
 | Site React | Cloudflare Pages ou Vercel | S3 + CloudFront | Fichiers statiques ; l'adresse de l'API en variable |
 | API FastAPI | Render ou Koyeb | ECS Fargate | **Une image Docker** identique |
 | Base | Neon ou Supabase (PostgreSQL) | RDS PostgreSQL | **PostgreSQL dès le départ**, migrations Alembic, copie par `pg_dump` / `pg_restore` |
-| Documents | Cloudflare R2 | S3 | R2 parle le protocole S3 : seuls l'adresse et les clés changent |
+| Documents | Supabase Storage, compartiment privé | S3 | Les deux parlent le protocole S3 : seuls l'adresse et les clés changent |
 | Connexion RH | Mot de passe + code à usage unique, dans l'application | Cognito | Derrière un port (Clean Architecture) : on change l'adaptateur |
 | Emails | Simulés | SES | Idem |
 | Déploiement | Automatique depuis GitHub (branche `demo`) | Idem vers ECR / ECS | Mêmes commandes de build |

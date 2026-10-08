@@ -1,9 +1,16 @@
-"""US-03 — Se connecter avec son mot de passe."""
+"""US-03 → US-101 (refonte) — Se connecter avec son mot de passe.
+
+US-101 : un seul message quand la connexion échoue, quelle qu'en soit la cause (CA-03),
+et le temps restant pendant la suspension (CA-06)."""
 
 from tests.employees import EMP_A, EMP_B
 
 URL = "/api/auth/login"
 PASSWORD = "Bonjour-2026"
+GENERIC = {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Ces informations ne correspondent pas. Vérifiez votre nom, votre date de naissance et votre mot de passe.",
+}
 
 
 def _login(client, password=PASSWORD, employee=EMP_A):
@@ -26,26 +33,17 @@ def test_ca02_wrong_password_is_rejected_and_counted(client, account, container)
     response = _login(client, password="mauvais-mdp")
 
     assert response.status_code == 401
-    assert response.json()["error"] == {
-        "code": "INVALID_CREDENTIALS",
-        "message": "Mot de passe incorrect.",
-        "field": "password",
-    }
+    assert response.json()["error"] == GENERIC
     assert container.accounts.get(EMP_A.id).failed_attempts == 1
     assert "set-cookie" not in response.headers
 
 
-def test_ca02_remaining_attempts_are_shown_from_the_third_error(client, account):
+def test_us101_ca03_remaining_attempts_are_never_shown(client, account):
     account(EMP_A, PASSWORD)
 
-    messages = [_login(client, password="mauvais-mdp").json()["error"]["message"] for _ in range(4)]
+    errors = [_login(client, password="mauvais-mdp").json()["error"] for _ in range(4)]
 
-    assert messages == [
-        "Mot de passe incorrect.",
-        "Mot de passe incorrect.",
-        "Mot de passe incorrect. Il vous reste 2 tentatives.",
-        "Mot de passe incorrect. Il vous reste 1 tentative.",
-    ]
+    assert errors == [GENERIC] * 4
 
 
 def test_ca03_fifth_error_locks_and_even_the_right_password_is_refused(client, account, clock):
@@ -61,8 +59,21 @@ def test_ca03_fifth_error_locks_and_even_the_right_password_is_refused(client, a
         assert response.json()["error"] == {
             "code": "ACCOUNT_LOCKED",
             "message": "Trop de tentatives. Réessayez dans 15 minutes.",
+            "retry_after": 900,
         }
     assert "set-cookie" not in sixth.headers
+
+
+def test_us101_ca06_retry_after_counts_down(client, account, clock):
+    account(EMP_A, PASSWORD)
+    for _ in range(5):
+        _login(client, password="mauvais-mdp")
+
+    clock.advance(minutes=10, seconds=30)
+    response = _login(client)
+
+    assert response.status_code == 423
+    assert response.json()["error"]["retry_after"] == 270
 
 
 def test_ca04_account_is_unlocked_after_15_minutes(client, account, clock, container):
@@ -89,11 +100,14 @@ def test_ca05_success_resets_the_counter(client, account, container):
     assert container.accounts.get(EMP_A.id).failed_attempts == 0
 
 
-def test_ca06_employee_without_password_must_create_one(client):
-    response = _login(client, employee=EMP_B)
+def test_us101_ca03_employee_without_password_gets_the_generic_answer(client, account):
+    account(EMP_A, PASSWORD)
+    wrong_password = _login(client, password="mauvais-mdp")
 
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "PASSWORD_NOT_SET"
+    without_password = _login(client, employee=EMP_B)
+
+    assert without_password.status_code == wrong_password.status_code == 401
+    assert without_password.json() == wrong_password.json() == {"error": GENERIC}
 
 
 def test_ca07_session_expires_after_30_minutes_of_inactivity(client, account, clock):
@@ -120,10 +134,11 @@ def test_ca07_activity_extends_the_session(client, account, clock):
     assert client.get("/api/me/profile").status_code == 200
 
 
-def test_unrecognized_identity_is_refused_before_any_password_check(client, account):
+def test_us101_ca03_unknown_identity_gets_the_same_answer_as_a_wrong_password(client, account):
     account(EMP_A, PASSWORD)
+    wrong_password = _login(client, password="mauvais-mdp")
 
-    response = client.post(URL, json=EMP_A.identity(birth_date="1996-03-16", password=PASSWORD))
+    unknown = client.post(URL, json=EMP_A.identity(birth_date="1996-03-16", password=PASSWORD))
 
-    assert response.status_code == 401
-    assert response.json()["error"]["code"] == "IDENTITY_NOT_RECOGNIZED"
+    assert unknown.status_code == wrong_password.status_code == 401
+    assert unknown.json() == wrong_password.json() == {"error": GENERIC}

@@ -1,0 +1,30 @@
+# US-001 : API du démonstrateur sur Render (Blueprint). Même image Docker que sur ECS Fargate.
+# Les valeurs « sync: false » (secrets) se saisissent dans le tableau de bord Render, jamais ici.
+services:
+  - type: web
+    name: acme-portail-api
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: demo
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: demo
+      - key: DATABASE_URL
+        sync: false
+      - key: STORAGE_BACKEND
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: S3_BUCKET
+        value: certificats
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false

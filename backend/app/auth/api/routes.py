@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.auth.api.dependencies import (
@@ -11,6 +12,7 @@ from app.auth.api.dependencies import (
     current_employee_id,
     set_session_cookie,
 )
+from app.auth.api.mfa_routes import CodeSentOut, LoginStepOut, MfaStatusOut
 from app.auth.application.identity import Identity
 
 router = APIRouter(tags=["auth"])
@@ -41,17 +43,7 @@ class AdminLoginIn(BaseModel):
     password: str = Field(max_length=200)
 
 
-class NextStepOut(BaseModel):
-    next_step: str
-
-
 # --- Employé ---------------------------------------------------------------
-
-
-@router.post("/api/auth/identify", response_model=NextStepOut)
-def identify(payload: IdentityIn, request: Request) -> NextStepOut:
-    next_step = container(request).identify_employee().execute(payload.to_identity())
-    return NextStepOut(next_step=next_step)
 
 
 @router.post("/api/auth/register", status_code=204)
@@ -77,10 +69,21 @@ def logout(request: Request, response: Response) -> None:
 # --- Administrateur ---------------------------------------------------------
 
 
-@router.post("/api/admin/auth/login", status_code=204)
-def admin_login(payload: AdminLoginIn, request: Request, response: Response) -> None:
-    token = container(request).login_admin().execute(payload.username, payload.password)
-    set_session_cookie(request, response, token)
+@router.post(
+    "/api/admin/auth/login",
+    status_code=204,
+    responses={202: {"model": LoginStepOut, "description": "Mot de passe vérifié, second facteur attendu (US-102)"}},
+)
+def admin_login(payload: AdminLoginIn, request: Request, response: Response) -> Response:
+    result = container(request).login_admin().execute(payload.username, payload.password)
+    if result.mfa is None:
+        set_session_cookie(request, response, result.token)
+        response.status_code = 204
+        return response
+    step = LoginStepOut(mfa=MfaStatusOut.of(result.mfa), code=CodeSentOut.of(result.code))
+    accepted = JSONResponse(step.model_dump(mode="json"), status_code=202)
+    set_session_cookie(request, accepted, result.token)
+    return accepted
 
 
 @router.post("/api/admin/auth/logout", status_code=204, dependencies=[Depends(current_admin_pending)])

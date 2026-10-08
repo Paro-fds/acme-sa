@@ -43,7 +43,7 @@ function renderPage() {
   render(
     <MemoryRouter initialEntries={['/profil']}>
       <Routes>
-        <Route path="/" element={<IdentifyProbe />} />
+        <Route path="/connexion" element={<IdentifyProbe />} />
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/mise-a-jour/informations" element={<p>Étape 1 : Informations</p>} />
         <Route path="/documents" element={<p>Écran Mes documents</p>} />

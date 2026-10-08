@@ -7,9 +7,10 @@ import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import PasswordField from '../../components/PasswordField.jsx'
 import TextField from '../../components/TextField.jsx'
-import { ADMIN_PASSWORD_PATH } from '../../lib/useLoader.js'
+import { ADMIN_MFA_PATH, ADMIN_PASSWORD_PATH } from '../../lib/useLoader.js'
 
-/** US-15 : connexion d'un administrateur ; mène au tableau de bord, ou au choix du mot de passe s'il est provisoire (US-23). */
+/** US-15 : connexion d'un administrateur ; puis la double authentification (US-102), le tableau de bord,
+ * ou le choix du mot de passe s'il est provisoire (US-23). */
 export default function AdminLoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -27,7 +28,12 @@ export default function AdminLoginPage() {
     setError(null)
     setNotice(null)
     try {
-      await adminLogin(username.trim(), password)
+      const step = await adminLogin(username.trim(), password)
+      if (step) {
+        // US-102 : mot de passe vérifié, le second facteur est attendu.
+        navigate(ADMIN_MFA_PATH, { replace: true, state: { step } })
+        return
+      }
       const me = await getAdminMe()
       navigate(me.must_change_password ? ADMIN_PASSWORD_PATH : '/admin', { replace: true })
     } catch (apiError) {

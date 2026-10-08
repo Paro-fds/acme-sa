@@ -1,12 +1,13 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { adminLogout, logout } from '../api/auth.js'
+import { EMPLOYEE_LOGIN_PATH } from './paths.js'
 
 export const LOGGED_OUT_NOTICE = 'Vous êtes déconnecté.'
 
 /** Espaces connectés : appel de déconnexion et écran de connexion où revenir. */
 const SPACES = {
-  employee: { close: () => logout(), loginPath: '/' },
+  employee: { close: () => logout(), loginPath: EMPLOYEE_LOGIN_PATH },
   admin: { close: () => adminLogout(), loginPath: '/admin/connexion' },
 }
 

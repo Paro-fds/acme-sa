@@ -1,13 +1,15 @@
 import { expect, test } from '@playwright/test'
+import { passSecondFactor } from './admin.js'
 
 const PROVISIONAL = 'Provisoire-E2E-2026'
 const CHOSEN = 'Mon-mot-de-passe-E2E-2026'
 
-async function login(page, username, password) {
+async function login(page, username, password, { secondFactor = true } = {}) {
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill(username)
   await page.getByLabel('Mot de passe', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Se connecter' }).click()
+  if (secondFactor) await passSecondFactor(page, `${username}@exemple.test`) // US-102
 }
 
 /**
@@ -55,7 +57,7 @@ test('administrateurs : ajout, mot de passe provisoire puis choisi', async ({ pa
   // Le provisoire ne fonctionne plus, le nouveau oui
   await page.getByRole('button', { name: 'Menu du compte' }).click()
   await page.getByRole('menuitem', { name: 'Se déconnecter' }).click()
-  await login(page, 'e2e.marie', PROVISIONAL)
+  await login(page, 'e2e.marie', PROVISIONAL, { secondFactor: false })
   await expect(page.getByRole('alert')).toHaveText(/Identifiant ou mot de passe incorrect\./)
   await login(page, 'e2e.marie', CHOSEN)
   await expect(page).toHaveURL(/\/admin$/)

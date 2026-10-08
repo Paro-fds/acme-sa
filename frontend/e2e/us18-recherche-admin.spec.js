@@ -1,11 +1,9 @@
 import { expect, test } from '@playwright/test'
+import { adminLogin } from './admin.js'
 
 /** US-18 : recherche sur mobile (390 px), barre collante, retour depuis un dossier (US-20). */
 test('recherche admin : barre collante, résultats, aucun résultat, effacer', async ({ page }) => {
-  await page.goto('/admin/connexion')
-  await page.getByLabel('Identifiant').fill('admin')
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await adminLogin(page)
   await expect(page).toHaveURL(/\/admin$/)
   await page.goto('/admin/employes')
   await expect(page.getByText('7 employés')).toBeVisible()

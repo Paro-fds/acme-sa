@@ -155,18 +155,20 @@ def test_ca07_documents_are_editable_again_while_reopened(sent):
 # --- CA-08 : identification ------------------------------------------------------------
 
 
-def test_ca08_identification_uses_the_last_sent_name(submitted, employee_client, client):
+def test_ca08_identification_uses_the_last_sent_name(submitted, employee_client, client, account):
     submitted(EMP_A, {"last_name": "JOSEPH-PAUL"})
     employee = employee_client(EMP_A)
     _reopen(employee)
     employee.put(f"{UPDATE}/changes", json={"changes": {"last_name": "PAUL"}})
+    account(EMP_A, "Bonjour-2026")
 
-    def identify(last_name):
-        return client.post("/api/auth/identify", json=EMP_A.identity(last_name=last_name)).status_code
+    def login(last_name):
+        payload = EMP_A.identity(last_name=last_name, password="Bonjour-2026")
+        return client.post("/api/auth/login", json=payload).status_code
 
-    assert identify("JOSEPH") == 200
-    assert identify("JOSEPH-PAUL") == 200
-    assert identify("PAUL") == 401
+    assert login("JOSEPH") == 204
+    assert login("JOSEPH-PAUL") == 204
+    assert login("PAUL") == 401
 
 
 # --- CA-09 : pas de réouverture sans envoi ---------------------------------------------

@@ -12,6 +12,7 @@ const EMPLOYEE_LINKS = [{ to: '/parcours', icon: 'workspace_premium', label: 'Mo
 const ADMIN_LINKS = [
   { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs' },
   { to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' },
+  { to: '/admin/securite', icon: 'verified_user', label: 'Ma double authentification' },
 ]
 
 /** Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23 ; « Mon parcours » : US-25). */

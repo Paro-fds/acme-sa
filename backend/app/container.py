@@ -12,6 +12,16 @@ from app.admin.application.get_employee_folder import GetEmployeeFolder
 from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
 from app.admin.application.reset_access import ResetAccess
+from app.auth.application.admin_mfa import (
+    ConfirmMfaChange,
+    ConfirmMfaSetup,
+    GetMfaStatus,
+    MfaCodes,
+    ResetAdminMfa,
+    SendMfaCode,
+    StartMfaSetup,
+    VerifyMfa,
+)
 from app.auth.application.sessions import SessionService
 from app.auth.application.admin_accounts import (
     AddAdmin,
@@ -23,15 +33,23 @@ from app.auth.application.admin_accounts import (
     ListAdmins,
     LoginAdmin,
 )
-from app.auth.application.use_cases import IdentifyEmployee, LoginEmployee, RegisterPassword
+from app.auth.application.use_cases import LoginEmployee, RegisterPassword
 from app.auth.domain.model import SubjectType
+from app.auth.domain.network import parse_networks
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
+from app.auth.infrastructure.mfa_adapters import (
+    DemoCodeSender,
+    LoggingSecurityLog,
+    PyOtpTotpService,
+    UnconfiguredCodeSender,
+)
 from app.auth.infrastructure.sql_repositories import SqlAccountRepository, SqlAdminAccountRepository, SqlSessionRepository
 from app.career.application.use_cases import GetCareerFields, GetMyCareer
 from app.career.infrastructure.sql_career_repository import SqlCareerRepository
 from app.config import Settings
 from app.document.application.use_cases import DeleteDocument, GetMyDocumentFile, ListMyDocuments, UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
+from app.document.infrastructure.remote_file_storage import S3FileStorage, SupabaseFileStorage
 from app.document.infrastructure.sql_document_repository import SqlDocumentRepository
 from app.employee.application.get_profile import GetEmployeeProfile
 from app.employee.infrastructure.csv_employee_repository import CsvEmployeeRepository
@@ -57,7 +75,8 @@ class Container:
         settings.career_dir.mkdir(parents=True, exist_ok=True)
 
         self.database = Database(settings.database_url)
-        self.database.create_schema()
+        if settings.auto_create_schema:
+            self.database.create_schema()
 
         self.clock = SystemClock()
         self.employees = CsvEmployeeRepository(settings.acme_csv_path)
@@ -67,8 +86,12 @@ class Container:
         self.updates = SqlUpdateRepository(self.database)
         self.documents = SqlDocumentRepository(self.database)
         self.careers = SqlCareerRepository(self.database)
-        self.file_storage = LocalFileStorage(settings.documents_dir)
+        self.file_storage = _file_storage(settings)
         self.password_hasher = Argon2PasswordHasher()
+        self.totp = PyOtpTotpService()
+        self.code_sender = DemoCodeSender() if settings.shows_demo_codes else UnconfiguredCodeSender()
+        self.security_log = LoggingSecurityLog()
+        self.rh_networks = parse_networks(settings.rh_allowed_networks)
 
         # US-23 CA-03 : le compte de la configuration devient le premier administrateur en base.
         ImportConfiguredAdmin(
@@ -81,11 +104,9 @@ class Container:
         durations = {
             SubjectType.EMPLOYEE: timedelta(minutes=self.settings.employee_session_minutes),
             SubjectType.ADMIN: timedelta(minutes=self.settings.admin_session_minutes),
+            SubjectType.ADMIN_MFA: timedelta(minutes=10),
         }
         return SessionService(self.sessions, self.clock, durations)
-
-    def identify_employee(self) -> IdentifyEmployee:
-        return IdentifyEmployee(self.employees, self.updates, self.accounts)
 
     def register_password(self) -> RegisterPassword:
         return RegisterPassword(self.employees, self.updates, self.accounts, self.password_hasher, self.session_service())
@@ -96,7 +117,36 @@ class Container:
         )
 
     def login_admin(self) -> LoginAdmin:
-        return LoginAdmin(self.admin_accounts, self.password_hasher, self.session_service(), self.clock)
+        mfa = self.mfa_codes() if self.settings.admin_mfa_required else None
+        return LoginAdmin(self.admin_accounts, self.password_hasher, self.session_service(), self.clock, mfa)
+
+    # --- double authentification RH (US-102) ---------------------------------------
+
+    def mfa_codes(self) -> MfaCodes:
+        return MfaCodes(
+            self.admin_accounts, self.code_sender, self.totp, self.security_log, self.clock, self.settings.shows_demo_codes
+        )
+
+    def get_mfa_status(self) -> GetMfaStatus:
+        return GetMfaStatus(self.mfa_codes())
+
+    def start_mfa_setup(self) -> StartMfaSetup:
+        return StartMfaSetup(self.mfa_codes())
+
+    def confirm_mfa_setup(self) -> ConfirmMfaSetup:
+        return ConfirmMfaSetup(self.mfa_codes(), self.session_service())
+
+    def send_mfa_code(self) -> SendMfaCode:
+        return SendMfaCode(self.mfa_codes())
+
+    def verify_mfa(self) -> VerifyMfa:
+        return VerifyMfa(self.mfa_codes(), self.session_service())
+
+    def confirm_mfa_change(self) -> ConfirmMfaChange:
+        return ConfirmMfaChange(self.mfa_codes())
+
+    def reset_admin_mfa(self) -> ResetAdminMfa:
+        return ResetAdminMfa(self.mfa_codes(), self.session_service())
 
     def get_current_admin(self) -> GetCurrentAdmin:
         return GetCurrentAdmin(self.admin_accounts)
@@ -193,3 +243,18 @@ class Container:
 
     def list_my_documents(self) -> ListMyDocuments:
         return ListMyDocuments(self.documents)
+
+
+def _file_storage(settings: Settings):
+    """US-001 : disque local sur le poste du développeur ; stockage distant une fois déployé (`STORAGE_BACKEND`)."""
+    if settings.storage_backend == "s3":
+        return S3FileStorage.create(
+            settings.s3_bucket,
+            settings.s3_region,
+            settings.s3_endpoint_url,
+            settings.s3_access_key_id,
+            settings.s3_secret_access_key,
+        )
+    if settings.storage_backend == "supabase":
+        return SupabaseFileStorage(settings.supabase_url, settings.supabase_service_role_key, settings.s3_bucket)
+    return LocalFileStorage(settings.documents_dir)

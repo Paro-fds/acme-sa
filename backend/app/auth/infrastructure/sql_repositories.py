@@ -4,6 +4,7 @@ from sqlalchemy import Boolean, Integer, String, delete, func, select
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.auth.domain.admin import AdminAccount
+from app.auth.domain.mfa import MfaMethod, PendingCode
 from app.auth.domain.model import Account, Session, SubjectType
 from app.shared.infrastructure.database import Base, Database, UtcDateTime
 
@@ -115,6 +116,20 @@ class AdminAccountRow(Base):
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     created_by: Mapped[str | None] = mapped_column(String, nullable=True)
     last_login_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    # US-102 : double authentification
+    mfa_method: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_secret: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_destination: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_pending_method: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_pending_secret: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_pending_destination: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_code_hash: Mapped[str | None] = mapped_column(String, nullable=True)
+    mfa_code_expires_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    mfa_change_allowed_until: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+
+
+def _method(value: str | None) -> MfaMethod | None:
+    return MfaMethod(value) if value else None
 
 
 def _admin(row: AdminAccountRow) -> AdminAccount:
@@ -128,6 +143,14 @@ def _admin(row: AdminAccountRow) -> AdminAccount:
         failed_attempts=row.failed_attempts,
         locked_until=row.locked_until,
         last_login_at=row.last_login_at,
+        mfa_method=_method(row.mfa_method),
+        mfa_secret=row.mfa_secret,
+        mfa_destination=row.mfa_destination,
+        mfa_pending_method=_method(row.mfa_pending_method),
+        mfa_pending_secret=row.mfa_pending_secret,
+        mfa_pending_destination=row.mfa_pending_destination,
+        mfa_code=PendingCode(row.mfa_code_hash, row.mfa_code_expires_at) if row.mfa_code_hash else None,
+        mfa_change_allowed_until=row.mfa_change_allowed_until,
     )
 
 
@@ -143,6 +166,15 @@ def _admin_row(account: AdminAccount) -> AdminAccountRow:
         created_at=account.created_at,
         created_by=account.created_by,
         last_login_at=account.last_login_at,
+        mfa_method=account.mfa_method.value if account.mfa_method else None,
+        mfa_secret=account.mfa_secret,
+        mfa_destination=account.mfa_destination,
+        mfa_pending_method=account.mfa_pending_method.value if account.mfa_pending_method else None,
+        mfa_pending_secret=account.mfa_pending_secret,
+        mfa_pending_destination=account.mfa_pending_destination,
+        mfa_code_hash=account.mfa_code.code_hash if account.mfa_code else None,
+        mfa_code_expires_at=account.mfa_code.expires_at if account.mfa_code else None,
+        mfa_change_allowed_until=account.mfa_change_allowed_until,
     )
 
 

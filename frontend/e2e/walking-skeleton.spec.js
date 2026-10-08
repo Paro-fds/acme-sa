@@ -1,22 +1,16 @@
 import { expect, test } from '@playwright/test'
+import { adminLogin } from './admin.js'
+import { createPassword, EMP_A } from './auth.js'
 
 /**
  * Walking Skeleton (docs/03-plan-implementation.md §4) :
  * un employé modifie son téléphone et soumet ; l'admin le voit « Mise à jour effectuée ».
  */
 test('parcours complet employé → admin', async ({ page }) => {
-  // Identification (US-01)
+  // Accueil (US-105), puis première connexion : création du mot de passe (US-101)
   await page.goto('/')
-  await page.getByLabel('Nom', { exact: true }).fill('JOSEPH')
-  await page.getByLabel('Prénom').fill('Jean')
-  await page.getByLabel('Date de naissance').fill('1996-03-15')
-  await page.getByRole('button', { name: 'Continuer' }).click()
-
-  // Création du mot de passe (US-02)
-  await expect(page.getByRole('heading', { name: 'Créez votre mot de passe' })).toBeVisible()
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByLabel('Confirmer le mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
+  await page.getByRole('link', { name: 'Se connecter' }).click()
+  await createPassword(page, EMP_A)
 
   // Profil et choix « Oui » (US-05, US-08)
   await expect(page.getByText('JOSEPH Jean')).toBeVisible()
@@ -44,10 +38,7 @@ test('parcours complet employé → admin', async ({ page }) => {
 
   // Admin : connexion, tableau de bord et liste (US-15, US-16, US-17)
   await page.context().clearCookies()
-  await page.goto('/admin/connexion')
-  await page.getByLabel('Identifiant').fill('admin')
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await adminLogin(page)
   // Base partagée entre les tests E2E : seuls le total (7 employés actifs) et une soumission au moins sont sûrs.
   await expect(page.getByRole('link', { name: /^Total : 7,/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Effectuées : [1-7],/ })).toBeVisible()

@@ -1,20 +1,11 @@
 import { expect, test } from '@playwright/test'
+import { createPassword, EMP_H2, login } from './auth.js'
 
 // EMP-H2 (PIERRE Marie, née le 20/11/1985), réservé à ce test.
-async function identify(page) {
-  await page.goto('/')
-  await page.getByLabel('Nom', { exact: true }).fill('PIERRE')
-  await page.getByLabel('Prénom').fill('Marie')
-  await page.getByLabel('Date de naissance').fill('1985-11-20')
-  await page.getByRole('button', { name: 'Continuer' }).click()
-}
 
 /** US-10 T-10.3 : modifier → enregistrer → déconnexion → reconnexion → reprise, sur mobile. */
 test('brouillon : sauvegarde automatique, enregistrement, reprise après reconnexion', async ({ page }) => {
-  await identify(page)
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByLabel('Confirmer le mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
+  await createPassword(page, EMP_H2)
   await page.getByRole('button', { name: 'Oui, mettre à jour mon dossier' }).click()
 
   // CA-01 : sauvegarde automatique après 2 s
@@ -34,9 +25,7 @@ test('brouillon : sauvegarde automatique, enregistrement, reprise après reconne
   await page.getByRole('button', { name: 'Menu du compte' }).click()
   await page.getByRole('menuitem', { name: 'Se déconnecter' }).click()
   await expect(page.getByText('Vous êtes déconnecté.')).toBeVisible()
-  await identify(page)
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await login(page, EMP_H2)
 
   // CA-03 : reprise avec les deux modifications
   await page.getByRole('button', { name: 'Reprendre la mise à jour' }).click()
