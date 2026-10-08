@@ -15,6 +15,7 @@ from app.auth.domain.errors import (
     CannotResetOwnMfa,
     InvalidMfaCode,
     MfaAlreadyEnrolled,
+    MfaMethodUnavailable,
     MfaNotEnrolled,
     NoSetupInProgress,
     NotAuthenticated,
@@ -41,14 +42,16 @@ class MfaStatus:
     method: MfaMethod | None
     destination: str | None
     """Destination masquée (« +509 •••• 1111 »)."""
+    available: tuple[MfaMethod, ...] = ()
+    """Méthodes ouvertes sur cet environnement (`MFA_METHODS`)."""
 
 
 @dataclass(frozen=True)
 class CodeSent:
     method: MfaMethod
     destination: str
-    demo_code: str | None
-    """Hors production seulement : le code, affiché dans la « boîte de démonstration » à la place du vrai envoi."""
+    local_code: str | None
+    """Poste du développeur et tests seulement : le code, affiché à l'écran à la place d'un envoi."""
 
 
 @dataclass(frozen=True)
@@ -65,10 +68,6 @@ class SetupStarted:
     totp: TotpSetup | None
 
 
-def status_of(admin: AdminAccount) -> MfaStatus:
-    return MfaStatus(admin.mfa_enrolled, admin.mfa_method, mask_destination(admin.mfa_method, admin.mfa_destination))
-
-
 class MfaCodes:
     """Émission et vérification des codes, partagées par tous les cas d'utilisation de la double authentification."""
 
@@ -79,7 +78,9 @@ class MfaCodes:
         totp: TotpService,
         log: SecurityLog,
         clock: Clock,
+        *,
         show_codes: bool,
+        methods: list[MfaMethod],
     ) -> None:
         self.admins = admins
         self._sender = sender
@@ -87,6 +88,11 @@ class MfaCodes:
         self.log = log
         self.clock = clock
         self._show_codes = show_codes
+        self.methods = tuple(method for method in MfaMethod if method in methods)
+
+    def status(self, admin: AdminAccount) -> MfaStatus:
+        destination = mask_destination(admin.mfa_method, admin.mfa_destination)
+        return MfaStatus(admin.mfa_enrolled, admin.mfa_method, destination, self.methods)
 
     def get(self, admin_id: str) -> AdminAccount:
         admin = self.admins.get(admin_id)
@@ -141,7 +147,7 @@ class GetMfaStatus:
         self._codes = codes
 
     def execute(self, admin_id: str) -> MfaStatus:
-        return status_of(self._codes.get(admin_id))
+        return self._codes.status(self._codes.get(admin_id))
 
 
 class StartMfaSetup:
@@ -156,6 +162,8 @@ class StartMfaSetup:
         change_allowed = admin.mfa_change_allowed_until is not None and now < admin.mfa_change_allowed_until
         if admin.mfa_enrolled and not change_allowed:
             raise MfaAlreadyEnrolled()
+        if method not in self._codes.methods:
+            raise MfaMethodUnavailable()
         destination = normalize_destination(method, destination)
         admin.clear_pending_mfa()
         admin.mfa_pending_method = method

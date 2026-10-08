@@ -69,17 +69,10 @@ def logout(request: Request, response: Response) -> None:
 # --- Administrateur ---------------------------------------------------------
 
 
-@router.post(
-    "/api/admin/auth/login",
-    status_code=204,
-    responses={202: {"model": LoginStepOut, "description": "Mot de passe vérifié, second facteur attendu (US-102)"}},
-)
-def admin_login(payload: AdminLoginIn, request: Request, response: Response) -> Response:
+@router.post("/api/admin/auth/login", status_code=202, response_model=LoginStepOut)
+def admin_login(payload: AdminLoginIn, request: Request) -> JSONResponse:
+    """US-102 : mot de passe vérifié ; la session reste « en attente du code » jusqu'au second facteur."""
     result = container(request).login_admin().execute(payload.username, payload.password)
-    if result.mfa is None:
-        set_session_cookie(request, response, result.token)
-        response.status_code = 204
-        return response
     step = LoginStepOut(mfa=MfaStatusOut.of(result.mfa), code=CodeSentOut.of(result.code))
     accepted = JSONResponse(step.model_dump(mode="json"), status_code=202)
     set_session_cookie(request, accepted, result.token)

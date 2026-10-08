@@ -5,13 +5,17 @@ import TextField from '../../../components/TextField.jsx'
 import CodeForm from './CodeForm.jsx'
 import { METHOD_ORDER, METHODS, codeInstruction } from './methods.js'
 
-function MethodOption({ method, checked, onChange, name }) {
-  const { title, icon, help } = METHODS[method]
+/** Méthode fermée sur cet environnement : le service d'envoi des codes n'est pas encore choisi (D-41). */
+const UNAVAILABLE_HELP = "Pas encore disponible : le service d'envoi des codes reste à choisir."
+
+function MethodOption({ method, checked, onChange, name, available }) {
+  const { title, icon } = METHODS[method]
+  const help = available ? METHODS[method].help : UNAVAILABLE_HELP
   return (
     <label
-      className={`flex cursor-pointer items-start gap-3 rounded-xl border-[1.5px] bg-surface p-4 ${
+      className={`flex items-start gap-3 rounded-xl border-[1.5px] bg-surface p-4 ${
         checked ? 'border-primary shadow-[0_0_0_3px_rgb(15_37_87/0.12)]' : 'border-border'
-      }`}
+      } ${available ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
     >
       <input
         type="radio"
@@ -19,6 +23,7 @@ function MethodOption({ method, checked, onChange, name }) {
         value={method}
         checked={checked}
         onChange={onChange}
+        disabled={!available}
         className="mt-3 size-5 shrink-0 accent-primary"
       />
       <span
@@ -61,8 +66,14 @@ function TotpInstructions({ totp }) {
 /**
  * US-102 CA-01 : choisir sa méthode, puis la confirmer avec un premier code.
  * `api` : { start(method, destination), confirm(code) } (connexion, ou changement depuis son compte).
+ * `available` : méthodes ouvertes sur cet environnement (`available_methods` de l'API) ; les autres sont grisées.
  */
-export default function MethodSetup({ api, onDone, submitLabel = 'Activer la double authentification' }) {
+export default function MethodSetup({
+  api,
+  onDone,
+  available = METHOD_ORDER,
+  submitLabel = 'Activer la double authentification',
+}) {
   const name = useId()
   const [method, setMethod] = useState(null)
   const [destination, setDestination] = useState('')
@@ -133,6 +144,7 @@ export default function MethodSetup({ api, onDone, submitLabel = 'Activer la dou
             method={option}
             name={name}
             checked={method === option}
+            available={available.includes(option)}
             onChange={() => {
               setMethod(option)
               setDestination('')

@@ -14,7 +14,7 @@ vi.mock('../../../api/mfa.js', () => ({
 
 const NOT_ENROLLED = { enrolled: false, method: null, destination: null }
 const WHATSAPP = { enrolled: true, method: 'WHATSAPP', destination: '+509 •••• 1111' }
-const SENT = { method: 'WHATSAPP', destination: '+509 •••• 1111', demo_code: '482913' }
+const SENT = { method: 'WHATSAPP', destination: '+509 •••• 1111', local_code: '482913' }
 const WRONG_CODE = new ApiError(422, 'INVALID_CODE', 'Code incorrect ou expiré. Vérifiez-le ou demandez-en un nouveau.', 'code')
 
 function renderPage(step) {
@@ -59,8 +59,8 @@ describe('MfaLoginPage — première connexion (US-102 CA-01)', () => {
     await user.click(screen.getByRole('button', { name: 'Recevoir un code' }))
 
     expect(loginMfa.start).toHaveBeenCalledWith('WHATSAPP', '+509 3722 1111')
-    const demo = await screen.findByRole('complementary', { name: 'Boîte de démonstration' })
-    expect(demo).toHaveTextContent('En production, ce code arriverait par WhatsApp au +509 •••• 1111.')
+    const demo = await screen.findByRole('complementary', { name: 'Message non envoyé' })
+    expect(demo).toHaveTextContent('En ligne, ce code partirait par WhatsApp au +509 •••• 1111.')
     expect(demo).toHaveTextContent('482 913')
     await user.type(screen.getByLabelText('Code de vérification'), '482913')
     await user.click(screen.getByRole('button', { name: 'Activer la double authentification' }))
@@ -89,6 +89,15 @@ describe('MfaLoginPage — première connexion (US-102 CA-01)', () => {
     await user.type(screen.getByLabelText('Code de vérification'), '123456')
     await user.click(screen.getByRole('button', { name: 'Activer la double authentification' }))
     expect(await screen.findByText('Tableau de bord')).toBeInTheDocument()
+  })
+
+  it('en ligne, tant que le service d’envoi n’est pas choisi : seule l’application est ouverte', async () => {
+    renderPage({ mfa: { ...NOT_ENROLLED, available_methods: ['TOTP'] }, code: null })
+
+    expect(await screen.findByRole('radio', { name: /WhatsApp/ })).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Email/ })).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Application d'authentification/ })).toBeEnabled()
+    expect(screen.getAllByText("Pas encore disponible : le service d'envoi des codes reste à choisir.")).toHaveLength(2)
   })
 
   it('une adresse invalide s’affiche sous le champ', async () => {
@@ -135,7 +144,7 @@ describe('MfaLoginPage — connexions suivantes (US-102 CA-02, CA-03)', () => {
   })
 
   it('« Renvoyer le code » remplace le code affiché', async () => {
-    loginMfa.resend.mockResolvedValue({ ...SENT, demo_code: '111222' })
+    loginMfa.resend.mockResolvedValue({ ...SENT, local_code: '111222' })
     const user = userEvent.setup()
     renderPage({ mfa: WHATSAPP, code: SENT })
 

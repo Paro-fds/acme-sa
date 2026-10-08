@@ -6,7 +6,7 @@
 | **Source** | `../cahier-des-charges.md` (exigences EF, ENF), `../tableau-unique-des-regles.md` (RG), `../decisions-a-valider.md` (D) |
 | **Numérotation** | Une story porte le numéro de son epic, comme les exigences : US-301 = 1re story de l'epic D3 (EF-301…). Elle est **indépendante** des US-01 → US-35 du MVP et de la V2 (`docs/epics/`) |
 
-10 epics, 41 user stories. Chaque fichier de story contient le récit, le pourquoi, les critères d'acceptation et la Definition of Done.
+10 epics, 42 user stories. Chaque fichier de story contient le récit, le pourquoi, les critères d'acceptation et la Definition of Done.
 
 ## Plan par lots
 
@@ -71,6 +71,7 @@ Une story appartient au lot où elle est livrée ; quand un complément arrive p
 | [US-002](D0-socle-et-mise-en-service/US-002-heberger-la-production-en-securite.md) | D0 | Héberger la production en sécurité | Must | — | Pas encore |
 | [US-003](D0-socle-et-mise-en-service/US-003-former-les-rh-avec-un-guide-d-une-page.md) | D0 | Former les RH avec un guide d'une page | Must | — | Pas encore |
 | [US-102](D1-acces-et-compte/US-102-choisir-ma-double-authentification.md) | D1 | Choisir ma double authentification | Must | — | En cours |
+| [US-106](D1-acces-et-compte/US-106-proteger-mon-acces-par-une-double-authentification.md) | D1 | Protéger mon accès par une double authentification | Must | — | Pas encore |
 | [US-703](D7-notifications/US-703-annoncer-le-portail-et-les-postes-ouverts.md) | D7 | Annoncer le portail et les postes ouverts | Must (Should pour le résumé) | résumé des postes au lot 4 | Pas encore |
 
 ### Lot 4 — Carrière et engagement
@@ -114,7 +115,7 @@ Parcours du démonstrateur (`../../9-demonstrateur/plan-demonstrateur.md`) : US-
 | Epic | Objectif | Stories | Lots |
 |---|---|:---:|---|
 | [D0 Socle et mise en service](D0-socle-et-mise-en-service/README.md) | Le portail tourne en ligne, sécurisé, sauvegardé, et les RH savent s'en servir. | 3 | 0, 3 |
-| [D1 Accès et compte](D1-acces-et-compte/README.md) | Chacun entre dans le portail simplement, et les comptes RH sont fortement protégés. | 5 | 1, 2, 3 |
+| [D1 Accès et compte](D1-acces-et-compte/README.md) | Chacun entre dans le portail simplement, et les comptes RH sont fortement protégés. | 6 | 1, 2, 3 |
 | [D2 Dossier de l'employé](D2-dossier-de-l-employe/README.md) | Chaque employé complète et confirme son dossier lui-même, en quelques minutes. | 5 | 1, 4 |
 | [D3 Certificats](D3-certificats/README.md) | L'employé fait valoir ses qualifications en déposant ses certificats et suit leur sort. | 5 | 1, 2 |
 | [D4 Validation RH](D4-validation-rh/README.md) | Les RH valident vite, sans conflit d'intérêts, et chaque décision se justifie. | 3 | 2 |

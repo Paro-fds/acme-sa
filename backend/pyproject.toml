@@ -13,14 +13,13 @@ dependencies = [
     "python-multipart",
     "psycopg[binary]",
     "alembic",
-    "httpx",
     "boto3",
     "pyotp",
     "segno",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "import-linter"]
+dev = ["pytest", "httpx", "import-linter"]
 
 [build-system]
 requires = ["setuptools>=68"]

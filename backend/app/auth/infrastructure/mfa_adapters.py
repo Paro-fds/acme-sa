@@ -30,12 +30,12 @@ class PyOtpTotpService:
         return pyotp.TOTP(secret).verify(code, for_time=now, valid_window=1)
 
 
-class DemoCodeSender:
-    """Démonstrateur et poste du développeur : aucun message ne part. Le code est rendu à l'écran
-    (« boîte de démonstration ») ; le journal ne garde que la destination masquée, jamais le code."""
+class LocalOutboxCodeSender:
+    """Poste du développeur et tests automatiques : aucun message ne part ; l'API rend le code pour l'écran.
+    Le journal ne garde que la destination masquée, jamais le code."""
 
     def send(self, method: MfaMethod, destination: str, code: str) -> None:
-        security_logger.info("Code de démonstration %s pour %s (non envoyé)", method.value, mask_destination(method, destination))
+        security_logger.info("Code %s pour %s (non envoyé, poste local)", method.value, mask_destination(method, destination))
 
 
 class UnconfiguredCodeSender:

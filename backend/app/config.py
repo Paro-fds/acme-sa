@@ -20,16 +20,14 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 
     app_env: Literal["local", "demo", "recette", "production"] = "local"
-    """`demo` : bandeau « Démonstration · données fictives », jeu fictif imposé, codes de démonstration visibles."""
+    """`demo` et `recette` : jeu fictif imposé (US-001 CA-05) ; `local` : poste du développeur et tests."""
     acme_csv_path: Path = PROJECT_DIR / "data" / "vault-employee-list_20261001-1400.csv"
     acme_data_dir: Path = Path("C:/acme-data")
     database_url: str = ""
     """`DATABASE_URL` : PostgreSQL (Supabase, puis RDS) ; vide = SQLite dans `ACME_DATA_DIR` (poste du développeur, tests)."""
     auto_create_schema: bool = True
     """Création directe du schéma (SQLite local, tests). Déployé : `false`, le schéma vient des migrations Alembic."""
-    storage_backend: Literal["local", "supabase", "s3"] = "local"
-    supabase_url: str = ""
-    supabase_service_role_key: str = ""
+    storage_backend: Literal["local", "s3"] = "local"
     s3_endpoint_url: str = ""
     """Vide sur AWS (S3 par défaut) ; adresse S3 de Supabase Storage sur le démonstrateur."""
     s3_bucket: str = ""
@@ -40,8 +38,9 @@ class Settings(BaseSettings):
     admin_password_hash: str = ""
     employee_session_minutes: int = 30
     admin_session_minutes: int = 120
-    admin_mfa_required: bool = True
-    """US-102 : double authentification des comptes RH ; toujours exigée en recette et en production."""
+    mfa_methods: str = "TOTP,EMAIL,WHATSAPP"
+    """US-102 : méthodes de double authentification proposées. Tant que le service d'envoi des codes n'est pas
+    choisi avec la DIT (D-41), les environnements en ligne n'ouvrent que `TOTP`."""
     rh_allowed_networks: str = ""
     """US-102 CA-06 : réseaux des bureaux (CIDR séparés par des virgules) ; vide = pas de restriction (démonstrateur)."""
     max_upload_mb: int = 5
@@ -56,10 +55,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _derive(self) -> "Settings":
-        if self.app_env in ("recette", "production"):
-            self.admin_mfa_required = True
-        if self.app_env == "demo":
-            # CA-05 : aucun vrai CSV ne peut être chargé sur le démonstrateur, quelle que soit la configuration.
+        if self.app_env in ("demo", "recette"):
+            # US-001 CA-05 : en ligne hors production, aucun vrai CSV ne peut être chargé, quelle que soit la configuration.
             self.acme_csv_path = DEMO_CSV
         if not self.database_url:
             self.database_url = f"sqlite:///{(self.acme_data_dir / 'portail.db').as_posix()}"
@@ -71,9 +68,14 @@ class Settings(BaseSettings):
         return self.app_env == "demo"
 
     @property
-    def shows_demo_codes(self) -> bool:
-        """US-102 : hors recette et production, les codes de vérification s'affichent à l'écran au lieu de partir."""
-        return self.app_env in ("local", "demo")
+    def shows_local_codes(self) -> bool:
+        """US-102 : sur le poste du développeur seulement (et dans les tests), aucun code ne part ;
+        l'API le renvoie pour qu'il s'affiche à l'écran."""
+        return self.app_env == "local"
+
+    @property
+    def enabled_mfa_methods(self) -> list[str]:
+        return [part.strip().upper() for part in self.mfa_methods.split(",") if part.strip()]
 
     @property
     def documents_dir(self) -> Path:

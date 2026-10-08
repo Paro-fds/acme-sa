@@ -129,4 +129,5 @@ La colonne **Pourquoi** explique à quoi sert la règle : c'est le commentaire d
 |---|---|---|---|---|:---:|
 | RG-80 | Tentatives de connexion | Blocage de 15 minutes après 5 mots de passe erronés (valeurs du portail actuel) | Empêcher de deviner un mot de passe en essayant au hasard | Demande phase 4 ; **P-09** | 🔵 |
 | RG-81 | Comptes RH | Double authentification ; réseau de l'institution (les RH travaillent depuis les bureaux) | Les comptes RH voient les dossiers de tous les employés : ils sont mieux protégés | Q8 §4 | ✅ |
+| RG-83 | Employés | Double authentification aussi pour les employés, avec les méthodes de RG-82 ; ❓ méthodes ouvertes aux employés et récupération sans passer à l'agence | Le dossier d'un employé est personnel : nom, date de naissance et mot de passe ne suffisent pas à le protéger | Demande du 2026-10-08 ; **P-15** | 🔵 |
 | RG-82 | Méthodes de double authentification | Au choix de la personne : code par WhatsApp, code par email, ou application TOTP (Microsoft Authenticator ou équivalent) ; code à 6 chiffres, usage unique ; ❓ durée de validité | Ne dépendre ni d'un seul canal ni d'un seul appareil | **P-14** | 🔵 |

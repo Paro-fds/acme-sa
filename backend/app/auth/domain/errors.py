@@ -149,6 +149,13 @@ class MfaAlreadyEnrolled(Conflict):
     message = "Une double authentification est déjà enregistrée : confirmez d'abord avec votre méthode actuelle."
 
 
+class MfaMethodUnavailable(Conflict):
+    """US-102 : méthode fermée sur cet environnement (service d'envoi pas encore choisi, D-41)."""
+
+    code = "MFA_METHOD_UNAVAILABLE"
+    message = "Cette méthode n'est pas encore disponible. Choisissez l'application d'authentification."
+
+
 class MfaNotEnrolled(Conflict):
     code = "MFA_NOT_ENROLLED"
     message = "Choisissez d'abord votre méthode de double authentification."

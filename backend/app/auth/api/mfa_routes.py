@@ -31,21 +31,28 @@ class MfaStatusOut(BaseModel):
     enrolled: bool
     method: MfaMethod | None
     destination: str | None
+    available_methods: list[MfaMethod]
+    """Méthodes ouvertes sur cet environnement (`MFA_METHODS`)."""
 
     @classmethod
     def of(cls, status: MfaStatus) -> "MfaStatusOut":
-        return cls(enrolled=status.enrolled, method=status.method, destination=status.destination)
+        return cls(
+            enrolled=status.enrolled,
+            method=status.method,
+            destination=status.destination,
+            available_methods=list(status.available),
+        )
 
 
 class CodeSentOut(BaseModel):
     method: MfaMethod
     destination: str
-    demo_code: str | None
-    """Hors production : le code, affiché dans la « boîte de démonstration »."""
+    local_code: str | None
+    """Poste du développeur et tests seulement (`APP_ENV=local`) : le code, affiché à l'écran ; jamais en ligne."""
 
     @classmethod
     def of(cls, sent: CodeSent | None) -> "CodeSentOut | None":
-        return cls(method=sent.method, destination=sent.destination, demo_code=sent.demo_code) if sent else None
+        return cls(method=sent.method, destination=sent.destination, local_code=sent.local_code) if sent else None
 
 
 class TotpOut(BaseModel):

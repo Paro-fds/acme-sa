@@ -22,11 +22,12 @@ RESEND = "/api/admin/auth/mfa/code"
 VERIFY = "/api/admin/auth/mfa/verify"
 RH_PAGE = "/api/admin/employees"
 PHONE = "+509 3722 1111"
+ALL_METHODS = ["WHATSAPP", "EMAIL", "TOTP"]
 
 
 @pytest.fixture
 def mfa_app(settings: Settings) -> Iterator[FastAPI]:
-    application = create_app(settings.model_copy(update={"admin_mfa_required": True}))
+    application = create_app(settings)
     application.state.container.clock = FakeClock()
     yield application
     application.state.container.close()
@@ -71,7 +72,7 @@ def totp_code(container, secret: str, **offset) -> str:
 
 def enroll_whatsapp(client) -> None:
     login(client)
-    code = client.post(SETUP, json={"method": "WHATSAPP", "destination": PHONE}).json()["code"]["demo_code"]
+    code = client.post(SETUP, json={"method": "WHATSAPP", "destination": PHONE}).json()["code"]["local_code"]
     assert client.post(SETUP_CONFIRM, json={"code": code}).status_code == 204
 
 
@@ -89,7 +90,10 @@ def test_ca01_le_mot_de_passe_seul_n_ouvre_pas_l_espace_rh(rh):
     response = login(rh)
 
     assert response.status_code == 202
-    assert response.json() == {"mfa": {"enrolled": False, "method": None, "destination": None}, "code": None}
+    assert response.json() == {
+        "mfa": {"enrolled": False, "method": None, "destination": None, "available_methods": ALL_METHODS},
+        "code": None,
+    }
     refused = rh.get(RH_PAGE)
     assert refused.status_code == 401
     assert refused.json()["error"]["code"] == "MFA_REQUIRED"
@@ -148,8 +152,13 @@ def test_ca02_a_la_connexion_suivante_le_code_part_vers_la_methode_enregistree(r
 
     assert response.status_code == 202
     body = response.json()
-    assert body["mfa"] == {"enrolled": True, "method": "WHATSAPP", "destination": "+509 •••• 1111"}
-    code = body["code"]["demo_code"]
+    assert body["mfa"] == {
+        "enrolled": True,
+        "method": "WHATSAPP",
+        "destination": "+509 •••• 1111",
+        "available_methods": ALL_METHODS,
+    }
+    code = body["code"]["local_code"]
     assert len(code) == 6 and code.isdigit()
     assert rh.post(VERIFY, json={"code": code}).status_code == 204
     assert rh.get(RH_PAGE).status_code == 200
@@ -158,7 +167,7 @@ def test_ca02_a_la_connexion_suivante_le_code_part_vers_la_methode_enregistree(r
 def test_ca02_le_code_est_a_usage_unique(rh):
     enroll_whatsapp(rh)
     rh.cookies.clear()
-    code = login(rh).json()["code"]["demo_code"]
+    code = login(rh).json()["code"]["local_code"]
     rh.post(VERIFY, json={"code": code})
     rh.cookies.clear()
     login(rh)
@@ -169,7 +178,7 @@ def test_ca02_le_code_est_a_usage_unique(rh):
 def test_ca02_le_code_expire_apres_5_minutes(rh, mfa_container):
     enroll_whatsapp(rh)
     rh.cookies.clear()
-    code = login(rh).json()["code"]["demo_code"]
+    code = login(rh).json()["code"]["local_code"]
 
     mfa_container.clock.advance(minutes=5)
     response = rh.post(VERIFY, json={"code": code})
@@ -185,14 +194,14 @@ def test_ca02_le_code_expire_apres_5_minutes(rh, mfa_container):
 def test_ca02_un_nouveau_code_remplace_le_precedent(rh):
     enroll_whatsapp(rh)
     rh.cookies.clear()
-    first = login(rh).json()["code"]["demo_code"]
+    first = login(rh).json()["code"]["local_code"]
 
     second = rh.post(RESEND).json()
 
     assert second["destination"] == "+509 •••• 1111"
-    if second["demo_code"] != first:
+    if second["local_code"] != first:
         assert rh.post(VERIFY, json={"code": first}).status_code == 422
-    assert rh.post(VERIFY, json={"code": second["demo_code"]}).status_code == 204
+    assert rh.post(VERIFY, json={"code": second["local_code"]}).status_code == 204
 
 
 def test_ca02_email_adresse_masquee(rh):
@@ -216,9 +225,9 @@ def test_ca02_cinq_codes_faux_suspendent_le_compte(rh):
     assert response.json()["error"]["retry_after"] == 900
 
 
-def test_ca02_en_production_le_code_n_est_jamais_renvoye_par_l_api(settings):
-    production = settings.model_copy(update={"admin_mfa_required": True, "app_env": "production"})
-    assert not production.shows_demo_codes
+@pytest.mark.parametrize("env", ["demo", "recette", "production"])
+def test_ca02_en_ligne_le_code_n_est_jamais_renvoye_par_l_api(env):
+    assert not Settings(_env_file=None, app_env=env).shows_local_codes
 
 
 # --- CA-03 : application d'authentification (TOTP) -----------------------------------------
@@ -243,7 +252,8 @@ def test_ca03_connexion_suivante_avec_le_code_de_l_application(rh, mfa_container
     rh.cookies.clear()
 
     response = login(rh)
-    assert response.json() == {"mfa": {"enrolled": True, "method": "TOTP", "destination": None}, "code": None}
+    assert response.json()["mfa"]["method"] == "TOTP"
+    assert response.json()["code"] is None
 
     mfa_container.clock.advance(minutes=3)
     assert rh.post(VERIFY, json={"code": "123456"}).status_code == 422
@@ -274,18 +284,18 @@ def test_ca04_changer_de_methode_demande_le_code_de_la_methode_actuelle(rh, mfa_
     refused = rh.post("/api/admin/me/mfa/setup", json={"method": "TOTP"})
     assert refused.status_code == 409
 
-    code = rh.post("/api/admin/me/mfa/code").json()["demo_code"]
+    code = rh.post("/api/admin/me/mfa/code").json()["local_code"]
     assert rh.post("/api/admin/me/mfa/confirm", json={"code": code}).status_code == 204
     secret = rh.post("/api/admin/me/mfa/setup", json={"method": "TOTP"}).json()["totp"]["secret"]
     assert rh.post("/api/admin/me/mfa/setup/confirm", json={"code": totp_code(mfa_container, secret)}).status_code == 204
 
-    assert rh.get("/api/admin/me/mfa").json() == {"enrolled": True, "method": "TOTP", "destination": None}
+    assert rh.get("/api/admin/me/mfa").json()["method"] == "TOTP"
     assert rh.get(RH_PAGE).status_code == 200  # la session continue
 
 
 def test_ca04_le_delai_pour_changer_est_limite(rh, mfa_container):
     enroll_whatsapp(rh)
-    code = rh.post("/api/admin/me/mfa/code").json()["demo_code"]
+    code = rh.post("/api/admin/me/mfa/code").json()["local_code"]
     rh.post("/api/admin/me/mfa/confirm", json={"code": code})
 
     mfa_container.clock.advance(minutes=10)
@@ -302,7 +312,7 @@ def test_ca05_un_autre_compte_rh_reinitialise_la_methode(rh, mfa_app, mfa_contai
     marie = mfa_container.admin_accounts.find_by_username("marie.pierre")
     with TestClient(mfa_app) as other:
         login(other, "marie.pierre", "Provisoire-2026!")
-        code = other.post(SETUP, json={"method": "WHATSAPP", "destination": "+50937222222"}).json()["code"]["demo_code"]
+        code = other.post(SETUP, json={"method": "WHATSAPP", "destination": "+50937222222"}).json()["code"]["local_code"]
         other.post(SETUP_CONFIRM, json={"code": code})
 
         assert rh.post(f"/api/admin/admins/{marie.id}/reset-mfa").status_code == 204
@@ -327,7 +337,7 @@ def test_ca05_on_ne_reinitialise_pas_sa_propre_methode(rh, mfa_container):
 
 
 def test_ca06_hors_du_reseau_des_bureaux_l_espace_rh_est_ferme(settings):
-    office = settings.model_copy(update={"admin_mfa_required": True, "rh_allowed_networks": "196.3.0.0/24"})
+    office = settings.model_copy(update={"rh_allowed_networks": "196.3.0.0/24"})
     app = create_app(office)
     try:
         with TestClient(app) as outside:  # adresse du client de test : « testclient »
@@ -378,5 +388,35 @@ def test_la_session_en_attente_du_code_expire_apres_10_minutes(rh, mfa_container
     assert rh.get(MFA).status_code == 401
 
 
-def test_sans_double_authentification_exigee_la_connexion_reste_en_une_etape(client):
-    assert login(client).status_code == 204
+def test_le_mot_de_passe_n_ouvre_jamais_seul_l_espace_rh(client):
+    response = login(client)
+
+    assert response.status_code == 202
+    assert client.get(RH_PAGE).json()["error"]["code"] == "MFA_REQUIRED"
+
+
+# --- Méthodes ouvertes (MFA_METHODS) : service d'envoi pas encore choisi (D-41) ----------------
+
+
+@pytest.fixture
+def totp_only(settings) -> Iterator[TestClient]:
+    app = create_app(settings.model_copy(update={"mfa_methods": "TOTP"}))
+    app.state.container.clock = FakeClock()
+    with TestClient(app) as client:
+        yield client
+    app.state.container.close()
+
+
+def test_seules_les_methodes_ouvertes_sont_proposees(totp_only):
+    body = login(totp_only).json()
+
+    assert body["mfa"]["available_methods"] == ["TOTP"]
+
+
+def test_une_methode_fermee_est_refusee(totp_only):
+    login(totp_only)
+
+    response = totp_only.post(SETUP, json={"method": "WHATSAPP", "destination": PHONE})
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "MFA_METHOD_UNAVAILABLE"

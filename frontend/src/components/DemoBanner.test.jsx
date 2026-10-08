@@ -26,7 +26,14 @@ describe('DemoBanner (US-001)', () => {
     },
   )
 
-  it("CA-04 : hors démonstration, aucun bandeau", () => {
+  it('CA-04 : en recette aussi', () => {
+    vi.stubEnv('VITE_APP_ENV', 'recette')
+    renderAt('/')
+
+    expect(screen.getByRole('note')).toHaveTextContent('Démonstration · données fictives')
+  })
+
+  it("CA-04 : en production ou sur le poste, aucun bandeau", () => {
     renderAt('/')
 
     expect(screen.queryByText('Démonstration · données fictives')).not.toBeInTheDocument()

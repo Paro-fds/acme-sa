@@ -45,7 +45,7 @@ export default function MfaLoginPage() {
             passe, un code à 6 chiffres vous sera demandé.
           </p>
         </div>
-        <MethodSetup api={loginMfa} onDone={enter} />
+        <MethodSetup api={loginMfa} onDone={enter} available={status.available_methods} />
       </>,
     )
   }

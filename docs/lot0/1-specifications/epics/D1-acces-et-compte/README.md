@@ -13,3 +13,4 @@
 | [US-103](US-103-donner-un-role-a-chaque-compte-rh.md) | Donner un rôle à chaque compte RH | 2 | Must | EF-103 | Pas encore |
 | [US-104](US-104-gerer-les-comptes-et-debloquer-un-employe.md) | Gérer les comptes et débloquer un employé | 2 | Must | EF-105 | Pas encore |
 | [US-105](US-105-decouvrir-le-portail-avant-de-me-connecter.md) | Découvrir le portail avant de me connecter | 1 | Must | Demande 1.1 (accueil, 3 bénéfices) ; Q9 (mascotte) | Fait |
+| [US-106](US-106-proteger-mon-acces-par-une-double-authentification.md) | Protéger mon accès par une double authentification | 3 | Must | EF-104 | Pas encore |

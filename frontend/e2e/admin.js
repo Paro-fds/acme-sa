@@ -8,8 +8,8 @@ import { expect } from '@playwright/test'
 export const ADMIN_PASSWORD = 'Admin-Test-2026'
 
 /** Lit le code de la boîte de démonstration, le saisit et valide. */
-export async function enterDemoCode(page, submitLabel) {
-  const box = page.getByRole('complementary', { name: 'Boîte de démonstration' })
+export async function enterLocalCode(page, submitLabel) {
+  const box = page.getByRole('complementary', { name: 'Message non envoyé' })
   await expect(box).toBeVisible()
   const code = (await box.innerText()).match(/(\d{3}) (\d{3})/).slice(1).join('')
   await page.getByLabel('Code de vérification').fill(code)
@@ -25,9 +25,9 @@ export async function passSecondFactor(page, email = 'rh.e2e@exemple.test') {
     await page.getByRole('radio', { name: /Email/ }).check()
     await page.getByLabel('Adresse email').fill(email)
     await page.getByRole('button', { name: 'Recevoir un code' }).click()
-    await enterDemoCode(page, 'Activer la double authentification')
+    await enterLocalCode(page, 'Activer la double authentification')
   } else {
-    await enterDemoCode(page, 'Me connecter')
+    await enterLocalCode(page, 'Me connecter')
   }
 }
 

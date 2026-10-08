@@ -5,7 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus, status_of
+from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus
 from app.auth.application.sessions import SessionService
 from app.auth.domain.admin import AdminAccount, validate_admin_password, validate_username
 from app.auth.domain.errors import (
@@ -49,8 +49,8 @@ class AdminView:
 @dataclass(frozen=True)
 class AdminLoginResult:
     token: str
-    mfa: MfaStatus | None
-    """US-102 : None quand la session RH est ouverte ; sinon, le second facteur est attendu."""
+    """Session « en attente du code » (US-102) : le second facteur ouvre la session RH."""
+    mfa: MfaStatus
     code: CodeSent | None = None
     """Code envoyé dès la connexion quand la méthode enregistrée est WhatsApp ou email."""
 
@@ -61,8 +61,8 @@ class LoginAdmin:
     Blocage **par compte** (5 échecs consécutifs → 15 minutes, conservé en base). Un identifiant
     inconnu reçoit le même message qu'un mauvais mot de passe et ne bloque aucun compte (US-23).
 
-    US-102 : avec la double authentification, le bon mot de passe n'ouvre qu'une session en attente
-    du code ; le compteur d'erreurs n'est remis à zéro qu'une fois le code vérifié.
+    US-102 : le bon mot de passe n'ouvre qu'une session en attente du code ; le compteur d'erreurs
+    n'est remis à zéro qu'une fois le code vérifié.
     """
 
     def __init__(
@@ -71,7 +71,7 @@ class LoginAdmin:
         hasher: PasswordHasher,
         sessions: SessionService,
         clock: Clock,
-        mfa: MfaCodes | None = None,
+        mfa: MfaCodes,
     ) -> None:
         self._admins = admins
         self._hasher = hasher
@@ -96,12 +96,7 @@ class LoginAdmin:
                 raise AccountLocked(admin.seconds_until_unlock(now))
             raise InvalidAdminCredentials()
 
-        if self._mfa is not None:
-            return self._second_factor(admin)
-        admin.register_success()
-        admin.last_login_at = now
-        self._admins.save(admin)
-        return AdminLoginResult(self._sessions.open(SubjectType.ADMIN, admin.id), None)
+        return self._second_factor(admin)
 
     def _second_factor(self, admin: AdminAccount) -> AdminLoginResult:
         code = None
@@ -110,11 +105,10 @@ class LoginAdmin:
             self._admins.save(admin)
         self._record("ADMIN_PASSWORD_OK", admin.id)
         token = self._sessions.open(SubjectType.ADMIN_MFA, admin.id)
-        return AdminLoginResult(token, status_of(admin), code)
+        return AdminLoginResult(token, self._mfa.status(admin), code)
 
     def _record(self, event: str, admin_id: str | None, **details: str) -> None:
-        if self._mfa is not None:
-            self._mfa.log.record(event, admin_id, **details)
+        self._mfa.log.record(event, admin_id, **details)
 
 
 class GetCurrentAdmin:

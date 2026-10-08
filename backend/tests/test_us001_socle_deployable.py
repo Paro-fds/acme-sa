@@ -2,12 +2,10 @@
 
 import csv
 import io
-import json
 import os
 from pathlib import Path
 
 import botocore.session
-import httpx
 import pytest
 from alembic import command
 from alembic.autogenerate import compare_metadata
@@ -21,7 +19,7 @@ from sqlalchemy import create_engine
 from app.config import DEMO_CSV, Settings, normalize_database_url
 from app.container import Container
 from app.document.infrastructure.local_file_storage import LocalFileStorage
-from app.document.infrastructure.remote_file_storage import S3FileStorage, SupabaseFileStorage
+from app.document.infrastructure.remote_file_storage import S3FileStorage
 from app.main import create_app
 from app.shared.infrastructure.database import Base
 from tests.employees import SECRET_MARKER
@@ -80,16 +78,16 @@ def test_ca07_deploye_l_application_demarre_sur_le_schema_des_migrations_sans_le
 def test_ca03_la_configuration_vient_des_variables_d_environnement(monkeypatch):
     monkeypatch.setenv("APP_ENV", "demo")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:motdepasse@db.exemple.test:5432/postgres")
-    monkeypatch.setenv("STORAGE_BACKEND", "supabase")
-    monkeypatch.setenv("SUPABASE_URL", "https://projet.exemple.test")
+    monkeypatch.setenv("STORAGE_BACKEND", "s3")
+    monkeypatch.setenv("S3_ENDPOINT_URL", "https://projet.exemple.test/storage/v1/s3")
     monkeypatch.setenv("S3_BUCKET", "certificats")
 
     settings = Settings(_env_file=None)
 
     assert settings.app_env == "demo"
     assert settings.database_url == "postgresql+psycopg://user:motdepasse@db.exemple.test:5432/postgres"
-    assert settings.storage_backend == "supabase"
-    assert settings.supabase_url == "https://projet.exemple.test"
+    assert settings.storage_backend == "s3"
+    assert settings.s3_endpoint_url == "https://projet.exemple.test/storage/v1/s3"
     assert settings.s3_bucket == "certificats"
 
 
@@ -123,8 +121,9 @@ def test_ca03_aucun_secret_ni_adresse_de_service_dans_le_code():
 # --- CA-05 : jeu fictif imposé hors production ----------------------------------------------
 
 
-def test_ca05_en_demonstration_le_jeu_fictif_est_impose_meme_si_un_autre_csv_est_configure(tmp_path: Path):
-    settings = Settings(_env_file=None, app_env="demo", acme_csv_path=tmp_path / "vrai-fichier.csv")
+@pytest.mark.parametrize("env", ["demo", "recette"])
+def test_ca05_hors_production_le_jeu_fictif_est_impose_meme_si_un_autre_csv_est_configure(tmp_path: Path, env):
+    settings = Settings(_env_file=None, app_env=env, acme_csv_path=tmp_path / "vrai-fichier.csv")
 
     assert settings.acme_csv_path == DEMO_CSV
 
@@ -143,48 +142,25 @@ def test_ca05_le_jeu_de_demonstration_ne_contient_que_des_donnees_fictives():
 # --- CA-02, CA-06 : fichiers dans un compartiment privé, derrière le port FileStorage -------
 
 
-def supabase(handler) -> SupabaseFileStorage:
-    client = httpx.Client(transport=httpx.MockTransport(handler))
-    return SupabaseFileStorage("https://projet.exemple.test/", "cle-service", "certificats", client=client)
-
-
-def test_ca02_supabase_depose_lit_et_supprime_dans_le_compartiment_prive():
-    calls: list[httpx.Request] = []
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        calls.append(request)
-        if request.method == "GET":
-            return httpx.Response(200, content=b"%PDF")
-        return httpx.Response(200, json={})
-
-    storage = supabase(handler)
-    storage.save("1001/ab12.pdf", b"%PDF")
-    assert storage.open("1001/ab12.pdf") == b"%PDF"
-    storage.delete("1001/ab12.pdf")
-
-    save, read, remove = calls
-    object_url = "https://projet.exemple.test/storage/v1/object/certificats/1001/ab12.pdf"
-    assert (save.method, str(save.url)) == ("POST", object_url)
-    assert save.headers["authorization"] == "Bearer cle-service"
-    assert save.headers["x-upsert"] == "true"
-    assert (read.method, str(read.url)) == ("GET", object_url)
-    assert (remove.method, str(remove.url)) == ("DELETE", "https://projet.exemple.test/storage/v1/object/certificats")
-    assert json.loads(remove.content) == {"prefixes": ["1001/ab12.pdf"]}
-
-
-def test_ca02_supabase_un_fichier_absent_est_signale_comme_tel():
-    storage = supabase(lambda request: httpx.Response(400, json={"error": "not_found"}))
-
-    with pytest.raises(FileNotFoundError):
-        storage.open("1001/absent.pdf")
-
-
 @pytest.mark.parametrize("key", ["", "/1001/a.pdf", "1001/../1002/a.pdf"])
 def test_ca02_une_cle_qui_sortirait_du_dossier_est_refusee(key):
-    storage = supabase(lambda request: httpx.Response(200))
+    storage = S3FileStorage("certificats", client=None)
 
     with pytest.raises(ValueError):
         storage.save(key, b"x")
+
+
+def test_ca06_supabase_storage_par_son_acces_s3_adresse_le_compartiment_dans_le_chemin():
+    storage = S3FileStorage.create("certificats", "us-west-2", "https://projet.exemple.test/storage/v1/s3", "k", "s")
+
+    assert storage._client.meta.config.s3["addressing_style"] == "path"
+    assert storage._client.meta.endpoint_url == "https://projet.exemple.test/storage/v1/s3"
+
+
+def test_ca08_sur_aws_ni_adresse_ni_cle_le_role_de_la_tache_suffit():
+    storage = S3FileStorage.create("certificats", "us-east-1", "", "", "")
+
+    assert storage._client.meta.endpoint_url == "https://s3.amazonaws.com"
 
 
 def test_ca02_s3_depose_lit_et_supprime_avec_l_interface_s3():
@@ -209,7 +185,7 @@ def test_ca02_s3_depose_lit_et_supprime_avec_l_interface_s3():
 
 @pytest.mark.parametrize(
     ("backend", "expected"),
-    [("local", LocalFileStorage), ("supabase", SupabaseFileStorage), ("s3", S3FileStorage)],
+    [("local", LocalFileStorage), ("s3", S3FileStorage)],
 )
 def test_ca08_l_adaptateur_de_stockage_se_choisit_par_la_configuration(tmp_path: Path, backend, expected):
     settings = Settings(
@@ -217,8 +193,6 @@ def test_ca08_l_adaptateur_de_stockage_se_choisit_par_la_configuration(tmp_path:
         app_env="demo",
         acme_data_dir=tmp_path,
         storage_backend=backend,
-        supabase_url="https://projet.exemple.test",
-        supabase_service_role_key="cle",
         s3_bucket="certificats",
     )
 

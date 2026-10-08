@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Alert from '../../../components/Alert.jsx'
 import Button from '../../../components/Button.jsx'
 import TextField from '../../../components/TextField.jsx'
-import DemoCodeBox from './DemoCodeBox.jsx'
+import LocalCodeBox from './LocalCodeBox.jsx'
 
 const SIX_DIGITS = /^\d{6}$/
 
@@ -50,7 +50,7 @@ export default function CodeForm({ instruction, sent, onSubmit, onResend, submit
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
       {children}
-      <DemoCodeBox sent={lastSent} />
+      <LocalCodeBox sent={lastSent} />
       <TextField
         label="Code de vérification"
         help={instruction}

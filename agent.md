@@ -6,6 +6,28 @@ Langue du projet et de l'interface : **français**.
 
 ## 0. Où en est le projet ? (à lire en premier)
 
+### Refonte demandée par M. Hilaire (en cours, mise à jour le 2026-10-08)
+
+Source de vérité : colonne « Statut » de `docs/lot0/1-specifications/epics/README.md` (stories US-001 → US-906, 10 epics D0 → D9, plan par lots). Le MVP n'est plus en service depuis le 2026-10-07 ; la refonte se code ici (`app-web-v2`).
+
+| Story | Statut | Où on en est |
+|---|---|---|
+| US-105 Accueil | **Fait** | — |
+| US-101 Connexion en un écran | **Fait** | — |
+| US-001 Socle déployable | **En cours** | Code prêt (PostgreSQL, Alembic, Docker, S3, bandeau, jeu fictif) ; reste la mise en ligne avec les comptes du développeur (`docs/lot0/9-demonstrateur/mise-en-ligne-pas-a-pas.md`) |
+| US-102 Double authentification RH | **En cours** (avancée, D-42) | Écrans, règles et TOTP faits ; envoi réel WhatsApp/email en attente de la DIT (D-41) ; `MFA_METHODS` dit quelles méthodes sont ouvertes |
+| US-106 Double authentification employés | Pas encore | Nouvelle exigence du 2026-10-08 (D-41, P-15) |
+
+**Prochaine action :** finir US-001 (une story à la fois), puis reprendre le lot 1.
+
+À savoir :
+- Connexion RH : le mot de passe ouvre une session « en attente du code » (`ADMIN_MFA`) ; aucun réglage ne désactive la double authentification. Dans les tests API, `rh_login()` (`tests/conftest.py`) fait la connexion complète avec l'application TOTP ; dans les tests E2E, `e2e/admin.js`.
+- Les codes WhatsApp/email ne s'affichent à l'écran qu'avec `APP_ENV=local` (poste du développeur, tests) ; en ligne, jamais.
+- Le démonstrateur ne reçoit que du travail du projet : rien de « spécial démo ».
+- `TEST_POSTGRES_URL` fait tourner toute la suite sur PostgreSQL.
+
+### MVP (historique)
+
 > **Dernière mise à jour : 2026-10-05.** Cette section est mise à jour à la fin de chaque story (voir §2, étape 8).
 > En cas de doute, la source de vérité est la colonne « Statut » de `docs/epics/README.md`.
 

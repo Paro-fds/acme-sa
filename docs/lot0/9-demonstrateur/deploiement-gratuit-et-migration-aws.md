@@ -75,7 +75,7 @@ Les certificats sont des documents personnels sensibles (cahier §8). Même avec
 | Par l'interface S3 seulement | Le backend parle à Supabase Storage avec boto3, comme il parlera à S3 ; pas de client Supabase |
 | Clés | Clés S3 de Supabase dans les variables d'environnement de Render, jamais dans le dépôt |
 
-**Si l'accès S3 de Supabase n'est pas disponible** (constaté le 2026-10-07 : pas encore d'accès sur le compte du développeur) : un adaptateur `SupabaseFileStorage` appelle l'API de stockage de Supabase (compartiment privé, URL signées de dépôt et de lecture) avec la clé `service_role`, côté serveur uniquement. Une variable `STORAGE_BACKEND` (`supabase` ou `s3`) choisit l'adaptateur ; le port `FileStorage`, les écrans et le parcours restent les mêmes. En développement et dans les tests : stockage local ou en mémoire.
+L'accès S3 de Supabase est activé sur le projet du développeur (constaté le 2026-10-08, région `us-west-2`) : il n'y a qu'un seul adaptateur, `S3FileStorage`. En développement et dans les tests : stockage local.
 
 À la migration, on vide `S3_ENDPOINT_URL` et on change le compartiment : le code est le même. Comme les fichiers sont fictifs, aucun n'est copié ; on recharge le jeu de démonstration.
 
@@ -84,8 +84,7 @@ Variables d'environnement (les mêmes noms partout) :
 | Variable | Gratuit | AWS |
 |---|---|---|
 | `DATABASE_URL` | Chaîne de connexion Supabase (pooler) | Point d'accès RDS, lu dans Secrets Manager |
-| `STORAGE_BACKEND` | `s3` (accès S3 de Supabase) ou `supabase` (API de stockage, solution de secours) | `s3` |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Seulement avec `STORAGE_BACKEND=supabase` | — |
+| `STORAGE_BACKEND` | `s3` (accès S3 de Supabase) | `s3` |
 | `S3_ENDPOINT_URL` | Adresse S3 de Supabase Storage | Vide (S3 d'AWS par défaut) |
 | `S3_BUCKET` | Compartiment privé Supabase | Compartiment S3 |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Clés S3 de Supabase | Aucune : rôle de la tâche Fargate |

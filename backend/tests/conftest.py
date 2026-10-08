@@ -9,6 +9,7 @@ from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pyotp
 import pytest
 from argon2 import PasswordHasher
 from fastapi import FastAPI
@@ -60,8 +61,6 @@ def settings(tmp_path: Path, admin_password_hash: str) -> Settings:
         frontend_dist_dir=tmp_path / "no-frontend",
         admin_username=ADMIN_USERNAME,
         admin_password_hash=admin_password_hash,
-        # Les suites d'avant US-102 testent la connexion RH en une étape ; tests/api/test_us102_*.py l'active.
-        admin_mfa_required=False,
     )
 
 
@@ -115,6 +114,27 @@ def employee_client(app: FastAPI, container) -> Iterator[Callable[[TestEmployee]
     yield connect
     for test_client in clients:
         test_client.close()
+
+
+RH_LOGIN = "/api/admin/auth/login"
+
+
+def rh_login(client: TestClient, username: str, password: str):
+    """Connexion RH complète par l'API (US-102) : mot de passe, puis code de l'application d'authentification.
+
+    À la première connexion du compte, l'application est enregistrée. Renvoie la réponse de l'étape qui
+    échoue, ou celle du code (204, cookie de la session RH) quand tout réussit.
+    """
+    response = client.post(RH_LOGIN, json={"username": username, "password": password})
+    if response.status_code != 202:
+        return response
+    container = client.app.state.container
+    if response.json()["mfa"]["enrolled"]:
+        secret = container.admin_accounts.find_by_username(username).mfa_secret
+        return client.post("/api/admin/auth/mfa/verify", json={"code": pyotp.TOTP(secret).at(container.clock.now())})
+    secret = client.post("/api/admin/auth/mfa/setup", json={"method": "TOTP"}).json()["totp"]["secret"]
+    code = pyotp.TOTP(secret).at(container.clock.now())
+    return client.post("/api/admin/auth/mfa/setup/confirm", json={"code": code})
 
 
 def admin_session(container) -> str:

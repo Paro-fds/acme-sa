@@ -109,6 +109,7 @@ export default function MySecurityPage() {
       {phase === 'setup' && (
         <MethodSetup
           api={myMfa}
+          available={status.available_methods}
           submitLabel="Enregistrer la nouvelle méthode"
           onDone={() => {
             setPhase('view')

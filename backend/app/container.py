@@ -35,10 +35,11 @@ from app.auth.application.admin_accounts import (
 )
 from app.auth.application.use_cases import LoginEmployee, RegisterPassword
 from app.auth.domain.model import SubjectType
+from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.network import parse_networks
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
 from app.auth.infrastructure.mfa_adapters import (
-    DemoCodeSender,
+    LocalOutboxCodeSender,
     LoggingSecurityLog,
     PyOtpTotpService,
     UnconfiguredCodeSender,
@@ -49,7 +50,7 @@ from app.career.infrastructure.sql_career_repository import SqlCareerRepository
 from app.config import Settings
 from app.document.application.use_cases import DeleteDocument, GetMyDocumentFile, ListMyDocuments, UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
-from app.document.infrastructure.remote_file_storage import S3FileStorage, SupabaseFileStorage
+from app.document.infrastructure.remote_file_storage import S3FileStorage
 from app.document.infrastructure.sql_document_repository import SqlDocumentRepository
 from app.employee.application.get_profile import GetEmployeeProfile
 from app.employee.infrastructure.csv_employee_repository import CsvEmployeeRepository
@@ -89,7 +90,7 @@ class Container:
         self.file_storage = _file_storage(settings)
         self.password_hasher = Argon2PasswordHasher()
         self.totp = PyOtpTotpService()
-        self.code_sender = DemoCodeSender() if settings.shows_demo_codes else UnconfiguredCodeSender()
+        self.code_sender = LocalOutboxCodeSender() if settings.shows_local_codes else UnconfiguredCodeSender()
         self.security_log = LoggingSecurityLog()
         self.rh_networks = parse_networks(settings.rh_allowed_networks)
 
@@ -117,14 +118,19 @@ class Container:
         )
 
     def login_admin(self) -> LoginAdmin:
-        mfa = self.mfa_codes() if self.settings.admin_mfa_required else None
-        return LoginAdmin(self.admin_accounts, self.password_hasher, self.session_service(), self.clock, mfa)
+        return LoginAdmin(self.admin_accounts, self.password_hasher, self.session_service(), self.clock, self.mfa_codes())
 
     # --- double authentification RH (US-102) ---------------------------------------
 
     def mfa_codes(self) -> MfaCodes:
         return MfaCodes(
-            self.admin_accounts, self.code_sender, self.totp, self.security_log, self.clock, self.settings.shows_demo_codes
+            self.admin_accounts,
+            self.code_sender,
+            self.totp,
+            self.security_log,
+            self.clock,
+            show_codes=self.settings.shows_local_codes,
+            methods=[MfaMethod(name) for name in self.settings.enabled_mfa_methods],
         )
 
     def get_mfa_status(self) -> GetMfaStatus:
@@ -255,6 +261,4 @@ def _file_storage(settings: Settings):
             settings.s3_access_key_id,
             settings.s3_secret_access_key,
         )
-    if settings.storage_backend == "supabase":
-        return SupabaseFileStorage(settings.supabase_url, settings.supabase_service_role_key, settings.s3_bucket)
     return LocalFileStorage(settings.documents_dir)

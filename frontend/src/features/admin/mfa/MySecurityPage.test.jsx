@@ -10,7 +10,7 @@ vi.mock('../../../api/mfa.js', () => ({
 }))
 vi.mock('../../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
-const SENT = { method: 'WHATSAPP', destination: '+509 •••• 1111', demo_code: '482913' }
+const SENT = { method: 'WHATSAPP', destination: '+509 •••• 1111', local_code: '482913' }
 
 function renderPage() {
   render(
@@ -37,7 +37,7 @@ describe('MySecurityPage (US-102 CA-04)', () => {
   it('changer de méthode : confirmation avec l’actuelle, puis la nouvelle', async () => {
     myMfa.sendCode.mockResolvedValue(SENT)
     myMfa.confirmCurrent.mockResolvedValue(null)
-    myMfa.start.mockResolvedValue({ method: 'EMAIL', code: { ...SENT, method: 'EMAIL', destination: 'r•••@exemple.test', demo_code: '777888' }, totp: null })
+    myMfa.start.mockResolvedValue({ method: 'EMAIL', code: { ...SENT, method: 'EMAIL', destination: 'r•••@exemple.test', local_code: '777888' }, totp: null })
     myMfa.confirm.mockResolvedValue(null)
     const user = userEvent.setup()
     renderPage()

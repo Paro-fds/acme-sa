@@ -30,7 +30,7 @@ Un employé sans email doit pouvoir entrer ; les comptes RH voient les dossiers 
 
 ## Notes
 
-Technologie à choisir avec la DIT : Cognito gère l'email et les applications TOTP ; WhatsApp demande un développement en plus. Employés : pas de double authentification au lancement (D-41, à confirmer).
+Technologie à choisir avec la DIT : Cognito gère l'email et les applications TOTP ; WhatsApp demande un développement en plus. Les employés ont aussi une double authentification : US-106 (D-41). Avancée au démonstrateur (D-42) : écrans, règles et application TOTP faits ; envoi réel des codes WhatsApp et email en attente du service choisi (`MFA_METHODS`).
 
 ## Definition of Done
 

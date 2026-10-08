@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { adminLogin, enterDemoCode } from './admin.js'
+import { adminLogin, enterLocalCode } from './admin.js'
 
 const PASSWORD = 'Paul-Provisoire-E2E-2026'
 const CHOSEN = 'Paul-Mot-de-passe-E2E-2026'
@@ -42,9 +42,9 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
   await page.getByRole('button', { name: 'Recevoir un code' }).click()
 
   // CA-02 : code reçu (boîte de démonstration), puis le mot de passe provisoire à changer (US-23)
-  await expect(page.getByRole('complementary', { name: 'Boîte de démonstration' })).toContainText('+509 •••• 3333')
+  await expect(page.getByRole('complementary', { name: 'Message non envoyé' })).toContainText('+509 •••• 3333')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await enterDemoCode(page, 'Activer la double authentification')
+  await enterLocalCode(page, 'Activer la double authentification')
   await expect(page).toHaveURL(/\/admin\/mot-de-passe$/)
   await page.getByLabel('Mot de passe provisoire', { exact: true }).fill(PASSWORD)
   await page.getByLabel('Nouveau mot de passe', { exact: true }).fill(CHOSEN)
@@ -62,7 +62,7 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
   await expect(page.getByText('Code incorrect ou expiré. Vérifiez-le ou demandez-en un nouveau.')).toBeVisible()
   await page.getByRole('button', { name: 'Renvoyer le code' }).click()
   await expect(page.getByText(/le précédent ne fonctionne plus/)).toBeVisible()
-  await enterDemoCode(page, 'Me connecter')
+  await enterLocalCode(page, 'Me connecter')
   await expect(page).toHaveURL(/\/admin$/)
 
   // CA-04 : changer de méthode depuis son compte, après confirmation avec WhatsApp
@@ -71,11 +71,11 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
   await expect(page.getByText('WhatsApp · +509 •••• 3333')).toBeVisible()
   await page.getByRole('button', { name: 'Changer de méthode' }).click()
   await page.getByRole('button', { name: 'Recevoir un code par WhatsApp' }).click()
-  await enterDemoCode(page, 'Confirmer')
+  await enterLocalCode(page, 'Confirmer')
   await page.getByRole('radio', { name: /Email/ }).check()
   await page.getByLabel('Adresse email').fill('paul.louis@exemple.test')
   await page.getByRole('button', { name: 'Recevoir un code' }).click()
-  await enterDemoCode(page, 'Enregistrer la nouvelle méthode')
+  await enterLocalCode(page, 'Enregistrer la nouvelle méthode')
   await expect(page.getByText(/Nouvelle méthode enregistrée/)).toBeVisible()
   await expect(page.getByText('Email · p•••@exemple.test')).toBeVisible()
   await logout(page)
