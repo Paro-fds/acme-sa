@@ -58,6 +58,9 @@ class Settings(BaseSettings):
         if self.app_env in ("demo", "recette"):
             # US-001 CA-05 : en ligne hors production, aucun vrai CSV ne peut être chargé, quelle que soit la configuration.
             self.acme_csv_path = DEMO_CSV
+        if not self.database_url and self.app_env != "local":
+            # US-001 : un conteneur déployé perd son disque à chaque redémarrage ; jamais de SQLite en ligne.
+            raise ValueError(f"DATABASE_URL est obligatoire avec APP_ENV={self.app_env} (base PostgreSQL).")
         if not self.database_url:
             self.database_url = f"sqlite:///{(self.acme_data_dir / 'portail.db').as_posix()}"
         self.database_url = normalize_database_url(self.database_url)

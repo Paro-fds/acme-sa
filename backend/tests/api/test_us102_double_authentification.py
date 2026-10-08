@@ -227,7 +227,8 @@ def test_ca02_cinq_codes_faux_suspendent_le_compte(rh):
 
 @pytest.mark.parametrize("env", ["demo", "recette", "production"])
 def test_ca02_en_ligne_le_code_n_est_jamais_renvoye_par_l_api(env):
-    assert not Settings(_env_file=None, app_env=env).shows_local_codes
+    online = Settings(_env_file=None, app_env=env, database_url="postgresql://u:p@db.exemple.test/portail")
+    assert not online.shows_local_codes
 
 
 # --- CA-03 : application d'authentification (TOTP) -----------------------------------------

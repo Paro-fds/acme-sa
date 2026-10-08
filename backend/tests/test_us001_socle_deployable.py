@@ -25,6 +25,7 @@ from app.shared.infrastructure.database import Base
 from tests.employees import SECRET_MARKER
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+PG = "postgresql://user:motdepasse@db.exemple.test:5432/postgres"
 
 
 def migrate(database_url: str) -> None:
@@ -104,6 +105,12 @@ def test_ca03_les_chaines_de_connexion_de_supabase_et_rds_sont_acceptees_telles_
     assert normalize_database_url(given) == expected
 
 
+@pytest.mark.parametrize("env", ["demo", "recette", "production"])
+def test_ca03_en_ligne_database_url_est_obligatoire(env):
+    with pytest.raises(ValueError, match="DATABASE_URL est obligatoire"):
+        Settings(_env_file=None, app_env=env)
+
+
 def test_ca03_sans_database_url_la_base_reste_sqlite_sur_le_poste(tmp_path: Path):
     settings = Settings(_env_file=None, acme_data_dir=tmp_path)
 
@@ -123,7 +130,7 @@ def test_ca03_aucun_secret_ni_adresse_de_service_dans_le_code():
 
 @pytest.mark.parametrize("env", ["demo", "recette"])
 def test_ca05_hors_production_le_jeu_fictif_est_impose_meme_si_un_autre_csv_est_configure(tmp_path: Path, env):
-    settings = Settings(_env_file=None, app_env=env, acme_csv_path=tmp_path / "vrai-fichier.csv")
+    settings = Settings(_env_file=None, app_env=env, database_url=PG, acme_csv_path=tmp_path / "vrai-fichier.csv")
 
     assert settings.acme_csv_path == DEMO_CSV
 
@@ -191,6 +198,7 @@ def test_ca08_l_adaptateur_de_stockage_se_choisit_par_la_configuration(tmp_path:
     settings = Settings(
         _env_file=None,
         app_env="demo",
+        database_url=f"sqlite:///{(tmp_path / 'portail.db').as_posix()}",
         acme_data_dir=tmp_path,
         storage_backend=backend,
         s3_bucket="certificats",

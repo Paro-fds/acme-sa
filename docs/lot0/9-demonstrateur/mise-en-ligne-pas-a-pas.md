@@ -66,13 +66,13 @@ Pour calculer l'empreinte, sur votre poste, depuis `backend/` : `.venv\Scripts\p
 Les autres valeurs sont déjà dans `render.yaml` : `APP_ENV=demo`, `MFA_METHODS=TOTP`, `STORAGE_BACKEND=s3`, `S3_BUCKET=certificats`, `S3_REGION=us-west-2`.
 
 3. Lancez le déploiement. Le premier prend quelques minutes, et le journal doit montrer `Running upgrade -> 0001`, puis `0002`.
-4. Vérifiez que `https://acme-portail-api.onrender.com/api/health` répond `{"status":"ok"}`. Si Render a donné un autre nom au service, notez l'adresse exacte.
+4. Vérifiez que `https://acme-sa.onrender.com/api/health` répond `{"status":"ok"}`. Si Render a donné un autre nom au service, notez l'adresse exacte.
 
 > L'offre gratuite endort l'API après environ 15 minutes sans visite ; le réveil prend 30 à 60 secondes. Avant une présentation, ouvrez l'adresse `/api/health` quelques minutes avant.
 
 ## 4. Vercel : le site
 
-1. Si l'adresse Render diffère de `acme-portail-api.onrender.com`, corrigez-la dans `frontend/vercel.json`, puis commitez et poussez sur `v2`.
+1. Si l'adresse Render diffère de `acme-sa.onrender.com`, corrigez-la dans `frontend/vercel.json`, puis commitez et poussez sur `v2`.
 2. Sur vercel.com, connectez-vous avec GitHub, puis **Add New** → **Project** → dépôt `acme-sa`, et réglez :
    - **Root Directory** : `frontend` ;
    - **Framework** : Vite (détecté automatiquement) ;
