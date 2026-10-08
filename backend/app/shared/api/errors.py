@@ -1,6 +1,7 @@
 """Traduction unique des erreurs métier et de validation en réponses HTTP.
 
-Format commun : {"error": {"code": "...", "message": "..."}}
+Format commun : {"error": {"code": "...", "message": "...", "field"?: "..."}}, plus les informations
+complémentaires de l'erreur (`DomainError.extra`, par exemple `retry_after`).
 """
 
 from fastapi import FastAPI, Request
@@ -25,10 +26,11 @@ _STATUS_BY_ERROR: list[tuple[type[DomainError], int]] = [
 ]
 
 
-def error_body(code: str, message: str, field: str | None = None) -> dict:
+def error_body(code: str, message: str, field: str | None = None, extra: dict | None = None) -> dict:
     error = {"code": code, "message": message}
     if field is not None:
         error["field"] = field
+    error.update(extra or {})
     return {"error": error}
 
 
@@ -44,7 +46,7 @@ def register_error_handlers(app: FastAPI) -> None:
     async def handle_domain_error(_: Request, error: DomainError) -> JSONResponse:
         return JSONResponse(
             status_code=status_for(error),
-            content=error_body(error.code, error.message, error.field),
+            content=error_body(error.code, error.message, error.field, error.extra),
         )
 
     @app.exception_handler(RequestValidationError)

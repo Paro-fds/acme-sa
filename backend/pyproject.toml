@@ -11,6 +11,11 @@ dependencies = [
     "pydantic-settings",
     "argon2-cffi",
     "python-multipart",
+    "psycopg[binary]",
+    "alembic",
+    "boto3",
+    "pyotp",
+    "segno",
 ]
 
 [project.optional-dependencies]
@@ -46,6 +51,7 @@ containers = [
     "app.update",
     "app.document",
     "app.admin",
+    "app.career",
 ]
 
 [[tool.importlinter.contracts]]
@@ -58,12 +64,14 @@ source_modules = [
     "app.update.domain",
     "app.document.domain",
     "app.admin.domain",
+    "app.career.domain",
     "app.shared.application",
     "app.employee.application",
     "app.auth.application",
     "app.update.application",
     "app.document.application",
     "app.admin.application",
+    "app.career.application",
 ]
 forbidden_modules = ["fastapi", "starlette", "pydantic", "sqlalchemy"]
 
@@ -89,6 +97,9 @@ source_modules = [
     "app.admin.domain",
     "app.admin.application",
     "app.admin.api",
+    "app.career.domain",
+    "app.career.application",
+    "app.career.api",
 ]
 forbidden_modules = [
     "app.shared.infrastructure",
@@ -97,5 +108,13 @@ forbidden_modules = [
     "app.update.infrastructure",
     "app.document.infrastructure",
     "app.admin.infrastructure",
+    "app.career.infrastructure",
     "app.container",
 ]
+
+# V2 (docs/v2/02-solution-design.md AD-V2-02) : le parcours ne touche jamais à la campagne de mise à jour.
+[[tool.importlinter.contracts]]
+name = "Parcours indépendant de la campagne"
+type = "forbidden"
+source_modules = ["app.career"]
+forbidden_modules = ["app.update"]

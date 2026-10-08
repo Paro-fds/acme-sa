@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Protocol
 
 from app.auth.domain.admin import AdminAccount
+from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.model import Account, Session, SubjectType
 
 
@@ -48,3 +50,31 @@ class AdminAccountRepository(Protocol):
     def delete(self, admin_id: str) -> None: ...
 
     def count(self) -> int: ...
+
+
+class TotpService(Protocol):
+    """US-102 CA-03 : application d'authentification (TOTP, Microsoft Authenticator ou autre)."""
+
+    def new_secret(self) -> str: ...
+
+    def provisioning_uri(self, secret: str, account_name: str) -> str:
+        """Adresse `otpauth://` que l'application lit dans le QR code."""
+        ...
+
+    def qr_code(self, uri: str) -> str:
+        """QR code de cette adresse, en image SVG (`data:` URI) affichable telle quelle."""
+        ...
+
+    def verify(self, secret: str, code: str, now: datetime) -> bool: ...
+
+
+class CodeSender(Protocol):
+    """US-102 CA-02 : envoi d'un code à usage unique par WhatsApp ou par email."""
+
+    def send(self, method: MfaMethod, destination: str, code: str) -> None: ...
+
+
+class SecurityLog(Protocol):
+    """US-102 CA-07 : trace des connexions RH et des changements de double authentification."""
+
+    def record(self, event: str, admin_id: str | None, **details: str) -> None: ...

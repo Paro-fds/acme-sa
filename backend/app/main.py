@@ -5,8 +5,9 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.admin.api import routes as admin_routes
-from app.auth.api import admin_account_routes
+from app.auth.api import admin_account_routes, mfa_routes
 from app.auth.api import routes as auth_routes
+from app.career.api import routes as career_routes
 from app.config import Settings
 from app.container import Container
 from app.document.api import routes as document_routes
@@ -34,8 +35,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(employee_routes.router)
     app.include_router(update_routes.router)
     app.include_router(document_routes.router)
+    app.include_router(career_routes.router)
     app.include_router(admin_routes.router)
     app.include_router(admin_account_routes.router)
+    app.include_router(mfa_routes.router)
+    mfa_routes.restrict_rh_space_to_office_network(app)
 
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], include_in_schema=False)
     def unknown_api_route(path: str) -> None:

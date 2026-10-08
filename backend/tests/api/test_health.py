@@ -12,5 +12,6 @@ def test_unknown_api_route_returns_404(client):
 
 
 def test_data_directories_are_created(client, settings):
-    assert (settings.acme_data_dir / "portail.db").exists()
+    if settings.database_url.startswith("sqlite"):  # sur PostgreSQL (TEST_POSTGRES_URL), pas de fichier de base
+        assert (settings.acme_data_dir / "portail.db").exists()
     assert settings.documents_dir.is_dir()

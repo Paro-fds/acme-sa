@@ -7,25 +7,22 @@
  */
 
 export class ApiError extends Error {
-  constructor(status, code, message, field = null) {
+  /** `details` : informations complémentaires de l'erreur (par exemple `retry_after`, US-101). */
+  constructor(status, code, message, field = null, details = {}) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
     this.field = field
+    this.details = details
   }
 }
 
 const NETWORK_ERROR_MESSAGE = 'Le serveur est injoignable. Vérifiez votre connexion.'
 
 function toApiError(status, data) {
-  const error = data?.error ?? {}
-  return new ApiError(
-    status,
-    error.code ?? 'UNKNOWN_ERROR',
-    error.message ?? 'Une erreur est survenue.',
-    error.field ?? null,
-  )
+  const { code, message, field, ...details } = data?.error ?? {}
+  return new ApiError(status, code ?? 'UNKNOWN_ERROR', message ?? 'Une erreur est survenue.', field ?? null, details)
 }
 
 export async function request(path, { method = 'GET', body, headers } = {}) {

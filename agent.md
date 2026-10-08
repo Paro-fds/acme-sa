@@ -6,6 +6,28 @@ Langue du projet et de l'interface : **français**.
 
 ## 0. Où en est le projet ? (à lire en premier)
 
+### Refonte demandée par M. Hilaire (en cours, mise à jour le 2026-10-08)
+
+Source de vérité : colonne « Statut » de `docs/lot0/1-specifications/epics/README.md` (stories US-001 → US-906, 10 epics D0 → D9, plan par lots). Le MVP n'est plus en service depuis le 2026-10-07 ; la refonte se code ici (`app-web-v2`).
+
+| Story | Statut | Où on en est |
+|---|---|---|
+| US-105 Accueil | **Fait** | — |
+| US-101 Connexion en un écran | **Fait** | — |
+| US-001 Socle déployable | **En cours** | Code prêt (PostgreSQL, Alembic, Docker, S3, bandeau, jeu fictif) ; reste la mise en ligne avec les comptes du développeur (`docs/lot0/9-demonstrateur/mise-en-ligne-pas-a-pas.md`) |
+| US-102 Double authentification RH | **En cours** (avancée, D-42) | Écrans, règles et TOTP faits ; envoi réel WhatsApp/email en attente de la DIT (D-41) ; `MFA_METHODS` dit quelles méthodes sont ouvertes |
+| US-106 Double authentification employés | Pas encore | Nouvelle exigence du 2026-10-08 (D-41, P-15) |
+
+**Prochaine action :** finir US-001 (une story à la fois), puis reprendre le lot 1.
+
+À savoir :
+- Connexion RH : le mot de passe ouvre une session « en attente du code » (`ADMIN_MFA`) ; aucun réglage ne désactive la double authentification. Dans les tests API, `rh_login()` (`tests/conftest.py`) fait la connexion complète avec l'application TOTP ; dans les tests E2E, `e2e/admin.js`.
+- Les codes WhatsApp/email ne s'affichent à l'écran qu'avec `APP_ENV=local` (poste du développeur, tests) ; en ligne, jamais.
+- Le démonstrateur ne reçoit que du travail du projet : rien de « spécial démo ».
+- `TEST_POSTGRES_URL` fait tourner toute la suite sur PostgreSQL.
+
+### MVP (historique)
+
 > **Dernière mise à jour : 2026-10-05.** Cette section est mise à jour à la fin de chaque story (voir §2, étape 8).
 > En cas de doute, la source de vérité est la colonne « Statut » de `docs/epics/README.md`.
 
@@ -41,11 +63,16 @@ Langue du projet et de l'interface : **français**.
 
 ### Prochaine action
 
-**MVP terminé** (phase 6 faite le 2026-10-05 ; `.\run.ps1 -Tunnel` pour un accès Internet). Le test du directeur est **reporté** par l'utilisateur ; le MVP reste en service. **Suite : V2, phase 7** (`docs/v2/03-plan-implementation.md` §4), à commencer par 7.1 (dossier `app-web-v2`). Le vrai CSV ne se lit qu'à travers les outils qui n'affichent aucune donnée ; ne jamais le copier.
+**MVP terminé** (phase 6 faite le 2026-10-05 ; `.\run.ps1 -Tunnel` pour un accès Internet). Le test du directeur est **reporté** par l'utilisateur ; le MVP reste en service (dossier `app-web`, branche `main`). Le vrai CSV ne se lit qu'à travers les outils qui n'affichent aucune donnée ; ne jamais le copier.
 
-**V2 — Parcours professionnel :** spécifications dans `docs/v2/` : PRD v1.2 et Solution Design v1.0 validés le 2026-10-05 ; epics E06 (US-25 → US-31) et E07 (US-32 → US-35), toutes « Pas encore » ; plan `docs/v2/03-plan-implementation.md` (phases 7 → 10) validé le 2026-10-05 ; le MVP **reste en service** pendant le développement V2. Le code V2 se fait dans `ACME SA\app-web-v2` (git worktree, port 8002, `C:\acme-data-v2`). Dans `app-web` tant que le MVP est en service : ni code, ni `npm run build`, ni `npx playwright test` (recompile `dist`), ni changement de branche.
+**V2 — Parcours professionnel :** spécifications dans `docs/v2/` : PRD v1.2 et Solution Design v1.0 validés le 2026-10-05 ; **phase 7 en cours** : 7.1 → 7.6 faites, **US-25 Fait** ; epic E06 en cours ; **V2 en pause depuis le 2026-10-05** : le directeur demande une refonte (verrou du certificat sur un dossier complet, validation RH, rôles…) ; plan validé le 2026-10-06 ; **lot 0 (cadrage : spécifications et maquettes, aucun développement)** en cours, backlog `docs/lot0/backlog-lot0.md`, cycles de 48 h ; le **registre des décisions** `docs/lot0/0-cadrage/registre-des-decisions-v1.8.md` fait foi. **Ne pas reprendre US-26** : la V2 sera refondue dans les nouvelles spécifications ; statuts V2 : `docs/v2/epics/README.md` ; plan `docs/v2/03-plan-implementation.md` (phases 7 → 10) validé le 2026-10-05 ; le MVP **reste en service** pendant le développement V2. Le code V2 se fait dans `ACME SA\app-web-v2` (git worktree, port 8002, `C:\acme-data-v2`). Dans `app-web` tant que le MVP est en service : ni code, ni `npm run build`, ni `npx playwright test` (recompile `dist`), ni changement de branche.
 
-À savoir :
+À savoir (V2) :
+- Module `career` (`app/career`) : registre `entry_kinds.py` (4 rubriques, `FieldSpec`), `CareerEntry` / `CareerProfile` / `sort_entries` (`career_entry.py`), `Month` (« AAAA-MM »), port `CareerRepository` (chaque écriture met à jour `career_profile` dans la même transaction) ; `SqlCareerRepository` ; cas d'utilisation `GetMyCareer`, `GetCareerFields` ; conteneur : `container.careers`. Ne jamais importer `app.update` depuis `app.career` (contrat import-linter).
+- Tests V2 : `tests/career.py` (`make_entry`, valeurs par défaut par rubrique), fixtures `career_entry`, `career_reference` (P-A, P-B, P-I), `frozen_clock` ; `CAREER_NOW` = 2026-10-15.
+- Frontend V2 : `features/career/` (`CareerPage`, `CareerSection`, `CareerEntryCard` + `SkillTag`, `careerKinds.js` : `CAREER_KINDS` (slug, icône, message vide) et `describeEntry`) ; `api/career.js` ; `formatMonth` dans `lib/format.js` ; lien « Mon parcours » du menu (`EMPLOYEE_LINKS` d'`AccountMenu`) et carte du profil.
+
+À savoir (MVP) :
 - Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
 - Tableau de bord : `features/admin/DashboardPage.jsx` (`/admin`) ; ses cartes mènent à `/admin/employes?status=UPDATED|NOT_UPDATED` : **US-19 doit lire ce paramètre**. Calcul : `app/admin/domain/statistics.py`, `GetStatistics`.
 - Liste admin : `features/admin/EmployeeListPage.jsx` (page dans l'adresse `?page=`, autres paramètres conservés ; cartes `lg:hidden` + tableau `hidden lg:block`, tous deux dans le DOM : dans les tests, viser `getByRole('list'|'table', { name: 'Employés' })`). `Page wide` pour les écrans admin larges. API : `display_name`, `previous_name`, `page_count` (`ListEmployees`).

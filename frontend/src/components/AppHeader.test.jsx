@@ -29,7 +29,7 @@ function ProfileProbe() {
 function renderAt(entries) {
   const router = createMemoryRouter(
     [
-      { path: '/', element: <IdentifyProbe /> },
+      { path: '/connexion', element: <IdentifyProbe /> },
       { path: '/profil', element: <ProfileProbe /> },
       { path: '/mise-a-jour', element: <AppHeader title="Mise à jour" account /> },
     ],
@@ -148,28 +148,45 @@ describe('AppHeader — menu du compte admin (US-23)', () => {
       { path: '/', element: <AppHeader title="Tableau de bord" account={account} /> },
       { path: '/admin/administrateurs', element: <p>Écran administrateurs</p> },
       { path: '/admin/mot-de-passe', element: <p>Écran mot de passe</p> },
+      { path: '/parcours', element: <p>Écran Mon parcours</p> },
     ])
     render(<RouterProvider router={router} />)
   }
 
-  it('propose « Administrateurs » et « Changer mon mot de passe »', async () => {
+  it('propose « Administrateurs », « Changer mon mot de passe » et « Ma double authentification » (US-102)', async () => {
     const user = userEvent.setup()
     renderHeader('admin')
 
     await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
     const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
-    expect(items).toEqual(['manage_accountsAdministrateurs', 'passwordChanger mon mot de passe', 'logoutSe déconnecter'])
+    expect(items).toEqual([
+      'manage_accountsAdministrateurs',
+      'passwordChanger mon mot de passe',
+      'verified_userMa double authentification',
+      'logoutSe déconnecter',
+    ])
 
     await user.click(screen.getByRole('menuitem', { name: 'Administrateurs' }))
     expect(await screen.findByText('Écran administrateurs')).toBeInTheDocument()
   })
 
-  it('le menu employé ne contient que « Se déconnecter »', async () => {
+  it('le menu employé ne contient que « Mon parcours » (US-25) et « Se déconnecter »', async () => {
     const user = userEvent.setup()
     renderHeader(true)
 
     await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
-    expect(screen.getAllByRole('menuitem')).toHaveLength(1)
+    const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
+    expect(items).toEqual(['workspace_premiumMon parcours', 'logoutSe déconnecter'])
     expect(screen.queryByRole('menuitem', { name: 'Administrateurs' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('menuitem', { name: 'Mon parcours' }))
+    expect(await screen.findByText('Écran Mon parcours')).toBeInTheDocument()
+  })
+
+  it('le menu admin ne propose pas « Mon parcours »', async () => {
+    renderHeader('admin')
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Menu du compte' }))
+    expect(screen.queryByRole('menuitem', { name: 'Mon parcours' })).not.toBeInTheDocument()
   })
 })

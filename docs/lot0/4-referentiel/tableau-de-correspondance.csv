@@ -1,0 +1,54 @@
+﻿Type;Colonne de l'export;Valeur dans l'export;Actifs;Code proposé;Libellé officiel proposé;Région;Type d'agence;Statut;Remarque
+Agence;agency_code;AM;1;AM;Agence Mobile 1;Grand Sud 2;Rural;À valider;
+Agence;agency_code;AQ;6;AQ;Aquin;Grand Sud 2;Rural;À valider;
+Agence;agency_code;BM;8;BM;Beaumont;Grand Sud 2;Rural;À valider;
+Agence;agency_code;BD;14;BD;Belladère;Bas Plateau;Rural;À valider;
+Agence;agency_code;CB;4;CB;Cabaret;Bas Artibonite;Rural;À valider;
+Agence;agency_code;CM;0;CM;Cameau;Métropole 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;CP;9;CP;Camp-Perrin;Grand Sud 2;Rural;À valider;
+Agence;agency_code;CH;13;CH;Cap-Haïtien;Haut Plateau;Rural;À vérifier;Région et type surprenants ; écrit « Cap-Haiten » dans le fichier
+Agence;agency_code;CY;12;CY;Cayes;Grand Sud 2;Urbain;À valider;
+Agence;agency_code;CL;13;CL;Clercine;Métropole 2;Urbain;À valider;
+Agence;agency_code;CR;0;CR;Croix-des-Bouquets;Métropole 2;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;DM;16;DM;Delmas;Métropole 2;Urbain;À valider;
+Agence;agency_code;FN;8;FN;Fond-des-Nègres;Grand Sud 1;Rural;À valider;
+Agence;agency_code;FM;0;FM;Fontamara;Grand Sud 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;GN;14;GN;Gonaïves;Haut Artibonite;Urbain;À valider;
+Agence;agency_code;GM;7;GM;Gros-Morne;Haut Artibonite;Rural;À valider;
+Agence;agency_code;HC;18;HC;Hinche;Haut Plateau;Urbain;À valider;
+Agence;agency_code;LB;5;LB;Laboule;Métropole 1;Rural;À valider;
+Agence;agency_code;LL;9;LL;Lalue;Métropole 1;Urbain;À valider;
+Agence;agency_code;LC;12;LC;Lascahobas;Bas Plateau;Rural;À valider;
+Agence;agency_code;LN;0;LN;Laville Nord;Métropole 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;LS;0;LS;Laville Sud;Métropole 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;LE;8;LE;Léogâne;Grand Sud 1;Rural;À valider;
+Agence;agency_code;LT;7;LT;L'Estère;Haut Artibonite;Rural;À valider;Caractère parasite dans le fichier (« L`ESTERE »)
+Agence;agency_code;MH;9;MH;Mahotière;Grand Sud 1;Urbain;À valider;
+Agence;agency_code;MS;9;MS;Maïssade;Haut Plateau;Rural;À valider;
+Agence;agency_code;MG;8;MG;Miragoâne;Grand Sud 1;Urbain;À valider;
+Agence;agency_code;MB;3;MB;Mirebalais;Bas Plateau;Rural;À valider;
+Agence;agency_code;PV;16;PV;Pétion-Ville;Métropole 1;Urbain;À valider;
+Agence;agency_code;PG;14;PG;Petit-Goâve;Grand Sud 1;Rural;À valider;
+Agence;agency_code;PR;2;PR;Petite-Rivière-de-l'Artibonite;Bas Artibonite;Rural;À valider;
+Agence;agency_code;PN;9;PN;Pignon;Haut Plateau;Rural;À valider;
+Agence;agency_code;SM;10;SM;Saint-Marc;Bas Artibonite;Urbain;À valider;
+Agence;agency_code;SN;6;SN;Shada Nord;Métropole 2;Urbain;À valider;
+Agence;agency_code;TM;9;TM;Thomassique;Haut Plateau;Rural;À valider;
+Inconnu;agency_code;PB;61;?;?;?;?;À rattacher;Absent du fichier des agences ; 14 directions représentées : siège ?
+Inconnu;agency_code;RC;24;?;?;?;?;À rattacher;Absent du fichier des agences ; 22 actifs au Recouvrement
+Direction ou service;department;Direction Crédit;163;?;Direction Crédit;;;À valider;
+Direction ou service;department;Crédit;1;?;Direction Crédit;;;À valider;Doublon probable
+Direction ou service;department;Service Administration;62;?;Service Administration;;;À valider;Rattachement à une direction ?
+Direction ou service;department;Administration;1;?;Service Administration;;;À valider;Doublon probable
+Direction ou service;department;Direction Opération;45;?;Direction Opération;;;À valider;
+Direction ou service;department;Service Recouvrement;40;?;Service Recouvrement;;;À valider;Rattachement à une direction ?
+Direction ou service;department;Recouvrement;5;?;Service Recouvrement;;;À valider;Doublon probable
+Direction ou service;department;Direction Risques et Conformité;14;?;Direction Risques et Conformité;;;À valider;
+Direction ou service;department;Département Informatique Technologie;7;?;Département Informatique Technologie;;;À valider;Rattachement à la DRHIT ?
+Direction ou service;department;Service Comptabilité;6;?;Service Comptabilité;;;À valider;Rattachement à une direction ?
+Direction ou service;department;Direction Générale;6;?;Direction Générale;;;À valider;
+Direction ou service;department;Direction Principale DRHIT;5;?;Direction Principale DRHIT;;;À valider;Sigle à développer
+Direction ou service;department;Direction Audit;3;?;Direction Audit;;;À valider;
+Direction ou service;department;Direction Principale MSCRD;3;?;Direction Principale MSCRD;;;À valider;Sigle à développer
+Direction ou service;department;Direction Marketing;2;?;Direction Marketing;;;À valider;
+Direction ou service;department;Direction Principale FA;1;?;Direction Principale FA;;;À valider;Sigle à développer

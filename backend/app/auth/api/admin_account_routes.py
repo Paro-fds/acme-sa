@@ -26,6 +26,7 @@ class AdminOut(BaseModel):
     created_by: str | None
     last_login_at: datetime | None
     must_change_password: bool
+    mfa_method: str | None
     is_me: bool
 
     @classmethod

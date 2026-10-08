@@ -8,7 +8,7 @@ import pytest
 
 from app.config import Settings
 from app.main import create_app
-from tests.conftest import TEST_CSV
+from tests.conftest import TEST_CSV, rh_login
 from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A
 
 LOGIN_URL = "/api/admin/auth/login"
@@ -18,7 +18,8 @@ BAD_PASSWORD = {"username": ADMIN_USERNAME, "password": "mauvais"}
 
 
 def _login(client, credentials=GOOD):
-    return client.post(LOGIN_URL, json=credentials)
+    """Connexion complète, double authentification comprise (US-102)."""
+    return rh_login(client, credentials["username"], credentials["password"])
 
 
 def _fail(client, times):

@@ -1,0 +1,252 @@
+<!DOCTYPE html><html class="h-full bg-slate-50" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>A9 — Valeurs à rattacher | Portail RH ACME</title>
+<!-- Tailwind CSS v3 with forms and container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#1E1E82',
+              red: '#CC1111',
+              dark: '#111827',
+              muted: '#4B5563',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-styling">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#F8FAFC] text-slate-800">
+<!-- BEGIN: TopHeader -->
+<header class="w-full bg-[#1E1E82] text-white px-6 py-3 flex items-center justify-between shadow-sm z-20 flex-shrink-0">
+<!-- Brand / Logo Area -->
+<div class="flex items-center space-x-3">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPpKqiCQl0t0oS4-x-DejXtI9fk5PwKR5YSA40KS5pzX1bO-qep1pFKCEkwfXZg77xgXVhxA7tf9tHYeCZVytD3Nga3SW7mVbAHEcLn7N1R8pG1Q7TCiT6phWGX4RftsnfLCbYJL4KcVIbULcNf78LHgOV3uvxW9uNLgjbPYStbHQ1aMf7pliAR13PH0bscjj5DC0Bc3IwmgBWsOQpqZsK3waoadqkSF8jTYvXfLdkxDzlZpnrTSwg" alt="ACME SA" class="h-8 object-contain bg-white rounded p-0.5">
+<span class="text-white/30 text-lg font-light leading-none">|</span>
+<span class="text-white text-base font-normal tracking-wide">Portail RH</span>
+</div>
+<!-- User & Session Info -->
+<div class="flex items-center space-x-5 text-xs text-white/90">
+<span class="">Administrateur Démo <span class="text-white/50">·</span> Administrateur</span>
+<a class="text-white/80 hover:text-white transition-colors duration-150" href="#">Se déconnecter</a>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContainer -->
+<div class="flex flex-1 min-h-[calc(100vh-48px)]">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 pt-5 pb-6 flex flex-col">
+<nav aria-label="Menu principal" class="space-y-1 px-3">
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="">Tableau de bord</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="">File de validation</span>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">
+            27
+          </span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="">Employés</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="">Signalements</span>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-[#FEF3C7] text-[#B45309]">
+            9
+          </span>
+</a>
+<!-- Active Page: À rattacher -->
+<a aria-current="page" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md bg-[#1E1E82] text-white shadow-sm" href="#">
+<span class="">À rattacher</span>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-[#FEF3C7] text-[#B45309]">
+            2
+          </span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="">Comptes et rôles</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="">Journal d'audit</span>
+</a>
+</nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 p-8 overflow-y-auto max-w-[1184px]">
+<!-- BEGIN: ContentHeader -->
+<section class="mb-6">
+<div class="flex items-center justify-between">
+<h1 class="text-2xl font-bold tracking-tight text-[#1E1E82]">Valeurs à rattacher</h1>
+<span class="inline-flex items-center px-3 py-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 rounded-md shadow-2xs">
+            Accès : responsable du référentiel et Administrateurs
+          </span>
+</div>
+<p class="mt-1 text-sm text-[#4B5563]">
+          Valeurs de l'export RH qui ne correspondent à aucune unité du référentiel.
+        </p>
+</section>
+<!-- END: ContentHeader -->
+<!-- BEGIN: AlertBanner -->
+<section class="mb-6">
+<div class="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] p-4 flex items-start space-x-3 shadow-2xs">
+<!-- Information / Warning Icon -->
+<svg class="h-5 w-5 text-[#B45309] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" fill-rule="evenodd"></path>
+</svg>
+<div class="text-sm font-medium text-[#92400E]">
+            Les employés concernés voient “Unité à confirmer” sur leur dossier jusqu'au rattachement.
+          </div>
+</div>
+</section>
+<!-- END: AlertBanner -->
+<!-- BEGIN: ContentLayoutGrid (Table + Panel) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- BEGIN: LeftColumnTable -->
+<section class="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden" data-purpose="unlinked-values-table">
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+<thead class="bg-slate-50/75 text-slate-500 font-medium text-xs">
+<tr>
+<th class="py-3.5 pl-4 pr-3" scope="col">Valeur trouvée</th>
+<th class="px-3 py-3.5" scope="col">Colonne de l'export</th>
+<th class="px-3 py-3.5" scope="col">Employés concernés</th>
+<th class="px-3 py-3.5" scope="col">Première apparition</th>
+<th class="py-3.5 pl-3 pr-4 text-right" scope="col">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 bg-white">
+<!-- Row 1: Selected / Active Row -->
+<tr class="bg-blue-50/40 relative border-l-4 border-l-[#1E1E82]">
+<td class="py-4 pl-3 pr-3 text-sm font-semibold text-slate-900">
+                    Dir. Recouv.
+                  </td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">
+                    Direction
+                  </td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">
+                    18
+                  </td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                    01/10/2026
+                  </td>
+<td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm">
+<button class="inline-flex items-center px-3 py-1 text-xs font-semibold text-[#1E1E82] bg-white border border-[#1E1E82] rounded shadow-2xs hover:bg-[#1E1E82] hover:text-white transition-colors duration-150" type="button">
+                      Rattacher
+                    </button>
+</td>
+</tr>
+<!-- Row 2: Standard Row -->
+<tr class="hover:bg-slate-50/60 border-l-4 border-l-transparent">
+<td class="py-4 pl-3 pr-3 text-sm font-semibold text-slate-900">
+                    Code ZZ
+                  </td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">
+                    Agence
+                  </td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">
+                    3
+                  </td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                    01/10/2026
+                  </td>
+<td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm">
+<button class="inline-flex items-center px-3 py-1 text-xs font-semibold text-[#1E1E82] bg-white border border-slate-300 rounded shadow-2xs hover:border-[#1E1E82] hover:bg-slate-50 transition-colors duration-150" type="button">
+                      Rattacher
+                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Count info -->
+<div class="px-4 py-3 bg-white border-t border-slate-100 text-xs text-slate-500">
+            1 à 2 sur 2
+          </div>
+</section>
+<!-- END: LeftColumnTable -->
+<!-- BEGIN: RightColumnPanel -->
+<section class="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-sm p-6" data-purpose="reconciliation-panel">
+<!-- Panel Header -->
+<div class="border-b border-slate-100 pb-4 mb-5">
+<h2 class="text-lg font-bold text-slate-900">
+              Dir. Recouv. <span class="text-slate-400 font-normal">·</span> 18 employés
+            </h2>
+</div>
+<!-- Radio Form Container -->
+<div class="space-y-5">
+<!-- Choice 1: Existing Unit (Selected) -->
+<div class="space-y-3">
+<label class="flex items-center cursor-pointer space-x-3">
+<input checked="" class="h-4 w-4 text-[#1E1E82] focus:ring-[#1E1E82] border-slate-300 text-brand-navy" name="rattachement_mode" type="radio" value="existing">
+<span class="text-sm font-medium text-slate-900">Rattacher à une unité existante</span>
+</label>
+<!-- Dropdown for existing units -->
+<div class="pl-7">
+<label class="sr-only" for="select-existing-unit">Sélectionner une unité existante</label>
+<select class="w-full text-sm border-slate-300 rounded-md shadow-2xs focus:border-[#1E1E82] focus:ring-[#1E1E82] text-slate-800 bg-white" id="select-existing-unit" name="existing_unit">
+<option selected="" value="direction_demo_recouvrement">Direction Démo du Recouvrement</option>
+<option value="direction_demo_operations">Direction Démo des Opérations</option>
+<option value="direction_demo_credit">Direction Démo du Crédit</option>
+</select>
+</div>
+</div>
+<!-- Choice 2: Create New Unit (Unselected) -->
+<div class="space-y-3 pt-2">
+<label class="flex items-center cursor-pointer space-x-3">
+<input class="h-4 w-4 text-[#1E1E82] focus:ring-[#1E1E82] border-slate-300" name="rattachement_mode" type="radio" value="new">
+<span class="text-sm font-medium text-slate-900">Créer une nouvelle unité</span>
+</label>
+<!-- Inactive / Disabled Sub-fields -->
+<div class="pl-7 space-y-3 opacity-50 pointer-events-none">
+<div>
+<label class="block text-xs font-medium text-slate-500 mb-1" for="new-unit-name">Nom de l'unité</label>
+<input class="w-full text-sm border-slate-300 bg-slate-50 rounded-md" disabled="" id="new-unit-name" placeholder="ex. Direction Recouvrement" type="text">
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 mb-1" for="new-unit-type">Type d'unité</label>
+<select class="w-full text-sm border-slate-300 bg-slate-50 rounded-md text-slate-500" disabled="" id="new-unit-type">
+<option>Direction</option>
+<option>Agence</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="pt-4 border-t border-slate-100 flex items-center space-x-3">
+<button class="flex-1 inline-flex justify-center items-center px-4 py-2 text-sm font-semibold text-white bg-[#1E1E82] hover:bg-[#18186b] rounded-md shadow-2xs transition-colors duration-150" type="button">
+                Valider le rattachement
+              </button>
+<button class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-150" type="button">
+                Annuler
+              </button>
+</div>
+<!-- Bottom Audit Notice -->
+<div class="flex items-center space-x-2 text-xs text-slate-500 pt-2">
+<svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" fill-rule="evenodd"></path>
+</svg>
+<span class="">Ce rattachement est enregistré dans le journal d'audit.</span>
+</div>
+</div>
+</section>
+<!-- END: RightColumnPanel -->
+</div>
+<!-- END: ContentLayoutGrid -->
+</main>
+<!-- END: MainContentArea -->
+</div>
+<!-- END: MainContainer -->
+
+
+</body></html>

@@ -5,6 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 
+from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus
 from app.auth.application.sessions import SessionService
 from app.auth.domain.admin import AdminAccount, validate_admin_password, validate_username
 from app.auth.domain.errors import (
@@ -20,6 +21,7 @@ from app.auth.domain.errors import (
     UsernameTaken,
     WrongCurrentPassword,
 )
+from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.model import SubjectType
 from app.auth.domain.ports import AdminAccountRepository, PasswordHasher
 from app.shared.domain.clock import Clock
@@ -40,6 +42,17 @@ class AdminView:
     """Identifiant (nom de connexion) de l'administrateur qui a créé le compte."""
     last_login_at: datetime | None
     must_change_password: bool
+    mfa_method: MfaMethod | None = None
+    """US-102 : méthode de double authentification enregistrée (None : à choisir à la prochaine connexion)."""
+
+
+@dataclass(frozen=True)
+class AdminLoginResult:
+    token: str
+    """Session « en attente du code » (US-102) : le second facteur ouvre la session RH."""
+    mfa: MfaStatus
+    code: CodeSent | None = None
+    """Code envoyé dès la connexion quand la méthode enregistrée est WhatsApp ou email."""
 
 
 class LoginAdmin:
@@ -47,34 +60,55 @@ class LoginAdmin:
 
     Blocage **par compte** (5 échecs consécutifs → 15 minutes, conservé en base). Un identifiant
     inconnu reçoit le même message qu'un mauvais mot de passe et ne bloque aucun compte (US-23).
+
+    US-102 : le bon mot de passe n'ouvre qu'une session en attente du code ; le compteur d'erreurs
+    n'est remis à zéro qu'une fois le code vérifié.
     """
 
     def __init__(
-        self, admins: AdminAccountRepository, hasher: PasswordHasher, sessions: SessionService, clock: Clock
+        self,
+        admins: AdminAccountRepository,
+        hasher: PasswordHasher,
+        sessions: SessionService,
+        clock: Clock,
+        mfa: MfaCodes,
     ) -> None:
         self._admins = admins
         self._hasher = hasher
         self._sessions = sessions
         self._clock = clock
+        self._mfa = mfa
 
-    def execute(self, username: str, password: str) -> str:
+    def execute(self, username: str, password: str) -> AdminLoginResult:
         admin = self._admins.find_by_username(username) if username else None
         if admin is None:
+            self._record("ADMIN_LOGIN_FAILED", None, username=username or "")
             raise InvalidAdminCredentials()
         now = self._clock.now()
         if admin.is_locked(now):
-            raise AccountLocked()
+            self._record("ADMIN_LOGIN_FAILED", admin.id, reason="locked")
+            raise AccountLocked(admin.seconds_until_unlock(now))
         if not self._hasher.verify(admin.password_hash, password):
             admin.register_failure(now)
             self._admins.save(admin)
+            self._record("ADMIN_LOGIN_FAILED", admin.id, reason="password")
             if admin.is_locked(now):
-                raise AccountLocked()
+                raise AccountLocked(admin.seconds_until_unlock(now))
             raise InvalidAdminCredentials()
 
-        admin.register_success()
-        admin.last_login_at = now
-        self._admins.save(admin)
-        return self._sessions.open(SubjectType.ADMIN, admin.id)
+        return self._second_factor(admin)
+
+    def _second_factor(self, admin: AdminAccount) -> AdminLoginResult:
+        code = None
+        if admin.mfa_enrolled and admin.mfa_method.sends_code:
+            code = self._mfa.issue(admin, admin.mfa_method, admin.mfa_destination)
+            self._admins.save(admin)
+        self._record("ADMIN_PASSWORD_OK", admin.id)
+        token = self._sessions.open(SubjectType.ADMIN_MFA, admin.id)
+        return AdminLoginResult(token, self._mfa.status(admin), code)
+
+    def _record(self, event: str, admin_id: str | None, **details: str) -> None:
+        self._mfa.log.record(event, admin_id, **details)
 
 
 class GetCurrentAdmin:
@@ -164,6 +198,7 @@ class ListAdmins:
                 created_by=usernames.get(account.created_by) if account.created_by else None,
                 last_login_at=account.last_login_at,
                 must_change_password=account.must_change_password,
+                mfa_method=account.mfa_method,
             )
             for account in accounts
         ]

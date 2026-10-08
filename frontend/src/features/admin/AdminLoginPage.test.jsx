@@ -21,6 +21,7 @@ function renderAt(path, state) {
         <Route path="/admin/connexion" element={<AdminLoginPage />} />
         <Route path="/admin" element={<p>Tableau de bord</p>} />
         <Route path="/admin/mot-de-passe" element={<p>Choix du mot de passe</p>} />
+        <Route path="/admin/double-authentification" element={<p>Double authentification</p>} />
         <Route path="/admin/employes" element={<EmployeeListPage />} />
       </Routes>
     </MemoryRouter>,
@@ -133,5 +134,23 @@ describe('AdminLoginPage (US-15)', () => {
     expect(await screen.findByRole('heading', { name: 'Connexion administrateur' })).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('Vous êtes déconnecté.')
     expect(adminLogout).toHaveBeenCalledOnce()
+  })
+
+  it('US-102 : mot de passe vérifié, second facteur attendu → écran de double authentification', async () => {
+    adminLogin.mockResolvedValue({ mfa: { enrolled: false, method: null, destination: null }, code: null })
+    const user = userEvent.setup()
+    renderAt('/admin/connexion')
+
+    await fillAndSubmit(user)
+
+    expect(await screen.findByText('Double authentification')).toBeInTheDocument()
+    expect(getAdminMe).not.toHaveBeenCalled()
+  })
+
+  it('US-102 : écran RH ouvert sans le code → retour à la double authentification', async () => {
+    listEmployees.mockRejectedValue(new ApiError(401, 'MFA_REQUIRED', 'Saisissez votre code de vérification pour continuer.'))
+    renderAt('/admin/employes')
+
+    expect(await screen.findByText('Double authentification')).toBeInTheDocument()
   })
 })

@@ -33,7 +33,7 @@ function renderPage({ documents = [DIPLOMA, CERTIFICATE], state = 'IN_PROGRESS' 
   render(
     <MemoryRouter initialEntries={['/documents']}>
       <Routes>
-        <Route path="/" element={<p>Écran identification</p>} />
+        <Route path="/connexion" element={<p>Écran identification</p>} />
         <Route path="/profil" element={<p>Écran profil</p>} />
         <Route path="/documents" element={<MyDocumentsPage />} />
         <Route path="/mise-a-jour/documents" element={<p>Étape 2 : Documents</p>} />
@@ -131,7 +131,7 @@ describe('MyDocumentsPage (US-07)', () => {
     render(
       <MemoryRouter initialEntries={['/documents']}>
         <Routes>
-          <Route path="/" element={<p>Écran identification</p>} />
+          <Route path="/connexion" element={<p>Écran identification</p>} />
           <Route path="/documents" element={<MyDocumentsPage />} />
         </Routes>
       </MemoryRouter>,

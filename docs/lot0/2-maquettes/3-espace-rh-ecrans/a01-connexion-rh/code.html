@@ -1,0 +1,109 @@
+<!DOCTYPE html><html lang="fr"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1 — Connexion RH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-[#1E1E82] min-h-screen w-full flex flex-col items-center justify-center p-4 antialiased text-slate-800 selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- Main Login Card Container -->
+  <div class="w-full max-w-[480px]">
+    
+    <!-- White Card -->
+    <div class="bg-white rounded-xl shadow-2xl p-8 sm:p-10 border border-slate-100">
+      
+      <!-- Brand & Header -->
+      <div class="text-center mb-8">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-0Qc-k5PF9kPudDSeXxjiyqvGQy0Q61sPyiS-mo_KE2IIYAV4Lzhk0ltuGlPqqmsP_EmuutroSk2EfnWLD34KpMO5RNjo7Iq-uUh11rcOu1eNerDlHz9czLmKLFgmojTiDn2sFqUplF8P_KjHPhpzTcdQazlycd6ijIqsk4UqyHnjXI2y3eB1vn9zz_olCUQ02LE924Ot1KeZrGKMrNZZzXAqkkMo4LaN1JQeujgOcNaMdH0W0YUo" alt="ACME SA" class="h-12 object-contain mx-auto mb-2">
+        <h1 class="text-xl font-bold text-[#1E1E82] tracking-tight">Espace RH</h1>
+      </div>
+
+      <!-- Étape 1 -->
+      <div class="space-y-4">
+        <div class="flex items-center space-x-2 pb-1 border-b border-slate-100">
+          <span class="w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-xs font-semibold flex items-center justify-center">1</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Identifiants</span>
+        </div>
+
+        <div>
+          <label for="identifiant" class="block text-xs font-semibold text-slate-700 mb-1.5">Identifiant</label>
+          <input type="text" id="identifiant" value="admin.demo@domaine-demo.local" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E1E82] focus:border-transparent transition">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="mdp" class="block text-xs font-semibold text-slate-700">Mot de passe</label>
+            <a href="#" class="text-xs text-[#1E1E82] hover:underline font-medium">Mot de passe oublié ?</a>
+          </div>
+          <input type="password" id="mdp" value="••••••••••••" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E1E82] focus:border-transparent transition">
+        </div>
+
+        <button type="button" class="w-full py-2.5 px-4 bg-slate-100 text-slate-600 rounded-lg text-sm font-semibold hover:bg-slate-200 transition border border-slate-200">
+          Continuer
+        </button>
+      </div>
+
+      <!-- Divider between Step 1 and Step 2 -->
+      <div class="relative my-7">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-slate-200"></div>
+        </div>
+        <div class="relative flex justify-center text-xs">
+          <span class="bg-white px-3 text-slate-400 font-medium">Double authentification</span>
+        </div>
+      </div>
+
+      <!-- Étape 2 (affichée comme si l'étape 1 était faite) -->
+      <div class="space-y-4">
+        <div class="flex items-center space-x-2 pb-1 border-b border-slate-100">
+          <span class="w-5 h-5 rounded-full bg-[#1E1E82] text-white text-xs font-semibold flex items-center justify-center">2</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1E82]">Vérification de sécurité</span>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Saisissez le code de vérification reçu par votre application d'authentification ou par email.
+        </p>
+
+        <!-- 6 Cases pour les chiffres -->
+        <div class="grid grid-cols-6 gap-2 sm:gap-2.5 pt-1">
+          <input type="text" maxlength="1" value="4" class="w-full h-12 text-center text-lg font-bold text-[#1E1E82] bg-white border-2 border-[#1E1E82] rounded-lg focus:outline-none ring-2 ring-[#1E1E82]/20">
+          <input type="text" maxlength="1" value="8" class="w-full h-12 text-center text-lg font-bold text-[#1E1E82] bg-white border-2 border-[#1E1E82] rounded-lg focus:outline-none ring-2 ring-[#1E1E82]/20">
+          <input type="text" maxlength="1" value="2" class="w-full h-12 text-center text-lg font-bold text-[#1E1E82] bg-white border-2 border-[#1E1E82] rounded-lg focus:outline-none ring-2 ring-[#1E1E82]/20">
+          <input type="text" maxlength="1" placeholder="·" class="w-full h-12 text-center text-lg font-semibold text-slate-400 bg-slate-50 border border-slate-300 rounded-lg focus:border-[#1E1E82] focus:bg-white focus:outline-none transition">
+          <input type="text" maxlength="1" placeholder="·" class="w-full h-12 text-center text-lg font-semibold text-slate-400 bg-slate-50 border border-slate-300 rounded-lg focus:border-[#1E1E82] focus:bg-white focus:outline-none transition">
+          <input type="text" maxlength="1" placeholder="·" class="w-full h-12 text-center text-lg font-semibold text-slate-400 bg-slate-50 border border-slate-300 rounded-lg focus:border-[#1E1E82] focus:bg-white focus:outline-none transition">
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <a href="#" class="text-xs text-[#1E1E82] hover:underline font-medium">Renvoyer le code</a>
+        </div>
+
+        <button type="button" class="w-full py-3 px-4 bg-[#1E1E82] text-white rounded-lg text-sm font-semibold hover:bg-[#161663] shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
+          <span class="">Valider</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Note de sécurité sous la carte -->
+    <div class="mt-6 flex items-center justify-center space-x-2 text-indigo-100 text-xs">
+      <svg class="w-4 h-4 text-indigo-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <span class="">Espace réservé au réseau de l'institution ou au VPN.</span>
+    </div>
+
+  </div>
+
+
+
+
+</body></html>

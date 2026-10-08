@@ -1,0 +1,260 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>A7 — Dossier d'un employé (consultation) - ACME SA Portail RH</title>
+<!-- Tailwind CSS v3 CDN with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#1E1E82',
+              red: '#CC1111',
+              activeNav: '#1c1c74'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom style definitions -->
+<style data-purpose="base-layout">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#F8FAFC]">
+<!-- BEGIN: MainHeader -->
+<header class="bg-[#1E1E82] text-white h-14 px-6 flex items-center justify-between select-none shrink-0" data-purpose="top-navigation-bar">
+<!-- Brand identity and portal name -->
+<div class="flex items-center space-x-3">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBri2yarIrKLEe3rxUXg4DfFhOba0Jhbb2o0zxLwYpPg0vBwU59DuTfFVQlwRYAVmjcBSGQgbdkaoduwdwcGQ98HzUnIGF02IGaa9DDh30gZC3bpUnFWwJ8AMMuVPo7ts2_2c1oNFuOQrAg8nlzQBDWANVWBdWLnwIAzWU4eip7djQwVUEhXPMmpD8Dua-HiRuvAE3KaCvtGic-CavSVNrIKb_svyMxe_tH5Zp1-6Zq-sFyKgzsKN5D" alt="ACME SA" class="h-8 object-contain bg-white rounded p-0.5">
+<span class="text-slate-400 font-light text-base">|</span>
+<span class="text-white text-sm font-medium tracking-wide">Portail RH</span>
+</div>
+<!-- User identification & logout -->
+<div class="flex items-center text-xs tracking-normal text-slate-200 space-x-3">
+<span class="">Administrateur Démo · Administrateur</span>
+<span class="text-slate-400">·</span>
+<a class="text-white hover:text-slate-200 transition-colors" href="#">Se déconnecter</a>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- Layout wrapper for Sidebar and Main Content -->
+<div class="flex flex-1 w-full max-w-[1440px] mx-auto">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 bg-white border-r border-slate-200 py-6 px-4 shrink-0" data-purpose="primary-sidebar">
+<nav class="space-y-1 text-sm font-medium">
+<!-- Tableau de bord -->
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="">Tableau de bord</span>
+</a>
+<!-- File de validation with count -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="">File de validation</span>
+<span class="bg-[#E2E8F0] text-slate-700 text-xs px-2 py-0.5 rounded-full font-semibold">27</span>
+</a>
+<!-- Employés (active state) -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-[#1E1E82] text-white shadow-sm font-medium" href="#">
+<span class="">Employés</span>
+</a>
+<!-- Signalements with count -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="">Signalements</span>
+<span class="bg-[#FEF3C7] text-[#B45309] text-xs px-2 py-0.5 rounded-full font-semibold">9</span>
+</a>
+<!-- À rattacher with count -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="">À rattacher</span>
+<span class="bg-[#FEF3C7] text-[#B45309] text-xs px-2 py-0.5 rounded-full font-semibold">2</span>
+</a>
+<!-- Comptes et rôles -->
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="">Comptes et rôles</span>
+</a>
+<!-- Journal d'audit -->
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="">Journal d'audit</span>
+</a>
+</nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 p-8 overflow-y-auto" data-purpose="employee-dossier-view">
+<!-- Top back navigation and audit banner -->
+<div class="mb-6 space-y-3">
+<!-- Back link -->
+<div>
+<a class="inline-flex items-center text-sm font-medium text-[#1E1E82] hover:underline" href="#">
+<svg aria-hidden="true" class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Employés
+          </a>
+</div>
+<!-- Audit trail notice banner -->
+<div class="bg-slate-100 border border-slate-200 rounded-md px-4 py-2.5 flex items-center text-xs text-slate-600" data-purpose="audit-log-banner">
+<svg aria-hidden="true" class="w-4 h-4 text-slate-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="">Votre consultation de ce dossier est enregistrée dans le journal d'audit.</span>
+</div>
+</div>
+<!-- Dossier Header Section -->
+<div class="bg-white rounded-lg border border-slate-200 p-6 mb-6 shadow-sm flex items-start justify-between" data-purpose="employee-header">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 leading-tight">Lucie Exemple · EMP-0418</h1>
+<p class="text-sm text-slate-600 mt-1">Chargée de crédit · Agence Démo Nord</p>
+</div>
+<!-- Status badges -->
+<div class="flex items-center space-x-3">
+<div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+<svg class="w-3.5 h-3.5 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+            Dossier complet
+          </div>
+<div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            Profil : 100 %
+          </div>
+</div>
+</div>
+<!-- Section Blocks Container -->
+<div class="space-y-6">
+<!-- BEGIN: ProfileBlock -->
+<section class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden" data-purpose="profile-details-card">
+<div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+<h2 class="text-base font-semibold text-slate-900">Profil</h2>
+</div>
+<div class="p-6 divide-y divide-slate-100 text-sm">
+<!-- Row: Téléphone -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Téléphone</span>
+<span class="text-slate-900 font-normal">00 00 00 00</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmé par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Email -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Email</span>
+<span class="text-slate-900 font-normal">lucie.exemple@domaine-demo.local</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmé par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Adresse -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Adresse</span>
+<span class="text-slate-900 font-normal">12, rue Démo, Ville Démo</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmée par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Contact d'urgence -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Contact d'urgence</span>
+<span class="text-slate-900 font-normal">Paul Démo · Conjoint·e · 00 00 00 00</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmé par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Niveau d'études déclaré -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Niveau d'études déclaré</span>
+<span class="text-slate-900 font-normal">Licence</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmé par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Agence -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Agence</span>
+<span class="text-slate-900 font-normal">Agence Démo Nord</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmée par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Poste -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Poste</span>
+<span class="text-slate-900 font-normal">Chargée de crédit</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmé par l'employée le 01/10/2026</span>
+</div>
+<!-- Row: Date d'embauche -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center">
+<span class="w-56 font-medium text-slate-600 shrink-0">Date d'embauche</span>
+<span class="text-slate-900 font-normal">12/03/2018</span>
+<span class="text-slate-400 text-xs sm:ml-4 sm:border-l sm:border-slate-200 sm:pl-4 mt-0.5 sm:mt-0">Confirmée par l'employée le 01/10/2026</span>
+</div>
+</div>
+</section>
+<!-- END: ProfileBlock -->
+<!-- BEGIN: CertificatesBlock -->
+<section class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden" data-purpose="certificates-card">
+<div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+<h2 class="text-base font-semibold text-slate-900">Certificats</h2>
+</div>
+<div class="p-6 space-y-4">
+<!-- Certificat 1: Baccalauréat -->
+<div class="flex items-center justify-between p-3.5 rounded-lg border border-slate-100 hover:bg-slate-50/60 transition-colors">
+<div class="flex items-center space-x-3.5">
+<span class="text-sm font-medium text-slate-900 w-72">Baccalauréat (2014)</span>
+<!-- Validated Badge -->
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+<svg class="w-3 h-3 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+                  Validé
+                </span>
+<span class="text-xs text-slate-400">validé le 02/10/2026 par Agent RH Démo 2</span>
+</div>
+<div>
+<a class="text-sm font-medium text-[#1E1E82] hover:underline inline-flex items-center" href="#">
+                  Voir le document
+                </a>
+</div>
+</div>
+<!-- Certificat 2: Licence -->
+<div class="flex items-center justify-between p-3.5 rounded-lg border border-slate-100 hover:bg-slate-50/60 transition-colors">
+<div class="flex items-center space-x-3.5">
+<span class="text-sm font-medium text-slate-900 w-72">Licence en Sciences comptables (2019)</span>
+<!-- In verification Badge -->
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+<svg class="w-3 h-3 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+                  En vérification
+                </span>
+<span class="text-xs text-slate-400">pris en charge par Agent RH Démo 1</span>
+</div>
+<div>
+<a class="text-sm font-medium text-[#1E1E82] hover:underline inline-flex items-center" href="#">
+                  Voir le document
+                </a>
+</div>
+</div>
+</div>
+</section>
+<!-- END: CertificatesBlock -->
+<!-- BEGIN: ReportsBlock -->
+<section class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden" data-purpose="signals-card">
+<div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+<h2 class="text-base font-semibold text-slate-900">Signalements</h2>
+</div>
+<div class="p-6">
+<div class="flex items-center space-x-4 text-sm p-3.5 rounded-lg border border-slate-100 bg-slate-50/40">
+<span class="text-slate-500 font-medium">28/09/2026</span>
+<span class="text-slate-300">·</span>
+<span class="font-medium text-slate-800">Agence</span>
+<span class="text-slate-300">·</span>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300">
+                Clos — valeur exacte
+              </span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-600">La valeur actuelle est juste.</span>
+</div>
+</div>
+</section>
+<!-- END: ReportsBlock -->
+</div>
+</main>
+<!-- END: MainContent -->
+</div>
+
+
+</body></html>

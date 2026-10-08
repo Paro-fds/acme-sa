@@ -36,6 +36,15 @@ describe('request', () => {
     expect(error.message).toBe('Informations non reconnues.')
   })
 
+  it("US-101 : les informations complémentaires de l'erreur (retry_after) sont conservées", async () => {
+    mockFetch(423, { error: { code: 'ACCOUNT_LOCKED', message: 'Trop de tentatives.', retry_after: 270 } })
+
+    const error = await request('/auth/login', { method: 'POST', body: {} }).catch((e) => e)
+
+    expect(error.code).toBe('ACCOUNT_LOCKED')
+    expect(error.details).toEqual({ retry_after: 270 })
+  })
+
   it('signale une erreur réseau avec un message compréhensible', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
 

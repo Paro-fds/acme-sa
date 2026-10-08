@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { passSecondFactor } from './admin.js'
 
 /**
  * US-15 : connexion et déconnexion admin, sur mobile.
@@ -19,6 +20,7 @@ test('connexion admin : refus, accès, déconnexion, routes protégées', async 
   // CA-01 : connexion → tableau de bord (US-16)
   await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
   await page.getByRole('button', { name: 'Se connecter' }).click()
+  await passSecondFactor(page) // US-102
   await expect(page).toHaveURL(/\/admin$/)
   await expect(page.getByRole('heading', { name: 'Suivi de la campagne' })).toBeVisible()
   await page.getByRole('link', { name: 'Voir la liste des employés' }).click()

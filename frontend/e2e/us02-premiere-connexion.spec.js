@@ -1,19 +1,15 @@
 import { expect, test } from '@playwright/test'
+import { createPassword, EMP_H1 } from './auth.js'
 
-/** US-02 T-02.8 : première connexion complète sur mobile (identification → création → profil). */
+/** US-02 → US-101 : première connexion complète sur mobile (création du mot de passe → profil). */
 test('première connexion : création du mot de passe puis accès au profil', async ({ page }) => {
-  await page.goto('/')
-  await page.getByLabel('Nom', { exact: true }).fill('PIERRE')
-  await page.getByLabel('Prénom').fill('Marie')
-  await page.getByLabel('Date de naissance').fill('1990-07-02')
-  await page.getByRole('button', { name: 'Continuer' }).click()
-
-  await expect(page.getByRole('heading', { name: 'Créez votre mot de passe' })).toBeVisible()
+  // Depuis l'écran de connexion, le lien mène à la création du mot de passe
+  await page.goto('/connexion')
+  await page.getByRole('link', { name: 'Première connexion ? Créer mon mot de passe' }).click()
+  await expect(page.getByRole('heading', { name: 'Première connexion' })).toBeVisible()
 
   // Erreur de confirmation, corrigée ensuite
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Bonjour-2026')
-  await page.getByLabel('Confirmer le mot de passe', { exact: true }).fill('Bonjour-2027')
-  await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
+  await createPassword(page, EMP_H1, 'Bonjour-2026', 'Bonjour-2027')
   await expect(page.getByText('Les deux mots de passe ne correspondent pas.')).toBeVisible()
 
   await page.getByLabel('Confirmer le mot de passe', { exact: true }).fill('Bonjour-2026')

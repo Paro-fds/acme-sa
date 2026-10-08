@@ -5,9 +5,11 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import AdminAccountsPage from './AdminAccountsPage.jsx'
 import { addAdmin, deleteAdmin, listAdmins } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
+import { resetAdminMfa } from '../../api/mfa.js'
 
 vi.mock('../../api/admin.js', () => ({ addAdmin: vi.fn(), deleteAdmin: vi.fn(), listAdmins: vi.fn() }))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
+vi.mock('../../api/mfa.js', () => ({ resetAdminMfa: vi.fn() }))
 
 const ME = {
   id: 'a1',
@@ -173,3 +175,38 @@ describe('AdminAccountsPage (US-23)', () => {
     expect(await screen.findByText('Écran connexion admin')).toBeInTheDocument()
   })
 })
+
+describe('AdminAccountsPage — double authentification (US-102 CA-05)', () => {
+  const PAUL = { ...MARIE, id: 'a3', username: 'paul.louis', must_change_password: false, mfa_method: 'WHATSAPP' }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    listAdmins.mockResolvedValue([{ ...ME, mfa_method: 'TOTP' }, MARIE, PAUL])
+  })
+
+  it('chaque compte indique sa méthode, ou qu’elle reste à choisir', async () => {
+    renderPage()
+
+    const [me, marie, paul] = await items()
+    expect(within(me).getByText(/Application d'authentification/)).toBeInTheDocument()
+    expect(within(marie).getByText(/à choisir à la prochaine connexion/)).toBeInTheDocument()
+    expect(within(paul).getByText(/WhatsApp/)).toBeInTheDocument()
+    expect(within(me).queryByRole('button', { name: /Réinitialiser/ })).not.toBeInTheDocument()
+    expect(within(marie).queryByRole('button', { name: /Réinitialiser/ })).not.toBeInTheDocument()
+  })
+
+  it('téléphone perdu : un autre compte RH réinitialise, après confirmation', async () => {
+    resetAdminMfa.mockResolvedValue(null)
+    const user = userEvent.setup()
+    renderPage()
+
+    const paul = (await items())[2]
+    await user.click(within(paul).getByRole('button', { name: 'Réinitialiser la double authentification de paul.louis' }))
+    expect(within(paul).getByRole('alertdialog')).toHaveTextContent('il choisira une nouvelle méthode')
+    await user.click(within(paul).getByRole('button', { name: 'Réinitialiser' }))
+
+    expect(resetAdminMfa).toHaveBeenCalledWith('a3')
+    expect(await screen.findByText('Double authentification de « paul.louis » réinitialisée.')).toBeInTheDocument()
+  })
+})
+

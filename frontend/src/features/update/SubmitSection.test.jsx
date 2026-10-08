@@ -23,7 +23,7 @@ function renderSection() {
   render(
     <MemoryRouter initialEntries={['/mise-a-jour/verification']}>
       <Routes>
-        <Route path="/" element={<p>Écran identification</p>} />
+        <Route path="/connexion" element={<p>Écran identification</p>} />
         <Route path="/mise-a-jour/verification" element={<Harness />} />
         <Route path="/mise-a-jour/confirmation" element={<p>Écran confirmation</p>} />
       </Routes>

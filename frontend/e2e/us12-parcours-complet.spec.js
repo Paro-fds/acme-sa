@@ -1,24 +1,8 @@
 import { expect, test } from '@playwright/test'
+import { EMP_B, signIn as signInAs } from './auth.js'
 
-const PASSWORD = 'Bonjour-2026'
-
-/** Connexion d'EMP-B (BAPTISTE Marc) : création du mot de passe ou saisie s'il existe déjà. */
-async function signIn(page) {
-  await page.goto('/')
-  await page.getByLabel('Nom', { exact: true }).fill('BAPTISTE')
-  await page.getByLabel('Prénom').fill('Marc')
-  await page.getByLabel('Date de naissance').fill('2000-12-01')
-  await page.getByRole('button', { name: 'Continuer' }).click()
-  await page.getByLabel('Mot de passe', { exact: true }).fill(PASSWORD)
-  const confirmation = page.getByLabel('Confirmer le mot de passe', { exact: true })
-  if (await confirmation.isVisible()) {
-    await confirmation.fill(PASSWORD)
-    await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
-  } else {
-    await page.getByRole('button', { name: 'Se connecter' }).click()
-  }
-  await expect(page).toHaveURL(/\/profil$/)
-}
+/** Connexion de l'employé réservé à ce test, ou création de son mot de passe. */
+const signIn = (page) => signInAs(page, EMP_B)
 
 /**
  * US-12 T-12.6 : identification → Oui → 2 modifications → document → vérification → soumission → profil « Effectuée ».

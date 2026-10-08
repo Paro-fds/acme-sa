@@ -4,29 +4,51 @@ Chaque test démarre avec une base SQLite vide, un dossier de documents vide
 et le CSV fictif `fixtures/employees_test.csv` : aucun test ne dépend d'un autre.
 """
 
+import os
 from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
+import pyotp
 import pytest
 from argon2 import PasswordHasher
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 
 from app.auth.api.dependencies import SESSION_COOKIE
 from app.auth.domain.model import Account, SubjectType
-from app.config import Settings
+from app.career.domain.career_entry import CareerEntry
+from app.career.domain.entry_kinds import EntryKind, SkillLevel
+from app.config import Settings, normalize_database_url
 from app.main import create_app
 from app.update.domain.update import EmployeeUpdate
-from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, TestEmployee
+from tests.career import make_entry
+from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A, EMP_B, EMP_I, TestEmployee
 from tests.fake_clock import FakeClock
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 TEST_CSV = FIXTURES_DIR / "employees_test.csv"
+CAREER_NOW = datetime(2026, 10, 15, 12, 0, tzinfo=UTC)
+"""Heure de référence des tests du parcours (mois courant 2026-10)."""
 
 
 @pytest.fixture(scope="session")
 def admin_password_hash() -> str:
     return PasswordHasher().hash(ADMIN_PASSWORD)
+
+
+POSTGRES_URL = os.environ.get("TEST_POSTGRES_URL", "")
+"""US-001 CA-08 : avec cette variable, toute la suite tourne sur une base PostgreSQL de répétition (vidée à chaque test)."""
+
+
+def _empty_postgres(url: str) -> str:
+    url = normalize_database_url(url)
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+    engine.dispose()
+    return url
 
 
 @pytest.fixture
@@ -35,6 +57,7 @@ def settings(tmp_path: Path, admin_password_hash: str) -> Settings:
         _env_file=None,
         acme_csv_path=TEST_CSV,
         acme_data_dir=tmp_path / "acme-data",
+        database_url=_empty_postgres(POSTGRES_URL) if POSTGRES_URL else "",
         frontend_dist_dir=tmp_path / "no-frontend",
         admin_username=ADMIN_USERNAME,
         admin_password_hash=admin_password_hash,
@@ -93,6 +116,27 @@ def employee_client(app: FastAPI, container) -> Iterator[Callable[[TestEmployee]
         test_client.close()
 
 
+RH_LOGIN = "/api/admin/auth/login"
+
+
+def rh_login(client: TestClient, username: str, password: str):
+    """Connexion RH complète par l'API (US-102) : mot de passe, puis code de l'application d'authentification.
+
+    À la première connexion du compte, l'application est enregistrée. Renvoie la réponse de l'étape qui
+    échoue, ou celle du code (204, cookie de la session RH) quand tout réussit.
+    """
+    response = client.post(RH_LOGIN, json={"username": username, "password": password})
+    if response.status_code != 202:
+        return response
+    container = client.app.state.container
+    if response.json()["mfa"]["enrolled"]:
+        secret = container.admin_accounts.find_by_username(username).mfa_secret
+        return client.post("/api/admin/auth/mfa/verify", json={"code": pyotp.TOTP(secret).at(container.clock.now())})
+    secret = client.post("/api/admin/auth/mfa/setup", json={"method": "TOTP"}).json()["totp"]["secret"]
+    code = pyotp.TOTP(secret).at(container.clock.now())
+    return client.post("/api/admin/auth/mfa/setup/confirm", json={"code": code})
+
+
 def admin_session(container) -> str:
     """Jeton d'une session ouverte pour le compte admin de test (importé de la configuration, US-23)."""
     admin = container.admin_accounts.find_by_username(ADMIN_USERNAME)
@@ -129,3 +173,47 @@ def submitted(container, draft) -> Callable[[TestEmployee, dict[str, str]], Empl
         return container.updates.get_for_employee(employee.id)
 
     return create
+
+
+# --- V2 : parcours professionnel (docs/v2/epics/README.md) -------------------------
+
+
+@pytest.fixture
+def frozen_clock(container) -> Callable[[datetime], FakeClock]:
+    """Fixe l'horloge de l'application (ex. 2026-10-15 : mois courant 2026-10)."""
+
+    def freeze(moment: datetime = CAREER_NOW) -> FakeClock:
+        fake = FakeClock(moment)
+        container.clock = fake
+        return fake
+
+    return freeze
+
+
+@pytest.fixture
+def career_entry(container) -> Callable[..., CareerEntry]:
+    """Crée un élément du parcours de l'employé (valeurs par défaut de sa rubrique) et met à jour `career_profile`."""
+
+    def create(employee: TestEmployee, kind: EntryKind, **fields) -> CareerEntry:
+        entry = make_entry(employee.id, kind, **fields)
+        container.careers.add(entry, changed_at=entry.updated_at)
+        return entry
+
+    return create
+
+
+@pytest.fixture
+def career_reference(career_entry) -> dict[str, list[CareerEntry]]:
+    """Parcours de référence P-A, P-B, P-I (EMP-I est inactif). Le justificatif de P-A arrive avec US-29."""
+    return {
+        "P-A": [
+            career_entry(EMP_A, EntryKind.SKILL, title="Analyse de crédit", skill_level=SkillLevel.EXPERT),
+            career_entry(EMP_A, EntryKind.QUALIFICATION),
+            career_entry(EMP_A, EntryKind.EXPERIENCE),
+        ],
+        "P-B": [
+            career_entry(EMP_B, EntryKind.SKILL, title="Anglais", skill_level=SkillLevel.GOOD),
+            career_entry(EMP_B, EntryKind.TRAINING),
+        ],
+        "P-I": [career_entry(EMP_I, EntryKind.SKILL, title="Analyse de crédit", skill_level=SkillLevel.EXPERT)],
+    }
