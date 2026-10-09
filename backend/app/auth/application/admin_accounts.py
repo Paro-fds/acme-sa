@@ -7,14 +7,16 @@ from datetime import datetime
 
 from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus
 from app.auth.application.sessions import SessionService
-from app.auth.domain.admin import AdminAccount, validate_admin_password, validate_username
+from app.auth.domain.admin import AdminAccount, AdminRole, RoleChange, ROLE_LABELS, validate_admin_password, validate_username
 from app.auth.domain.errors import (
     AccountLocked,
     AdminAlreadyExists,
     AdminNotFound,
     CannotDeleteSelf,
+    InsufficientRole,
     InvalidAdminCredentials,
     LastAdmin,
+    LastAdminRole,
     NotAuthenticated,
     PasswordMismatch,
     PasswordUnchanged,
@@ -42,6 +44,8 @@ class AdminView:
     """Identifiant (nom de connexion) de l'administrateur qui a créé le compte."""
     last_login_at: datetime | None
     must_change_password: bool
+    role: AdminRole = AdminRole.ADMIN
+    role_label: str = "Administrateur"
     mfa_method: MfaMethod | None = None
     """US-102 : méthode de double authentification enregistrée (None : à choisir à la prochaine connexion)."""
 
@@ -198,6 +202,8 @@ class ListAdmins:
                 created_by=usernames.get(account.created_by) if account.created_by else None,
                 last_login_at=account.last_login_at,
                 must_change_password=account.must_change_password,
+                role=account.role,
+                role_label=ROLE_LABELS.get(account.role, account.role.value),
                 mfa_method=account.mfa_method,
             )
             for account in accounts
@@ -205,7 +211,8 @@ class ListAdmins:
 
 
 class AddAdmin:
-    """US-23 CA-05 : ajout d'un administrateur avec un mot de passe provisoire."""
+    """US-23 CA-05 : ajout d'un administrateur avec un mot de passe provisoire ;
+    US-103 : rôle attribué à la création (Agent RH par défaut)."""
 
     def __init__(
         self, admins: AdminAccountRepository, hasher: PasswordHasher, clock: Clock, new_id: NewId = _new_id
@@ -215,7 +222,12 @@ class AddAdmin:
         self._clock = clock
         self._new_id = new_id
 
-    def execute(self, actor_id: str, username: str, password: str) -> AdminAccount:
+    def execute(
+        self, actor_id: str, username: str, password: str, role: AdminRole = AdminRole.AGENT_RH
+    ) -> AdminAccount:
+        actor = self._admins.get(actor_id)
+        if actor is not None and actor.role != AdminRole.ADMIN:
+            raise InsufficientRole("Seul un administrateur peut créer des comptes.")
         username = validate_username(username)
         validate_admin_password(password, field="password")
         if self._admins.username_taken(username):
@@ -225,11 +237,60 @@ class AddAdmin:
             username=username,
             password_hash=self._hasher.hash(password),
             created_at=self._clock.now(),
+            role=role,
             created_by=actor_id,
             must_change_password=True,
         )
         self._admins.add(admin)
         return admin
+
+
+class ChangeAdminRole:
+    """US-103 : modification du rôle d'un compte RH par un Administrateur."""
+
+    def __init__(self, admins: AdminAccountRepository, clock: Clock) -> None:
+        self._admins = admins
+        self._clock = clock
+
+    def execute(self, actor_id: str, target_id: str, new_role: AdminRole) -> AdminAccount:
+        actor = self._admins.get(actor_id)
+        if actor is None or actor.role != AdminRole.ADMIN:
+            raise InsufficientRole("Seul un administrateur peut modifier les rôles.")
+        target = self._admins.get(target_id)
+        if target is None:
+            raise AdminNotFound()
+        if target.role == new_role:
+            return target
+        if target.role == AdminRole.ADMIN and new_role != AdminRole.ADMIN:
+            other_admins = sum(
+                1 for a in self._admins.list_all() if a.role == AdminRole.ADMIN and a.id != target.id
+            )
+            if other_admins == 0:
+                raise LastAdminRole("Le dernier administrateur ne peut pas changer de rôle.")
+        old_role = target.role
+        target.role = new_role
+        self._admins.save(target)
+        self._admins.record_role_change(
+            RoleChange(
+                id=None,
+                admin_id=target.id,
+                actor_id=actor.id,
+                old_role=old_role,
+                new_role=new_role,
+                at=self._clock.now(),
+            )
+        )
+        return target
+
+
+class ListRoleChanges:
+    """US-103 CA-03 : historique des modifications de rôle."""
+
+    def __init__(self, admins: AdminAccountRepository) -> None:
+        self._admins = admins
+
+    def execute(self, admin_id: str | None = None) -> list[RoleChange]:
+        return self._admins.list_role_changes(admin_id)
 
 
 class DeleteAdmin:

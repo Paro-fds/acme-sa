@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
-from app.auth.domain.admin import AdminAccount
+from app.auth.domain.admin import AdminAccount, RoleChange
 from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.model import Account, Session, SubjectType
 
@@ -50,6 +50,10 @@ class AdminAccountRepository(Protocol):
     def delete(self, admin_id: str) -> None: ...
 
     def count(self) -> int: ...
+
+    def record_role_change(self, change: RoleChange) -> None: ...
+
+    def list_role_changes(self, admin_id: str | None = None) -> list[RoleChange]: ...
 
 
 class TotpService(Protocol):

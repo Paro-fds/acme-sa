@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 
+from enum import StrEnum
+
 from app.auth.domain.errors import AdminPasswordTooShort, InvalidUsername
 from app.auth.domain.mfa import MfaMethod, PendingCode
 from app.auth.domain.model import Lockable
@@ -12,12 +14,42 @@ ADMIN_PASSWORD_MIN_LENGTH = 12
 _USERNAME = re.compile(r"^[A-Za-z0-9._-]{3,50}$")
 
 
+class AdminRole(StrEnum):
+    """US-103, RG-41 : rôles des comptes de l'espace RH."""
+
+    ADMIN = "ADMIN"
+    AGENT_RH = "AGENT_RH"
+    REFERENTIAL = "REFERENTIAL"
+    READONLY = "READONLY"
+
+
+ROLE_LABELS: dict[AdminRole, str] = {
+    AdminRole.ADMIN: "Administrateur",
+    AdminRole.AGENT_RH: "Agent RH",
+    AdminRole.REFERENTIAL: "Responsable du référentiel",
+    AdminRole.READONLY: "Lecture seule",
+}
+
+
+@dataclass(frozen=True)
+class RoleChange:
+    """US-103 CA-03 : trace de chaque changement de rôle (qui, quand, ancien et nouveau rôle)."""
+
+    id: int | None
+    admin_id: str
+    actor_id: str
+    old_role: AdminRole
+    new_role: AdminRole
+    at: datetime
+
+
 @dataclass
 class AdminAccount(Lockable):
     id: str
     username: str
     password_hash: str
     created_at: datetime
+    role: AdminRole = AdminRole.ADMIN
     created_by: str | None = None
     """Administrateur qui a créé le compte ; None pour le premier compte et la migration."""
     must_change_password: bool = False

@@ -5,7 +5,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, File, Request, UploadFile
 from pydantic import BaseModel
 
-from app.auth.api.dependencies import container, current_admin
+from app.auth.api.dependencies import container, current_admin, require_not_readonly
 from app.referential.application.use_cases import ImportSummary, UnitView
 
 router = APIRouter(prefix="/api/admin/referential", tags=["referential"])
@@ -89,7 +89,7 @@ def get_referential(request: Request, admin_id: str = Depends(current_admin)) ->
 
 @router.post("/import", response_model=ImportOut)
 async def import_referential(
-    request: Request, file: UploadFile = File(...), admin_id: str = Depends(current_admin)
+    request: Request, file: UploadFile = File(...), admin_id: str = Depends(require_not_readonly)
 ) -> ImportOut:
     content = await file.read(MAX_FILE_BYTES + 1)
     admin = container(request).get_current_admin().execute(admin_id)

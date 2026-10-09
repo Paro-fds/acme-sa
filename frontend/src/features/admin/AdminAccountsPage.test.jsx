@@ -3,17 +3,24 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import AdminAccountsPage from './AdminAccountsPage.jsx'
-import { addAdmin, deleteAdmin, listAdmins } from '../../api/admin.js'
+import { addAdmin, changeAdminRole, deleteAdmin, listAdmins } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 import { resetAdminMfa } from '../../api/mfa.js'
 
-vi.mock('../../api/admin.js', () => ({ addAdmin: vi.fn(), deleteAdmin: vi.fn(), listAdmins: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  addAdmin: vi.fn(),
+  changeAdminRole: vi.fn(),
+  deleteAdmin: vi.fn(),
+  listAdmins: vi.fn(),
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 vi.mock('../../api/mfa.js', () => ({ resetAdminMfa: vi.fn() }))
 
 const ME = {
   id: 'a1',
   username: 'admin',
+  role: 'ADMIN',
+  role_label: 'Administrateur',
   created_at: '2026-10-01T08:00:00Z',
   created_by: null,
   last_login_at: '2026-10-05T09:15:00Z',
@@ -23,6 +30,8 @@ const ME = {
 const MARIE = {
   id: 'a2',
   username: 'marie.pierre',
+  role: 'AGENT_RH',
+  role_label: 'Agent RH',
   created_at: '2026-10-05T10:00:00Z',
   created_by: 'admin',
   last_login_at: null,
@@ -93,8 +102,8 @@ describe('AdminAccountsPage (US-23)', () => {
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
     await user.click(submit)
 
-    expect(addAdmin).toHaveBeenCalledWith('marie.pierre', 'Provisoire-2026!')
-    expect(await screen.findByText(/Administrateur « marie\.pierre » ajouté/)).toBeInTheDocument()
+    expect(addAdmin).toHaveBeenCalledWith('marie.pierre', 'Provisoire-2026!', 'AGENT_RH')
+    expect(await screen.findByText(/(?:Administrateur|Compte) « marie\.pierre » ajouté/)).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: '2 comptes' })).toBeInTheDocument()
     expect(screen.getByLabelText('Identifiant')).toHaveValue('')
     expect(screen.getByLabelText('Mot de passe provisoire')).toHaveValue('')
@@ -207,6 +216,71 @@ describe('AdminAccountsPage — double authentification (US-102 CA-05)', () => {
 
     expect(resetAdminMfa).toHaveBeenCalledWith('a3')
     expect(await screen.findByText('Double authentification de « paul.louis » réinitialisée.')).toBeInTheDocument()
+  })
+})
+
+describe('AdminAccountsPage — rôles des comptes RH (US-103)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    listAdmins.mockResolvedValue([ME, MARIE])
+  })
+
+  it('affiche le rôle de chaque compte', async () => {
+    renderPage()
+
+    const [me, marie] = await items()
+    expect(within(me).getByText('Administrateur', { selector: 'span' })).toBeInTheDocument()
+    expect(within(marie).getByText('Agent RH', { selector: 'span' })).toBeInTheDocument()
+  })
+
+  it('un administrateur peut modifier le rôle d’un compte', async () => {
+    changeAdminRole.mockResolvedValue({ ...MARIE, role: 'READONLY', role_label: 'Lecture seule' })
+    const user = userEvent.setup()
+    renderPage()
+
+    const [, marie] = await items()
+    const select = within(marie).getByLabelText(/Rôle de marie.pierre/)
+    expect(select).toHaveValue('AGENT_RH')
+
+    await user.selectOptions(select, 'READONLY')
+    expect(changeAdminRole).toHaveBeenCalledWith('a2', 'READONLY')
+    expect(await screen.findByText(/Rôle de « marie.pierre » modifié en « Lecture seule »/)).toBeInTheDocument()
+  })
+
+  it('le formulaire d’ajout permet de choisir le rôle', async () => {
+    addAdmin.mockResolvedValue({
+      id: 'a3',
+      username: 'lucie.audit',
+      role: 'READONLY',
+      role_label: 'Lecture seule',
+      created_at: '2026-10-09T12:00:00Z',
+      created_by: 'admin',
+      last_login_at: null,
+      must_change_password: true,
+      is_me: false,
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await items()
+
+    await user.type(screen.getByLabelText('Identifiant'), 'lucie.audit')
+    await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
+    await user.selectOptions(screen.getByLabelText('Rôle initial'), 'READONLY')
+
+    await user.click(screen.getByRole('button', { name: "Ajouter l'administrateur" }))
+
+    expect(addAdmin).toHaveBeenCalledWith('lucie.audit', 'Provisoire-2026!', 'READONLY')
+  })
+
+  it('un compte en Lecture seule ne voit pas le formulaire de création de compte', async () => {
+    const READONLY_ME = { ...ME, role: 'READONLY', role_label: 'Lecture seule' }
+    listAdmins.mockResolvedValue([READONLY_ME, MARIE])
+
+    renderPage()
+
+    expect(await screen.findByText('2 comptes')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Ajouter un compte RH' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: "Ajouter l'administrateur" })).not.toBeInTheDocument()
   })
 })
 

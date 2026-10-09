@@ -52,13 +52,31 @@ export function listAdmins() {
   return request('/admin/admins')
 }
 
-/** US-23 : ajout avec un mot de passe provisoire (à changer à la première connexion). */
-export function addAdmin(username, password) {
-  return request('/admin/admins', { method: 'POST', body: { username, password } })
+/** US-23 : ajout avec un mot de passe provisoire ; US-103 : rôle initial. */
+export function addAdmin(username, password, role = 'AGENT_RH') {
+  return request('/admin/admins', { method: 'POST', body: { username, password, role } })
 }
 
 export function deleteAdmin(id) {
   return request(`/admin/admins/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+/** US-103 : rôles disponibles pour les comptes RH. */
+export function listAdminRoles() {
+  return request('/admin/roles')
+}
+
+/** US-103 : changer le rôle d'un compte RH. */
+export function changeAdminRole(id, role) {
+  return request(`/admin/admins/${encodeURIComponent(id)}/role`, {
+    method: 'PUT',
+    body: { role },
+  })
+}
+
+/** US-103 CA-03 : historique des modifications de rôle d'un compte. */
+export function getAdminRoleHistory(id) {
+  return request(`/admin/admins/${encodeURIComponent(id)}/role-history`)
 }
 
 /** US-605 : connexions des 30 derniers jours et avis après le dépôt. */

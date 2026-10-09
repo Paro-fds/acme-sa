@@ -71,6 +71,21 @@ class AdminOnly(Forbidden):
     message = "Accès réservé à l'administration."
 
 
+class InsufficientRole(Forbidden):
+    code = "INSUFFICIENT_ROLE"
+    message = "Action non autorisée pour votre rôle."
+
+
+class LastAdminRole(Conflict):
+    code = "LAST_ADMIN"
+    message = "Le dernier administrateur ne peut pas changer de rôle."
+
+
+class InvalidRole(InvalidInput):
+    code = "INVALID_ROLE"
+    message = "Rôle administrateur non reconnu."
+
+
 # --- Comptes administrateurs (US-23) ------------------------------------------------
 
 

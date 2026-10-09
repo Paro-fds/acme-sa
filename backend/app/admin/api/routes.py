@@ -3,7 +3,7 @@ from datetime import date, datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel
 
-from app.auth.api.dependencies import container, current_admin
+from app.auth.api.dependencies import container, current_admin, require_not_readonly
 from app.document.api.schemas import DocumentOut, file_response
 from app.update.api.schemas import ChangeOut
 
@@ -118,9 +118,9 @@ def get_employee_document_file(document_id: str, request: Request) -> Response:
     return file_response(container(request).get_employee_document_file().execute(document_id))
 
 
-@router.post("/employees/{employee_id}/reset-access", status_code=204)
+@router.post("/employees/{employee_id}/reset-access", status_code=204, dependencies=[Depends(require_not_readonly)])
 def reset_access(employee_id: str, request: Request) -> None:
-    """US-22 : seule route d'écriture de l'administration."""
+    """US-22 : réinitialiser l'accès ; US-103 CA-01 : refusé en lecture seule."""
     container(request).reset_access().execute(employee_id)
 
 

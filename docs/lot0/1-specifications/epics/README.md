@@ -51,7 +51,7 @@ Une story appartient au lot où elle est livrée ; quand un complément arrive p
 
 | Story | Epic | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|---|
-| [US-103](lot-2-traitement-rh/US-103-donner-un-role-a-chaque-compte-rh.md) | D1 | Donner un rôle à chaque compte RH | Must | — | Pas encore |
+| [US-103](lot-2-traitement-rh/US-103-donner-un-role-a-chaque-compte-rh.md) | D1 | Donner un rôle à chaque compte RH | Must | — | Fait |
 | [US-104](lot-2-traitement-rh/US-104-gerer-les-comptes-et-debloquer-un-employe.md) | D1 | Gérer les comptes et débloquer un employé | Must | — | Pas encore |
 | [US-304](lot-2-traitement-rh/US-304-garder-la-preuve-des-certificats.md) | D3 | Garder la preuve des certificats | Must | — | Pas encore |
 | [US-305](lot-2-traitement-rh/US-305-un-niveau-d-etudes-prouve.md) | D3 | Un niveau d'études prouvé | Should | — | Pas encore |

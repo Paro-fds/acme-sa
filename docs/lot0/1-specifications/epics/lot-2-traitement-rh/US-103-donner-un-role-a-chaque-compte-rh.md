@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | D1 Accès et compte |
 | **Lot** | 2 |
 | **Priorité** | Must |
@@ -20,13 +20,13 @@ Un employé sans email doit pouvoir entrer ; les comptes RH voient les dossiers 
 
 ## Critères d'acceptation
 
-- **CA-01** Un compte Lecture seule consulte dossiers et tableaux de bord, sans bouton Valider ni Rejeter, et le portail refuse l'action si elle est tentée.
-- **CA-02** Un employé sans rôle RH n'accède jamais à l'espace RH.
-- **CA-03** Chaque changement de rôle est tracé (qui, quand, ancien et nouveau rôle).
+- [x] **CA-01** Un compte Lecture seule consulte dossiers et tableaux de bord, sans bouton Valider ni Rejeter, et le portail refuse l'action si elle est tentée.
+- [x] **CA-02** Un employé sans rôle RH n'accède jamais à l'espace RH.
+- [x] **CA-03** Chaque changement de rôle est tracé (qui, quand, ancien et nouveau rôle).
 
 ## Definition of Done
 
-- [ ] Chaque critère d'acceptation est couvert par un test vert
-- [ ] Écran vérifié sur téléphone (390 px) et sur ordinateur (1280 px), s'il y a un écran
-- [ ] Données fictives uniquement ; aucun salaire, aucune colonne exclue dans l'API ni les journaux
-- [ ] Statut mis à jour ici et dans `../README.md`
+- [x] Chaque critère d'acceptation est couvert par un test vert
+- [x] Écran vérifié sur téléphone (390 px) et sur ordinateur (1280 px), s'il y a un écran
+- [x] Données fictives uniquement ; aucun salaire, aucune colonne exclue dans l'API ni les journaux
+- [x] Statut mis à jour ici et dans `../README.md`

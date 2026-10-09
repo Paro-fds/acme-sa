@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Integer, String, delete, func, select
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.auth.domain.admin import AdminAccount
+from app.auth.domain.admin import AdminAccount, AdminRole, RoleChange
 from app.auth.domain.logins import EmployeeLogin
 from app.auth.domain.mfa import MfaMethod, PendingCode
 from app.auth.domain.model import Account, Session, SubjectType
@@ -111,6 +111,7 @@ class AdminAccountRow(Base):
     username_key: Mapped[str] = mapped_column(String, unique=True)
     """Identifiant en minuscules : unicité sans tenir compte des majuscules (US-23)."""
     password_hash: Mapped[str] = mapped_column(String)
+    role: Mapped[str] = mapped_column(String, default="ADMIN")
     must_change_password: Mapped[bool] = mapped_column(Boolean, default=False)
     failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
@@ -129,8 +130,28 @@ class AdminAccountRow(Base):
     mfa_change_allowed_until: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
 
 
+class RoleChangeRow(Base):
+    """US-103 CA-03 : trace de chaque changement de rôle d'un compte RH."""
+
+    __tablename__ = "admin_role_change"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    admin_id: Mapped[str] = mapped_column(String, index=True)
+    actor_id: Mapped[str] = mapped_column(String)
+    old_role: Mapped[str] = mapped_column(String)
+    new_role: Mapped[str] = mapped_column(String)
+    at: Mapped[datetime] = mapped_column(UtcDateTime, index=True)
+
+
 def _method(value: str | None) -> MfaMethod | None:
     return MfaMethod(value) if value else None
+
+
+def _role(value: str | None) -> AdminRole:
+    try:
+        return AdminRole(value) if value else AdminRole.ADMIN
+    except ValueError:
+        return AdminRole.ADMIN
 
 
 def _admin(row: AdminAccountRow) -> AdminAccount:
@@ -138,6 +159,7 @@ def _admin(row: AdminAccountRow) -> AdminAccount:
         id=row.id,
         username=row.username,
         password_hash=row.password_hash,
+        role=_role(row.role),
         created_at=row.created_at,
         created_by=row.created_by,
         must_change_password=row.must_change_password,
@@ -161,6 +183,7 @@ def _admin_row(account: AdminAccount) -> AdminAccountRow:
         username=account.username,
         username_key=account.username.casefold(),
         password_hash=account.password_hash,
+        role=account.role.value if account.role else AdminRole.ADMIN.value,
         must_change_password=account.must_change_password,
         failed_attempts=account.failed_attempts,
         locked_until=account.locked_until,
@@ -218,6 +241,36 @@ class SqlAdminAccountRepository:
     def count(self) -> int:
         with self._database.session() as session:
             return session.scalar(select(func.count()).select_from(AdminAccountRow)) or 0
+
+    def record_role_change(self, change: RoleChange) -> None:
+        with self._database.session() as session:
+            session.add(
+                RoleChangeRow(
+                    admin_id=change.admin_id,
+                    actor_id=change.actor_id,
+                    old_role=change.old_role.value if isinstance(change.old_role, AdminRole) else str(change.old_role),
+                    new_role=change.new_role.value if isinstance(change.new_role, AdminRole) else str(change.new_role),
+                    at=change.at,
+                )
+            )
+
+    def list_role_changes(self, admin_id: str | None = None) -> list[RoleChange]:
+        with self._database.session() as session:
+            stmt = select(RoleChangeRow).order_by(RoleChangeRow.at.desc(), RoleChangeRow.id.desc())
+            if admin_id:
+                stmt = stmt.where(RoleChangeRow.admin_id == admin_id)
+            rows = session.scalars(stmt)
+            return [
+                RoleChange(
+                    id=row.id,
+                    admin_id=row.admin_id,
+                    actor_id=row.actor_id,
+                    old_role=_role(row.old_role),
+                    new_role=_role(row.new_role),
+                    at=row.at,
+                )
+                for row in rows
+            ]
 
 
 class EmployeeLoginRow(Base):

@@ -12,7 +12,7 @@ Chacun entre dans le portail simplement, et les comptes RH sont fortement proté
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-103](US-103-donner-un-role-a-chaque-compte-rh.md) | Donner un rôle à chaque compte RH | Must | — | Pas encore |
+| [US-103](US-103-donner-un-role-a-chaque-compte-rh.md) | Donner un rôle à chaque compte RH | Must | — | Fait |
 | [US-104](US-104-gerer-les-comptes-et-debloquer-un-employe.md) | Gérer les comptes et débloquer un employé | Must | — | Pas encore |
 
 ## D3 Certificats

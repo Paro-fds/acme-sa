@@ -27,11 +27,13 @@ from app.auth.application.sessions import SessionService
 from app.auth.application.admin_accounts import (
     AddAdmin,
     ChangeAdminPassword,
+    ChangeAdminRole,
     CreateFirstAdmin,
     DeleteAdmin,
     GetCurrentAdmin,
     ImportConfiguredAdmin,
     ListAdmins,
+    ListRoleChanges,
     LoginAdmin,
 )
 from app.auth.application.use_cases import CountLogins, LoginEmployee, RegisterPassword
@@ -220,6 +222,12 @@ class Container:
 
     def change_admin_password(self) -> ChangeAdminPassword:
         return ChangeAdminPassword(self.admin_accounts, self.password_hasher, self.session_service())
+
+    def change_admin_role(self) -> ChangeAdminRole:
+        return ChangeAdminRole(self.admin_accounts, self.clock)
+
+    def list_role_changes(self) -> ListRoleChanges:
+        return ListRoleChanges(self.admin_accounts)
 
     # --- employee / update ----------------------------------------------------
 

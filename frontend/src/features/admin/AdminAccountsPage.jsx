@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { addAdmin, deleteAdmin, listAdmins } from '../../api/admin.js'
+import { addAdmin, changeAdminRole, deleteAdmin, listAdmins } from '../../api/admin.js'
 import { resetAdminMfa } from '../../api/mfa.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
@@ -102,10 +102,11 @@ function ResetMfaConfirmation({ username, resetting, onConfirm, onCancel }) {
   )
 }
 
-function AdminItem({ admin, deletable, onDelete, onResetMfa }) {
+function AdminItem({ admin, deletable, isSuperAdmin, onRoleChange, onDelete, onResetMfa }) {
   const [resettingMfa, setResettingMfa] = useState(null)
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [changingRole, setChangingRole] = useState(false)
   const buttonRef = useRef(null)
 
   function cancel() {
@@ -122,6 +123,14 @@ function AdminItem({ admin, deletable, onDelete, onResetMfa }) {
     }
   }
 
+  async function handleRoleSelect(e) {
+    const newRole = e.target.value
+    if (newRole === admin.role) return
+    setChangingRole(true)
+    await onRoleChange(admin, newRole)
+    setChangingRole(false)
+  }
+
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
       <div className="flex items-start gap-3">
@@ -135,6 +144,7 @@ function AdminItem({ admin, deletable, onDelete, onResetMfa }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-semibold break-all text-heading">{admin.username}</p>
             {admin.is_me && <Badge tone="info">Vous</Badge>}
+            <Badge tone="info">{admin.role_label || 'Administrateur'}</Badge>
             {admin.must_change_password && <Badge tone="neutral">Mot de passe provisoire</Badge>}
           </div>
           <p className="text-sm text-help">
@@ -148,6 +158,26 @@ function AdminItem({ admin, deletable, onDelete, onResetMfa }) {
             Double authentification{' '}:{' '}
             {admin.mfa_method ? METHODS[admin.mfa_method].title : 'à choisir à la prochaine connexion'}
           </p>
+
+          {isSuperAdmin && (
+            <div className="mt-2 flex items-center gap-2">
+              <label htmlFor={`role-${admin.id}`} className="text-xs font-medium text-help">
+                Rôle de {admin.username}{' '}:
+              </label>
+              <select
+                id={`role-${admin.id}`}
+                value={admin.role || 'ADMIN'}
+                onChange={handleRoleSelect}
+                disabled={changingRole}
+                className="rounded border border-border bg-surface px-2 py-1 text-xs font-semibold text-heading disabled:opacity-60"
+              >
+                <option value="ADMIN">Administrateur</option>
+                <option value="AGENT_RH">Agent RH</option>
+                <option value="REFERENTIAL">Responsable du référentiel</option>
+                <option value="READONLY">Lecture seule</option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
       {!admin.is_me && admin.mfa_method && resettingMfa !== null && (
@@ -196,11 +226,12 @@ function AdminItem({ admin, deletable, onDelete, onResetMfa }) {
   )
 }
 
-/** CA-05, CA-06 : ajout avec un mot de passe provisoire ; erreurs affichées sous le champ concerné. */
+/** CA-05, CA-06 : ajout avec un mot de passe provisoire ; US-103 : rôle choisi à la création. */
 function AddAdminForm({ onAdded }) {
   const redirectIfUnauthorized = useUnauthorizedRedirect(LOGIN_PATH)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('AGENT_RH')
   const [errors, setErrors] = useState({})
   const [failure, setFailure] = useState(null)
   const [sending, setSending] = useState(false)
@@ -213,9 +244,10 @@ function AddAdminForm({ onAdded }) {
     setErrors({})
     setFailure(null)
     try {
-      const created = await addAdmin(username.trim(), password)
+      const created = await addAdmin(username.trim(), password, role)
       setUsername('')
       setPassword('')
+      setRole('AGENT_RH')
       onAdded(created)
     } catch (apiError) {
       if (redirectIfUnauthorized(apiError)) return
@@ -226,7 +258,7 @@ function AddAdminForm({ onAdded }) {
   }
 
   return (
-    <Block icon="person_add" title="Ajouter un administrateur">
+    <Block icon="person_add" title="Ajouter un compte RH">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         <TextField
           label="Identifiant"
@@ -253,6 +285,25 @@ function AddAdminForm({ onAdded }) {
           }}
           error={errors.password}
         />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="add-role" className="text-sm font-semibold text-heading">
+            Rôle initial
+          </label>
+          <select
+            id="add-role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="min-h-11 rounded-lg border border-border bg-surface px-3 text-sm text-heading shadow-input"
+          >
+            <option value="ADMIN">Administrateur</option>
+            <option value="AGENT_RH">Agent RH</option>
+            <option value="REFERENTIAL">Responsable du référentiel</option>
+            <option value="READONLY">Lecture seule</option>
+          </select>
+          <p className="text-xs text-help">
+            Définit les actions permises dans l'espace RH. Peut être modifié ultérieurement par un Administrateur.
+          </p>
+        </div>
         <Alert>{failure}</Alert>
         <Button type="submit" variant="secondary" disabled={!complete || sending}>
           <span className="material-symbols-outlined" aria-hidden="true">person_add</span>
@@ -263,7 +314,7 @@ function AddAdminForm({ onAdded }) {
   )
 }
 
-/** US-23 : comptes administrateurs (liste, ajout, suppression). */
+/** US-23 : comptes administrateurs ; US-103 : gestion des rôles RH. */
 export default function AdminAccountsPage() {
   const redirectIfUnauthorized = useUnauthorizedRedirect(LOGIN_PATH)
   const { data: admins, error, loading, reload } = useLoader(listAdmins, { loginPath: LOGIN_PATH })
@@ -272,13 +323,30 @@ export default function AdminAccountsPage() {
   const listId = useId()
 
   const page = (children) => (
-    <Page account="admin" title="Administrateurs" backTo="/admin">
+    <Page account="admin" title="Comptes et rôles" backTo="/admin">
       {children}
     </Page>
   )
 
   if (loading) return page(<p role="status">Chargement…</p>)
   if (error) return page(<Alert>{error.message}</Alert>)
+
+  const me = admins.find((a) => a.is_me)
+  const isSuperAdmin = me?.role === 'ADMIN'
+
+  async function handleRoleChange(admin, newRole) {
+    setNotice(null)
+    setFailure(null)
+    try {
+      const updated = await changeAdminRole(admin.id, newRole)
+      setNotice(`Rôle de « ${admin.username} » modifié en « ${updated.role_label} ».`)
+      reload()
+    } catch (apiError) {
+      if (redirectIfUnauthorized(apiError)) return
+      setFailure(apiError.message)
+      reload()
+    }
+  }
 
   async function handleDelete(admin) {
     setNotice(null)
@@ -311,15 +379,15 @@ export default function AdminAccountsPage() {
 
   function handleAdded(created) {
     setFailure(null)
-    setNotice(`Administrateur « ${created.username} » ajouté. Transmettez-lui son identifiant et son mot de passe provisoire.`)
+    setNotice(`Compte « ${created.username} » ajouté avec le rôle « ${created.role_label} ». Transmettez-lui son mot de passe provisoire.`)
     reload()
   }
 
   return page(
     <>
       <div className="flex flex-col gap-2">
-        <h2 className="text-[26px] leading-8 font-bold">Administrateurs</h2>
-        <p>Chaque administrateur a son propre identifiant{'\u00a0'}; tous ont les mêmes droits.</p>
+        <h2 className="text-[26px] leading-8 font-bold">Comptes et rôles</h2>
+        <p>Gérez les accès à l'espace RH et attribuez les rôles : Administrateur, Agent RH, Responsable du référentiel ou Lecture seule.</p>
       </div>
 
       {notice && <Alert tone="success">{notice}</Alert>}
@@ -334,7 +402,9 @@ export default function AdminAccountsPage() {
             <AdminItem
               key={admin.id}
               admin={admin}
-              deletable={!admin.is_me && admins.length > 1}
+              isSuperAdmin={isSuperAdmin}
+              deletable={!admin.is_me && admins.length > 1 && isSuperAdmin}
+              onRoleChange={handleRoleChange}
               onDelete={handleDelete}
               onResetMfa={handleResetMfa}
             />
@@ -342,7 +412,7 @@ export default function AdminAccountsPage() {
         </ul>
       </section>
 
-      <AddAdminForm onAdded={handleAdded} />
+      {isSuperAdmin && <AddAdminForm onAdded={handleAdded} />}
     </>,
   )
 }
