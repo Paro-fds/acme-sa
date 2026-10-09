@@ -45,6 +45,8 @@ describe('HomePage (US-105)', () => {
     renderHome()
 
     expect(screen.getByRole('figure', { name: 'La Penseuse' })).toBeInTheDocument()
+    expect(screen.getByRole('figure', { name: 'La Penseuse' })).toHaveTextContent(/Mascotte\s*:\s*La Penseuse/)
+    expect(screen.getByText('Conseil RH bienveillant')).toBeInTheDocument()
   })
 
   it("CA-04 : le pourcentage du dossier n'y figure pas (il apparaît après la connexion)", () => {
@@ -53,20 +55,26 @@ describe('HomePage (US-105)', () => {
     expect(screen.queryByText(/%/)).not.toBeInTheDocument()
   })
 
-  it('CA-05 : « Se connecter » mène à l’écran de connexion ; l’aide RH est visible', async () => {
+  it('CA-05 : la barre fixe regroupe confidentialité, connexion et aide RH', async () => {
     const user = userEvent.setup()
     renderHome()
 
-    expect(screen.getByText('Une question ? Adressez-vous au service RH de votre agence.')).toBeInTheDocument()
+    const footer = screen.getByRole('contentinfo')
+    expect(footer).toHaveTextContent('Accès réservé aux 364 collaborateurs ACME SA')
+    expect(footer).toHaveTextContent('Besoin d’aide pour vous connecter ? Contactez les RH')
     await user.click(screen.getByRole('link', { name: 'Se connecter' }))
     expect(screen.getByText('Écran de connexion')).toBeInTheDocument()
   })
 
-  it("CA-06 : aucun chiffre ni lieu non confirmé (nombre d'agences, d'employés)", () => {
+  it('CA-06 : affiche les chiffres confirmés, sans lieux non confirmés ni promesse de dossier déjà vérifié', () => {
     renderHome()
 
-    expect(screen.queryByText(/\d/)).not.toBeInTheDocument()
+    expect(screen.getByText('28 agences interconnectées')).toBeInTheDocument()
+    expect(screen.getByText('364 collaborateurs ACME SA')).toBeInTheDocument()
+    expect(screen.queryByText(/\b(35|500)\b/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Cap-Haïtien/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/dossier est déjà complet et vérifié/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Réseau Ouest|Artibonite|Plateau Central/i)).not.toBeInTheDocument()
   })
 
   it("l'écran de connexion se trouve désormais à /connexion", () => {
