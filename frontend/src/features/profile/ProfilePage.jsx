@@ -14,7 +14,7 @@ import { UNIT_TO_CONFIRM, profileSections } from './profileSections.js'
 function ProfileSummary({ profile }) {
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} className="rounded-xl border border-border bg-surface p-4 shadow-card">
+    <section aria-labelledby={titleId} className="rounded-xl bg-surface p-4 shadow-card">
       <div className="flex items-center gap-4">
         <div
           aria-hidden="true"
@@ -49,7 +49,7 @@ function NavCard({ to, icon, title, text }) {
   return (
     <Link
       to={to}
-      className="flex min-h-16 items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-card hover:bg-canvas"
+      className="flex min-h-16 items-center gap-3 rounded-xl bg-surface p-4 shadow-card hover:bg-canvas"
     >
       <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-info-bg text-info-text" aria-hidden="true">
         <span className="material-symbols-outlined">{icon}</span>

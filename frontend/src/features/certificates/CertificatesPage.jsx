@@ -21,7 +21,7 @@ function Checklist({ completion }) {
   const missing = completion.elements.filter((element) => !element.complete)
   const n = missing.length
   return (
-    <section aria-labelledby="checklist-title" className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
+    <section aria-labelledby="checklist-title" className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <h3 id="checklist-title" className="text-lg font-semibold text-balance">
         Il reste {n} information{n > 1 ? 's' : ''} à compléter avant de déposer votre certificat
       </h3>
@@ -84,7 +84,7 @@ export default function CertificatesPage() {
           {data.certificates.length} titre{data.certificates.length > 1 ? 's' : ''} déposé{data.certificates.length > 1 ? 's' : ''}
         </span>
       </div>
-      <section aria-label="Niveau d'études validé" className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
+      <section aria-label="Niveau d'études validé" className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-info-bg text-info-text" aria-hidden="true">
           <span className="material-symbols-outlined">workspace_premium</span>
         </span>

@@ -9,19 +9,19 @@ const ITEMS = [
 
 export default function BottomNav() {
   return (
-    <nav aria-label="Navigation principale" className="border-t border-border bg-surface pb-[env(safe-area-inset-bottom,0px)]">
+    <nav aria-label="Navigation principale" className="bg-surface/95 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-4px_16px_rgb(30_41_59/0.06)] backdrop-blur-xl">
       <ul className="mx-auto grid max-w-3xl grid-cols-3">
         {ITEMS.map((item) => (
           <li key={item.to}>
             <NavLink
               to={item.to}
               className={({ isActive }) =>
-                `flex min-h-14 flex-col items-center justify-center gap-0.5 text-sm ${
-                  isActive ? 'font-semibold text-primary' : 'text-help hover:text-heading'
+                `flex min-h-16 flex-col items-center justify-center gap-0.5 text-sm ${
+                  isActive ? 'font-semibold text-primary' : 'text-help hover:text-primary'
                 }`
               }
             >
-              <span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span>
+              <span className="material-symbols-outlined text-2xl" aria-hidden="true">{item.icon}</span>
               {item.label}
             </NavLink>
           </li>

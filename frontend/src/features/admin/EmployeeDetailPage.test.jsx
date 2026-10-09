@@ -83,10 +83,29 @@ describe('EmployeeDetailPage (US-20)', () => {
 
     const header = await screen.findByRole('region', { name: 'Employé' })
     expect(within(header).getByText('Lecture seule')).toBeInTheDocument()
-    expect(within(header).getByRole('heading', { name: 'JOSEPH Jean' })).toBeInTheDocument()
-    expect(within(header).getByText('AC-1001 · Agence PV · Agent de crédit')).toBeInTheDocument()
+    expect(within(header).getByRole('heading', { name: 'JOSEPH Jean · AC-1001' })).toBeInTheDocument()
+    expect(within(header).getByText('Agent de crédit · Agence PV')).toBeInTheDocument()
     expect(within(header).getByText('Mise à jour effectuée')).toBeInTheDocument()
     expect(getEmployee).toHaveBeenCalledWith('1001')
+  })
+
+  it('reprend la structure de la maquette A07 sans inventer de fonctions non disponibles', async () => {
+    getEmployee.mockResolvedValue(SUBMITTED)
+    renderAt()
+
+    expect(await screen.findByRole('banner')).toHaveTextContent('Portail RH')
+    const navigation = screen.getByRole('navigation', { name: 'Navigation principale RH' })
+    expect(within(navigation).getByRole('link', { name: 'Employés' })).toHaveAttribute('aria-current', 'page')
+    expect(within(navigation).getByText('File de validation')).toHaveAttribute('aria-disabled', 'true')
+    expect(within(navigation).getByText('Signalements')).toHaveAttribute('aria-disabled', 'true')
+
+    const profile = screen.getByRole('region', { name: 'Profil' })
+    expect(within(profile).getByText('Téléphone')).toBeInTheDocument()
+    expect(within(profile).getByText('+50937222222')).toBeInTheDocument()
+    expect(screen.queryByText('Dossier complet')).not.toBeInTheDocument()
+    expect(screen.queryByText(/consultation de ce dossier est enregistrée/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Certificats' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Signalements' })).not.toBeInTheDocument()
   })
 
   it('CA-01 : date de soumission et changements « Ancienne → Nouvelle »', async () => {
@@ -107,10 +126,10 @@ describe('EmployeeDetailPage (US-20)', () => {
     getEmployee.mockResolvedValue(SUBMITTED)
     renderAt()
 
-    const contact = await screen.findByRole('region', { name: 'Coordonnées' })
-    expect(within(contact).getByText('+50937222222')).toBeInTheDocument()
-    expect(block('Identité')).toHaveTextContent('15/03/1996')
-    expect(block('Informations professionnelles')).toHaveTextContent('Crédit')
+    const profile = await screen.findByRole('region', { name: 'Profil' })
+    expect(within(profile).getByText('+50937222222')).toBeInTheDocument()
+    expect(profile).toHaveTextContent('15/03/1996')
+    expect(profile).toHaveTextContent('Crédit')
     expect(screen.queryByText('Modifiable')).not.toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'Non modifiable' })).not.toBeInTheDocument()
   })
@@ -119,7 +138,7 @@ describe('EmployeeDetailPage (US-20)', () => {
     getEmployee.mockResolvedValue({ ...SUBMITTED, last_name: 'JOSEPH-PAUL', display_name: 'JOSEPH-PAUL Jean', previous_name: 'JOSEPH' })
     renderAt()
 
-    expect(await screen.findByRole('heading', { name: 'JOSEPH-PAUL Jean' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'JOSEPH-PAUL Jean · AC-1001' })).toBeInTheDocument()
     expect(screen.getByText('anciennement JOSEPH')).toBeInTheDocument()
   })
 
@@ -150,10 +169,10 @@ describe('EmployeeDetailPage (US-20)', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
     // Seule action possible sur le dossier : la réinitialisation de l'accès (US-22).
     const buttons = screen.queryAllByRole('button')
-    expect(buttons).toHaveLength(3)
-    expect(buttons[0]).toHaveAccessibleName('Retour')
-    expect(buttons[1]).toHaveAccessibleName('Menu du compte')
-    expect(buttons[2]).toHaveAccessibleName("Réinitialiser l'accès")
+    expect(buttons).toHaveLength(2)
+    expect(screen.getByRole('link', { name: 'Retour à la liste des employés' })).toHaveAttribute('href', '/admin/employes')
+    expect(buttons[0]).toHaveAccessibleName('Menu du compte')
+    expect(buttons[1]).toHaveAccessibleName("Réinitialiser l'accès")
   })
 
   it('US-21 : bloc « Documents » chargé avec le dossier', async () => {
@@ -211,7 +230,7 @@ describe('EmployeeDetailPage (US-20)', () => {
     renderAt({ pathname: '/admin/employes/1001', state: { listSearch: '?search=pierre&status=NOT_UPDATED' } })
     await screen.findByRole('region', { name: 'Mise à jour' })
 
-    await user.click(screen.getByRole('button', { name: 'Retour' }))
+    await user.click(screen.getByRole('link', { name: 'Retour à la liste des employés' }))
 
     expect(await screen.findByText('Liste ?search=pierre&status=NOT_UPDATED')).toBeInTheDocument()
   })

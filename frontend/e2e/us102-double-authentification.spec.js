@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { adminLogin, enterLocalCode } from './admin.js'
 
+const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/714b2012-8130-4f37-90c0-b587e71ccc7a/scratchpad/captures'
+
 const PASSWORD = 'Paul-Provisoire-E2E-2026'
 const CHOSEN = 'Paul-Mot-de-passe-E2E-2026'
 
@@ -8,7 +10,7 @@ async function login(page, username, password) {
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill(username)
   await page.getByLabel('Mot de passe', { exact: true }).fill(password)
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await page.getByRole('button', { name: 'Continuer' }).click()
 }
 
 async function logout(page) {
@@ -32,9 +34,10 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
   await logout(page)
 
   // CA-01 : première connexion de Paul → choix de la méthode avant l'espace RH
+  // US-107 : l'étape 2 s'ouvre sur la même carte, sans changer d'écran
   await login(page, 'e2e.paul', PASSWORD)
-  await expect(page).toHaveURL(/\/admin\/double-authentification$/)
   await expect(page.getByRole('heading', { name: 'Protégez votre compte' })).toBeVisible()
+  await expect(page).toHaveURL(/\/admin\/connexion$/)
   await page.goto('/admin')
   await expect(page).toHaveURL(/\/admin\/double-authentification$/) // l'espace RH reste fermé
   await page.getByRole('radio', { name: /WhatsApp/ }).check()
@@ -55,14 +58,16 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
 
   // Connexion suivante : le code part vers WhatsApp ; un code faux est refusé
   await login(page, 'e2e.paul', CHOSEN)
-  await expect(page.getByRole('heading', { name: 'Double authentification' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Vérification de sécurité/ })).toBeVisible()
   await expect(page.getByText('Saisissez le code à 6 chiffres envoyé par WhatsApp au +509 •••• 3333.')).toBeVisible()
+  await page.getByLabel('Code de vérification').fill('482')
+  await page.screenshot({ path: `${CAPTURES}/us107-code-390.png`, fullPage: true })
   await page.getByLabel('Code de vérification').fill('000000')
-  await page.getByRole('button', { name: 'Me connecter' }).click()
+  await page.getByRole('button', { name: 'Valider' }).click()
   await expect(page.getByText('Code incorrect ou expiré. Vérifiez-le ou demandez-en un nouveau.')).toBeVisible()
   await page.getByRole('button', { name: 'Renvoyer le code' }).click()
   await expect(page.getByText(/le précédent ne fonctionne plus/)).toBeVisible()
-  await enterLocalCode(page, 'Me connecter')
+  await enterLocalCode(page, 'Valider')
   await expect(page).toHaveURL(/\/admin$/)
 
   // CA-04 : changer de méthode depuis son compte, après confirmation avec WhatsApp

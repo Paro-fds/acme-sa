@@ -14,7 +14,7 @@ function MethodOption({ method, checked, onChange, name, available }) {
   return (
     <label
       className={`flex items-start gap-3 rounded-xl border-[1.5px] bg-surface p-4 ${
-        checked ? 'border-primary shadow-[0_0_0_3px_rgb(15_37_87/0.12)]' : 'border-border'
+        checked ? 'border-primary shadow-[0_0_0_3px_rgb(30_30_130/0.12)]' : 'border-border'
       } ${available ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
     >
       <input

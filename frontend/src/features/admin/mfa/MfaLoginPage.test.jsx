@@ -122,10 +122,12 @@ describe('MfaLoginPage — connexions suivantes (US-102 CA-02, CA-03)', () => {
     const user = userEvent.setup()
     renderPage({ mfa: WHATSAPP, code: SENT })
 
-    expect(await screen.findByRole('heading', { name: 'Double authentification' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Vérification de sécurité/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
+    expect(screen.getByText('Mot de passe vérifié')).toBeInTheDocument()
     expect(screen.getByText('Saisissez le code à 6 chiffres envoyé par WhatsApp au +509 •••• 1111.')).toBeInTheDocument()
     await user.type(screen.getByLabelText('Code de vérification'), '482913')
-    await user.click(screen.getByRole('button', { name: 'Me connecter' }))
+    await user.click(screen.getByRole('button', { name: 'Valider' }))
 
     expect(loginMfa.verify).toHaveBeenCalledWith('482913')
     expect(await screen.findByText('Tableau de bord')).toBeInTheDocument()
@@ -137,7 +139,7 @@ describe('MfaLoginPage — connexions suivantes (US-102 CA-02, CA-03)', () => {
     renderPage({ mfa: WHATSAPP, code: SENT })
 
     await user.type(await screen.findByLabelText('Code de vérification'), '000000')
-    await user.click(screen.getByRole('button', { name: 'Me connecter' }))
+    await user.click(screen.getByRole('button', { name: 'Valider' }))
 
     expect(await screen.findByText(WRONG_CODE.message)).toBeInTheDocument()
     expect(screen.getByLabelText('Code de vérification')).toHaveValue('')
@@ -173,7 +175,7 @@ describe('MfaLoginPage — connexions suivantes (US-102 CA-02, CA-03)', () => {
     renderPage()
 
     await user.type(await screen.findByLabelText('Code de vérification'), '482913')
-    await user.click(screen.getByRole('button', { name: 'Me connecter' }))
+    await user.click(screen.getByRole('button', { name: 'Valider' }))
 
     expect(await screen.findByText('Choix du mot de passe')).toBeInTheDocument()
   })

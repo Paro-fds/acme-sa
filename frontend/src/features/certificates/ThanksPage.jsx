@@ -69,7 +69,7 @@ export default function ThanksPage() {
         « Félicitations pour cette démarche. Chaque titre validé renforce vos perspectives au sein du réseau. »
       </Mascot>
 
-      <section aria-labelledby="summary-title" className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
+      <section aria-labelledby="summary-title" className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
         <h3 id="summary-title" className="text-lg font-semibold">
           Récapitulatif du dépôt
         </h3>

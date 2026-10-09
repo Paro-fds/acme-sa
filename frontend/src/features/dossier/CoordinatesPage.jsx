@@ -37,12 +37,12 @@ function CoordinatesForm({ section }) {
         Mettez à jour vos informations de contact.
       </SectionHeading>
       <Mascot role="Guide carrière">« Vos coordonnées permettent aux RH et à votre agence de rester en contact direct avec vous. »</Mascot>
-      <DossierProgress completion={dossier.completion} />
+      <DossierProgress completion={dossier.completion} section="Section 1 sur 3 · Coordonnées personnelles" />
       <IdentityBlock />
 
       <section aria-labelledby="coordinates-title" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
-          <h3 id="coordinates-title" className="text-lg font-semibold">
+          <h3 id="coordinates-title" className="text-lg font-semibold text-heading">
             Coordonnées à renseigner
           </h3>
           <p className="text-sm text-help">Ces canaux seront utilisés pour vous contacter directement.</p>
@@ -54,6 +54,7 @@ function CoordinatesForm({ section }) {
           type="tel"
           inputMode="tel"
           autoComplete="tel"
+          icon="call"
           value={values.telephone}
           onChange={set('telephone')}
           help="8 chiffres, par exemple +509 3712 3456."
@@ -65,6 +66,7 @@ function CoordinatesForm({ section }) {
           label="Adresse de résidence"
           required
           autoComplete="street-address"
+          icon="home_pin"
           value={values.address}
           onChange={set('address')}
           placeholder="Ex. 12 rue Capois, Port-au-Prince"
@@ -77,6 +79,7 @@ function CoordinatesForm({ section }) {
             label="Adresse email"
             type="email"
             autoComplete="email"
+            icon="mail"
             value={values.no_email ? '' : values.email}
             onChange={set('email')}
             disabled={values.no_email}
@@ -84,7 +87,7 @@ function CoordinatesForm({ section }) {
             labelAside={<FieldStatus {...dossier.email} error={fieldError('email')} />}
             error={fieldError('email')}
           />
-          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg bg-section p-3">
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl bg-section p-3">
             <input
               type="checkbox"
               checked={values.no_email}
@@ -92,7 +95,7 @@ function CoordinatesForm({ section }) {
               className="mt-1 size-5 shrink-0 accent-primary"
             />
             <span className="flex flex-col">
-              <span className="font-semibold text-heading">Je n'ai pas d'adresse email</span>
+              <span className="font-medium text-heading">Je n'ai pas d'adresse email</span>
               <span className="text-sm text-help">Sans email, vous recevrez les notifications par WhatsApp.</span>
             </span>
           </label>

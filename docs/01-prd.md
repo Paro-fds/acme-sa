@@ -30,7 +30,7 @@ L'employé, l'Agent RH, le responsable du référentiel, l'Administrateur (M. Hi
 | Lot | But | Stories |
 |---|---|---|
 | Démonstrateur | Montrer tôt à la direction générale ce qui se construit, sur données fictives (D-40) | US-001 |
-| 1. Parcours « certificat » | Un employé complète son profil et dépose ses certificats | 16 stories |
+| 1. Parcours « certificat » | Un employé complète son profil et dépose ses certificats | 17 stories |
 | 2. Traitement RH | Les RH valident, pilotent et enregistrent les demandes | 14 stories |
 | 3. Mise en service | Le portail est hébergé, sécurisé et annoncé | 5 stories |
 | 4. Carrière et engagement | L'employé voit ses postes éligibles et suit ses demandes | 7 stories |
@@ -47,7 +47,7 @@ La liste des stories, leurs statuts et les enchaînements à respecter sont dans
 | Décisions (D) et leur état | `lot0/1-specifications/decisions-a-valider.md` |
 | Modèle de données | `lot0/3-modele-de-donnees/modele-de-donnees.md` |
 | Écrans | Validés par M. Hilaire (D-47) : espace employé `lot0/2-maquettes/2-espace-employe-ecrans/`, espace RH `lot0/2-maquettes/3-espace-rh-ecrans/` |
-| Epics et user stories | `lot0/1-specifications/epics/` (10 epics D0 → D9, 45 stories) |
+| Epics et user stories | `lot0/1-specifications/epics/` (10 epics D0 → D9, 46 stories) |
 
 ## 7. Ce qui reste du MVP et de la V2
 

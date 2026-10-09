@@ -126,6 +126,17 @@ S = [
    "Il change de méthode depuis son compte, après confirmation avec la méthode actuelle.",
    "Chaque connexion et chaque changement de méthode sont tracés, sans jamais écrire le code."],
   "Demande du 2026-10-08 (développeur) : « les employés aussi doivent faire une double authentification » ; elle remplace « employés : non au lancement » (D-41), à faire confirmer par M. Hilaire. ❓ P-15 : méthodes ouvertes aux employés (beaucoup n'ont pas d'email ; WhatsApp a un coût par message à l'échelle de tous les employés) et récupération sans passage à l'agence. Le domaine et les écrans de US-102 se réutilisent."),
+ ("107","D1","Aligner la connexion RH sur l'écran validé","1","",
+  "Must","EF-104 (écran)","RG-80, RG-81, RG-82","D-47, D-42",
+  "personne des RH","me connecter à l'espace RH sur l'écran que la direction a validé",
+  "retrouver dans le portail l'écran qui a été montré et approuvé",
+  ["La connexion RH reprend l'écran A01 : carte blanche sur fond bleu marine, logo, « Espace RH », et la mention « Espace réservé au réseau de l'institution ou au VPN » sous la carte.",
+   "Les deux étapes sont sur la même carte : 1 « Identifiants » (identifiant, mot de passe, « Continuer »), puis 2 « Vérification de sécurité », qui s'ouvre sans changer d'écran une fois le mot de passe vérifié.",
+   "Le code se saisit dans 6 cases, une par chiffre ; un code collé ou proposé par le téléphone remplit les 6 cases ; « Valider » ouvre l'espace RH.",
+   "« Renvoyer le code » n'apparaît que pour un code envoyé par WhatsApp ou par email ; avec une application d'authentification, rien n'est à renvoyer.",
+   "« Mot de passe oublié ? » affiche « Demandez à un Administrateur de réinitialiser votre accès » : aucune réinitialisation en libre-service (EF-105).",
+   "À la première connexion, ou après une réinitialisation, l'étape 2 devient « Protégez votre compte » sur la même carte ; les règles de US-102 sont inchangées (méthodes ouvertes, code faux, suspension, message unique)."],
+  "Demande de l'utilisateur du 2026-10-09 : aligner la connexion RH sur l'écran A01 validé par M. Hilaire (D-47) et la placer au lot 1. US-102 reste au lot 3, « En cours », jusqu'au choix du service d'envoi des codes (D-41)."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -399,7 +410,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

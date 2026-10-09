@@ -80,7 +80,7 @@ function HrItemCard({ item, section }) {
   }
 
   return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
+    <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <div className="flex items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info-bg text-info-text" aria-hidden="true">
           <span className="material-symbols-outlined">{ICONS[item.key]}</span>
@@ -142,7 +142,7 @@ export default function HrInformationPage() {
   const current = section.dossier
   return page(
     <>
-      <SectionHeading number={3} title="Mes informations RH">
+      <SectionHeading number={3} title="Mes informations RH" icon="verified_user">
         Ces informations viennent du service RH. Vérifiez-les : vous ne pouvez pas les modifier, mais vous pouvez signaler une
         erreur.
       </SectionHeading>

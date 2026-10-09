@@ -1,17 +1,18 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import Alert from '../../../components/Alert.jsx'
 import Button from '../../../components/Button.jsx'
-import TextField from '../../../components/TextField.jsx'
+import CodeBoxes from './CodeBoxes.jsx'
 import LocalCodeBox from './LocalCodeBox.jsx'
 
 const SIX_DIGITS = /^\d{6}$/
 
 /**
- * Saisie d'un code à 6 chiffres (US-102 CA-02, CA-03).
- * `onSubmit(code)` : promesse ; une erreur `field: 'code'` s'affiche sous le champ, les autres au-dessus du bouton.
+ * Saisie d'un code à 6 chiffres (US-102 CA-02, CA-03), en 6 cases (US-107, écran A01).
+ * `onSubmit(code)` : promesse ; une erreur `field: 'code'` s'affiche sous les cases, les autres au-dessus du bouton.
  * `onResend` : facultatif (WhatsApp, email) ; renvoie le nouveau code envoyé.
  */
 export default function CodeForm({ instruction, sent, onSubmit, onResend, submitLabel = 'Vérifier', children }) {
+  const id = useId()
   const [code, setCode] = useState('')
   const [error, setError] = useState(null)
   const [failure, setFailure] = useState(null)
@@ -19,6 +20,7 @@ export default function CodeForm({ instruction, sent, onSubmit, onResend, submit
   const [lastSent, setLastSent] = useState(sent)
   const [sending, setSending] = useState(false)
   const complete = SIX_DIGITS.test(code)
+  const describedBy = [instruction && `${id}-help`, error && `${id}-error`].filter(Boolean).join(' ') || undefined
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -51,31 +53,46 @@ export default function CodeForm({ instruction, sent, onSubmit, onResend, submit
     <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
       {children}
       <LocalCodeBox sent={lastSent} />
-      <TextField
-        label="Code de vérification"
-        help={instruction}
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        maxLength={6}
-        value={code}
-        onChange={(e) => {
-          setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
-          setError(null)
-        }}
-        error={error}
-        className="[&_input]:text-center [&_input]:font-mono [&_input]:text-xl [&_input]:tracking-[0.4em]"
-      />
+      <div className="flex flex-col gap-3">
+        <label htmlFor={id} className="sr-only">
+          Code de vérification
+        </label>
+        {instruction && (
+          <p id={`${id}-help`} className="text-help">
+            {instruction}
+          </p>
+        )}
+        <CodeBoxes
+          id={id}
+          value={code}
+          onChange={(value) => {
+            setCode(value)
+            setError(null)
+          }}
+          invalid={Boolean(error)}
+          describedBy={describedBy}
+        />
+        {error && (
+          <p id={`${id}-error`} className="flex items-center gap-1 text-sm text-error-text">
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">error</span>
+            {error}
+          </p>
+        )}
+        {onResend && (
+          <button
+            type="button"
+            onClick={handleResend}
+            className="min-h-11 w-fit font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            Renvoyer le code
+          </button>
+        )}
+      </div>
       <Alert tone="info">{notice}</Alert>
       <Alert>{failure}</Alert>
       <Button type="submit" disabled={!complete || sending}>
         {sending ? 'Vérification…' : submitLabel}
       </Button>
-      {onResend && (
-        <Button variant="ghost" onClick={handleResend}>
-          <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
-          Renvoyer le code
-        </Button>
-      )}
     </form>
   )
 }

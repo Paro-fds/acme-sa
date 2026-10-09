@@ -7,8 +7,8 @@ import BottomNav from './BottomNav.jsx'
 /** US-207 CA-02 : en-tête « Portail Carrière » de l'espace employé (écrans validés 06 → 13). */
 function EmployeeHeader() {
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-10 border-b border-border bg-surface">
-      <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4">
+    <header className="sticky top-[env(safe-area-inset-top,0px)] z-10 bg-surface/90 shadow-[0_1px_8px_rgb(0_0_0/0.04)] backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-3xl items-center gap-3 px-4">
         <img src={logo} alt="ACME SA" width="40" height="40" className="size-10 shrink-0 rounded-full" />
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate font-semibold text-heading">Portail Carrière</span>

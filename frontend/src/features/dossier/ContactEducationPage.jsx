@@ -10,6 +10,15 @@ import { DossierProgress, FieldStatus, SectionHeading } from './SectionParts.jsx
 import { HR_INFORMATION_PATH } from './paths.js'
 import { useDossierSection } from './useDossierSection.js'
 
+/** Icône d'une partie du formulaire (écran validé 09) : carré bleu pâle de 36 px. */
+function SectionIcon({ name }) {
+  return (
+    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-info-bg text-primary" aria-hidden="true">
+      <span className="material-symbols-outlined text-xl">{name}</span>
+    </span>
+  )
+}
+
 function RelationshipSelect({ options, value, onChange, error }) {
   const id = useId()
   return (
@@ -17,26 +26,34 @@ function RelationshipSelect({ options, value, onChange, error }) {
       <label htmlFor={id} className="text-base font-semibold text-heading">
         Lien avec vous
       </label>
-      <select
-        id={id}
-        value={value}
-        onChange={onChange}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className={`h-12 w-full rounded-lg border-[1.5px] bg-surface px-4 text-base text-heading ${
-          error ? 'border-error-border bg-error-bg' : 'border-border-input'
-        }`}
-      >
-        <option value="">Choisir…</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          id={id}
+          value={value}
+          onChange={onChange}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className={`h-12 w-full appearance-none rounded-lg border px-4 pr-10 text-base text-heading shadow-card outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 ${
+            error ? 'border-error-border bg-error-bg' : 'border-border-input bg-surface'
+          }`}
+        >
+          <option value="">Choisir…</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <span
+          className="material-symbols-outlined pointer-events-none absolute inset-y-0 right-3 flex items-center text-xl text-muted"
+          aria-hidden="true"
+        >
+          expand_more
+        </span>
+      </div>
       {error && (
-        <p id={`${id}-error`} className="flex items-center gap-1 text-sm text-error-text">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">error</span>
+        <p id={`${id}-error`} className="flex items-start gap-2 rounded-lg bg-error-bg p-2.5 text-sm font-medium text-error-text">
+          <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">report_problem</span>
           {error}
         </p>
       )}
@@ -48,47 +65,56 @@ function EducationLevels({ levels, value, onChange, status, error }) {
   const titleId = useId()
   const errorId = useId()
   return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
+    <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <div className="flex items-center justify-between gap-2">
-        <h3 id={titleId} className="flex items-center gap-2 text-lg font-semibold">
-          <span className="material-symbols-outlined" aria-hidden="true">school</span>
+        <h3 id={titleId} className="flex items-center gap-2 text-lg font-semibold text-heading">
+          <SectionIcon name="school" />
           Niveau d'études
         </h3>
         {status}
       </div>
-      <fieldset aria-describedby={error ? errorId : undefined} className="flex flex-col gap-2">
+      <fieldset aria-describedby={error ? errorId : undefined} className="flex flex-col gap-2.5">
         <legend className="mb-2 text-sm text-help">Sélectionnez votre plus haut niveau d'études complété :</legend>
-        {levels.map((level, index) => (
-          <label
-            key={level.value}
-            className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 ${
-              value === level.value ? 'border-primary bg-info-bg' : 'border-transparent bg-section'
-            }`}
-          >
-            <input
-              type="radio"
-              name="education_level"
-              value={level.value}
-              checked={value === level.value}
-              onChange={() => onChange(level.value)}
-              className="mt-1 size-5 shrink-0 accent-primary"
-            />
-            <span className="flex flex-col">
-              <span className="font-semibold text-heading">
-                {index + 1}. {level.label}
+        {levels.map((level, index) => {
+          const selected = value === level.value
+          return (
+            <label
+              key={level.value}
+              className={`flex min-h-11 cursor-pointer items-start gap-2 rounded-xl p-2 transition-colors ${
+                selected ? 'bg-highlight shadow-card' : 'bg-section hover:bg-info-bg'
+              }`}
+            >
+              <input
+                type="radio"
+                name="education_level"
+                value={level.value}
+                checked={selected}
+                onChange={() => onChange(level.value)}
+                className="mt-1 size-5 shrink-0 accent-primary"
+              />
+              <span className="flex min-w-0 flex-col">
+                <span
+                  className={`flex items-center gap-1.5 text-sm ${selected ? 'font-bold text-primary' : 'font-semibold text-heading'}`}
+                >
+                  {index + 1}. {level.label}
+                  {selected && (
+                    <span className="material-symbols-outlined text-base" aria-hidden="true">check_circle</span>
+                  )}
+                </span>
+                <span className="mt-1 text-sm text-help">{level.examples}</span>
               </span>
-              <span className="text-sm text-help">{level.examples}</span>
-            </span>
-          </label>
-        ))}
+            </label>
+          )
+        })}
       </fieldset>
       {error && (
-        <p id={errorId} className="text-sm text-error-text">
+        <p id={errorId} className="flex items-start gap-2 rounded-lg bg-error-bg p-2.5 text-sm font-medium text-error-text">
+          <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">report_problem</span>
           {error}
         </p>
       )}
-      <p className="flex items-start gap-2 rounded-lg bg-section p-3 text-sm text-help">
-        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">verified_user</span>
+      <p className="flex items-start gap-2 rounded-lg bg-info-bg p-2 text-sm text-help">
+        <span className="material-symbols-outlined shrink-0 text-xl text-primary" aria-hidden="true">verified_user</span>
         Votre niveau sera confirmé par vos certificats validés dans « Mes certificats ».
       </p>
     </section>
@@ -121,18 +147,18 @@ function ContactEducationForm({ section }) {
       <Mascot role="Conseil carrière">
         « Ces renseignements protègent votre quotidien et valorisent vos compétences pour les promotions internes. »
       </Mascot>
-      <DossierProgress completion={dossier.completion} />
+      <DossierProgress completion={dossier.completion} section="Section 2 sur 3 · Contact et études" />
 
-      <section aria-labelledby="contact-title" className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 shadow-card">
+      <section aria-labelledby="contact-title" className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
         <div className="flex items-center justify-between gap-2">
-          <h3 id="contact-title" className="flex items-center gap-2 text-lg font-semibold">
-            <span className="material-symbols-outlined" aria-hidden="true">emergency_home</span>
+          <h3 id="contact-title" className="flex items-center gap-2 text-lg font-semibold text-heading">
+            <SectionIcon name="shield_person" />
             Contact d'urgence
           </h3>
           <FieldStatus complete={contact.complete} value={null} error={contactError} />
         </div>
-        <p className="flex items-start gap-2 rounded-lg bg-section p-3 text-sm text-help">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">lock</span>
+        <p className="flex items-center gap-2 rounded-lg bg-section p-2 text-sm text-help">
+          <span className="material-symbols-outlined shrink-0 text-lg text-primary" aria-hidden="true">lock</span>
           Utilisé uniquement en cas d'urgence et pour vos droits aux assurances du personnel.
         </p>
         <TextField

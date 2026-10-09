@@ -16,7 +16,7 @@ export default function CertificateList({ certificates }) {
   return (
     <ul aria-label="Certificats déposés" className="flex flex-col gap-3">
       {certificates.map((certificate) => (
-        <li key={certificate.id} className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-card">
+        <li key={certificate.id} className="flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col">
               <span className="text-sm font-semibold text-info-text">{certificate.type_label} · {certificate.level_label}</span>

@@ -1,13 +1,12 @@
 import { Link, useLocation, useParams } from 'react-router'
 import { getEmployee, listEmployeeDocuments } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
-import Page from '../../components/Page.jsx'
 import { AdminStatusBadge } from '../../components/StatusBadge.jsx'
 import ValueComparison from '../../components/ValueComparison.jsx'
-import { formatDateTime, initials } from '../../lib/format.js'
+import { displayValue, formatDateTime, initials } from '../../lib/format.js'
 import { useLoader } from '../../lib/useLoader.js'
-import InfoSection from '../profile/InfoSection.jsx'
 import { profileSections } from '../profile/profileSections.js'
+import AdminShell from './AdminShell.jsx'
 import AdminDocuments from './AdminDocuments.jsx'
 import Block from './Block.jsx'
 import ResetAccess from './ResetAccess.jsx'
@@ -25,22 +24,40 @@ function ReadOnlyBadge() {
 
 function FolderHeader({ folder }) {
   return (
-    <section aria-label="Employé" className="flex items-start gap-4 rounded-xl border border-border bg-surface p-4 shadow-card">
-      <span
-        className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white"
-        aria-hidden="true"
-      >
-        {initials(folder.last_name, folder.first_name)}
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <ReadOnlyBadge />
-        <h2 className="text-[22px] leading-7 font-bold break-words">{folder.display_name}</h2>
+    <section aria-label="Employé" className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:flex-row sm:items-start sm:justify-between sm:p-6">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h1 className="break-words text-2xl leading-tight font-bold">
+          {folder.display_name} · {folder.employee_code}
+        </h1>
         {folder.previous_name && <p className="text-sm text-muted">anciennement {folder.previous_name}</p>}
-        <p className="text-sm text-help">
-          {folder.employee_code} · Agence {folder.agency_code} · {folder.position}
-        </p>
+        <p className="text-sm text-help">{folder.position} · Agence {folder.agency_code}</p>
+        <div className="mt-2"><ReadOnlyBadge /></div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
         <AdminStatusBadge status={folder.status} />
       </div>
+    </section>
+  )
+}
+
+function ProfileBlock({ folder }) {
+  const fields = profileSections(folder).flatMap(({ fields: sectionFields }) => sectionFields)
+
+  return (
+    <section aria-label="Profil" className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
+      <div className="border-b border-border bg-section px-4 py-3 sm:px-6">
+        <h2 className="text-base font-semibold">Profil</h2>
+      </div>
+      <dl className="divide-y divide-border px-4 py-2 text-sm sm:px-6">
+        {fields.map(({ label, value }) => (
+          <div key={label} className="flex flex-col gap-1 py-3.5 sm:flex-row sm:items-center sm:gap-0">
+            <dt className="shrink-0 font-medium text-muted sm:w-56">{label}</dt>
+            <dd className={`min-w-0 break-words ${value ? 'text-heading' : 'text-muted italic'}`}>
+              {displayValue(value)}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </section>
   )
 }
@@ -93,9 +110,9 @@ export default function EmployeeDetailPage() {
   })
 
   const page = (children) => (
-    <Page account="admin" title="Dossier" backTo={listUrl}>
+    <AdminShell>
       {children}
-    </Page>
+    </AdminShell>
   )
 
   if (loading) return page(<p role="status">Chargement…</p>)
@@ -116,18 +133,32 @@ export default function EmployeeDetailPage() {
   const [folder, documents] = data
   return page(
     <>
-      <FolderHeader folder={folder} />
-      <UpdateBlock folder={folder} />
-      {profileSections(folder).map(({ icon, title, fields }) => (
-        <InfoSection key={title} icon={icon} title={title} fields={fields} showEditable={false} />
-      ))}
-      <AdminDocuments documents={documents} />
-      <ResetAccess
-        employeeId={folder.id}
-        name={folder.display_name}
-        activated={folder.account_activated}
-        onReset={reload}
-      />
+      <div className="mb-6 flex flex-col gap-3">
+        <Link
+          to={listUrl}
+          aria-label="Retour à la liste des employés"
+          className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-primary hover:underline"
+        >
+          <span className="material-symbols-outlined mr-1.5 text-[18px]" aria-hidden="true">arrow_back</span>
+          Employés
+        </Link>
+        <div className="flex items-center gap-2 rounded-md border border-border bg-section px-4 py-2.5 text-xs text-help">
+          <span className="material-symbols-outlined shrink-0 text-[16px]" aria-hidden="true">visibility</span>
+          <span>Consultation en lecture seule ; seules les informations d'accès peuvent être modifiées.</span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-6">
+        <FolderHeader folder={folder} />
+        <ProfileBlock folder={folder} />
+        <UpdateBlock folder={folder} />
+        <AdminDocuments documents={documents} />
+        <ResetAccess
+          employeeId={folder.id}
+          name={folder.display_name}
+          activated={folder.account_activated}
+          onReset={reload}
+        />
+      </div>
     </>,
   )
 }

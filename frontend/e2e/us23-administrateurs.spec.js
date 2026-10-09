@@ -8,7 +8,7 @@ async function login(page, username, password, { secondFactor = true } = {}) {
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill(username)
   await page.getByLabel('Mot de passe', { exact: true }).fill(password)
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await page.getByRole('button', { name: 'Continuer' }).click()
   if (secondFactor) await passSecondFactor(page, `${username}@exemple.test`) // US-102
 }
 

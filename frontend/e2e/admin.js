@@ -19,7 +19,7 @@ export async function enterLocalCode(page, submitLabel) {
 /** Première connexion : méthode « Email » ; connexions suivantes : le code de la méthode enregistrée. */
 export async function passSecondFactor(page, email = 'rh.e2e@exemple.test') {
   const setup = page.getByRole('heading', { name: 'Protégez votre compte' })
-  const verify = page.getByRole('heading', { name: 'Double authentification' })
+  const verify = page.getByText(/Saisissez le code à 6 chiffres/)
   await expect(setup.or(verify)).toBeVisible()
   if (await setup.isVisible()) {
     await page.getByRole('radio', { name: /Email/ }).check()
@@ -27,7 +27,7 @@ export async function passSecondFactor(page, email = 'rh.e2e@exemple.test') {
     await page.getByRole('button', { name: 'Recevoir un code' }).click()
     await enterLocalCode(page, 'Activer la double authentification')
   } else {
-    await enterLocalCode(page, 'Me connecter')
+    await enterLocalCode(page, 'Valider')
   }
 }
 
@@ -36,7 +36,7 @@ export async function adminLogin(page, username = 'admin', password = ADMIN_PASS
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill(username)
   await page.getByLabel('Mot de passe', { exact: true }).fill(password)
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await page.getByRole('button', { name: 'Continuer' }).click()
   await passSecondFactor(page)
   await expect(page).toHaveURL(/\/admin(\/mot-de-passe)?$/)
 }

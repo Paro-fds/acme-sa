@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** Un employé au dossier complet et un au dossier incomplet, en recette.
 
-16 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+17 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -14,6 +14,7 @@ Chacun entre dans le portail simplement, et les comptes RH sont fortement proté
 |---|---|---|---|---|
 | [US-101](US-101-me-connecter-sans-adresse-email.md) | Me connecter sans adresse email | Must | — | Fait |
 | [US-105](US-105-decouvrir-le-portail-avant-de-me-connecter.md) | Découvrir le portail avant de me connecter | Must | — | Fait |
+| [US-107](US-107-aligner-la-connexion-rh-sur-l-ecran-valide.md) | Aligner la connexion RH sur l'écran validé | Must | — | Fait |
 
 ## D2 Dossier de l'employé
 

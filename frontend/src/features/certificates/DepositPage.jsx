@@ -132,7 +132,7 @@ function FilePicker({ file, onFile, maxMb, error, progress }) {
   const button =
     'flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-[1.5px] border-primary px-4 font-semibold text-primary hover:bg-info-bg'
   return (
-    <section aria-labelledby="file-title" className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
+    <section aria-labelledby="file-title" className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <h3 id="file-title" className="text-lg font-semibold">
         Pièce justificative
       </h3>
@@ -202,7 +202,7 @@ function DepositForm({ form, firstName, depositing }) {
       </Mascot>
       <FilePicker file={file} onFile={setFile} maxMb={form.max_mb} error={fieldError('file')} progress={progress} />
 
-      <section aria-labelledby="fields-title" className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 shadow-card">
+      <section aria-labelledby="fields-title" className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
         <h3 id="fields-title" className="text-lg font-semibold">
           Informations sur le document
         </h3>
