@@ -92,6 +92,8 @@ Les autres valeurs sont déjà dans `render.yaml` : `APP_ENV=demo`, `MFA_METHODS
 
 Les employés du démonstrateur sont ceux de `backend/demo/employes-fictifs.csv` : 7 actifs et 1 inactif.
 
+Le référentiel des unités (US-501) se charge depuis l'écran RH : menu du compte → **Référentiel** → importer `backend/demo/referentiel-fictif.xlsx` (régions, agences et directions « Démo » ; PB et RC restent « À rattacher », comme dans l'export réel). Le vrai référentiel ne va jamais sur le démonstrateur.
+
 ## 6. Montrer la double authentification à M. Hilaire
 
 Le démonstrateur ne montre que ce que le projet livrera, sans accessoire de démonstration. Le service d'envoi des codes par WhatsApp et par email reste à choisir avec la DIT (D-41) : en ligne, ces deux méthodes apparaissent donc grisées, avec la mention « Pas encore disponible ». Le réglage `MFA_METHODS` les ouvrira le jour où l'envoi existera, sans changer les écrans.
@@ -112,8 +114,8 @@ Les règles à souligner devant lui :
 
 | Point | Story | Pourquoi ce n'est pas fait |
 |---|---|---|
-| Comptes Supabase, Render et Vercel | US-001 CA-01 | Ces actions sont à faire avec vos accès (§1 à §4) |
-| Dépôt **signé** des fichiers, envoyés directement au stockage | US-001 CA-07 | Aujourd'hui, les fichiers passent par l'API. Le dépôt signé viendra avec les certificats (D3). |
+| Dépôt **signé** des fichiers, envoyés directement au stockage | US-301 | Aujourd'hui, les fichiers passent par l'API. Le dépôt signé viendra avec les certificats. |
+| Répétition de migration sur le sandbox AWS | US-002 | AWS est pour plus tard ; la répétition a été faite en local sur PostgreSQL 17 |
 | Envoi réel des codes par WhatsApp et par email | US-102 | Le service reste à choisir avec la DIT (D-41) ; il suffira d'un adaptateur derrière le port `CodeSender` |
 | Double authentification des employés | US-106 | Nouvelle exigence du 2026-10-08 ; méthodes et récupération à confirmer (P-15) |
 | Rôles RH (Agent RH, Administrateur, Lecture seule) | US-103 | Aujourd'hui, tout compte RH peut réinitialiser la double authentification d'un autre |

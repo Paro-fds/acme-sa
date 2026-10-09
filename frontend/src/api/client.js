@@ -1,6 +1,6 @@
 /**
  * Client HTTP unique : les composants n'appellent jamais fetch directement
- * (docs/03-plan-implementation.md §1.1).
+ * (docs/02-solution-design.md §3).
  *
  * Les erreurs de l'API ont le format {"error": {"code", "message"}} ;
  * elles sont levées sous forme d'ApiError, avec un message affichable tel quel.
@@ -65,5 +65,37 @@ export function upload(path, formData, { onProgress } = {}) {
     }
     xhr.onerror = () => reject(new ApiError(0, 'NETWORK_ERROR', NETWORK_ERROR_MESSAGE))
     xhr.send(formData)
+  })
+}
+
+const UPLOAD_FAILED_MESSAGE = "L'envoi du fichier n'a pas abouti. Vérifiez votre connexion et réessayez."
+
+/**
+ * US-301 CA-06 : envoie un fichier avec un dépôt signé, directement dans le stockage privé.
+ * `ticket` : `{ method: 'POST', url, fields }` (formulaire signé S3) ou `{ method: 'PUT', url, headers }`.
+ * Une adresse qui commence par `/api` est celle du stockage local du poste du développeur.
+ */
+export function uploadToStorage(ticket, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open(ticket.method, ticket.url)
+    xhr.withCredentials = ticket.url.startsWith('/api')
+    for (const [name, value] of Object.entries(ticket.headers ?? {})) xhr.setRequestHeader(name, value)
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(event.loaded / event.total)
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve()
+      else reject(new ApiError(xhr.status, 'UPLOAD_FAILED', UPLOAD_FAILED_MESSAGE))
+    }
+    xhr.onerror = () => reject(new ApiError(0, 'UPLOAD_FAILED', UPLOAD_FAILED_MESSAGE))
+    if (ticket.method === 'POST') {
+      const form = new FormData()
+      for (const [name, value] of Object.entries(ticket.fields ?? {})) form.append(name, value)
+      form.append('file', file)
+      xhr.send(form)
+    } else {
+      xhr.send(file)
+    }
   })
 }

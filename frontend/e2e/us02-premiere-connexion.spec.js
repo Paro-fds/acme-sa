@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { createPassword, EMP_H1 } from './auth.js'
+import { acceptConsent, createPassword, EMP_H1 } from './auth.js'
 
 /** US-02 → US-101 : première connexion complète sur mobile (création du mot de passe → profil). */
 test('première connexion : création du mot de passe puis accès au profil', async ({ page }) => {
@@ -15,8 +15,10 @@ test('première connexion : création du mot de passe puis accès au profil', as
   await page.getByLabel('Confirmer le mot de passe', { exact: true }).fill('Bonjour-2026')
   await page.getByRole('button', { name: 'Créer mon mot de passe' }).click()
 
-  await expect(page).toHaveURL(/\/profil$/)
-  await expect(page.getByText('PIERRE Marie')).toBeVisible()
+  // US-207 : première connexion → « Avant de commencer », puis l'accueil.
+  await expect(page).toHaveURL(/\/avant-de-commencer$/)
+  await acceptConsent(page)
+  await expect(page.getByRole('heading', { name: 'Bonjour Marie' })).toBeVisible()
 
   // Le cookie de session n'est pas lisible par JavaScript
   const cookies = await page.context().cookies()

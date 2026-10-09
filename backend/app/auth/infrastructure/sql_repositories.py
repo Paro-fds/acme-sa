@@ -4,6 +4,7 @@ from sqlalchemy import Boolean, Integer, String, delete, func, select
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.auth.domain.admin import AdminAccount
+from app.auth.domain.logins import EmployeeLogin
 from app.auth.domain.mfa import MfaMethod, PendingCode
 from app.auth.domain.model import Account, Session, SubjectType
 from app.shared.infrastructure.database import Base, Database, UtcDateTime
@@ -217,3 +218,34 @@ class SqlAdminAccountRepository:
     def count(self) -> int:
         with self._database.session() as session:
             return session.scalar(select(func.count()).select_from(AdminAccountRow)) or 0
+
+
+class EmployeeLoginRow(Base):
+    """US-605 : une ligne par connexion réussie d'un employé."""
+
+    __tablename__ = "employee_login"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    employee_id: Mapped[str] = mapped_column(String, index=True)
+    at: Mapped[datetime] = mapped_column(UtcDateTime, index=True)
+
+
+class SqlLoginJournal:
+    def __init__(self, database: Database) -> None:
+        self._database = database
+
+    def record(self, login: EmployeeLogin) -> None:
+        with self._database.session() as session:
+            session.add(EmployeeLoginRow(employee_id=login.employee_id, at=login.at))
+
+    def all(self) -> list[EmployeeLogin]:
+        with self._database.session() as session:
+            rows = session.scalars(select(EmployeeLoginRow).order_by(EmployeeLoginRow.id))
+            return [EmployeeLogin(r.employee_id, r.at) for r in rows]
+
+    def since(self, moment: datetime) -> list[EmployeeLogin]:
+        with self._database.session() as session:
+            rows = session.scalars(
+                select(EmployeeLoginRow).where(EmployeeLoginRow.at >= moment).order_by(EmployeeLoginRow.id)
+            )
+            return [EmployeeLogin(r.employee_id, r.at) for r in rows]

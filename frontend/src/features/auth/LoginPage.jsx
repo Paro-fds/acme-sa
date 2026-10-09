@@ -42,7 +42,7 @@ export default function LoginPage() {
     setNotice(null)
     try {
       await login(identity, password)
-      navigate('/profil', { replace: true })
+      navigate('/accueil', { replace: true })
     } catch (apiError) {
       setSending(false)
       if (apiError.code === 'IDENTITY_AMBIGUOUS') {

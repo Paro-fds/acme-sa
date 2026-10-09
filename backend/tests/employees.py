@@ -1,4 +1,4 @@
-"""Employés fictifs du CSV de test (docs/epics/README.md, « Jeu de données de test commun »)."""
+"""Employés fictifs du CSV de test (docs/03-plan-implementation.md §4.1)."""
 
 from dataclasses import dataclass
 

@@ -60,3 +60,8 @@ export function addAdmin(username, password) {
 export function deleteAdmin(id) {
   return request(`/admin/admins/${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
+
+/** US-605 : connexions des 30 derniers jours et avis après le dépôt. */
+export function getEngagement() {
+  return request('/admin/engagement')
+}

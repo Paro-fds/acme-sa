@@ -12,11 +12,11 @@ export const VISIBILITY_NOTICE =
 export default function CareerPage() {
   const { data, error, loading } = useLoader(getMyCareer)
 
-  if (loading) return <Page account title="Mon parcours" backTo="/profil"><p role="status">Chargement…</p></Page>
-  if (error) return <Page account title="Mon parcours" backTo="/profil"><Alert>{error.message}</Alert></Page>
+  if (loading) return <Page account title="Mon parcours" backTo="/profil" backLabel="Mon profil"><p role="status">Chargement…</p></Page>
+  if (error) return <Page account title="Mon parcours" backTo="/profil" backLabel="Mon profil"><Alert>{error.message}</Alert></Page>
 
   return (
-    <Page account title="Mon parcours" backTo="/profil">
+    <Page account title="Mon parcours" backTo="/profil" backLabel="Mon profil">
       <div className="flex flex-col gap-1">
         <h2 className="text-[26px] leading-8 font-bold">Mon parcours</h2>
         <p className="text-help">Vos diplômes, formations, expériences et compétences, à compléter quand vous le souhaitez.</p>

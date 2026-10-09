@@ -9,16 +9,20 @@ import EmployeeListPage from './features/admin/EmployeeListPage.jsx'
 import HomePage from './features/home/HomePage.jsx'
 import MfaLoginPage from './features/admin/mfa/MfaLoginPage.jsx'
 import MySecurityPage from './features/admin/mfa/MySecurityPage.jsx'
+import ReferentialPage from './features/admin/referential/ReferentialPage.jsx'
 import AmbiguousIdentityPage from './features/auth/AmbiguousIdentityPage.jsx'
 import CareerPage from './features/career/CareerPage.jsx'
+import CertificatesPage from './features/certificates/CertificatesPage.jsx'
+import DepositPage from './features/certificates/DepositPage.jsx'
+import ThanksPage from './features/certificates/ThanksPage.jsx'
+import EmployeeHomePage from './features/dashboard/EmployeeHomePage.jsx'
 import CreatePasswordPage from './features/auth/CreatePasswordPage.jsx'
 import LoginPage from './features/auth/LoginPage.jsx'
-import DocumentsStep from './features/documents/DocumentsStep.jsx'
-import MyDocumentsPage from './features/documents/MyDocumentsPage.jsx'
+import ConsentPage from './features/dossier/ConsentPage.jsx'
+import ContactEducationPage from './features/dossier/ContactEducationPage.jsx'
+import CoordinatesPage from './features/dossier/CoordinatesPage.jsx'
+import HrInformationPage from './features/dossier/HrInformationPage.jsx'
 import ProfilePage from './features/profile/ProfilePage.jsx'
-import ConfirmationStep from './features/update/ConfirmationStep.jsx'
-import InformationsStep from './features/update/InformationsStep.jsx'
-import ReviewStep from './features/update/ReviewStep.jsx'
 
 export default function AppRoutes() {
   return (
@@ -29,16 +33,23 @@ export default function AppRoutes() {
         <Route path="/connexion" element={<LoginPage />} />
         <Route path="/connexion/premiere" element={<CreatePasswordPage />} />
         <Route path="/connexion/homonyme" element={<AmbiguousIdentityPage />} />
+        <Route path="/accueil" element={<EmployeeHomePage />} />
         <Route path="/profil" element={<ProfilePage />} />
-        <Route path="/documents" element={<MyDocumentsPage />} />
+        <Route path="/avant-de-commencer" element={<ConsentPage />} />
+        <Route path="/profil/coordonnees" element={<CoordinatesPage />} />
+        <Route path="/profil/contact-etudes" element={<ContactEducationPage />} />
+        <Route path="/profil/informations-rh" element={<HrInformationPage />} />
+        <Route path="/certificats" element={<CertificatesPage />} />
+        <Route path="/certificats/deposer" element={<DepositPage />} />
+        <Route path="/certificats/merci" element={<ThanksPage />} />
         <Route path="/parcours" element={<CareerPage />} />
-        <Route path="/mise-a-jour/informations" element={<InformationsStep />} />
-        <Route path="/mise-a-jour/documents" element={<DocumentsStep />} />
-        <Route path="/mise-a-jour/verification" element={<ReviewStep />} />
-        <Route path="/mise-a-jour/confirmation" element={<ConfirmationStep />} />
+        {/* US-206 : les adresses de l'ancien parcours du MVP ramènent à « Mon profil ». */}
+        <Route path="/documents" element={<Navigate to="/profil" replace />} />
+        <Route path="/mise-a-jour/*" element={<Navigate to="/profil" replace />} />
         <Route path="/admin/connexion" element={<AdminLoginPage />} />
         <Route path="/admin/double-authentification" element={<MfaLoginPage />} />
         <Route path="/admin/securite" element={<MySecurityPage />} />
+        <Route path="/admin/referentiel" element={<ReferentialPage />} />
         <Route path="/admin" element={<DashboardPage />} />
         <Route path="/admin/employes" element={<EmployeeListPage />} />
         <Route path="/admin/employes/:id" element={<EmployeeDetailPage />} />

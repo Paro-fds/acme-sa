@@ -6,7 +6,12 @@ import DashboardPage from './DashboardPage.jsx'
 import { getStatistics } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/admin.js', () => ({ getStatistics: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  getStatistics: vi.fn(),
+  getEngagement: vi.fn(() =>
+    Promise.resolve({ logins_30_days: 0, employees_30_days: 0, active_employees: 7, feedback: [] }),
+  ),
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
 function ListProbe() {

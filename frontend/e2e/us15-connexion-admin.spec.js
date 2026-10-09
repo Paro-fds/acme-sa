@@ -24,7 +24,8 @@ test('connexion admin : refus, accès, déconnexion, routes protégées', async 
   await expect(page).toHaveURL(/\/admin$/)
   await expect(page.getByRole('heading', { name: 'Suivi de la campagne' })).toBeVisible()
   await page.getByRole('link', { name: 'Voir la liste des employés' }).click()
-  await expect(page.getByText(/\d+ employés/)).toBeVisible()
+  await expect(page).toHaveURL(/\/admin\/employes$/)
+  await expect(page.getByText(/^\d+ employés/)).toBeVisible()
 
   // CA-06 : déconnexion
   await page.getByRole('button', { name: 'Menu du compte' }).click()

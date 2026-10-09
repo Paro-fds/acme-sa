@@ -32,7 +32,7 @@ export default function CreatePasswordPage() {
     setError(null)
     try {
       await register(identity, password, confirmation)
-      navigate('/profil', { replace: true })
+      navigate('/accueil', { replace: true })
     } catch (apiError) {
       setSending(false)
       if (apiError.code === 'IDENTITY_AMBIGUOUS') {

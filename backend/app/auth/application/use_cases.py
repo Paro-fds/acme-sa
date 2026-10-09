@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from datetime import datetime
+from app.auth.domain.logins import EmployeeLogin, LoginJournal
 from app.auth.application.identity import Identity, find_employee
 from app.auth.application.sessions import SessionService
 from app.auth.domain.errors import AccountLocked, IdentityNotRecognized, LoginFailed, RegistrationRefused
@@ -22,12 +25,16 @@ class RegisterPassword:
         accounts: AccountRepository,
         hasher: PasswordHasher,
         sessions: SessionService,
+        clock: Clock,
+        logins: LoginJournal,
     ) -> None:
         self._employees = employees
         self._updates = updates
         self._accounts = accounts
         self._hasher = hasher
         self._sessions = sessions
+        self._clock = clock
+        self._logins = logins
 
     def execute(self, identity: Identity, password: str, confirmation: str) -> str:
         validate_new_password(password, confirmation)
@@ -43,6 +50,7 @@ class RegisterPassword:
         account.failed_attempts = 0
         account.locked_until = None
         self._accounts.save(account)
+        self._logins.record(EmployeeLogin(employee.id, self._clock.now()))
         return self._sessions.open(SubjectType.EMPLOYEE, employee.id)
 
 
@@ -58,6 +66,7 @@ class LoginEmployee:
         hasher: PasswordHasher,
         sessions: SessionService,
         clock: Clock,
+        logins: LoginJournal,
     ) -> None:
         self._employees = employees
         self._updates = updates
@@ -65,6 +74,7 @@ class LoginEmployee:
         self._hasher = hasher
         self._sessions = sessions
         self._clock = clock
+        self._logins = logins
 
     def execute(self, identity: Identity, password: str) -> str:
         try:
@@ -88,4 +98,22 @@ class LoginEmployee:
 
         account.register_success()
         self._accounts.save(account)
+        self._logins.record(EmployeeLogin(employee.id, now))
         return self._sessions.open(SubjectType.EMPLOYEE, employee.id)
+
+
+@dataclass(frozen=True)
+class LoginCounts:
+    logins: int
+    employees: int
+
+
+class CountLogins:
+    """US-605 : connexions depuis une date, et nombre d'employés différents qui se sont connectés."""
+
+    def __init__(self, logins: LoginJournal) -> None:
+        self._logins = logins
+
+    def execute(self, since: datetime) -> LoginCounts:
+        recent = self._logins.since(since)
+        return LoginCounts(len(recent), len({login.employee_id for login in recent}))

@@ -1,4 +1,4 @@
-"""Aides pour les tests du parcours professionnel (V2, docs/v2/epics/README.md)."""
+"""Aides pour les tests du parcours professionnel (hérité de la V2, D-44)."""
 
 from dataclasses import replace
 from datetime import UTC, datetime

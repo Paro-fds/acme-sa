@@ -1,164 +1,103 @@
 # agent.md — Consignes pour les agents qui travaillent sur ce projet
 
-Portail web **mobile-first** de mise à jour des dossiers employés d'**ACME SA** (MVP).
-Testé par le directeur et une autre personne, exécuté sur la machine du développeur.
-Langue du projet et de l'interface : **français**.
+**Portail carrière ACME SA** : refonte du portail des dossiers employés demandée par M. Hilaire (DRH).
+Web **mobile d'abord**. Langue du projet et de l'interface : **français**. Le code se fait ici (`app-web-v2`, branche `v2`).
 
 ## 0. Où en est le projet ? (à lire en premier)
 
-### Refonte demandée par M. Hilaire (en cours, mise à jour le 2026-10-08)
-
-Source de vérité : colonne « Statut » de `docs/lot0/1-specifications/epics/README.md` (stories US-001 → US-906, 10 epics D0 → D9, plan par lots). Le MVP n'est plus en service depuis le 2026-10-07 ; la refonte se code ici (`app-web-v2`).
+> Mise à jour le 2026-10-09. Source de vérité des statuts : `docs/lot0/1-specifications/epics/README.md`.
 
 | Story | Statut | Où on en est |
 |---|---|---|
 | US-105 Accueil | **Fait** | — |
 | US-101 Connexion en un écran | **Fait** | — |
-| US-001 Socle déployable | **En cours** | Code prêt (PostgreSQL, Alembic, Docker, S3, bandeau, jeu fictif) ; reste la mise en ligne avec les comptes du développeur (`docs/lot0/9-demonstrateur/mise-en-ligne-pas-a-pas.md`) |
+| US-001 Socle déployable | **Fait** | En ligne : Vercel (site) → Render `https://acme-sa.onrender.com` (API, Docker) → Supabase (PostgreSQL, stockage S3) ; chaque push sur `v2` redéploie. Dépôt signé → US-301 ; répétition AWS → US-002 |
 | US-102 Double authentification RH | **En cours** (avancée, D-42) | Écrans, règles et TOTP faits ; envoi réel WhatsApp/email en attente de la DIT (D-41) ; `MFA_METHODS` dit quelles méthodes sont ouvertes |
-| US-106 Double authentification employés | Pas encore | Nouvelle exigence du 2026-10-08 (D-41, P-15) |
+| US-106 Double authentification employés | Pas encore | Exigence du 2026-10-08 (D-41, P-15) |
+| US-501 Référentiel des unités | **Fait** | Import Excel (`app/referential`, écran `/admin/referentiel`). Interface au lot 4 → US-503 |
+| US-201 Voir mon dossier et ma progression | **Fait** | `app/employee/domain/completion.py` : 8 éléments (RG-01), tronqué à l'entier (5/8 = 62 %) ; affectation en libellés officiels, « Unité à confirmer » sinon |
+| US-202 Compléter mes coordonnées | **Fait** | Module `app/dossier`, écrans `features/dossier/` (`/avant-de-commencer`, `/profil/coordonnees`, `/profil/contact-etudes`). Une information compte seulement saisie ou confirmée. Mention d'information à valider (D-43) |
+| US-203 Confirmer ou signaler agence, poste, date d'embauche | **Fait** | Section 3/3 `/profil/informations-rh` ; confirmation datée ou signalement (table `error_report`, traité au lot 2 par US-403) ; signalement automatique si embauche avant 18 ans (RG-16) |
+| US-204 Savoir ce qui me reste avant de déposer | **Fait** | `/certificats` fermé tant que le profil n'est pas complet, liste de ce qui reste avec un lien par élément ; `completion.is_complete` |
+| US-206 Retirer l'ancien parcours de mise à jour | **Fait** | Plus de routes `/api/me/update/*` ni `/api/me/documents/*` ; `/mise-a-jour/*` et `/documents` ramènent à `/profil` ; les écrans RH du MVP lisent toujours les envois passés |
+| US-301 Déposer un certificat | **Fait** | Module `app/certificate` : dépôt signé direct au stockage (S3, ou route locale en `local`), contenu réel contrôlé, 5 Mo, 20 au plus, nom aléatoire. Domaines à valider (D-45). CORS du stockage à vérifier sur le démonstrateur |
+| US-302 Savoir ce que mon certificat m'apporte | **Fait** | `/certificats/merci` : récapitulatif, « Reçu », ce que ça débloque, avis en un clic (D-46) |
+| US-303 Suivre mon certificat | **Fait** | Statuts dans « Mes certificats ». « À corriger » et redépôt au lot 2 ; notification avec US-701 |
+| US-502 Rattacher les valeurs inconnues | **Fait** | Bloc « À rattacher » de `/admin/referentiel`, avec le nombre d'employés ; disparaît après import de la correspondance |
+| US-605 Mesurer si les employés reviennent | **Fait** | Journal `employee_login` ; carte « Engagement des employés » du tableau de bord RH (`GET /api/admin/engagement`) |
+| US-207 Aligner l'espace employé sur les écrans validés | **Fait** | Écrans validés par M. Hilaire = `2-espace-employe-ecrans/` et `3-espace-rh-ecrans/` (D-47). Accueil `/accueil` (écran 06) après la connexion, « Avant de commencer » d'abord à la première connexion ; en-tête « Portail Carrière » et barre du bas ; identité en lecture seule (08) ; écrans 07, 11, 12, 13 alignés ; niveau d'études validé en tête de « Mes certificats » |
+| US-701, US-702 Notifications et rappels | Pas encore | **Reportées** le 2026-10-08 : prestataire non choisi (D-41) ; déclenchement des rappels à décider |
 
-**Prochaine action :** finir US-001 (une story à la fois), puis reprendre le lot 1.
+**Prochaine action :** lot 1 terminé le 2026-10-09, sauf US-701 et US-702 reportées. Les écrans RH (menu latéral, A09 « Valeurs à rattacher ») sont repris au début du lot 2. Avant le lot 2 : pousser `v2` (migrations 0005 → 0007), essayer un dépôt de certificat sur le démonstrateur (CORS), faire valider D-43, D-44, D-45. Lot 2 : ordre proposé dans `docs/03-plan-implementation.md` §2, en revenant au cycle normal (tests après chaque story). Une story à la fois.
 
 À savoir :
-- Connexion RH : le mot de passe ouvre une session « en attente du code » (`ADMIN_MFA`) ; aucun réglage ne désactive la double authentification. Dans les tests API, `rh_login()` (`tests/conftest.py`) fait la connexion complète avec l'application TOTP ; dans les tests E2E, `e2e/admin.js`.
-- Les codes WhatsApp/email ne s'affichent à l'écran qu'avec `APP_ENV=local` (poste du développeur, tests) ; en ligne, jamais.
-- Le démonstrateur ne reçoit que du travail du projet : rien de « spécial démo ».
+- **Code hérité** du MVP et de la V2 : modules `update` et `document` (sans route employé depuis US-206, lus par les écrans RH du MVP), écrans RH du MVP, `career` (`/parcours`, D-44) : à remplacer par des stories (`docs/01-prd.md` §7). Ne pas l'étendre.
+- Tests API d'un profil complet : `complete_profile(client)` (`tests/conftest.py`) ; dépôt : `_deposit(client)` (`tests/api/test_us301_depot.py`).
+- Connexion RH : le mot de passe ouvre une session « en attente du code » (`ADMIN_MFA`) ; aucun réglage ne désactive la double authentification. Tests API : `rh_login()` (`tests/conftest.py`) ; tests E2E : `e2e/admin.js`.
+- Les codes WhatsApp/email ne s'affichent à l'écran qu'avec `APP_ENV=local` ; en ligne, jamais.
+- Le démonstrateur ne reçoit que du travail du projet : rien de « spécial démo ». Chaque push sur `v2` le met à jour : ne pousser que des tests verts.
 - `TEST_POSTGRES_URL` fait tourner toute la suite sur PostgreSQL.
-
-### MVP (historique)
-
-> **Dernière mise à jour : 2026-10-05.** Cette section est mise à jour à la fin de chaque story (voir §2, étape 8).
-> En cas de doute, la source de vérité est la colonne « Statut » de `docs/epics/README.md`.
-
-### Phases (`docs/03-plan-implementation.md`)
-
-| Phase | Statut |
-|---|---|
-| 0 — Mise en place | **Fait** |
-| 1 — Walking Skeleton | **Fait** (parcours employé → admin vérifié par `frontend/e2e/walking-skeleton.spec.js`) |
-| 2 — Identification complète | **Fait** (US-01 à US-04) |
-| 3 — Consultation et mise à jour | **Fait** (US-05, 06, 08 → 12, US-24) |
-| 4 — Documents | **Fait** (US-13, US-14, US-07) |
-| 5 — Administration | **Fait** (US-15 → US-23) |
-| 6 — Finalisation | **Fait** (test du directeur reporté par l'utilisateur) |
-
-### Epics (`docs/epics/README.md`)
-
-| Epic | Statut |
-|---|---|
-| E01 Identification | **Fait** (US-01 à US-04) |
-| E02 Consultation | **Fait** (US-05, US-06, US-07) |
-| E03 Mise à jour | **Fait** (US-08 → US-12, US-24) |
-| E04 Documents | **Fait** (US-13, US-14) |
-| E05 Administration | **Fait** (US-15 → US-23) |
-
-### Stories
-
-**Fait :** US-01 → US-24 (toutes les stories).
-
-**En cours :** aucune.
-
-**Pas encore :** aucune.
-
-### Prochaine action
-
-**MVP terminé** (phase 6 faite le 2026-10-05 ; `.\run.ps1 -Tunnel` pour un accès Internet). Le test du directeur est **reporté** par l'utilisateur ; le MVP reste en service (dossier `app-web`, branche `main`). Le vrai CSV ne se lit qu'à travers les outils qui n'affichent aucune donnée ; ne jamais le copier.
-
-**V2 — Parcours professionnel :** spécifications dans `docs/v2/` : PRD v1.2 et Solution Design v1.0 validés le 2026-10-05 ; **phase 7 en cours** : 7.1 → 7.6 faites, **US-25 Fait** ; epic E06 en cours ; **V2 en pause depuis le 2026-10-05** : le directeur demande une refonte (verrou du certificat sur un dossier complet, validation RH, rôles…) ; plan validé le 2026-10-06 ; **lot 0 (cadrage : spécifications et maquettes, aucun développement)** en cours, backlog `docs/lot0/backlog-lot0.md`, cycles de 48 h ; le **registre des décisions** `docs/lot0/0-cadrage/registre-des-decisions-v1.8.md` fait foi. **Ne pas reprendre US-26** : la V2 sera refondue dans les nouvelles spécifications ; statuts V2 : `docs/v2/epics/README.md` ; plan `docs/v2/03-plan-implementation.md` (phases 7 → 10) validé le 2026-10-05 ; le MVP **reste en service** pendant le développement V2. Le code V2 se fait dans `ACME SA\app-web-v2` (git worktree, port 8002, `C:\acme-data-v2`). Dans `app-web` tant que le MVP est en service : ni code, ni `npm run build`, ni `npx playwright test` (recompile `dist`), ni changement de branche.
-
-À savoir (V2) :
-- Module `career` (`app/career`) : registre `entry_kinds.py` (4 rubriques, `FieldSpec`), `CareerEntry` / `CareerProfile` / `sort_entries` (`career_entry.py`), `Month` (« AAAA-MM »), port `CareerRepository` (chaque écriture met à jour `career_profile` dans la même transaction) ; `SqlCareerRepository` ; cas d'utilisation `GetMyCareer`, `GetCareerFields` ; conteneur : `container.careers`. Ne jamais importer `app.update` depuis `app.career` (contrat import-linter).
-- Tests V2 : `tests/career.py` (`make_entry`, valeurs par défaut par rubrique), fixtures `career_entry`, `career_reference` (P-A, P-B, P-I), `frozen_clock` ; `CAREER_NOW` = 2026-10-15.
-- Frontend V2 : `features/career/` (`CareerPage`, `CareerSection`, `CareerEntryCard` + `SkillTag`, `careerKinds.js` : `CAREER_KINDS` (slug, icône, message vide) et `describeEntry`) ; `api/career.js` ; `formatMonth` dans `lib/format.js` ; lien « Mon parcours » du menu (`EMPLOYEE_LINKS` d'`AccountMenu`) et carte du profil.
-
-À savoir (MVP) :
-- Le menu de l'avatar (« Se déconnecter ») s'active avec la prop `account` de `Page` : `account` pour un écran employé, `account="admin"` pour **tout écran admin** (déconnexion vers `/admin/connexion`, `useLogout('admin')`). Écrans admin : `useLoader(load, { loginPath: '/admin/connexion' })`.
-- Tableau de bord : `features/admin/DashboardPage.jsx` (`/admin`) ; ses cartes mènent à `/admin/employes?status=UPDATED|NOT_UPDATED` : **US-19 doit lire ce paramètre**. Calcul : `app/admin/domain/statistics.py`, `GetStatistics`.
-- Liste admin : `features/admin/EmployeeListPage.jsx` (page dans l'adresse `?page=`, autres paramètres conservés ; cartes `lg:hidden` + tableau `hidden lg:block`, tous deux dans le DOM : dans les tests, viser `getByRole('list'|'table', { name: 'Employés' })`). `Page wide` pour les écrans admin larges. API : `display_name`, `previous_name`, `page_count` (`ListEmployees`).
-- Recherche admin : `features/admin/EmployeeSearch.jsx` (300 ms, `?search=` en `replace`) ; règle `app/admin/domain/search.py`, appliquée dans `ListEmployees` avant la pagination. Filtre de statut : `features/admin/StatusFilter.jsx` (`?status=`, compteurs `counts` de l'API). `useLoader(load, { key })` relance le chargement quand la clé change.
-- Dossier admin : `features/admin/EmployeeDetailPage.jsx` (`/admin/employes/:id`, blocs `Block`, retour vers la liste via `state.listSearch`) ; `GetEmployeeFolder` ; sections partagées avec le profil : `features/profile/profileSections.js` (`InfoSection showEditable={false}` côté admin). Documents (US-21) : `features/admin/AdminDocuments.jsx`, chargés avec le dossier ; `ListEmployeeDocuments`, `GetEmployeeDocumentFile` ; bloc titré réutilisable `features/admin/Block.jsx` (prop `aside`). Bloc « Accès » et réinitialisation (US-22) : `features/admin/ResetAccess.jsx`, `ResetAccess` (module `admin`), `POST /api/admin/employees/{id}/reset-access`, seule écriture de l'administration.
-- Admin : comptes en base (US-23, table `admin_account`, `app/auth/application/admin_accounts.py`) ; `current_admin` (refuse un mot de passe provisoire : `403 PASSWORD_CHANGE_REQUIRED`) / `current_admin_pending` ; fixture `admin_session(container)` dans `tests/conftest.py` (compte de test importé de la configuration). Écrans `/admin/administrateurs`, `/admin/mot-de-passe` ; liens du menu du compte admin. Le test paramétré `test_us15_admin_auth.py` couvre automatiquement toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé) : une route qui prend un `{id}` reçoit `1001`.
-- Contrôle d'un CSV (phase 6) : `app/tools/check_csv.py` (chargement, dates, accents, formats de téléphone, doublons, puis recherche des valeurs des colonnes exclues dans toutes les réponses de l'API sur une base temporaire) ; rapport sans aucune donnée du CSV ; testé sur le CSV fictif (`tests/test_check_csv_tool.py`).
-- Profil : `features/profile/InfoSection.jsx` (section teintée, « Modifiable » / cadenas par champ, selon `editable_fields` de l'API) ; jeton `--color-section` ; `formatGender` et `initials` dans `lib/format.js`.
-- Modifier à nouveau (US-24) : `EmployeeUpdate.submitted_changes` = copie du dernier envoi, lue par l'admin, le profil et l'identification (`current_values`, `has_submission`) ; le brouillon reste dans `changes`. Ne jamais lire `changes` côté admin. Routes `reopen` / `discard` ; carte d'état (`reopened`).
-- Carte d'état : `features/profile/UpdateStateCard.jsx` (présentation seule ; les appels API restent dans `ProfilePage.jsx`) ; choix Oui/Non dans `DecisionCard.jsx`. `useLoader` renvoie aussi `reload()`. Variante de bouton `subtle` (fond gris clair).
-- Étape 1 : `features/update/InformationsStep.jsx` (+ `FieldCard`, `FormSection`, `fieldRules.js` qui reprend les règles du registre serveur) ; `components/Stepper.jsx` (4 étapes) à réutiliser dans les étapes suivantes. `TextField` accepte `required`, `labelAside`, `footer`.
-- Brouillon : `features/update/useAutosave.js` (2 s, champs valides seulement, `flush()` au changement d'étape) ; `formatTime` dans `lib/format.js`.
-- Vérification : `features/update/ReviewStep.jsx`, `components/ValueComparison.jsx` ; `formatSize` dans `lib/format.js`.
-- Soumission : `features/update/SubmitSection.jsx` (`useSubmission`, verrou anti double clic) ; confirmation : `ConfirmationStep.jsx`.
-- Tests E2E : une seule base partagée, un employé fictif par test (liste dans `frontend/e2e/start-server.mjs`).
-- Documents (module backend `document`) : `UploadDocument`, `DeleteDocument`, `ListMyDocuments`, `ensure_update_open()`, `LocalFileStorage`, `SqlDocumentRepository` ; frontend `features/documents/` (`DocumentsStep`, `DocumentItem` avec prop `onDelete` (bouton « Supprimer » + confirmation ; sans `onDelete`, aucun bouton), `resizeImage`) ; `upload()` (XHR avec progression) dans `api/client.js`.
-- Consultation : `features/documents/MyDocumentsPage.jsx` (`/documents`) ; `DocumentItem` accepte `fileUrl` (« Voir », miniature) et `showDate` ; `components/ImagePreview.jsx` (aperçu plein écran, à réutiliser pour US-21) ; `documentFileUrl()` dans `api/documents.js`.
+- Écran admin : `Page account="admin"` et `useLoader(load, { loginPath: '/admin/connexion' })`. Le test paramétré `test_us15_admin_auth.py` couvre toute nouvelle route `/api/admin/*` (401 sans session, 403 avec session employé).
+- Écran employé d'une section du profil : `useDossierSection()` (`features/dossier/`) gère le chargement, le passage par « Avant de commencer » et les erreurs de champ.
 
 ## 1. Méthode : Spec-Driven Development
 
-Les spécifications font foi. Ordre de lecture avant toute modification :
+Les spécifications font foi. Ordre de lecture :
 
 | Document | Rôle |
 |---|---|
-| `docs/01-prd.md` | Le quoi et le pourquoi (fonctionnalités F-xx, décisions D-xx) |
-| `docs/02-solution-design.md` | Le comment (architecture, modèle de données, API, sécurité) |
-| `docs/epics/README.md` | Index des user stories, **statuts**, jeu de données de test, Definition of Done |
-| `docs/epics/E0x-*/US-xx-*.md` | Une story : règles, critères d'acceptation (CA-xx), tests (T-xx.y) |
-| `docs/03-plan-implementation.md` | Phases, ordre de réalisation, règles de Clean Architecture (§1.1), **avancement** (§2.1) |
+| `docs/lot0/0-cadrage/registre-des-decisions-v1.8.md` | **Fait foi** en cas de contradiction |
+| `docs/01-prd.md` | Le quoi et le pourquoi, en court, avec les renvois au cahier des charges |
+| `docs/lot0/1-specifications/` | Cahier des charges (EF, ENF), tableau unique des règles (RG), décisions (D) |
+| `docs/lot0/1-specifications/epics/` | Index des stories (**statuts**), une story par fichier : récit, critères d'acceptation (CA-xx), Definition of Done |
+| `docs/02-solution-design.md` | Le comment : architecture, modules, données, API, sécurité, **règles de Clean Architecture** (§3) |
+| `docs/03-plan-implementation.md` | Ordre de réalisation, démonstrateur, jeu de test, Definition of Done commune |
+| `docs/lot0/2-maquettes/2-espace-employe-ecrans/`, `3-espace-rh-ecrans/` | Écrans **validés par M. Hilaire** (D-47) : la référence ; une règle du registre l'emporte sur un texte d'écran |
 
-Tous ces documents sont **validés** : ne pas changer une règle métier ou une décision sans l'accord de l'utilisateur. Toute nouvelle demande devient une nouvelle story.
+Ne pas changer une règle métier ou une décision sans l'accord de l'utilisateur. Toute nouvelle demande devient une nouvelle story. S'en tenir aux mots du directeur : citer la source, mettre le reste en question ouverte (❓).
 
 ## 2. Travailler story par story
 
 **Une seule story à la fois.** Ne pas commencer la suivante avant que la courante soit « Fait » et que l'utilisateur ait validé.
 
-Cycle d'une story :
+Les fichiers de story, les README des epics et l'index sont **générés** par `docs/lot0/1-specifications/epics/generer_stories.py` (listes `EPICS`, `S` et dictionnaire `STATUS`) : on ne les modifie jamais à la main ; on change le générateur, puis on le relance.
 
-1. Passer son statut à **En cours** (fichier de la story, index `docs/epics/README.md` et §0 de ce fichier).
-2. Relire la story : règles, critères d'acceptation, hors périmètre.
-3. Écrire les tests listés dans la story (**avant** le code), nommés d'après la story et le critère (`test_us01_*.py`, `test_ca04_*`).
+1. Passer son statut à **En cours** (générateur, puis §0 de ce fichier).
+2. Relire la story : critères d'acceptation, règles, maquette. **Poser toutes les questions ouvertes à l'utilisateur dès maintenant**, pas à la fin.
+3. Écrire les tests de la story (**avant** le code), nommés d'après la story et le critère (`test_us202_*.py`, `test_ca04_*`).
 4. Domaine + cas d'utilisation → tests unitaires verts (ports simulés en mémoire).
-5. Infrastructure + route API, câblage dans `backend/app/container.py` → tests API verts.
+5. Infrastructure + route API + migration Alembic, câblage dans `backend/app/container.py` → tests API verts.
 6. Écran React → tests composant verts ; vérifier à 390 px et 1280 px.
-7. Lancer **toute** la suite de tests (voir §5) : tout doit être vert.
-8. Cocher la Definition of Done, passer le statut à **Fait** dans **les trois endroits** : le fichier de la story, l'index `docs/epics/README.md` et la section §0 de ce fichier (tableaux, « Prochaine action », date de mise à jour).
-   Mettre aussi à jour le **statut de l'epic** (README de l'epic, tableau « Statut des epics » de `docs/epics/README.md`, §0) et celui de la **phase**, ainsi que les statuts du **plan d'implémentation** (`docs/03-plan-implementation.md` : §2, §2.1, tableau de la phase, §10, date « Avancement mis à jour le »).
-9. S'arrêter et présenter le résultat à l'utilisateur. **Ne pas commiter : l'utilisateur s'en charge.**
-   Le compte rendu indique toujours où en sont l'**epic** et la **phase** de la story ; quand une story termine un epic ou une phase, l'annoncer explicitement (« Epic E0x terminé », « Phase n terminée »).
-
-### Statuts des stories
+   Pendant les étapes 4 à 6, ne lancer que les tests de la story et ceux du code touché.
+7. Lancer **toute** la suite (§5), **une seule fois**, à la fin : tout doit être vert. Playwright seulement si un écran ou un parcours a changé.
+8. En une seule passe : Definition of Done cochée, statut **Fait** (générateur, puis §0), `docs/02-solution-design.md` si l'architecture a changé.
+9. S'arrêter et présenter le résultat à l'utilisateur, en court : ce qui a été fait, les tests, où en sont l'**epic** et le **lot**, ce qui reste à décider. Annoncer un epic ou un lot terminé. **Ne pas commiter : l'utilisateur s'en charge.**
 
 | Statut | Signification |
 |---|---|
 | **Pas encore** | Aucun code écrit |
-| **En cours** | Commencée (y compris version minimale du Walking Skeleton) |
+| **En cours** | Commencée |
 | **Fait** | Tous les critères d'acceptation couverts par des tests verts, Definition of Done cochée |
 
-Le statut figure dans l'en-tête de chaque story (`| **Statut** | … |`), dans la colonne « Statut » de l'index et dans §0 de ce fichier. Les trois doivent toujours être identiques.
+## 3. Architecture
 
-## 3. Architecture (à respecter strictement)
+Monolithe modulaire, 3 tiers, **Clean Architecture** : règles complètes dans `docs/02-solution-design.md` §3, modules dans §4. L'essentiel :
 
-Monolithe modulaire, 3 tiers, **Clean Architecture**. Modules backend : `shared`, `employee`, `auth`, `update`, `document`, `admin`, chacun en 4 couches :
-
-| Couche | Contient | N'importe jamais |
-|---|---|---|
-| `domain` | Entités, règles métier pures, ports (interfaces), erreurs métier | FastAPI, Pydantic, SQLAlchemy, fichiers, autres couches |
-| `application` | Cas d'utilisation (une classe, méthode `execute()`, ports injectés) | FastAPI, SQLAlchemy, `infrastructure`, `api` |
-| `infrastructure` | Adaptateurs : CSV, SQLAlchemy, disque, Argon2 | `api` |
-| `api` | Routes FastAPI, schémas Pydantic | `infrastructure` |
-
-- `backend/app/container.py` est le **seul** endroit qui instancie l'infrastructure (composition root).
-- Les routes obtiennent les cas d'utilisation via `container(request)` (`app/auth/api/dependencies.py`).
-- Un module n'utilise un autre que par ses ports ou cas d'utilisation, jamais par son infrastructure.
-- Erreurs métier : sous-classes de `app/shared/domain/errors.py`, avec un `code` stable et un `message` en français ; traduites en HTTP à un seul endroit (`app/shared/api/errors.py`). Format : `{"error": {"code", "message", "field"?}}`.
-- Les règles sont vérifiées par **import-linter** (`[tool.importlinter]` dans `backend/pyproject.toml`), exécuté par `tests/test_architecture.py`.
-- Frontend : les composants n'appellent jamais `fetch` ; tout passe par `frontend/src/api/`. Logique d'écran dans des hooks (`src/lib/`, `src/features/*/`).
+- Chaque module backend a 4 couches : `domain` → `application` → `infrastructure` / `api`. Le domaine et l'application n'importent aucun framework.
+- `backend/app/container.py` est le **seul** endroit qui instancie l'infrastructure.
+- Un module n'utilise un autre que par ses ports ou ses cas d'utilisation.
+- Erreurs métier : `code` stable et `message` en français, traduites en HTTP dans `app/shared/api/errors.py`.
+- Vérifié par import-linter (`tests/test_architecture.py`) : un nouveau module s'ajoute aux contrats de `backend/pyproject.toml`.
+- Frontend : jamais de `fetch` dans un composant ; tout passe par `frontend/src/api/`.
 
 ## 4. Règles métier et sécurité à ne jamais enfreindre
 
-- Le CSV source est en **lecture seule** ; seuls les employés `active = true` et les colonnes de la liste blanche sont lus (`csv_employee_repository.py`). Dates du CSV : **MM/JJ/AAAA**.
-- **Aucune colonne exclue** (bancaire, dettes, licenciement, références, pièce d'identité…) ne doit apparaître dans l'API ou les logs. Le CSV de test contient `FAKE-SECRET-…` dans ces colonnes : les tests le vérifient.
-- L'administrateur est en **lecture seule** sur les dossiers (seule exception : réinitialiser l'accès, US-22).
-- Côté admin, **deux statuts seulement** : `UPDATED` / `NOT_UPDATED`. Le brouillon n'est jamais visible par l'admin.
-- Un employé n'accède à ses données que par `/api/me/*` (jamais par un identifiant dans l'URL).
-- Mots de passe : Argon2, jamais renvoyés ni journalisés.
+- L'export RH est en **lecture seule** ; seuls les employés actifs et les colonnes de la liste blanche sont lus. Dates du CSV : **MM/JJ/AAAA**.
+- **Aucune colonne exclue** (bancaire, dettes, licenciement, références, pièce d'identité…) dans l'API ou les journaux. Le CSV de test met `FAKE-SECRET-…` dans ces colonnes : les tests le vérifient.
+- **Aucune donnée réelle d'employé** hors de la production sécurisée : démonstrateur et recette sur données fictives. Ne jamais copier le vrai export.
+- Un employé n'accède à ses données que par `/api/me/*`.
+- Mots de passe : Argon2, jamais renvoyés ni journalisés. Secrets seulement dans `backend/.env` ou chez l'hébergeur, jamais dans le dépôt.
+- Aucune saisie dans le dossier de l'employé avant son consentement (US-202).
 
 ## 5. Commandes
 
@@ -166,28 +105,27 @@ Monolithe modulaire, 3 tiers, **Clean Architecture**. Modules backend : `shared`
 # Backend (depuis backend/)
 .venv\Scripts\python -m pytest            # tests unitaires, API et contrats d'architecture
 .venv\Scripts\lint-imports                # contrats d'architecture seuls
+.venv\Scripts\alembic revision --autogenerate -m "..." --rev-id 000N   # nouvelle migration
 
 # Frontend (depuis frontend/)
 npm test                                  # tests unitaires et composants (Vitest)
 npx playwright test                       # tests bout en bout (mobile 390 px, CSV fictif)
 
-# Lancer l'application (depuis la racine)
-.\run.ps1                                 # ou -Build (recompiler le frontend), -Tunnel (accès Internet HTTPS)
-python -m app.tools.create_admin          # (depuis backend/) premier administrateur (run.ps1 le demande s'il manque)
-python -m app.tools.check_csv             # (depuis backend/) contrôle du CSV avant un test (voir docs/guide-demarrage.md)
+# Outils (depuis backend/)
+python -m app.tools.create_admin          # premier compte RH
+python -m app.tools.check_csv             # contrôle d'un export sans afficher aucune donnée (docs/guide-demarrage.md)
 ```
 
 ## 6. Données et environnement
 
-- `data/` contient le **vrai** CSV : jamais versionné, jamais utilisé dans les tests.
-- Tests : uniquement `backend/tests/fixtures/employees_test.csv` (employés fictifs EMP-A, EMP-H1/H2, EMP-D1/D2, EMP-I, EMP-E, EMP-B, cf. `docs/epics/README.md`) et les fixtures de `backend/tests/conftest.py`.
-- Base SQLite et documents : `ACME_DATA_DIR` (par défaut `C:\acme-data`), **hors OneDrive**.
-- Configuration : `backend/.env` (non versionné), modèle dans `backend/.env.example`.
-- Maquettes de référence : `stitch_portail_dossier_collaborateur_acme/` (design system dans `acme_enterprise_clarity/DESIGN.md`). Les écrans admin n'ont pas de maquette : ils utilisent les composants existants, sans validation visuelle intermédiaire.
+- Tests : uniquement le CSV fictif `backend/tests/fixtures/employees_test.csv` et les fixtures de `backend/tests/conftest.py` (`docs/03-plan-implementation.md` §4).
+- Données locales : `C:\acme-data-v2`, **hors OneDrive**. Le vrai export n'est jamais versionné ni utilisé dans les tests.
+- Configuration : `backend/.env` (non versionné), modèle dans `backend/.env.example` (aucun secret).
+- Démonstrateur : `docs/lot0/9-demonstrateur/` ; référentiel fictif à importer : `backend/demo/referentiel-fictif.xlsx`.
 
 ## 7. Conventions
 
-- Textes d'interface et messages d'erreur en français, clairs, affichés près de l'élément concerné.
-- Mobile-first : zones tactiles ≥ 44 px, texte ≥ 16 px, aucun défilement horizontal, bouton principal dans la barre collée en bas.
+- Textes d'interface et messages d'erreur en français, près de l'élément concerné, qui disent quoi faire (RG-15).
+- Mobile d'abord : zones tactiles ≥ 44 px, texte ≥ 16 px, aucun défilement horizontal, bouton principal dans la barre collée en bas.
 - Couleurs et styles uniquement via les jetons Tailwind de `frontend/src/index.css`.
 - Ne pas commiter ni pousser : l'utilisateur gère git.

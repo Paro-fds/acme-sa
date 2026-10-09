@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel
 
 from app.auth.api.dependencies import container, current_admin
-from app.document.api.routes import DocumentOut, file_response
-from app.update.api.routes import ChangeOut
+from app.document.api.schemas import DocumentOut, file_response
+from app.update.api.schemas import ChangeOut
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(current_admin)])
 
@@ -122,3 +122,29 @@ def get_employee_document_file(document_id: str, request: Request) -> Response:
 def reset_access(employee_id: str, request: Request) -> None:
     """US-22 : seule route d'écriture de l'administration."""
     container(request).reset_access().execute(employee_id)
+
+
+class RatingCountOut(BaseModel):
+    rating: int
+    label: str
+    count: int
+
+
+class EngagementOut(BaseModel):
+    """US-605 : des nombres seulement, jamais de commentaire ni de nom."""
+
+    logins_30_days: int
+    employees_30_days: int
+    active_employees: int
+    feedback: list[RatingCountOut]
+
+
+@router.get("/engagement", response_model=EngagementOut)
+def engagement(request: Request) -> EngagementOut:
+    result = container(request).get_engagement().execute()
+    return EngagementOut(
+        logins_30_days=result.logins_30_days,
+        employees_30_days=result.employees_30_days,
+        active_employees=result.active_employees,
+        feedback=[RatingCountOut(**item.__dict__) for item in result.feedback],
+    )

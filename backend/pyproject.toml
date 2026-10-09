@@ -16,6 +16,7 @@ dependencies = [
     "boto3",
     "pyotp",
     "segno",
+    "openpyxl",
 ]
 
 [project.optional-dependencies]
@@ -34,7 +35,7 @@ pythonpath = ["."]
 
 # ---------------------------------------------------------------------------
 # Clean Architecture : règles de dépendance vérifiées par `lint-imports`
-# (docs/03-plan-implementation.md §1.1)
+# (docs/02-solution-design.md §3)
 # ---------------------------------------------------------------------------
 [tool.importlinter]
 root_package = "app"
@@ -52,6 +53,9 @@ containers = [
     "app.document",
     "app.admin",
     "app.career",
+    "app.referential",
+    "app.dossier",
+    "app.certificate",
 ]
 
 [[tool.importlinter.contracts]]
@@ -65,6 +69,9 @@ source_modules = [
     "app.document.domain",
     "app.admin.domain",
     "app.career.domain",
+    "app.referential.domain",
+    "app.dossier.domain",
+    "app.certificate.domain",
     "app.shared.application",
     "app.employee.application",
     "app.auth.application",
@@ -72,6 +79,9 @@ source_modules = [
     "app.document.application",
     "app.admin.application",
     "app.career.application",
+    "app.referential.application",
+    "app.dossier.application",
+    "app.certificate.application",
 ]
 forbidden_modules = ["fastapi", "starlette", "pydantic", "sqlalchemy"]
 
@@ -100,6 +110,15 @@ source_modules = [
     "app.career.domain",
     "app.career.application",
     "app.career.api",
+    "app.referential.domain",
+    "app.referential.application",
+    "app.referential.api",
+    "app.dossier.domain",
+    "app.dossier.application",
+    "app.dossier.api",
+    "app.certificate.domain",
+    "app.certificate.application",
+    "app.certificate.api",
 ]
 forbidden_modules = [
     "app.shared.infrastructure",
@@ -109,10 +128,13 @@ forbidden_modules = [
     "app.document.infrastructure",
     "app.admin.infrastructure",
     "app.career.infrastructure",
+    "app.referential.infrastructure",
+    "app.dossier.infrastructure",
+    "app.certificate.infrastructure",
     "app.container",
 ]
 
-# V2 (docs/v2/02-solution-design.md AD-V2-02) : le parcours ne touche jamais à la campagne de mise à jour.
+# Hérité de la V2 (docs/02-solution-design.md §3) : le parcours ne touche jamais à la campagne de mise à jour.
 [[tool.importlinter.contracts]]
 name = "Parcours indépendant de la campagne"
 type = "forbidden"

@@ -19,7 +19,7 @@ function renderPage() {
         <Route path="/connexion" element={<p>Écran de connexion</p>} />
         <Route path="/connexion/premiere" element={<CreatePasswordPage />} />
         <Route path="/connexion/homonyme" element={<p>Écran homonymes</p>} />
-        <Route path="/profil" element={<p>Écran profil</p>} />
+        <Route path="/accueil" element={<p>Écran accueil</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -44,7 +44,7 @@ describe('CreatePasswordPage (US-101, décision 4)', () => {
     expect(submit()).toBeDisabled()
   })
 
-  it('la création réussie ouvre le profil', async () => {
+  it('la création réussie ouvre l’accueil (US-207)', async () => {
     register.mockResolvedValue(null)
     const user = userEvent.setup()
     renderPage()
@@ -53,7 +53,7 @@ describe('CreatePasswordPage (US-101, décision 4)', () => {
     await user.click(submit())
 
     expect(register).toHaveBeenCalledWith(IDENTITY, 'Bonjour-2026', 'Bonjour-2026')
-    expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+    expect(await screen.findByText('Écran accueil')).toBeInTheDocument()
   })
 
   it('une règle du mot de passe non respectée s’affiche sous le champ concerné', async () => {

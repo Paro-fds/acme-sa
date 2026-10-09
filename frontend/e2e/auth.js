@@ -27,18 +27,31 @@ export async function login(page, person, password = PASSWORD) {
   await page.getByRole('button', { name: 'Me connecter' }).click()
 }
 
-/** Connexion, ou création du mot de passe si l'employé n'en a pas encore (tests rejoués sur une base partagée). */
-export async function signIn(page, person, password = PASSWORD) {
+const LANDING = /\/(accueil|avant-de-commencer)$/
+
+/** US-202 CA-01, US-207 : à la première connexion, « Avant de commencer » ; on accepte la mention pour continuer. */
+export async function acceptConsent(page) {
+  await page.getByRole('checkbox', { name: /J'ai lu et j'accepte/ }).check()
+  await page.getByRole('button', { name: /Continuer vers mon espace/ }).click()
+  await expect(page).toHaveURL(/\/accueil$/)
+}
+
+/**
+ * Connexion, ou création du mot de passe si l'employé n'en a pas encore (tests rejoués sur une base partagée).
+ * L'employé arrive sur « Accueil » (US-207) ; `consent: false` le laisse sur « Avant de commencer » s'il n'a pas encore accepté.
+ */
+export async function signIn(page, person, { password = PASSWORD, consent = true } = {}) {
   await login(page, person, password)
   const opened = await page
-    .waitForURL(/\/profil$/, { timeout: 3000 })
+    .waitForURL(LANDING, { timeout: 3000 })
     .then(() => true)
     .catch(() => false)
   if (!opened) await createPassword(page, person, password)
-  await expect(page).toHaveURL(/\/profil$/)
+  await expect(page).toHaveURL(LANDING)
+  if (consent && page.url().endsWith('/avant-de-commencer')) await acceptConsent(page)
 }
 
-// Employés fictifs du CSV de test (docs/epics/README.md), un par test.
+// Employés fictifs du CSV de test (docs/03-plan-implementation.md §4.1), un par test.
 export const EMP_A = { lastName: 'JOSEPH', firstName: 'Jean', birthDate: '1996-03-15' }
 export const EMP_B = { lastName: 'BAPTISTE', firstName: 'Marc', birthDate: '2000-12-01' }
 export const EMP_E = { lastName: 'ÉTIENNE', firstName: 'Rosé', birthDate: '1979-09-30' }

@@ -8,14 +8,15 @@ from app.admin.api import routes as admin_routes
 from app.auth.api import admin_account_routes, mfa_routes
 from app.auth.api import routes as auth_routes
 from app.career.api import routes as career_routes
+from app.certificate.api import routes as certificate_routes
 from app.config import Settings
 from app.container import Container
-from app.document.api import routes as document_routes
+from app.dossier.api import routes as dossier_routes
+from app.referential.api import routes as referential_routes
 from app.employee.api import routes as employee_routes
 from app.shared.api import health
 from app.shared.api.errors import register_error_handlers
 from app.shared.domain.errors import NotFound
-from app.update.api import routes as update_routes
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -33,12 +34,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health.router)
     app.include_router(auth_routes.router)
     app.include_router(employee_routes.router)
-    app.include_router(update_routes.router)
-    app.include_router(document_routes.router)
     app.include_router(career_routes.router)
     app.include_router(admin_routes.router)
     app.include_router(admin_account_routes.router)
     app.include_router(mfa_routes.router)
+    app.include_router(referential_routes.router)
+    app.include_router(dossier_routes.router)
+    app.include_router(certificate_routes.router)
     mfa_routes.restrict_rh_space_to_office_network(app)
 
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], include_in_schema=False)

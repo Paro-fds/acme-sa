@@ -239,4 +239,4 @@ def test_ca04_every_admin_route_refuses_an_employee_session(employee_client, met
 
 def test_ca04_admin_session_cannot_reach_employee_routes(admin_client):
     assert admin_client.get("/api/me/profile").status_code == 401
-    assert admin_client.get("/api/me/update").status_code == 401
+    assert admin_client.get("/api/me/dossier").status_code == 401

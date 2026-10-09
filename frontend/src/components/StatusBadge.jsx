@@ -2,12 +2,14 @@ const STYLES = {
   neutral: 'bg-status-neutral-bg border-status-neutral-border text-status-neutral-text',
   progress: 'bg-status-progress-bg border-status-progress-border text-status-progress-text',
   done: 'bg-status-done-bg border-status-done-border text-status-done-text',
+  error: 'bg-error-bg border-error-border text-error-text',
 }
 
 const DOTS = {
   neutral: 'bg-status-neutral-dot',
   progress: 'bg-status-progress-dot',
   done: 'bg-status-done-dot',
+  error: 'bg-error-dot',
 }
 
 /** Pastille de statut : jamais la couleur seule, toujours un texte (design system). */

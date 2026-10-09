@@ -1,4 +1,4 @@
-"""Fixtures communes à toutes les stories (docs/epics/README.md).
+"""Fixtures communes à toutes les stories (docs/03-plan-implementation.md §4.2).
 
 Chaque test démarre avec une base SQLite vide, un dossier de documents vide
 et le CSV fictif `fixtures/employees_test.csv` : aucun test ne dépend d'un autre.
@@ -175,7 +175,7 @@ def submitted(container, draft) -> Callable[[TestEmployee, dict[str, str]], Empl
     return create
 
 
-# --- V2 : parcours professionnel (docs/v2/epics/README.md) -------------------------
+# --- Hérité de la V2 : parcours professionnel (D-44) --------------------------------
 
 
 @pytest.fixture
@@ -217,3 +217,23 @@ def career_reference(career_entry) -> dict[str, list[CareerEntry]]:
         ],
         "P-I": [career_entry(EMP_I, EntryKind.SKILL, title="Analyse de crédit", skill_level=SkillLevel.EXPERT)],
     }
+
+
+# --- Lot 1 : profil complet (US-204, US-301) --------------------------------------------------------
+
+COMPLETE_COORDINATES = {"telephone": "3712 3456", "address": "12 rue Capois, Port-au-Prince", "email": "", "no_email": True}
+COMPLETE_CONTACT = {
+    "contact_name": "Jean Baptiste Pierre",
+    "contact_relationship": "SIBLING",
+    "contact_telephone": "4812 8901",
+    "education_level": "LICENCE",
+}
+
+
+def complete_profile(client: TestClient) -> None:
+    """Remplit les 8 éléments de RG-01 par l'API : consentement, coordonnées, contact, niveau, trois confirmations."""
+    assert client.post("/api/me/dossier/consent", json={"information_notice": True, "whatsapp": False}).status_code == 200
+    assert client.put("/api/me/dossier/coordinates", json=COMPLETE_COORDINATES).status_code == 200
+    assert client.put("/api/me/dossier/contact-and-education", json=COMPLETE_CONTACT).status_code == 200
+    for key in ("agency_confirmed", "position_confirmed", "hire_date_confirmed"):
+        assert client.post(f"/api/me/dossier/hr-information/{key}/confirm").status_code == 200

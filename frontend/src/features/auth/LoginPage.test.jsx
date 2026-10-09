@@ -20,7 +20,7 @@ function renderPage(state) {
         <Route path="/connexion" element={<LoginPage />} />
         <Route path="/connexion/premiere" element={<p>Écran création du mot de passe</p>} />
         <Route path="/connexion/homonyme" element={<p>Écran homonymes</p>} />
-        <Route path="/profil" element={<p>Écran profil</p>} />
+        <Route path="/accueil" element={<p>Écran accueil</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -61,7 +61,7 @@ describe('LoginPage (US-101)', () => {
     expect(submit()).toBeDisabled()
   })
 
-  it('CA-01 : des informations exactes ouvrent le profil', async () => {
+  it('CA-01 : des informations exactes ouvrent l’accueil (US-207)', async () => {
     login.mockResolvedValue(null)
     const user = userEvent.setup()
     renderPage()
@@ -70,7 +70,7 @@ describe('LoginPage (US-101)', () => {
     await user.click(submit())
 
     expect(login).toHaveBeenCalledWith(IDENTITY, 'Bonjour-2026')
-    expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+    expect(await screen.findByText('Écran accueil')).toBeInTheDocument()
   })
 
   it('CA-03 : un seul message quand la connexion échoue ; le mot de passe est effacé', async () => {

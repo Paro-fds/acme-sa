@@ -2,16 +2,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
-import ProfilePage, { DISCARDED_NOTICE } from './ProfilePage.jsx'
-import { decide, discardUpdate, getProfile, reopenUpdate } from '../../api/employee.js'
+import ProfilePage from './ProfilePage.jsx'
+import { getProfile } from '../../api/employee.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/employee.js', () => ({
-  getProfile: vi.fn(),
-  decide: vi.fn(),
-  reopenUpdate: vi.fn(),
-  discardUpdate: vi.fn(),
-}))
+vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn() }))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 
 const PROFILE = {
@@ -23,15 +18,29 @@ const PROFILE = {
   telephone_number: '+50937221111',
   email_address: '',
   address_line_1: '12 rue Capois, Port-au-Prince',
-  agency_code: 'PV',
-  department: 'Crédit',
+  affectation: { agency: 'Pétion-Ville', region: 'Métropole 1', direction: 'Direction du Crédit' },
   position: 'Agent de crédit',
   grade: '12',
   level: '2',
   contract_nature: 'CDI',
   hire_date: '2019-06-03',
-  editable_fields: ['last_name', 'first_name', 'telephone_number', 'email_address', 'address_line_1'],
-  update: { state: 'NOT_DONE', accepted: null, created_at: null, updated_at: null, submitted_at: null, changes: [] },
+  editable_fields: ['telephone_number', 'email_address', 'address_line_1'],
+  completion: {
+    percent: 25,
+    complete: 2,
+    total: 8,
+    is_complete: false,
+    elements: [
+      { key: 'telephone', label: 'Téléphone', complete: true },
+      { key: 'address', label: 'Adresse', complete: true },
+      { key: 'email', label: 'Email', complete: false },
+      { key: 'emergency_contact', label: "Contact d'urgence", complete: false },
+      { key: 'education_level', label: "Niveau d'études", complete: false },
+      { key: 'agency_confirmed', label: 'Agence confirmée', complete: false },
+      { key: 'position_confirmed', label: 'Poste confirmé', complete: false },
+      { key: 'hire_date_confirmed', label: "Date d'embauche confirmée", complete: false },
+    ],
+  },
 }
 
 function IdentifyProbe() {
@@ -45,8 +54,7 @@ function renderPage() {
       <Routes>
         <Route path="/connexion" element={<IdentifyProbe />} />
         <Route path="/profil" element={<ProfilePage />} />
-        <Route path="/mise-a-jour/informations" element={<p>Étape 1 : Informations</p>} />
-        <Route path="/documents" element={<p>Écran Mes documents</p>} />
+        <Route path="/certificats" element={<p>Écran Mes certificats</p>} />
         <Route path="/parcours" element={<p>Écran Mon parcours</p>} />
       </Routes>
     </MemoryRouter>,
@@ -72,7 +80,7 @@ describe('ProfilePage (US-05)', () => {
     const summary = screen.getByRole('region', { name: 'JOSEPH Jean' })
     expect(within(summary).getByText('Agent de crédit')).toBeInTheDocument()
     expect(within(summary).getByText('Matricule AC-1001')).toBeInTheDocument()
-    expect(within(summary).getByText('Agence PV')).toBeInTheDocument()
+    expect(within(summary).getByText('Pétion-Ville')).toBeInTheDocument() // libellé officiel seul (US-201)
     expect(within(summary).getByText('JJ')).toBeInTheDocument() // avatar avec initiales
   })
 
@@ -89,7 +97,8 @@ describe('ProfilePage (US-05)', () => {
     expect(labels('Informations professionnelles')).toEqual([
       'Matricule',
       'Agence',
-      'Département',
+      'Région',
+      'Direction',
       'Poste',
       'Grade',
       'Niveau',
@@ -109,8 +118,8 @@ describe('ProfilePage (US-05)', () => {
   it('les champs modifiables sont signalés, les autres portent un cadenas', async () => {
     await renderProfile()
 
-    expect(within(field('Identité', 'Nom')).getByText('Modifiable')).toBeInTheDocument()
     expect(within(field('Coordonnées', 'Email')).getByText('Modifiable')).toBeInTheDocument()
+    expect(within(field('Identité', 'Nom')).getByLabelText('Non modifiable')).toBeInTheDocument()
     expect(within(field('Identité', 'Date de naissance')).getByLabelText('Non modifiable')).toBeInTheDocument()
     expect(within(field('Informations professionnelles', 'Poste')).getByLabelText('Non modifiable')).toBeInTheDocument()
     expect(within(field('Identité', 'Date de naissance')).queryByText('Modifiable')).not.toBeInTheDocument()
@@ -128,20 +137,21 @@ describe('ProfilePage (US-05)', () => {
     expect(field('Coordonnées', 'Téléphone')).toHaveTextContent('+509 3722 2222')
   })
 
-  it('US-07 : le lien « Mes documents » ouvre la liste des documents', async () => {
+  it('US-206 : plus de question Oui / Non ni de « Mes documents » ; les sections du dossier et « Mes certificats »', async () => {
     await renderProfile()
 
-    await userEvent.setup().click(screen.getByRole('link', { name: /Mes documents/ }))
-
-    expect(await screen.findByText('Écran Mes documents')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /mettre à jour mon dossier/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Mes documents/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Mes coordonnées/ })).toHaveAttribute('href', '/profil/coordonnees')
+    expect(screen.getByRole('link', { name: /Contact d'urgence & études/ })).toHaveAttribute('href', '/profil/contact-etudes')
+    expect(screen.getByRole('link', { name: /Mes informations RH/ })).toHaveAttribute('href', '/profil/informations-rh')
+    expect(screen.getByRole('link', { name: /Mes certificats.*Disponible dès votre profil complet/ })).toBeInTheDocument()
   })
 
-  it('US-25 CA-03 : la carte « Mon parcours », sous « Mes documents », ouvre le parcours', async () => {
+  it('US-25 CA-03 : la carte « Mon parcours » ouvre le parcours', async () => {
     await renderProfile()
 
-    const documents = screen.getByRole('link', { name: /Mes documents/ })
     const career = screen.getByRole('link', { name: /Mon parcours/ })
-    expect(documents.compareDocumentPosition(career) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(career).toHaveTextContent('Diplômes, formations, expériences et compétences')
 
     await userEvent.setup().click(career)
@@ -156,116 +166,34 @@ describe('ProfilePage (US-05)', () => {
   })
 })
 
-describe('ProfilePage — choix Oui / Non (US-08)', () => {
-  const yes = () => screen.getByRole('button', { name: 'Oui, mettre à jour mon dossier' })
-  const no = () => screen.getByRole('button', { name: 'Non, consulter uniquement' })
-
-  it('CA-01 : « Oui » ouvre l’étape 1 « Informations »', async () => {
-    decide.mockResolvedValue({ ...PROFILE.update, state: 'IN_PROGRESS', accepted: true })
+describe('ProfilePage — dossier et progression (US-201)', () => {
+  it('CA-02 : « Votre dossier est complet à X % », avec une barre de progression', async () => {
     await renderProfile()
 
-    await userEvent.setup().click(yes())
-
-    expect(decide).toHaveBeenCalledWith(true)
-    expect(await screen.findByText('Étape 1 : Informations')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Votre dossier est complet à 25 %' })).toBeInTheDocument()
+    const bar = screen.getByRole('progressbar', { name: 'Progression du dossier' })
+    expect(bar).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.getByText('2 éléments complétés sur 8')).toBeInTheDocument()
   })
 
-  it('CA-02 : « Non » laisse l’employé sur son profil avec le message', async () => {
-    decide.mockResolvedValue({ ...PROFILE.update, accepted: false })
+  it('CA-01 : agence, région et direction avec leur libellé officiel, jamais le code brut', async () => {
     await renderProfile()
 
-    await userEvent.setup().click(no())
-
-    expect(decide).toHaveBeenCalledWith(false)
-    expect(await screen.findByText("C'est noté. Vous pourrez mettre à jour votre dossier à tout moment.")).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'JOSEPH Jean' })).toBeInTheDocument()
-    expect(screen.getByText('Non effectuée')).toBeInTheDocument()
+    const section = screen.getByRole('region', { name: 'Informations professionnelles' })
+    expect(within(section).getByText('Pétion-Ville')).toBeInTheDocument()
+    expect(within(section).getByText('Métropole 1')).toBeInTheDocument()
+    expect(within(section).getByText('Direction du Crédit')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'JOSEPH Jean' })).getByText('Pétion-Ville')).toBeInTheDocument()
+    expect(screen.queryByText('PV')).not.toBeInTheDocument()
   })
 
-  it('CA-03 : après « Non », « Oui » reste possible et ouvre l’étape 1', async () => {
-    decide.mockResolvedValueOnce({ ...PROFILE.update, accepted: false })
-    decide.mockResolvedValueOnce({ ...PROFILE.update, state: 'IN_PROGRESS', accepted: true })
-    await renderProfile()
-    const user = userEvent.setup()
+  it('CA-03 : une agence inconnue du référentiel s’affiche « Unité à confirmer », sans bloquer', async () => {
+    await renderProfile({ affectation: { agency: null, region: null, direction: 'Direction du Crédit' } })
 
-    await user.click(no())
-    await screen.findByText("C'est noté. Vous pourrez mettre à jour votre dossier à tout moment.")
-    await user.click(yes())
-
-    expect(await screen.findByText('Étape 1 : Informations')).toBeInTheDocument()
-  })
-
-  it('CA-04 : après soumission, la question n’est plus affichée', async () => {
-    await renderProfile({
-      update: { ...PROFILE.update, state: 'DONE', accepted: true, submitted_at: '2026-10-04T15:10:00' },
-    })
-
-    expect(screen.queryByRole('button', { name: 'Oui, mettre à jour mon dossier' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Non, consulter uniquement' })).not.toBeInTheDocument()
-  })
-
-  it('CA-04 : un 409 (soumise depuis un autre appareil) recharge le profil, qui n’affiche plus la question', async () => {
-    decide.mockRejectedValue(
-      new ApiError(409, 'UPDATE_ALREADY_SUBMITTED', 'Votre mise à jour a déjà été soumise : elle ne peut plus être modifiée.'),
-    )
-    await renderProfile()
-    getProfile.mockResolvedValue({
-      ...PROFILE,
-      update: { ...PROFILE.update, state: 'DONE', accepted: true, submitted_at: '2026-10-04T15:10:00' },
-    })
-
-    await userEvent.setup().click(no())
-
-    expect(await screen.findByText('Effectuée')).toBeInTheDocument()
-    expect(screen.getByRole('alert')).toHaveTextContent('Votre mise à jour a déjà été soumise')
-    expect(screen.queryByRole('button', { name: 'Oui, mettre à jour mon dossier' })).not.toBeInTheDocument()
+    const section = screen.getByRole('region', { name: 'Informations professionnelles' })
+    expect(within(section).getAllByText('Unité à confirmer')).toHaveLength(2)
+    expect(within(screen.getByRole('region', { name: 'JOSEPH Jean' })).getByText('Unité à confirmer')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Votre dossier est complet à 25 %' })).toBeInTheDocument()
   })
 })
 
-describe('ProfilePage — modifier à nouveau (US-24)', () => {
-  const SENT = {
-    state: 'DONE',
-    accepted: true,
-    reopened: false,
-    created_at: '2026-10-04T09:00:00',
-    updated_at: '2026-10-04T15:10:00',
-    submitted_at: '2026-10-04T15:10:00',
-    changes: [],
-  }
-  const REOPENED = { ...SENT, state: 'IN_PROGRESS', reopened: true, updated_at: '2026-10-06T09:00:00' }
-
-  it('CA-01, CA-02 : « Modifier à nouveau » rouvre la mise à jour puis ouvre l’étape 1', async () => {
-    reopenUpdate.mockResolvedValue(REOPENED)
-    await renderProfile({ update: SENT })
-
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Modifier à nouveau' }))
-
-    expect(reopenUpdate).toHaveBeenCalledOnce()
-    expect(await screen.findByText('Étape 1 : Informations')).toBeInTheDocument()
-  })
-
-  it('CA-05 : « Annuler les modifications » confirmé → message, retour à l’état envoyé', async () => {
-    discardUpdate.mockResolvedValue(SENT)
-    const user = userEvent.setup()
-    await renderProfile({ update: REOPENED })
-    getProfile.mockResolvedValue({ ...PROFILE, update: SENT })
-
-    await user.click(screen.getByRole('button', { name: 'Annuler les modifications' }))
-    await user.click(screen.getByRole('button', { name: 'Tout annuler' }))
-
-    expect(discardUpdate).toHaveBeenCalledOnce()
-    expect(await screen.findByText(DISCARDED_NOTICE)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Modifier à nouveau' })).toBeInTheDocument()
-  })
-
-  it('une erreur (état changé ailleurs) est affichée et le profil rechargé', async () => {
-    reopenUpdate.mockRejectedValue(new ApiError(409, 'UPDATE_NOT_SUBMITTED', "Votre mise à jour n'a pas encore été envoyée : vous pouvez la modifier directement."))
-    await renderProfile({ update: SENT })
-    getProfile.mockResolvedValue({ ...PROFILE, update: REOPENED })
-
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Modifier à nouveau' }))
-
-    expect(await screen.findByRole('alert')).toHaveTextContent("pas encore été envoyée")
-    expect(await screen.findByRole('button', { name: 'Reprendre la modification' })).toBeInTheDocument()
-  })
-})

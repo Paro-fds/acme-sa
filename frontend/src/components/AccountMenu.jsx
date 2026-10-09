@@ -11,6 +11,7 @@ const EMPLOYEE_LINKS = [{ to: '/parcours', icon: 'workspace_premium', label: 'Mo
 /** Liens supplémentaires de l'espace admin (US-23). */
 const ADMIN_LINKS = [
   { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs' },
+  { to: '/admin/referentiel', icon: 'account_tree', label: 'Référentiel' },
   { to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' },
   { to: '/admin/securite', icon: 'verified_user', label: 'Ma double authentification' },
 ]

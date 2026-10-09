@@ -161,6 +161,7 @@ describe('AppHeader — menu du compte admin (US-23)', () => {
     const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
     expect(items).toEqual([
       'manage_accountsAdministrateurs',
+      'account_treeRéférentiel',
       'passwordChanger mon mot de passe',
       'verified_userMa double authentification',
       'logoutSe déconnecter',

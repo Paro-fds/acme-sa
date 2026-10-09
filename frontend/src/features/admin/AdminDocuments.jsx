@@ -1,5 +1,5 @@
 import { employeeDocumentFileUrl } from '../../api/admin.js'
-import DocumentItem from '../documents/DocumentItem.jsx'
+import DocumentItem from './DocumentItem.jsx'
 import Block from './Block.jsx'
 
 const plural = (count) => `${count} document${count > 1 ? 's' : ''}`

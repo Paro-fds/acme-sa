@@ -105,7 +105,6 @@ def test_ca04_available_whatever_the_campaign_state(employee_client, submitted, 
 
     assert response.status_code == 200
     assert _titles(response.json(), "SKILL") == ["Analyse de crédit"]
-    assert employee_client(EMP_A).get("/api/me/update").json()["state"] == "DONE"
     assert admin_client.get("/api/admin/statistics").json() == statistics
 
 

@@ -23,6 +23,8 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['./src/test/setup.js'],
       include: ['src/**/*.test.{js,jsx}'],
       css: false,
+      // Formulaires longs remplis touche par touche (dépôt de certificat) : 5 s ne suffisent pas quand toute la suite tourne.
+      testTimeout: 15000,
     },
   }
 })

@@ -14,6 +14,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = BACKEND_DIR.parent
 DEMO_CSV = BACKEND_DIR / "demo" / "employes-fictifs.csv"
 """US-001 CA-05 : seul jeu d'employés chargé hors production (données fictives)."""
+DEMO_REFERENTIAL = BACKEND_DIR / "demo" / "referentiel-fictif.xlsx"
+"""US-501 : référentiel fictif au format d'import, pour le démonstrateur et les tests (agences et directions « Démo »)."""
 
 
 class Settings(BaseSettings):
@@ -45,6 +47,8 @@ class Settings(BaseSettings):
     """US-102 CA-06 : réseaux des bureaux (CIDR séparés par des virgules) ; vide = pas de restriction (démonstrateur)."""
     max_upload_mb: int = 5
     max_documents_per_employee: int = 10
+    max_certificates_per_employee: int = 20
+    """RG-22, D-07 : 20 certificats au plus par employé."""
     max_career_entries_per_kind: int = 30
     """V2 (D-10) : éléments au plus par rubrique du parcours professionnel."""
     career_recent_days: int = 7
@@ -79,6 +83,11 @@ class Settings(BaseSettings):
     @property
     def enabled_mfa_methods(self) -> list[str]:
         return [part.strip().upper() for part in self.mfa_methods.split(",") if part.strip()]
+
+    @property
+    def certificates_dir(self) -> Path:
+        """US-301 : certificats sur le poste du développeur (`STORAGE_BACKEND=local`)."""
+        return self.acme_data_dir / "certificates"
 
     @property
     def documents_dir(self) -> Path:

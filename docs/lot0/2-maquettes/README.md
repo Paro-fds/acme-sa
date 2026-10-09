@@ -4,6 +4,8 @@ Livrable 2 du lot 0 : maquettes des écrans employé et administration, téléph
 
 Les maquettes sont des « fils de fer » : la mascotte, la police et la couleur d'erreur définitives viendront avec le guide de style (B-05). Toutes les personnes et agences sont fictives.
 
+**Validées par M. Hilaire (D-47) : `2-espace-employe-ecrans/` et `3-espace-rh-ecrans/`.** Ce sont elles qui servent de référence au développement ; le prototype cliquable est un support de présentation. Si le texte d'un écran contredit une règle du registre (par exemple l'email « Optionnel », RG-02), la règle l'emporte.
+
 ## À regarder
 
 | Dossier | Ce qu'il contient | État |

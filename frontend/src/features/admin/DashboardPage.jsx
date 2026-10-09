@@ -3,6 +3,7 @@ import { getStatistics } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
+import EngagementCard from './EngagementCard.jsx'
 import { useLoader } from '../../lib/useLoader.js'
 
 const LIST = '/admin/employes'
@@ -93,6 +94,8 @@ export default function DashboardPage() {
           <StatCard key={key} {...card} value={data[key]} />
         ))}
       </div>
+
+      <EngagementCard />
 
       <div className="flex flex-col gap-3 md:flex-row">
         <Link

@@ -178,7 +178,7 @@ describe('CareerPage (US-25)', () => {
   it('le retour mène au profil', async () => {
     await renderPage()
 
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Retour' }))
+    await userEvent.setup().click(within(screen.getByRole('main')).getByRole('link', { name: 'Mon profil' }))
     expect(await screen.findByText('Écran profil')).toBeInTheDocument()
   })
 
