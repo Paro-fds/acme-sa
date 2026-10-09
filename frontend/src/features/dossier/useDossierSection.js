@@ -20,6 +20,7 @@ export function useDossierSection() {
   const [error, setError] = useState(null)
 
   const current = dossier ?? data
+  const loadFailed = !loading && !loadError && data === null && dossier === null
   const needsConsent = current && !current.consent.information_notice_at
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export function useDossierSection() {
   return {
     dossier: needsConsent ? null : current,
     loading: loading || needsConsent,
-    loadError,
+    loadError: loadFailed ? new Error('Impossible de charger le dossier.') : loadError,
     save,
     sending,
     saved,

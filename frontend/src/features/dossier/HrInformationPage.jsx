@@ -117,9 +117,11 @@ function HrItemCard({ item, section }) {
               C'est exact
             </Button>
           )}
-          <Button variant="subtle" onClick={() => setReporting(true)}>
-            Signaler une erreur
-          </Button>
+          {item.status !== 'REPORTED' && (
+            <Button variant="subtle" onClick={() => setReporting(true)}>
+              Signaler une erreur
+            </Button>
+          )}
         </div>
       )}
       {reporting && error && !error.field && <Alert>{error.message}</Alert>}

@@ -197,3 +197,11 @@ describe('ProfilePage — dossier et progression (US-201)', () => {
   })
 })
 
+describe('ProfilePage — erreurs de chargement', () => {
+  it('affiche un message si l API retourne null (erreur serveur silencieuse)', async () => {
+    getProfile.mockResolvedValue(null)
+    renderPage()
+
+    expect(await screen.findByText('Impossible de charger le profil.')).toBeInTheDocument()
+  })
+})
