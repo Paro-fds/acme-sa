@@ -3,6 +3,7 @@ import logo from '../assets/logo-acme.png'
 import AccountMenu from './AccountMenu.jsx'
 import AppHeader from './AppHeader.jsx'
 import BottomNav from './BottomNav.jsx'
+import AdminLayout from '../features/admin/AdminLayout.jsx'
 
 /** US-207 CA-02 : en-tête « Portail Carrière » de l'espace employé (écrans validés 06 → 13). */
 function EmployeeHeader() {
@@ -21,10 +22,10 @@ function EmployeeHeader() {
 }
 
 /**
- * Mise en page commune : en-tête, contenu centré, barre d'action collée en bas sur mobile.
- * `account` : écran connecté ; `account="admin"` pour l'espace admin. Un écran employé (`account` seul) a
- * l'en-tête « Portail Carrière », le lien de retour dans la page et la barre du bas (US-207) ; `nav={false}` la masque.
- * `backLabel` : texte du lien de retour d'un écran employé. `wide` : contenu plus large (tableaux de l'administration).
+ * Mise en page commune :
+ * - Si `account === 'admin'` : layout officiel RH (maquettes A02 à A10) avec en-tête bleu marine et barre latérale.
+ * - Si `account === true` : espace employé (écrans 06 à 13) avec en-tête « Portail Carrière » et barre du bas.
+ * - Sinon : en-tête simple `AppHeader`.
  */
 export default function Page({
   title,
@@ -37,6 +38,20 @@ export default function Page({
   wide = false,
   children,
 }) {
+  if (account === 'admin') {
+    return (
+      <AdminLayout
+        title={title}
+        backTo={backTo}
+        backLabel={backLabel}
+        headerActions={headerActions}
+        wide={wide}
+      >
+        {children}
+      </AdminLayout>
+    )
+  }
+
   const width = wide ? 'max-w-6xl' : 'max-w-3xl'
   const employee = account === true
   const bottomBar = actions || (employee && nav)
