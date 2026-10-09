@@ -37,12 +37,19 @@ class Settings(BaseSettings):
     s3_access_key_id: str = ""
     s3_secret_access_key: str = ""
     admin_username: str = "admin"
+    admin_password: str = ""
     admin_password_hash: str = ""
     employee_session_minutes: int = 30
     admin_session_minutes: int = 120
     mfa_methods: str = "TOTP,EMAIL,WHATSAPP"
-    """US-102 : méthodes de double authentification proposées. Tant que le service d'envoi des codes n'est pas
-    choisi avec la DIT (D-41), les environnements en ligne n'ouvrent que `TOTP`."""
+    """US-102 : méthodes de double authentification proposées."""
+    demo_show_mfa_codes: bool = False
+    """En environnement demo, permet d'afficher les codes simulés si aucun provider réel n'est configuré."""
+    whatsapp_meta_token: str = ""
+    whatsapp_meta_phone_number_id: str = ""
+    whatsapp_twilio_account_sid: str = ""
+    whatsapp_twilio_auth_token: str = ""
+    whatsapp_twilio_from: str = ""
     rh_allowed_networks: str = ""
     """US-102 CA-06 : réseaux des bureaux (CIDR séparés par des virgules) ; vide = pas de restriction (démonstrateur)."""
     max_upload_mb: int = 5
@@ -68,6 +75,15 @@ class Settings(BaseSettings):
         if not self.database_url:
             self.database_url = f"sqlite:///{(self.acme_data_dir / 'portail.db').as_posix()}"
         self.database_url = normalize_database_url(self.database_url)
+
+        # Si un mot de passe en clair est fourni, on génère automatiquement son empreinte Argon2
+        raw_password = (self.admin_password or "").strip()
+        if not raw_password and self.admin_password_hash and not self.admin_password_hash.startswith("$argon2"):
+            raw_password = self.admin_password_hash.strip()
+        if raw_password:
+            from argon2 import PasswordHasher
+            self.admin_password_hash = PasswordHasher().hash(raw_password)
+
         return self
 
     @property
@@ -75,10 +91,18 @@ class Settings(BaseSettings):
         return self.app_env == "demo"
 
     @property
+    def has_meta_whatsapp(self) -> bool:
+        return bool(self.whatsapp_meta_token and self.whatsapp_meta_phone_number_id)
+
+    @property
+    def has_twilio_whatsapp(self) -> bool:
+        return bool(self.whatsapp_twilio_account_sid and self.whatsapp_twilio_auth_token and self.whatsapp_twilio_from)
+
+    @property
     def shows_local_codes(self) -> bool:
         """US-102 : sur le poste du développeur seulement (et dans les tests), aucun code ne part ;
-        l'API le renvoie pour qu'il s'affiche à l'écran."""
-        return self.app_env == "local"
+        l'API le renvoie pour qu'il s'affiche à l'écran. En démo, actif si DEMO_SHOW_MFA_CODES=true."""
+        return self.app_env == "local" or (self.app_env == "demo" and self.demo_show_mfa_codes)
 
     @property
     def enabled_mfa_methods(self) -> list[str]:

@@ -42,6 +42,7 @@ from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.network import parse_networks
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
 from app.auth.infrastructure.mfa_adapters import (
+    ConfigurableCodeSender,
     LocalOutboxCodeSender,
     LoggingSecurityLog,
     PyOtpTotpService,
@@ -127,7 +128,14 @@ class Container:
         self.file_storage = _file_storage(settings)
         self.password_hasher = Argon2PasswordHasher()
         self.totp = PyOtpTotpService()
-        self.code_sender = LocalOutboxCodeSender() if settings.shows_local_codes else UnconfiguredCodeSender()
+        self.code_sender = ConfigurableCodeSender(
+            meta_token=settings.whatsapp_meta_token,
+            meta_phone_number_id=settings.whatsapp_meta_phone_number_id,
+            twilio_account_sid=settings.whatsapp_twilio_account_sid,
+            twilio_auth_token=settings.whatsapp_twilio_auth_token,
+            twilio_from=settings.whatsapp_twilio_from,
+            allow_demo_fallback=settings.shows_local_codes,
+        )
         self.security_log = LoggingSecurityLog()
         self.rh_networks = parse_networks(settings.rh_allowed_networks)
 

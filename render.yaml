@@ -17,7 +17,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: MFA_METHODS
-        value: TOTP
+        value: TOTP,WHATSAPP
       - key: STORAGE_BACKEND
         value: s3
       - key: S3_BUCKET
@@ -32,5 +32,17 @@ services:
         sync: false
       - key: ADMIN_USERNAME
         sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
       - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: WHATSAPP_META_TOKEN
+        sync: false
+      - key: WHATSAPP_META_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TWILIO_ACCOUNT_SID
+        sync: false
+      - key: WHATSAPP_TWILIO_AUTH_TOKEN
+        sync: false
+      - key: WHATSAPP_TWILIO_FROM
         sync: false

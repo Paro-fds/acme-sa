@@ -147,13 +147,32 @@ class ImportConfiguredAdmin:
         self._new_id = new_id
 
     def execute(self) -> None:
-        if not (self._username and self._password_hash) or self._admins.count() > 0:
+        if not (self._username and self._password_hash):
             return
+        username = self._username.strip()
+        existing = self._admins.find_by_username(username)
+        if existing:
+            if (
+                existing.password_hash != self._password_hash
+                or existing.role != AdminRole.ADMIN
+                or existing.mfa_locked_until is not None
+            ):
+                existing.password_hash = self._password_hash
+                existing.role = AdminRole.ADMIN
+                existing.mfa_attempts = 0
+                existing.mfa_locked_until = None
+                self._admins.save(existing)
+            return
+
+        if self._admins.count() > 0:
+            return
+
         self._admins.add(
             AdminAccount(
                 id=self._new_id(),
-                username=self._username.strip(),
+                username=username,
                 password_hash=self._password_hash,
+                role=AdminRole.ADMIN,
                 created_at=self._clock.now(),
             )
         )
