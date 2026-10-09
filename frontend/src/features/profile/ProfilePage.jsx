@@ -69,6 +69,7 @@ export default function ProfilePage() {
 
   if (loading) return <Page account title="Mon profil"><p role="status">Chargement…</p></Page>
   if (error) return <Page account title="Mon profil"><Alert>{error.message}</Alert></Page>
+  if (!profile) return <Page account title="Mon profil"><Alert>Impossible de charger le profil.</Alert></Page>
 
   const editable = (fieldName) => profile.editable_fields.includes(fieldName)
 
