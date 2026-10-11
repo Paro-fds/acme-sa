@@ -5,11 +5,12 @@ import AccountMenu from '../../components/AccountMenu.jsx'
 
 const NAV_ITEMS = [
   { to: '/admin', end: true, label: 'Tableau de bord', icon: 'dashboard' },
-  { to: '/admin/validations', end: false, label: 'File de validation', icon: 'fact_check' },
+  { to: '/admin/validation', end: false, label: 'File de validation', icon: 'fact_check', badge: '27', badgeTone: 'neutral' },
   { to: '/admin/employes', end: false, label: 'Employés', icon: 'groups' },
-  { to: '/admin/signalements', end: false, label: 'Signalements', icon: 'report_problem' },
-  { to: '/admin/referentiel', end: false, label: 'À rattacher', icon: 'account_tree' },
-  { to: '/admin/administrateurs', end: false, label: 'Comptes et rôles', icon: 'manage_accounts' },
+  { to: '/admin/postes', end: false, label: 'Postes ouverts', icon: 'work' },
+  { to: '/admin/signalements', end: false, label: 'Signalements', icon: 'report_problem', badge: '9', badgeTone: 'warning' },
+  { to: '/admin/referentiel', end: false, label: 'À rattacher', icon: 'account_tree', badge: '2', badgeTone: 'warning' },
+  { to: '/admin/comptes', end: false, label: 'Comptes et rôles', icon: 'manage_accounts' },
   { to: '/admin/audit', end: false, label: "Journal d'audit", icon: 'history' },
 ]
 
@@ -17,7 +18,7 @@ const NAV_ITEMS = [
  * Layout officiel de l'espace RH aligné sur les maquettes A02 à A10 validées par la direction.
  * Comprend :
  * - L'en-tête supérieur bleu marine (#1E1E82) avec le logo ACME SA, « Portail RH », le titre, les actions et le menu de compte.
- * - La barre latérale (Sidebar) gauche avec les 7 rubriques officielles.
+ * - La barre latérale (Sidebar) gauche avec les 7 rubriques des maquettes, plus « Postes ouverts » (US-802, lot 4, sans maquette).
  * - Le conteneur principal avec fond clair et contenu de la page.
  * - Un menu escamotable sur mobile (zones tactiles ≥ 44 px).
  */
@@ -128,6 +129,17 @@ export default function AdminLayout({
                   </span>
                   <span>{item.label}</span>
                 </span>
+                {item.badge && (
+                  <span
+                    className={`inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold ${
+                      item.badgeTone === 'warning'
+                        ? 'bg-[#FEF3C7] text-[#B45309]'
+                        : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>

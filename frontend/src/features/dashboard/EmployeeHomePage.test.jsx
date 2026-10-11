@@ -1,12 +1,12 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getDossier } from '../../api/dossier.js'
+import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
 import EmployeeHomePage from './EmployeeHomePage.jsx'
 
 vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn() }))
-vi.mock('../../api/dossier.js', () => ({ getDossier: vi.fn() }))
+vi.mock('../../api/dossier.js', () => ({ getDossier: vi.fn(), getFreshness: vi.fn(), confirmStillAccurate: vi.fn() }))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 
 const KEYS = [
@@ -50,6 +50,7 @@ function renderPage() {
 describe('US-207 CA-01 — Accueil de l’employé (écran 06)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    getFreshness.mockResolvedValue({ items: [], stale_count: 0 })
     getDossier.mockResolvedValue({ consent: { information_notice_at: '2026-10-08T09:00:00Z', whatsapp: false } })
   })
 
@@ -96,12 +97,13 @@ describe('US-207 CA-01 — Accueil de l’employé (écran 06)', () => {
     renderPage()
 
     const nav = await screen.findByRole('navigation', { name: 'Navigation principale' })
-    expect(within(nav).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/accueil', '/profil', '/certificats'])
+    expect(within(nav).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/accueil', '/profil', '/certificats', '/carriere'])
     expect(within(nav).getByRole('link', { name: /Accueil/ })).toHaveAttribute('aria-current', 'page')
   })
 
   it('première connexion : « Avant de commencer » passe d’abord (écran 05)', async () => {
     getProfile.mockResolvedValue(profile([]))
+    getFreshness.mockResolvedValue({ items: [], stale_count: 0 })
     getDossier.mockResolvedValue({ consent: { information_notice_at: null, whatsapp: null } })
     renderPage()
 

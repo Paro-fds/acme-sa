@@ -20,11 +20,18 @@ export function sendFile(ticket, file, onProgress) {
   return uploadToStorage(ticket, file, onProgress)
 }
 
-/** US-301 : enregistre le certificat une fois son fichier arrivé dans le stockage. */
-export function createCertificate(fields, uploadId, originalName) {
+/** US-301, US-304 : enregistre le certificat une fois son fichier arrivé dans le stockage. */
+export function createCertificate(fields, uploadId, originalName, replacesId = null) {
   return request('/me/certificates', {
     method: 'POST',
-    body: { ...fields, upload_id: uploadId, original_name: originalName },
+    body: { ...fields, upload_id: uploadId, original_name: originalName, replaces_id: replacesId || undefined },
+  })
+}
+
+/** US-304 CA-01 : suppression d'un certificat non validé (interdit pour un validé). */
+export function deleteCertificate(certificateId) {
+  return request(`/me/certificates/${encodeURIComponent(certificateId)}`, {
+    method: 'DELETE',
   })
 }
 

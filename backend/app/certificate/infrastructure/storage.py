@@ -48,6 +48,10 @@ class LocalCertificateStorage:
         with self._path(key).open("rb") as file:
             return file.read(length)
 
+    def read(self, key: str) -> bytes:
+        with self._path(key).open("rb") as file:
+            return file.read()
+
     def delete(self, key: str) -> None:
         self._path(key).unlink(missing_ok=True)
 
@@ -100,6 +104,10 @@ class S3CertificateStorage:
 
     def head(self, key: str, length: int) -> bytes:
         response = self._client.get_object(Bucket=self._bucket, Key=key, Range=f"bytes=0-{length - 1}")
+        return response["Body"].read()
+
+    def read(self, key: str) -> bytes:
+        response = self._client.get_object(Bucket=self._bucket, Key=key)
         return response["Body"].read()
 
     def delete(self, key: str) -> None:

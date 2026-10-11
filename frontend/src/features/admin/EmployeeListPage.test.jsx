@@ -6,7 +6,11 @@ import EmployeeListPage from './EmployeeListPage.jsx'
 import { listEmployees } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/admin.js', () => ({ listEmployees: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  listEmployees: vi.fn(),
+  searchQualifiedEmployees: vi.fn(),
+  getEmployeesExportUrl: vi.fn(() => '#'),
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
 const employee = (id, last_name, first_name, overrides = {}) => ({

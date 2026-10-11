@@ -12,6 +12,7 @@ from app.auth.api.dependencies import (
     require_admin,
     set_session_cookie,
 )
+from app.admin.domain.audit import AuditAction, AuditEntry
 from app.auth.application.admin_accounts import AdminView
 from app.auth.domain.admin import AdminRole, RoleChange, ROLE_LABELS
 from app.auth.domain.errors import InvalidRole
@@ -39,6 +40,10 @@ class AdminOut(BaseModel):
     last_login_at: datetime | None
     must_change_password: bool
     mfa_method: str | None
+    full_name: str | None = None
+    email: str | None = None
+    employee_id: str | None = None
+    is_active: bool = True
     is_me: bool
 
     @classmethod
@@ -79,6 +84,13 @@ class AddAdminIn(BaseModel):
     username: str = Field(max_length=100)
     password: str = Field(max_length=200)
     role: str = Field(default="AGENT_RH", max_length=50)
+    full_name: str | None = Field(default=None, max_length=150)
+    email: str | None = Field(default=None, max_length=150)
+    employee_id: str | None = Field(default=None, max_length=50)
+
+
+class SetAdminStatusIn(BaseModel):
+    is_active: bool
 
 
 class ChangeRoleIn(BaseModel):
@@ -134,7 +146,27 @@ def list_admins(request: Request, admin_id: str = Depends(current_admin)) -> lis
 @router.post("/admins", status_code=201, response_model=AdminOut)
 def add_admin(payload: AddAdminIn, request: Request, admin_id: str = Depends(require_admin)) -> AdminOut:
     role = _parse_role(payload.role)
-    created = container(request).add_admin().execute(admin_id, payload.username, payload.password, role)
+    created = container(request).add_admin().execute(
+        actor_id=admin_id,
+        username=payload.username,
+        password=payload.password,
+        role=role,
+        full_name=payload.full_name,
+        email=payload.email,
+        employee_id=payload.employee_id,
+    )
+    container(request).audit_logs.add(
+        AuditEntry(
+            id=None,
+            at=container(request).clock.now(),
+            actor_id=admin_id,
+            actor_name=admin_id,
+            action=AuditAction.ACCOUNT_MANAGEMENT.value,
+            target_id=created.username,
+            target_name=created.full_name or created.username,
+            details=f"Création du compte ({ROLE_LABELS.get(created.role, created.role)})",
+        )
+    )
     view = next(view for view in container(request).list_admins().execute() if view.id == created.id)
     return AdminOut.of(view, admin_id)
 
@@ -146,6 +178,29 @@ def change_role(
     """US-103 : changer le rôle d'un compte RH (réservé à l'Administrateur)."""
     new_role = _parse_role(payload.role)
     container(request).change_admin_role().execute(admin_id, target_id, new_role)
+    view = next(view for view in container(request).list_admins().execute() if view.id == target_id)
+    return AdminOut.of(view, admin_id)
+
+
+@router.put("/admins/{target_id}/status", response_model=AdminOut)
+def set_admin_status(
+    target_id: str, payload: SetAdminStatusIn, request: Request, admin_id: str = Depends(require_admin)
+) -> AdminOut:
+    """US-104 CA-02, CA-03 : désactiver ou activer un compte RH."""
+    updated = container(request).set_admin_status().execute(admin_id, target_id, payload.is_active)
+    action_detail = "Compte réactivé" if payload.is_active else "Compte désactivé"
+    container(request).audit_logs.add(
+        AuditEntry(
+            id=None,
+            at=container(request).clock.now(),
+            actor_id=admin_id,
+            actor_name=admin_id,
+            action=AuditAction.ACCOUNT_MANAGEMENT.value,
+            target_id=updated.username,
+            target_name=updated.full_name or updated.username,
+            details=action_detail,
+        )
+    )
     view = next(view for view in container(request).list_admins().execute() if view.id == target_id)
     return AdminOut.of(view, admin_id)
 

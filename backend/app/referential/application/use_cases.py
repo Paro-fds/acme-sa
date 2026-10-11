@@ -188,6 +188,26 @@ class ResolveAffectation:
         )
 
 
+class ResolveUnitCodes:
+    """US-801 : unités d'un employé (agence, sa région en cours, service, sa direction), pour le critère « unité »."""
+
+    def __init__(self, repository: ReferentialRepository) -> None:
+        self._repository = repository
+
+    def execute(self, agency_value: str, department_value: str) -> tuple[str, ...]:
+        """Dans l'ordre : agence, sa région, puis service, sa direction."""
+        mappings = {(m.column, normalize(m.value)): m.unit_code for m in self._repository.mappings()}
+        current = self._repository.current_attachments()
+        codes: list[str] = []
+        for column, value in (("agency_code", agency_value), ("department", department_value)):
+            code = mappings.get((column, normalize(value))) if value and value.strip() else None
+            while code and code not in codes:
+                codes.append(code)
+                attachment = current.get(code)
+                code = attachment.parent_code if attachment else None
+        return tuple(codes)
+
+
 @dataclass(frozen=True)
 class ToAttach:
     """US-502 CA-01 : une valeur de l'export sans unité officielle, et le nombre d'employés actifs concernés."""

@@ -25,6 +25,13 @@ class DossierRepository(Protocol):
 
     def add_report(self, report: Report) -> None: ...
 
+    def list_all_reports(self) -> list[Report]:
+        """Tous les signalements pour la file de traitement RH (US-403)."""
+
+    def get_report_by_id(self, report_id: int) -> Report | None: ...
+
+    def update_report(self, report: Report) -> None: ...
+
 
 class ExportContact(Protocol):
     """Coordonnées actuelles de l'export (et du dernier envoi du MVP) : proposées tant que l'employé

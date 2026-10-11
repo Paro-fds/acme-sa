@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from app.certificate.domain.certificate import Certificate, CertificateFile, Feedback
+from app.certificate.domain.certificate import Certificate, CertificateFile, CertificateHistoryEntry, Feedback
 
 
 class CertificateRepository(Protocol):
@@ -17,10 +17,21 @@ class CertificateRepository(Protocol):
 
     def get(self, certificate_id: str) -> Certificate | None: ...
 
+    def update(self, certificate: Certificate) -> None: ...
+
+    def delete(self, certificate_id: str) -> None: ...
+
+    def add_history(self, entry: "CertificateHistoryEntry") -> None: ...
+
+    def history_of(self, certificate_id: str) -> "list[CertificateHistoryEntry]": ...
+
     def set_feedback(self, feedback: Feedback) -> None:
         """Un avis par certificat : un nouvel avis remplace le précédent."""
 
     def feedbacks(self) -> list[Feedback]: ...
+
+    def list_all(self) -> list[Certificate]:
+        """Tous les certificats (pour le pilotage RH et les statistiques)."""
 
 
 @dataclass(frozen=True)
@@ -43,6 +54,9 @@ class CertificateStorage(Protocol):
         """Les premiers octets du fichier, pour en reconnaître le type réel."""
 
     def delete(self, key: str) -> None: ...
+
+    def read(self, key: str) -> bytes:
+        """Le fichier entier, pour l'ouvrir dans l'espace RH."""
 
     @property
     def receives_uploads(self) -> bool:

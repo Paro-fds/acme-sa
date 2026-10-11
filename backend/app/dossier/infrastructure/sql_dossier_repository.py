@@ -71,6 +71,10 @@ class ReportRow(Base):
     comment: Mapped[str | None] = mapped_column(String, nullable=True)
     at: Mapped[datetime] = mapped_column(UtcDateTime)
     status: Mapped[str] = mapped_column(String)
+    decided_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    decision: Mapped[str | None] = mapped_column(String, nullable=True)
+    resolution_comment: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 def _confirmation_row(c: Confirmation) -> ConfirmationRow:
@@ -160,10 +164,7 @@ class SqlDossierRepository:
     def reports(self, employee_id: str) -> list[Report]:
         with self._database.session() as session:
             rows = session.scalars(select(ReportRow).where(ReportRow.employee_id == employee_id).order_by(ReportRow.id))
-            return [
-                Report(r.employee_id, r.information, ReportOrigin(r.origin), r.current_value, r.indicated_value, r.comment, r.at, r.status)
-                for r in rows
-            ]
+            return [_to_report(r) for r in rows]
 
     def add_report(self, report: Report) -> None:
         with self._database.session() as session:
@@ -177,5 +178,49 @@ class SqlDossierRepository:
                     comment=report.comment,
                     at=report.at,
                     status=report.status,
+                    decided_by=report.decided_by,
+                    decided_at=report.decided_at,
+                    decision=report.decision,
+                    resolution_comment=report.resolution_comment,
                 )
             )
+
+    def list_all_reports(self) -> list[Report]:
+        with self._database.session() as session:
+            rows = session.scalars(select(ReportRow).order_by(ReportRow.at.desc()))
+            return [_to_report(r) for r in rows]
+
+    def get_report_by_id(self, report_id: int) -> Report | None:
+        with self._database.session() as session:
+            row = session.get(ReportRow, report_id)
+            return _to_report(row) if row is not None else None
+
+    def update_report(self, report: Report) -> None:
+        if report.id is None:
+            return
+        with self._database.session() as session:
+            row = session.get(ReportRow, report.id)
+            if row is not None:
+                row.status = report.status
+                row.decided_by = report.decided_by
+                row.decided_at = report.decided_at
+                row.decision = report.decision
+                row.resolution_comment = report.resolution_comment
+
+
+def _to_report(r: ReportRow) -> Report:
+    return Report(
+        employee_id=r.employee_id,
+        information=r.information,
+        origin=ReportOrigin(r.origin),
+        current_value=r.current_value,
+        indicated_value=r.indicated_value,
+        comment=r.comment,
+        at=r.at,
+        status=r.status,
+        id=r.id,
+        decided_by=r.decided_by,
+        decided_at=r.decided_at,
+        decision=r.decision,
+        resolution_comment=r.resolution_comment,
+    )

@@ -10,7 +10,12 @@ import { ApiError } from '../../api/client.js'
 import { loginMfa } from '../../api/mfa.js'
 
 vi.mock('../../api/auth.js', () => ({ adminLogin: vi.fn(), adminLogout: vi.fn(), logout: vi.fn() }))
-vi.mock('../../api/admin.js', () => ({ getAdminMe: vi.fn(), listEmployees: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  getAdminMe: vi.fn(),
+  listEmployees: vi.fn(),
+  searchQualifiedEmployees: vi.fn(),
+  getEmployeesExportUrl: vi.fn(() => '#'),
+}))
 vi.mock('../../api/mfa.js', () => ({
   loginMfa: { status: vi.fn(), start: vi.fn(), confirm: vi.fn(), resend: vi.fn(), verify: vi.fn() },
 }))

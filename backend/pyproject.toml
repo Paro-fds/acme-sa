@@ -56,6 +56,7 @@ containers = [
     "app.referential",
     "app.dossier",
     "app.certificate",
+    "app.job",
 ]
 
 [[tool.importlinter.contracts]]
@@ -82,6 +83,8 @@ source_modules = [
     "app.referential.application",
     "app.dossier.application",
     "app.certificate.application",
+    "app.job.domain",
+    "app.job.application",
 ]
 forbidden_modules = ["fastapi", "starlette", "pydantic", "sqlalchemy"]
 
@@ -119,6 +122,9 @@ source_modules = [
     "app.certificate.domain",
     "app.certificate.application",
     "app.certificate.api",
+    "app.job.domain",
+    "app.job.application",
+    "app.job.api",
 ]
 forbidden_modules = [
     "app.shared.infrastructure",
@@ -131,6 +137,7 @@ forbidden_modules = [
     "app.referential.infrastructure",
     "app.dossier.infrastructure",
     "app.certificate.infrastructure",
+    "app.job.infrastructure",
     "app.container",
 ]
 

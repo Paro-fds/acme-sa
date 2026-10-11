@@ -9,7 +9,9 @@ import { ApiError } from '../../api/client.js'
 vi.mock('../../api/admin.js', () => ({
   getEmployee: vi.fn(),
   listEmployeeDocuments: vi.fn(),
+  listEmployeeCertificates: vi.fn().mockResolvedValue([]),
   employeeDocumentFileUrl: (id) => `/api/admin/documents/${id}/file`,
+  certificateFileUrl: (id) => `/api/admin/validation/${id}/file`,
 }))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 

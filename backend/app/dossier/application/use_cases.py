@@ -2,7 +2,7 @@
 US-203 : confirmer ou signaler agence, poste, date d'embauche (EF-203, EF-204, EF-205)."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 from app.dossier.domain.dossier import (
     Confirmation,
@@ -17,6 +17,7 @@ from app.dossier.domain.dossier import (
     gesture,
 )
 from app.dossier.domain.errors import ConsentRequired, InvalidDossierField, NoticeNotAccepted, UnknownHrInformation
+from app.dossier.domain.freshness import PERISHABLE, Freshness, expiry, freshness, reminder
 from app.dossier.domain.hr_information import (
     LABELS,
     HrItem,
@@ -358,3 +359,92 @@ class IsProfileComplete:
 
     def execute(self, employee_id: str) -> bool:
         return completion(self._summary.execute(employee_id).done).is_complete
+
+
+# --- US-205 : confirmer ses informations chaque année -------------------------------------
+
+_INFORMATION_LABELS = {
+    Information.TELEPHONE.value: "Téléphone",
+    Information.ADDRESS.value: "Adresse",
+    Information.EMAIL.value: "Adresse email",
+    Information.EMERGENCY_CONTACT.value: "Contact d'urgence",
+    **{item.value: label for item, label in LABELS.items()},
+}
+
+
+@dataclass(frozen=True)
+class FreshnessItemView:
+    key: str
+    label: str
+    value: str
+    confirmed_at: datetime
+    expires_on: date
+    reminder_on: date
+    """RG-61 : date du rappel, que les notifications (US-701) utiliseront."""
+    state: str
+
+
+@dataclass(frozen=True)
+class FreshnessView:
+    items: tuple[FreshnessItemView, ...]
+    stale_count: int
+
+
+class _Freshness:
+    def __init__(self, dossiers: DossierRepository, hr_source: HrInformationSource, clock: Clock) -> None:
+        self._dossiers = dossiers
+        self._hr_source = hr_source
+        self._clock = clock
+
+    def _current(self, employee_id: str) -> list[tuple[str, str, datetime]]:
+        """Les informations périssables déjà données : clé, valeur, dernière confirmation.
+
+        Une information signalée aux RH (US-203) attend leur réponse : elle n'est ni périmée ni reconfirmée."""
+        dossier = self._dossiers.get(employee_id) or Dossier(employee_id)
+        dates = ConfirmationDates.of(self._dossiers.confirmations(employee_id)).latest
+        reports = self._dossiers.reports(employee_id)
+        hr = self._hr_source.execute(employee_id)
+        current = []
+        for key in PERISHABLE:
+            confirmed_at = dates.get(key)
+            if confirmed_at is None:
+                continue
+            item = hr_item(key)
+            if item is not None:
+                if hr_status(item, confirmed_at, reports)[0] == "REPORTED":
+                    continue
+                value = hr.value_of(item)
+            else:
+                value = dossier.value_of(Information(key))
+            if value:
+                current.append((key, value, confirmed_at))
+        return current
+
+    def _view(self, employee_id: str) -> FreshnessView:
+        today = self._clock.now().date()
+        items = tuple(
+            FreshnessItemView(
+                key, _INFORMATION_LABELS[key], value, confirmed_at, expiry(confirmed_at), reminder(confirmed_at),
+                freshness(confirmed_at, today).value,
+            )
+            for key, value, confirmed_at in self._current(employee_id)
+        )
+        return FreshnessView(items, sum(item.state == Freshness.STALE for item in items))
+
+
+class GetFreshness(_Freshness):
+    """CA-01 : l'état de chaque information (à jour, rappel dû, périmée)."""
+
+    def execute(self, employee_id: str) -> FreshnessView:
+        return self._view(employee_id)
+
+
+class ConfirmStillAccurate(_Freshness):
+    """CA-02 : « Ces informations sont-elles toujours exactes ? » Oui met à jour toutes les dates de confirmation,
+    sans changer aucune valeur."""
+
+    def execute(self, employee_id: str) -> FreshnessView:
+        now = self._clock.now()
+        for key, value, _ in self._current(employee_id):
+            self._dossiers.add_confirmation(Confirmation(employee_id, key, Gesture.CONFIRMATION, value, value, now))
+        return self._view(employee_id)

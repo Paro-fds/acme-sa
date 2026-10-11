@@ -109,6 +109,40 @@ class Certificate:
     domain_other: str | None
     status: CertificateStatus
     submitted_at: datetime
+    assigned_to: str | None = None
+    assigned_at: datetime | None = None
+    decided_by: str | None = None
+    decided_at: datetime | None = None
+    rejection_reason: str | None = None
+    rejection_comment: str | None = None
+    original_level: str | None = None
+    replaces_id: str | None = None
+    is_archived: bool = False
+
+
+REJECTION_REASONS = (
+    "Document illisible ou de mauvaise qualité",
+    "Document incomplet (pages manquantes)",
+    "Nom de l'employé absent ou différent de celui du dossier",
+    "Document non reconnu comme diplôme, certificat ou attestation",
+    "Niveau déclaré non conforme au document",
+    "Établissement ou année non identifiable",
+    "Document expiré ou non valide",
+    "Doublon d'un document déjà validé",
+    "Fichier endommagé ou format non conforme",
+    "Autre",
+)
+
+
+@dataclass(frozen=True)
+class CertificateHistoryEntry:
+    id: int | None
+    certificate_id: str
+    actor_id: str
+    actor_name: str | None
+    action: str
+    details: str | None
+    at: datetime
 
 
 @dataclass(frozen=True)

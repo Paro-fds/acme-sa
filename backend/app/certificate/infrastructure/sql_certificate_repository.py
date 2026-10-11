@@ -2,10 +2,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, String, func, select
+from sqlalchemy import Boolean, ForeignKey, Integer, String, delete, func, select
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.certificate.domain.certificate import Certificate, CertificateFile, CertificateStatus, Feedback
+from app.certificate.domain.certificate import Certificate, CertificateFile, CertificateHistoryEntry, CertificateStatus, Feedback
 from app.shared.infrastructure.database import Base, Database, UtcDateTime
 
 
@@ -22,8 +22,29 @@ class CertificateRow(Base):
     country: Mapped[str | None] = mapped_column(String, nullable=True)
     domain: Mapped[str | None] = mapped_column(String, nullable=True)
     domain_other: Mapped[str | None] = mapped_column(String, nullable=True)
-    status: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, index=True)
     submitted_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    assigned_to: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    assigned_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    rejection_reason: Mapped[str | None] = mapped_column(String, nullable=True)
+    rejection_comment: Mapped[str | None] = mapped_column(String, nullable=True)
+    original_level: Mapped[str | None] = mapped_column(String, nullable=True)
+    replaces_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    is_archived: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+
+
+class CertificateHistoryRow(Base):
+    __tablename__ = "certificate_history"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    certificate_id: Mapped[str] = mapped_column(ForeignKey("certificate.id"), index=True)
+    actor_id: Mapped[str] = mapped_column(String)
+    actor_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    action: Mapped[str] = mapped_column(String)
+    details: Mapped[str | None] = mapped_column(String, nullable=True)
+    at: Mapped[datetime] = mapped_column(UtcDateTime, index=True)
 
 
 class CertificateFileRow(Base):
@@ -62,6 +83,15 @@ def _certificate(row: CertificateRow) -> Certificate:
         row.domain_other,
         CertificateStatus(row.status),
         row.submitted_at,
+        assigned_to=row.assigned_to,
+        assigned_at=row.assigned_at,
+        decided_by=row.decided_by,
+        decided_at=row.decided_at,
+        rejection_reason=row.rejection_reason,
+        rejection_comment=row.rejection_comment,
+        original_level=row.original_level,
+        replaces_id=row.replaces_id,
+        is_archived=row.is_archived,
     )
 
 
@@ -98,6 +128,15 @@ class SqlCertificateRepository:
                     domain_other=certificate.domain_other,
                     status=certificate.status.value,
                     submitted_at=certificate.submitted_at,
+                    assigned_to=certificate.assigned_to,
+                    assigned_at=certificate.assigned_at,
+                    decided_by=certificate.decided_by,
+                    decided_at=certificate.decided_at,
+                    rejection_reason=certificate.rejection_reason,
+                    rejection_comment=certificate.rejection_comment,
+                    original_level=certificate.original_level,
+                    replaces_id=certificate.replaces_id,
+                    is_archived=certificate.is_archived,
                 )
             )
             session.flush()
@@ -122,6 +161,89 @@ class SqlCertificateRepository:
         with self._database.session() as session:
             row = session.get(CertificateRow, certificate_id)
             return _certificate(row) if row else None
+
+    def update(self, certificate: Certificate) -> None:
+        with self._database.session() as session:
+            row = session.get(CertificateRow, certificate.id)
+            if not row:
+                return
+            row.certificate_type = certificate.certificate_type
+            row.level = certificate.level
+            row.title = certificate.title
+            row.institution = certificate.institution
+            row.year = certificate.year
+            row.country = certificate.country
+            row.domain = certificate.domain
+            row.domain_other = certificate.domain_other
+            row.status = certificate.status.value
+            row.assigned_to = certificate.assigned_to
+            row.assigned_at = certificate.assigned_at
+            row.decided_by = certificate.decided_by
+            row.decided_at = certificate.decided_at
+            row.rejection_reason = certificate.rejection_reason
+            row.rejection_comment = certificate.rejection_comment
+            row.original_level = certificate.original_level
+            row.replaces_id = certificate.replaces_id
+            row.is_archived = certificate.is_archived
+            session.add(row)
+
+    def delete(self, certificate_id: str) -> None:
+        with self._database.session() as session:
+            row = session.get(CertificateRow, certificate_id)
+            if not row:
+                return
+            session.execute(delete(CertificateFileRow).where(CertificateFileRow.certificate_id == certificate_id))
+            session.execute(delete(CertificateHistoryRow).where(CertificateHistoryRow.certificate_id == certificate_id))
+            session.delete(row)
+
+    def list_queue(self, exclude_employee_id: str | None = None) -> list[Certificate]:
+        with self._database.session() as session:
+            query = select(CertificateRow).where(
+                CertificateRow.status.in_([CertificateStatus.RECEIVED.value, CertificateStatus.IN_REVIEW.value])
+            )
+            if exclude_employee_id:
+                query = query.where(CertificateRow.employee_id != exclude_employee_id)
+            query = query.order_by(CertificateRow.submitted_at.asc(), CertificateRow.id)
+            rows = session.scalars(query)
+            return [_certificate(r) for r in rows]
+
+    def list_all(self) -> list[Certificate]:
+        with self._database.session() as session:
+            rows = session.scalars(select(CertificateRow).order_by(CertificateRow.submitted_at.asc()))
+            return [_certificate(r) for r in rows]
+
+    def add_history(self, entry: CertificateHistoryEntry) -> None:
+        with self._database.session() as session:
+            session.add(
+                CertificateHistoryRow(
+                    certificate_id=entry.certificate_id,
+                    actor_id=entry.actor_id,
+                    actor_name=entry.actor_name,
+                    action=entry.action,
+                    details=entry.details,
+                    at=entry.at,
+                )
+            )
+
+    def history_of(self, certificate_id: str) -> list[CertificateHistoryEntry]:
+        with self._database.session() as session:
+            rows = session.scalars(
+                select(CertificateHistoryRow)
+                .where(CertificateHistoryRow.certificate_id == certificate_id)
+                .order_by(CertificateHistoryRow.at.asc(), CertificateHistoryRow.id.asc())
+            )
+            return [
+                CertificateHistoryEntry(
+                    id=r.id,
+                    certificate_id=r.certificate_id,
+                    actor_id=r.actor_id,
+                    actor_name=r.actor_name,
+                    action=r.action,
+                    details=r.details,
+                    at=r.at,
+                )
+                for r in rows
+            ]
 
     def set_feedback(self, feedback: Feedback) -> None:
         with self._database.session() as session:

@@ -6,7 +6,11 @@ import EmployeeListPage from './EmployeeListPage.jsx'
 import StatusFilter, { readStatus } from './StatusFilter.jsx'
 import { listEmployees } from '../../api/admin.js'
 
-vi.mock('../../api/admin.js', () => ({ listEmployees: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  listEmployees: vi.fn(),
+  searchQualifiedEmployees: vi.fn(),
+  getEmployeesExportUrl: vi.fn(() => '#'),
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
 const employee = (id, name, status) => ({

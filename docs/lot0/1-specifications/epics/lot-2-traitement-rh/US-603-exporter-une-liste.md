@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | D6 Pilotage |
 | **Lot** | 2 |
 | **Priorité** | Should |
@@ -25,7 +25,7 @@ Critère de réussite n°1 : une liste de candidats qualifiés en une minute ; d
 
 ## Definition of Done
 
-- [ ] Chaque critère d'acceptation est couvert par un test vert
-- [ ] Écran vérifié sur téléphone (390 px) et sur ordinateur (1280 px), s'il y a un écran
-- [ ] Données fictives uniquement ; aucun salaire, aucune colonne exclue dans l'API ni les journaux
-- [ ] Statut mis à jour ici et dans `../README.md`
+- [x] Chaque critère d'acceptation est couvert par un test vert
+- [x] Écran vérifié sur téléphone (390 px) et sur ordinateur (1280 px), s'il y a un écran
+- [x] Données fictives uniquement ; aucun salaire, aucune colonne exclue dans l'API ni les journaux
+- [x] Statut mis à jour ici et dans `../README.md`

@@ -50,6 +50,26 @@ class ReportOrigin(StrEnum):
     """Contrôle de cohérence (RG-16) : n'est pas une réponse de l'employé."""
 
 
+class ReportStatus(StrEnum):
+    NEW = "NEW"
+    IN_PROGRESS = "IN_PROGRESS"
+    CORRECTED = "CORRECTED"
+    CLOSED_ACCURATE = "CLOSED_ACCURATE"
+
+
+class ReportDecision(StrEnum):
+    INDICATED_IS_CORRECT = "INDICATED_IS_CORRECT"
+    CURRENT_IS_CORRECT = "CURRENT_IS_CORRECT"
+
+
+REPORT_STATUS_LABELS = {
+    ReportStatus.NEW: "Nouveau",
+    ReportStatus.IN_PROGRESS: "En cours",
+    ReportStatus.CORRECTED: "Corrigé — en attente du système RH",
+    ReportStatus.CLOSED_ACCURATE: "Clos — valeur exacte",
+}
+
+
 @dataclass(frozen=True)
 class Report:
     """Signalement d'erreur (§4.4) : traité par les RH au lot 2 (US-403)."""
@@ -62,6 +82,11 @@ class Report:
     comment: str | None
     at: datetime
     status: str = "NEW"
+    id: int | None = None
+    decided_by: str | None = None
+    decided_at: datetime | None = None
+    decision: str | None = None
+    resolution_comment: str | None = None
 
 
 def hired_too_young(birth: date, hire: date | None) -> bool:

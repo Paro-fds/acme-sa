@@ -118,6 +118,11 @@ class AdminAccountRow(Base):
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     created_by: Mapped[str | None] = mapped_column(String, nullable=True)
     last_login_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    # US-104 : gestion des comptes RH
+    full_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    email: Mapped[str | None] = mapped_column(String, nullable=True)
+    employee_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     # US-102 : double authentification
     mfa_method: Mapped[str | None] = mapped_column(String, nullable=True)
     mfa_secret: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -166,6 +171,10 @@ def _admin(row: AdminAccountRow) -> AdminAccount:
         failed_attempts=row.failed_attempts,
         locked_until=row.locked_until,
         last_login_at=row.last_login_at,
+        full_name=row.full_name,
+        email=row.email,
+        employee_id=row.employee_id,
+        is_active=row.is_active,
         mfa_method=_method(row.mfa_method),
         mfa_secret=row.mfa_secret,
         mfa_destination=row.mfa_destination,
@@ -190,6 +199,10 @@ def _admin_row(account: AdminAccount) -> AdminAccountRow:
         created_at=account.created_at,
         created_by=account.created_by,
         last_login_at=account.last_login_at,
+        full_name=account.full_name,
+        email=account.email,
+        employee_id=account.employee_id,
+        is_active=account.is_active,
         mfa_method=account.mfa_method.value if account.mfa_method else None,
         mfa_secret=account.mfa_secret,
         mfa_destination=account.mfa_destination,

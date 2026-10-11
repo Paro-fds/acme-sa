@@ -1,13 +1,13 @@
 """US-202, US-203 : /api/me/dossier — consentement, coordonnées, contact d'urgence, niveau d'études ;
-confirmer ou signaler agence, poste, date d'embauche."""
+confirmer ou signaler agence, poste, date d'embauche ; US-205 : confirmer ses informations chaque année."""
 
-from datetime import datetime
+from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
 from app.auth.api.dependencies import container, current_employee_id
-from app.dossier.application.use_cases import ContactView, DossierView, EmailView, FieldView
+from app.dossier.application.use_cases import ContactView, DossierView, EmailView, FieldView, FreshnessView
 
 router = APIRouter(prefix="/api/me/dossier", tags=["dossier"])
 
@@ -169,3 +169,34 @@ def report_hr_error(
 ) -> DossierOut:
     container(request).report_hr_error().execute(employee_id, key, body.correct_value, body.comment)
     return _dossier(request, employee_id)
+
+
+class FreshnessItemOut(BaseModel):
+    key: str
+    label: str
+    value: str
+    confirmed_at: datetime
+    expires_on: date
+    reminder_on: date
+    state: str
+
+
+class FreshnessOut(BaseModel):
+    items: list[FreshnessItemOut]
+    stale_count: int
+
+    @classmethod
+    def of(cls, view: FreshnessView) -> "FreshnessOut":
+        return cls(items=[FreshnessItemOut(**item.__dict__) for item in view.items], stale_count=view.stale_count)
+
+
+@router.get("/freshness", response_model=FreshnessOut)
+def get_freshness(request: Request, employee_id: str = Depends(current_employee_id)) -> FreshnessOut:
+    """US-205 CA-01 : à jour, rappel dû (30 jours avant) ou périmée (12 mois sans confirmation)."""
+    return FreshnessOut.of(container(request).get_freshness().execute(employee_id))
+
+
+@router.post("/still-accurate", response_model=FreshnessOut)
+def confirm_still_accurate(request: Request, employee_id: str = Depends(current_employee_id)) -> FreshnessOut:
+    """US-205 CA-02 : « Ces informations sont-elles toujours exactes ? » Oui."""
+    return FreshnessOut.of(container(request).confirm_still_accurate().execute(employee_id))

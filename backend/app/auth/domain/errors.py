@@ -134,6 +134,21 @@ class LastAdmin(Conflict):
     message = "Le dernier administrateur ne peut pas être supprimé."
 
 
+class AccountDisabled(Forbidden):
+    code = "ACCOUNT_DISABLED"
+    message = "Ce compte a été désactivé."
+
+
+class CannotDeactivateSelf(Conflict):
+    code = "CANNOT_DEACTIVATE_SELF"
+    message = "Vous ne pouvez pas désactiver votre propre compte."
+
+
+class LastAdminActive(Conflict):
+    code = "LAST_ADMIN_ACTIVE"
+    message = "Le dernier administrateur actif ne peut pas être désactivé."
+
+
 class AdminAlreadyExists(Conflict):
     code = "ADMIN_ALREADY_EXISTS"
     message = "Un administrateur existe déjà : les suivants s'ajoutent depuis l'écran « Administrateurs »."

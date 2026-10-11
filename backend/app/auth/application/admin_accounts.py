@@ -9,13 +9,16 @@ from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus
 from app.auth.application.sessions import SessionService
 from app.auth.domain.admin import AdminAccount, AdminRole, RoleChange, ROLE_LABELS, validate_admin_password, validate_username
 from app.auth.domain.errors import (
+    AccountDisabled,
     AccountLocked,
     AdminAlreadyExists,
     AdminNotFound,
+    CannotDeactivateSelf,
     CannotDeleteSelf,
     InsufficientRole,
     InvalidAdminCredentials,
     LastAdmin,
+    LastAdminActive,
     LastAdminRole,
     NotAuthenticated,
     PasswordMismatch,
@@ -48,6 +51,10 @@ class AdminView:
     role_label: str = "Administrateur"
     mfa_method: MfaMethod | None = None
     """US-102 : méthode de double authentification enregistrée (None : à choisir à la prochaine connexion)."""
+    full_name: str | None = None
+    email: str | None = None
+    employee_id: str | None = None
+    is_active: bool = True
 
 
 @dataclass(frozen=True)
@@ -88,6 +95,9 @@ class LoginAdmin:
         if admin is None:
             self._record("ADMIN_LOGIN_FAILED", None, username=username or "")
             raise InvalidAdminCredentials()
+        if not admin.is_active:
+            self._record("ADMIN_LOGIN_FAILED", admin.id, reason="disabled")
+            raise AccountDisabled()
         now = self._clock.now()
         if admin.is_locked(now):
             self._record("ADMIN_LOGIN_FAILED", admin.id, reason="locked")
@@ -116,14 +126,14 @@ class LoginAdmin:
 
 
 class GetCurrentAdmin:
-    """Compte de la session admin ; un compte supprimé entre-temps ne donne plus accès."""
+    """Compte de la session admin ; un compte supprimé ou désactivé entre-temps ne donne plus accès."""
 
     def __init__(self, admins: AdminAccountRepository) -> None:
         self._admins = admins
 
     def execute(self, admin_id: str) -> AdminAccount:
         admin = self._admins.get(admin_id)
-        if admin is None:
+        if admin is None or not admin.is_active:
             raise NotAuthenticated()
         return admin
 
@@ -155,12 +165,9 @@ class ImportConfiguredAdmin:
             if (
                 existing.password_hash != self._password_hash
                 or existing.role != AdminRole.ADMIN
-                or existing.mfa_locked_until is not None
             ):
                 existing.password_hash = self._password_hash
                 existing.role = AdminRole.ADMIN
-                existing.mfa_attempts = 0
-                existing.mfa_locked_until = None
                 self._admins.save(existing)
             return
 
@@ -224,6 +231,10 @@ class ListAdmins:
                 role=account.role,
                 role_label=ROLE_LABELS.get(account.role, account.role.value),
                 mfa_method=account.mfa_method,
+                full_name=account.full_name,
+                email=account.email,
+                employee_id=account.employee_id,
+                is_active=account.is_active,
             )
             for account in accounts
         ]
@@ -231,7 +242,8 @@ class ListAdmins:
 
 class AddAdmin:
     """US-23 CA-05 : ajout d'un administrateur avec un mot de passe provisoire ;
-    US-103 : rôle attribué à la création (Agent RH par défaut)."""
+    US-103 : rôle attribué à la création (Agent RH par défaut) ;
+    US-104 : nom, email, matricule rattaché (A10)."""
 
     def __init__(
         self, admins: AdminAccountRepository, hasher: PasswordHasher, clock: Clock, new_id: NewId = _new_id
@@ -242,7 +254,14 @@ class AddAdmin:
         self._new_id = new_id
 
     def execute(
-        self, actor_id: str, username: str, password: str, role: AdminRole = AdminRole.AGENT_RH
+        self,
+        actor_id: str,
+        username: str,
+        password: str,
+        role: AdminRole = AdminRole.AGENT_RH,
+        full_name: str | None = None,
+        email: str | None = None,
+        employee_id: str | None = None,
     ) -> AdminAccount:
         actor = self._admins.get(actor_id)
         if actor is not None and actor.role != AdminRole.ADMIN:
@@ -259,9 +278,46 @@ class AddAdmin:
             role=role,
             created_by=actor_id,
             must_change_password=True,
+            full_name=full_name.strip() if full_name else None,
+            email=email.strip() if email else None,
+            employee_id=employee_id.strip() if employee_id else None,
+            is_active=True,
         )
         self._admins.add(admin)
         return admin
+
+
+class SetAdminStatus:
+    """US-104 CA-02 : activer ou désactiver un compte RH.
+    Un compte désactivé ne peut plus se connecter ; son historique de décisions reste visible.
+    Garde-fous : on ne peut pas désactiver son propre compte, ni le dernier administrateur actif.
+    """
+
+    def __init__(self, admins: AdminAccountRepository, sessions: SessionService, clock: Clock) -> None:
+        self._admins = admins
+        self._sessions = sessions
+        self._clock = clock
+
+    def execute(self, actor_id: str, target_id: str, is_active: bool) -> AdminAccount:
+        actor = self._admins.get(actor_id)
+        if actor is None or actor.role != AdminRole.ADMIN:
+            raise InsufficientRole("Seul un administrateur peut modifier le statut d'un compte.")
+        target = self._admins.get(target_id)
+        if target is None:
+            raise AdminNotFound()
+        if not is_active and target.id == actor_id:
+            raise CannotDeactivateSelf()
+        if not is_active and target.role == AdminRole.ADMIN and target.is_active:
+            active_admins = sum(
+                1 for a in self._admins.list_all() if a.role == AdminRole.ADMIN and a.is_active and a.id != target.id
+            )
+            if active_admins == 0:
+                raise LastAdminActive()
+        target.is_active = is_active
+        self._admins.save(target)
+        if not is_active:
+            self._sessions.close_all_for(SubjectType.ADMIN, target.id)
+        return target
 
 
 class ChangeAdminRole:

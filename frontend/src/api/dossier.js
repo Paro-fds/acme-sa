@@ -26,3 +26,13 @@ export function confirmHrInformation(key) {
 export function reportHrError(key, { correct_value, comment }) {
   return request(`/me/dossier/hr-information/${key}/report`, { method: 'POST', body: { correct_value, comment } })
 }
+
+/** US-205 : état de chaque information (à jour, rappel dû, périmée après 12 mois). */
+export function getFreshness() {
+  return request('/me/dossier/freshness')
+}
+
+/** US-205 CA-02 : « Ces informations sont-elles toujours exactes ? » Oui. */
+export function confirmStillAccurate() {
+  return request('/me/dossier/still-accurate', { method: 'POST' })
+}

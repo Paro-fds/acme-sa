@@ -54,6 +54,8 @@ class CertificateOut(BaseModel):
     status_label: str
     submitted_at: datetime
     unlocks: UnlocksOut
+    replaces_id: str | None = None
+    is_archived: bool = False
 
     @classmethod
     def of(cls, view: CertificateView) -> "CertificateOut":
@@ -90,6 +92,7 @@ class DepositIn(BaseModel):
     domain_other: str = ""
     upload_id: str = ""
     original_name: str = ""
+    replaces_id: str | None = None
 
 
 @router.get("/form")
@@ -144,8 +147,19 @@ def deposit_certificate(body: DepositIn, request: Request, employee_id: str = De
         body.domain,
         body.domain_other,
     )
-    view = container(request).deposit_certificate().execute(employee_id, fields, body.upload_id, body.original_name)
+    view = container(request).deposit_certificate().execute(
+        employee_id, fields, body.upload_id, body.original_name, replaces_id=body.replaces_id
+    )
     return CertificateOut.of(view)
+
+
+@router.delete("/{certificate_id}", status_code=204)
+def delete_certificate(
+    certificate_id: str, request: Request, employee_id: str = Depends(current_employee_id)
+) -> Response:
+    """US-304 CA-01 : Un certificat validé constitue une preuve et ne peut pas être supprimé."""
+    container(request).delete_certificate().execute(employee_id, certificate_id)
+    return Response(status_code=204)
 
 
 class FeedbackIn(BaseModel):

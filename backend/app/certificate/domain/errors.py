@@ -59,3 +59,10 @@ class InvalidRating(InvalidInput):
 
     def __init__(self) -> None:
         super().__init__(field="rating")
+
+
+class CannotDeleteValidatedCertificate(Forbidden):
+    """US-304 CA-01 : Un certificat validé constitue une preuve et ne peut jamais être supprimé."""
+
+    code = "CANNOT_DELETE_VALIDATED_CERTIFICATE"
+    message = "Un certificat validé constitue une preuve et ne peut pas être supprimé."

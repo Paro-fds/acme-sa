@@ -20,9 +20,9 @@ Un employé sans email doit pouvoir entrer ; les comptes RH voient les dossiers 
 
 ## Critères d'acceptation
 
-- [x] **CA-01** Un compte Lecture seule consulte dossiers et tableaux de bord, sans bouton Valider ni Rejeter, et le portail refuse l'action si elle est tentée.
-- [x] **CA-02** Un employé sans rôle RH n'accède jamais à l'espace RH.
-- [x] **CA-03** Chaque changement de rôle est tracé (qui, quand, ancien et nouveau rôle).
+- **CA-01** Un compte Lecture seule consulte dossiers et tableaux de bord, sans bouton Valider ni Rejeter, et le portail refuse l'action si elle est tentée.
+- **CA-02** Un employé sans rôle RH n'accède jamais à l'espace RH.
+- **CA-03** Chaque changement de rôle est tracé (qui, quand, ancien et nouveau rôle).
 
 ## Definition of Done
 

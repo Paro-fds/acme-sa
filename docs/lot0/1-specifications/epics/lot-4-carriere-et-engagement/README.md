@@ -12,7 +12,7 @@ Chaque employé complète et confirme son dossier lui-même, en quelques minutes
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-205](US-205-confirmer-mes-informations-chaque-annee.md) | Confirmer mes informations chaque année | Must | — | Pas encore |
+| [US-205](US-205-confirmer-mes-informations-chaque-annee.md) | Confirmer mes informations chaque année | Must | envoi du rappel avec US-701 | Fait |
 
 ## D5 Référentiel des unités
 
@@ -36,8 +36,8 @@ L'employé voit les postes ouverts auxquels il est éligible et ce qui lui manqu
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-801](US-801-voir-les-postes-auxquels-je-suis-eligible.md) | Voir les postes auxquels je suis éligible | Must | — | Pas encore |
-| [US-802](US-802-publier-un-poste.md) | Publier un poste | Must (Should pour la confidentialité) | — | Pas encore |
+| [US-801](US-801-voir-les-postes-auxquels-je-suis-eligible.md) | Voir les postes auxquels je suis éligible | Must | — | En cours |
+| [US-802](US-802-publier-un-poste.md) | Publier un poste | Must (Should pour la confidentialité) | poste confidentiel (EF-807, Should) plus tard | Fait |
 | [US-803](US-803-ajouter-mes-formations-et-experiences.md) | Ajouter mes formations et expériences | Should | — | Pas encore |
 
 ## D9 Demandes et mouvements de carrière
@@ -46,4 +46,4 @@ Les demandes de promotion et de mobilité sont enregistrées, suivies et traité
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-902](US-902-deposer-et-suivre-ma-demande-en-ligne.md) | Déposer et suivre ma demande en ligne | Must | — | Pas encore |
+| [US-902](US-902-deposer-et-suivre-ma-demande-en-ligne.md) | Déposer et suivre ma demande en ligne | Must | demande spontanée (sans poste ouvert) plus tard | Fait |

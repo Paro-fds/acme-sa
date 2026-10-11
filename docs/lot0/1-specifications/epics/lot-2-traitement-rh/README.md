@@ -13,7 +13,7 @@ Chacun entre dans le portail simplement, et les comptes RH sont fortement proté
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
 | [US-103](US-103-donner-un-role-a-chaque-compte-rh.md) | Donner un rôle à chaque compte RH | Must | — | Fait |
-| [US-104](US-104-gerer-les-comptes-et-debloquer-un-employe.md) | Gérer les comptes et débloquer un employé | Must | — | Pas encore |
+| [US-104](US-104-gerer-les-comptes-et-debloquer-un-employe.md) | Gérer les comptes et débloquer un employé | Must | — | Fait |
 
 ## D3 Certificats
 
@@ -21,7 +21,7 @@ L'employé fait valoir ses qualifications en déposant ses certificats et suit l
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-304](US-304-garder-la-preuve-des-certificats.md) | Garder la preuve des certificats | Must | — | Pas encore |
+| [US-304](US-304-garder-la-preuve-des-certificats.md) | Garder la preuve des certificats | Must | — | Fait |
 | [US-305](US-305-un-niveau-d-etudes-prouve.md) | Un niveau d'études prouvé | Should | — | Pas encore |
 
 ## D4 Validation RH
@@ -30,9 +30,9 @@ Les RH valident vite, sans conflit d'intérêts, et chaque décision se justifie
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-401](US-401-prendre-le-dossier-suivant.md) | Prendre le dossier suivant | Must (Should pour la réaffectation) | — | Pas encore |
-| [US-402](US-402-examiner-et-decider.md) | Examiner et décider | Must | — | Pas encore |
-| [US-403](US-403-traiter-les-signalements.md) | Traiter les signalements | Must | — | Pas encore |
+| [US-401](US-401-prendre-le-dossier-suivant.md) | Prendre le dossier suivant | Must (Should pour la réaffectation) | — | Fait |
+| [US-402](US-402-examiner-et-decider.md) | Examiner et décider | Must | — | Fait |
+| [US-403](US-403-traiter-les-signalements.md) | Traiter les signalements | Must | — | Fait |
 
 ## D6 Pilotage
 
@@ -40,10 +40,10 @@ La direction et les RH savent qui est qualifié, où, et où en sont les dossier
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
-| [US-601](US-601-voir-l-etat-des-dossiers-d-un-coup-d-il.md) | Voir l'état des dossiers d'un coup d'œil | Must | — | Pas encore |
-| [US-602](US-602-trouver-les-employes-qualifies-en-une-minute.md) | Trouver les employés qualifiés en une minute | Must | — | Pas encore |
-| [US-603](US-603-exporter-une-liste.md) | Exporter une liste | Should | — | Pas encore |
-| [US-604](US-604-rendre-compte-de-chaque-action.md) | Rendre compte de chaque action | Must | — | Pas encore |
+| [US-601](US-601-voir-l-etat-des-dossiers-d-un-coup-d-il.md) | Voir l'état des dossiers d'un coup d'œil | Must | — | Fait |
+| [US-602](US-602-trouver-les-employes-qualifies-en-une-minute.md) | Trouver les employés qualifiés en une minute | Must | — | Fait |
+| [US-603](US-603-exporter-une-liste.md) | Exporter une liste | Should | — | Fait |
+| [US-604](US-604-rendre-compte-de-chaque-action.md) | Rendre compte de chaque action | Must | — | Fait |
 
 ## D9 Demandes et mouvements de carrière
 

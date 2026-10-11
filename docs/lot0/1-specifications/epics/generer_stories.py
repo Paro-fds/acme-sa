@@ -187,13 +187,14 @@ S = [
    "« Mes informations RH », « Déposer un certificat », la confirmation d'envoi et « Mes certificats » reprennent la présentation des écrans 07, 11, 12 et 13 ; le niveau d'études validé s'affiche en tête de « Mes certificats ».",
    "Quand le texte d'un écran contredit une règle du registre (délai, canaux, email obligatoire), la règle l'emporte (D-47)."],
   "Demande de l'utilisateur du 2026-10-09 : les écrans validés par M. Hilaire sont `2-espace-employe-ecrans/` et `3-espace-rh-ecrans/` (D-47). Les écrans RH (menu latéral, A09 « Valeurs à rattacher ») sont repris au début du lot 2."),
- ("205","D2","Confirmer mes informations chaque année","4","",
+ ("205","D2","Confirmer mes informations chaque année","4","envoi du rappel avec US-701",
   "Must","EF-210","RG-60 → RG-64","D-36",
   "employé","confirmer en un clic que mes informations sont toujours exactes",
   "que mon dossier reste à jour sans tout ressaisir",
   ["Une information non confirmée depuis 12 mois est périmée ; un rappel arrive 30 jours avant.",
    "« Ces informations sont-elles toujours exactes ? » : Oui met à jour toutes les dates de confirmation.",
-   "Certificats validés et niveau d'études ne se périment jamais."], ""),
+   "Certificats validés et niveau d'études ne se périment jamais."],
+  "Choix de l'utilisateur du 2026-10-11 : une information périmée est signalée sans rien bloquer (le profil reste complet, le dépôt reste ouvert) ; l'effet à la fin du délai de grâce (RG-62) reste une question pour la DRH. Le rappel 30 jours avant partira par WhatsApp ou email avec US-701 : l'API en donne déjà la date (`reminder_on`). Dans le portail, l'Accueil montre « Ces informations sont-elles toujours exactes ? » avec les informations périmées, « Oui, toujours exactes » (toutes les dates de confirmation, aucune valeur changée) et « Non, je corrige » (Mon profil). Se périment : téléphone, adresse, email, contact d'urgence, agence, poste, date d'embauche ; une information signalée aux RH attend leur réponse et ne se périme pas."),
 
  ("301","D3","Déposer un certificat depuis mon téléphone","1","antivirus et stockage chiffré au lot 3, avec US-002",
   "Must","EF-301, EF-302, EF-308","RG-20 → RG-25, RG-31","D-04, D-07",
@@ -352,14 +353,15 @@ S = [
   ["Chaque poste porte un indicateur vert (éligible) ou orange (pas encore), avec un texte, pas seulement une couleur.",
    "Orange : le portail dit ce qui manque (« Il vous manque un certificat de niveau Licence validé »).",
    "Seules les données validées comptent ; l'indicateur informe et ne décide jamais.",
-   "Je peux toujours manifester mon intérêt ; s'il est orange, il est marqué « hors critères »."], ""),
- ("802","D8","Publier un poste","4","",
+   "Je peux toujours manifester mon intérêt ; s'il est orange, il est marqué « hors critères »."],
+  "Choix de l'utilisateur du 2026-10-11 : pour l'instant, un poste publié et ouvert (date d'ouverture atteinte, date limite non passée) n'apparaît dans « Ma carrière » (`/carriere`) qu'aux employés aptes, qui remplissent tous ses critères : certificat validé du niveau et du domaine demandés, ancienneté dans l'institution, ancienneté dans le poste, grade, unité (agence, région, direction). Seules les données validées comptent (CA-03, fait). L'ancienneté dans le poste part de la date d'embauche tant que l'historique des mouvements manque (EF-907, US-903). Restent à décider avec l'utilisateur : l'indicateur orange avec ce qui manque (CA-01, CA-02 ; la règle `missing` le calcule déjà) et la manifestation d'intérêt (CA-04)."),
+ ("802","D8","Publier un poste","4","poste confidentiel (EF-807, Should) plus tard",
   "Must (Should pour la confidentialité)","EF-803, EF-804, EF-807","—","—",
   "Agent RH","saisir un poste ouvert, que l'Administrateur publie après l'avoir validé",
   "que les postes soient pourvus en priorité en interne",
   ["Fiche : intitulé et code, unité, grade visé, mission, critères, dates d'ouverture et limite.",
-   "Statuts Brouillon, Publié, Clôturé, Pourvu, avec date et auteur ; un critère modifié après publication est tracé.",
-   "Un Administrateur peut marquer un poste confidentiel, avec un motif ; seules les personnes ciblées le voient."], ""),
+   "Statuts Brouillon, Publié, Clôturé, Pourvu, avec date et auteur ; un critère modifié après publication est tracé."],
+  "Choix de l'utilisateur du 2026-10-11 : lot 4 limité aux priorités Must, donc le poste confidentiel (EF-807, Should : « Un Administrateur peut marquer un poste confidentiel, avec un motif ; seules les personnes ciblées le voient ») est reporté ; critères structurés (niveau d'études minimum, domaine, ancienneté dans l'institution et dans le poste, grade minimum, unité), tous facultatifs, pour que US-801 calcule l'éligibilité ; l'Agent RH et l'Administrateur saisissent et modifient, seul l'Administrateur publie, clôture et marque pourvu ; un poste clôturé ou pourvu ne se modifie plus ; chaque étape est inscrite au journal d'audit (US-604). 🟡 Grade : un nombre (8, 10…), comme dans l'export RH ; l'ordre des grades est à confirmer par la DRH."),
  ("803","D8","Ajouter mes formations et expériences","4","",
   "Should","EF-802","RG-04","—",
   "employé","ajouter mes formations, expériences et compétences",
@@ -374,12 +376,13 @@ S = [
    "La demande suit 7 étapes, de la réception à la clôture (acceptée, refusée, reportée ou retirée) ; chaque passage est daté.",
    "Aucune demande ne peut être supprimée.",
    "Le profil de l'employé au moment de la demande est conservé."], ""),
- ("902","D9","Déposer et suivre ma demande en ligne","4","",
+ ("902","D9","Déposer et suivre ma demande en ligne","4","demande spontanée (sans poste ouvert) plus tard",
   "Must","EF-901 (portail), EF-904","RG-73, RG-74","D-23, D-37",
   "employé","déposer une demande de promotion ou de mobilité, même sans poste ouvert, et la suivre",
   "ne plus attendre sans nouvelles",
   ["Un accusé de réception arrive sous 2 jours ouvrables.",
-   "« Mes demandes » montre l'étape en cours de chacune."], ""),
+   "« Mes demandes » montre l'étape en cours de chacune."],
+  "Choix de l'utilisateur du 2026-10-11 : pour l'instant, seulement la candidature à un poste publié ; la demande spontanée de promotion ou de mobilité, sans poste ouvert, viendra plus tard (avec le registre de US-901). L'employé apte postule depuis « Ma carrière » (message facultatif), profil complet exigé (D-23) ; l'accusé de réception est immédiat, avec un numéro de suivi (CAND-00001) ; le message WhatsApp ou email viendra avec US-701. « Mes candidatures » montre l'étape en cours (n sur 7) et l'historique. Circuit en 7 étapes (EF-902) : les RH (Agent RH ou Administrateur) font avancer chaque candidature depuis la fiche du poste, l'évaluation peut être sautée, puis clôturent avec une suite (acceptée, refusée, reportée) ; chaque étape est datée, signée et inscrite au journal d'audit. L'employé retire sa candidature tant qu'elle n'est pas clôturée ; aucune n'est supprimée (RG-74). Fiche de demande (Q6 §4), ajout du 2026-10-11 : CV facultatif (PDF, JPG ou PNG, contrôlé et stocké comme un certificat), que tout compte RH ouvre depuis la candidature, chaque consultation inscrite au journal d'audit ; profil au moment de la candidature figé (poste, grade, unités, ancienneté, niveau d'études validé, certificats validés)."),
  ("903","D9","Contrôler les mouvements lus dans les lettres","2","ancienneté dans le poste au lot 4",
   "Should (Must pour l'ancienneté)","EF-906, EF-907","RG-72","D-33, D-38",
   "Agent RH","contrôler les promotions, transferts et nominations que le portail a lus dans les lettres scannées",
@@ -410,7 +413,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

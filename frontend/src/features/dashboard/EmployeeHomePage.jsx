@@ -1,6 +1,6 @@
 import { useEffect, useId } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { getDossier } from '../../api/dossier.js'
+import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Mascot from '../../components/Mascot.jsx'
@@ -9,6 +9,7 @@ import { useLoader } from '../../lib/useLoader.js'
 import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
 import { DEPOSIT_PATH } from '../certificates/paths.js'
 import { CONSENT_PATH } from '../dossier/paths.js'
+import StillAccurateCard from './StillAccurateCard.jsx'
 
 export const HOME_PATH = '/accueil'
 
@@ -35,8 +36,8 @@ const REMAINING = {
 }
 
 async function load() {
-  const [profile, dossier] = await Promise.all([getProfile(), getDossier()])
-  return { profile, consentGiven: Boolean(dossier.consent.information_notice_at) }
+  const [profile, dossier, freshness] = await Promise.all([getProfile(), getDossier(), getFreshness()])
+  return { profile, freshness, consentGiven: Boolean(dossier.consent.information_notice_at) }
 }
 
 /** Anneau de l'écran 06 (`code.html`) : 112 px, trait de 8, fond bleu pâle, pourcentage en bleu. */
@@ -211,6 +212,8 @@ export default function EmployeeHomePage() {
             : `« Bravo ${profile.first_name}, votre profil est complet ! »`}
         </Mascot>
       </section>
+
+      <StillAccurateCard freshness={data.freshness} />
 
       <section className="flex flex-col items-center gap-4 rounded-xl bg-surface p-4 text-center shadow-card sm:flex-row sm:text-left">
         <Ring percent={completion.percent} />

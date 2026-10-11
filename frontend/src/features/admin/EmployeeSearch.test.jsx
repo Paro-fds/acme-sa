@@ -5,7 +5,11 @@ import { Link, MemoryRouter, Route, Routes, useLocation, useNavigate } from 'rea
 import EmployeeListPage from './EmployeeListPage.jsx'
 import { listEmployees } from '../../api/admin.js'
 
-vi.mock('../../api/admin.js', () => ({ listEmployees: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  listEmployees: vi.fn(),
+  searchQualifiedEmployees: vi.fn(),
+  getEmployeesExportUrl: vi.fn(() => '#'),
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
 const employee = (id, last_name, first_name) => ({

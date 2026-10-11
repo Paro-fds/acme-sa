@@ -8,8 +8,8 @@ const STATUS_NOTES = {
   VALIDATED: 'Niveau validé dans votre dossier RH.',
 }
 
-/** US-303, US-207 : chaque certificat avec son statut, toujours visible. */
-export default function CertificateList({ certificates }) {
+/** US-303, US-304 : chaque certificat avec son statut, y compris s'il est archivé/remplacé. */
+export default function CertificateList({ certificates, onDelete }) {
   if (certificates.length === 0) {
     return <p className="rounded-xl bg-section p-4 text-help">Aucun certificat déposé pour l'instant.</p>
   }
@@ -22,14 +22,38 @@ export default function CertificateList({ certificates }) {
               <span className="text-sm font-semibold text-info-text">{certificate.type_label} · {certificate.level_label}</span>
               <p className="font-semibold break-words text-heading">{certificate.title}</p>
             </div>
-            <CertificateStatus status={certificate.status} />
+            <div className="flex items-center gap-2">
+              {certificate.is_archived ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-section px-2.5 py-0.5 text-xs font-semibold text-muted">
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">archive</span>
+                  Archivé (remplacé)
+                </span>
+              ) : (
+                <CertificateStatus status={certificate.status} />
+              )}
+            </div>
           </div>
           <p className="flex flex-wrap gap-x-3 rounded-lg bg-section px-3 py-2 text-sm text-help">
             <span>{certificate.institution}</span>
             <span>Promotion {certificate.year}</span>
           </p>
-          {STATUS_NOTES[certificate.status] && <p className="text-sm text-help">{STATUS_NOTES[certificate.status]}</p>}
-          <p className="text-sm text-muted">Déposé le {formatLocalDate(certificate.submitted_at)}</p>
+          {certificate.is_archived ? (
+            <p className="text-sm text-help italic">Ce certificat a été remplacé mais reste conservé comme preuve dans votre dossier RH.</p>
+          ) : (
+            STATUS_NOTES[certificate.status] && <p className="text-sm text-help">{STATUS_NOTES[certificate.status]}</p>
+          )}
+          <div className="flex items-center justify-between text-sm text-muted">
+            <span>Déposé le {formatLocalDate(certificate.submitted_at)}</span>
+            {onDelete && certificate.status !== 'VALIDATED' && (
+              <button
+                type="button"
+                onClick={() => onDelete(certificate.id)}
+                className="text-xs font-medium text-warning-text hover:underline"
+              >
+                Supprimer
+              </button>
+            )}
+          </div>
         </li>
       ))}
     </ul>

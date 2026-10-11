@@ -1,13 +1,14 @@
 import { Link, useLocation, useParams } from 'react-router'
-import { getEmployee, listEmployeeDocuments } from '../../api/admin.js'
+import * as adminApi from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
 import { AdminStatusBadge } from '../../components/StatusBadge.jsx'
 import ValueComparison from '../../components/ValueComparison.jsx'
-import { displayValue, formatDateTime, initials } from '../../lib/format.js'
+import { displayValue, formatDateTime } from '../../lib/format.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { profileSections } from '../profile/profileSections.js'
-import AdminShell from './AdminShell.jsx'
+import AdminCertificatesBlock from './AdminCertificatesBlock.jsx'
 import AdminDocuments from './AdminDocuments.jsx'
+import AdminShell from './AdminShell.jsx'
 import Block from './Block.jsx'
 import ResetAccess from './ResetAccess.jsx'
 
@@ -96,9 +97,14 @@ function UpdateBlock({ folder }) {
   )
 }
 
-const loadFolder = (id) => Promise.all([getEmployee(id), listEmployeeDocuments(id)])
+const loadFolder = (id) =>
+  Promise.all([
+    adminApi.getEmployee(id),
+    adminApi.listEmployeeDocuments(id),
+    typeof adminApi.listEmployeeCertificates === 'function' ? adminApi.listEmployeeCertificates(id).catch(() => []) : Promise.resolve([]),
+  ])
 
-/** US-20, US-21 : dossier d'un employé et ses documents, en lecture seule. */
+/** US-20, US-21, US-304 : dossier d'un employé, certificats et documents, en lecture seule. */
 export default function EmployeeDetailPage() {
   const { id } = useParams()
   const location = useLocation()
@@ -130,7 +136,7 @@ export default function EmployeeDetailPage() {
   }
   if (error) return page(<Alert>{error.message}</Alert>)
 
-  const [folder, documents] = data
+  const [folder, documents, certificates = []] = data
   return page(
     <>
       <div className="mb-6 flex flex-col gap-3">
@@ -151,6 +157,7 @@ export default function EmployeeDetailPage() {
         <FolderHeader folder={folder} />
         <ProfileBlock folder={folder} />
         <UpdateBlock folder={folder} />
+        <AdminCertificatesBlock certificates={certificates} />
         <AdminDocuments documents={documents} />
         <ResetAccess
           employeeId={folder.id}

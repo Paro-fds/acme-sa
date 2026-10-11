@@ -52,16 +52,16 @@ Une story appartient au lot où elle est livrée ; quand un complément arrive p
 | Story | Epic | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|---|
 | [US-103](lot-2-traitement-rh/US-103-donner-un-role-a-chaque-compte-rh.md) | D1 | Donner un rôle à chaque compte RH | Must | — | Fait |
-| [US-104](lot-2-traitement-rh/US-104-gerer-les-comptes-et-debloquer-un-employe.md) | D1 | Gérer les comptes et débloquer un employé | Must | — | Pas encore |
-| [US-304](lot-2-traitement-rh/US-304-garder-la-preuve-des-certificats.md) | D3 | Garder la preuve des certificats | Must | — | Pas encore |
+| [US-104](lot-2-traitement-rh/US-104-gerer-les-comptes-et-debloquer-un-employe.md) | D1 | Gérer les comptes et débloquer un employé | Must | — | Fait |
+| [US-304](lot-2-traitement-rh/US-304-garder-la-preuve-des-certificats.md) | D3 | Garder la preuve des certificats | Must | — | Fait |
 | [US-305](lot-2-traitement-rh/US-305-un-niveau-d-etudes-prouve.md) | D3 | Un niveau d'études prouvé | Should | — | Pas encore |
-| [US-401](lot-2-traitement-rh/US-401-prendre-le-dossier-suivant.md) | D4 | Prendre le dossier suivant | Must (Should pour la réaffectation) | — | Pas encore |
-| [US-402](lot-2-traitement-rh/US-402-examiner-et-decider.md) | D4 | Examiner et décider | Must | — | Pas encore |
-| [US-403](lot-2-traitement-rh/US-403-traiter-les-signalements.md) | D4 | Traiter les signalements | Must | — | Pas encore |
-| [US-601](lot-2-traitement-rh/US-601-voir-l-etat-des-dossiers-d-un-coup-d-il.md) | D6 | Voir l'état des dossiers d'un coup d'œil | Must | — | Pas encore |
-| [US-602](lot-2-traitement-rh/US-602-trouver-les-employes-qualifies-en-une-minute.md) | D6 | Trouver les employés qualifiés en une minute | Must | — | Pas encore |
-| [US-603](lot-2-traitement-rh/US-603-exporter-une-liste.md) | D6 | Exporter une liste | Should | — | Pas encore |
-| [US-604](lot-2-traitement-rh/US-604-rendre-compte-de-chaque-action.md) | D6 | Rendre compte de chaque action | Must | — | Pas encore |
+| [US-401](lot-2-traitement-rh/US-401-prendre-le-dossier-suivant.md) | D4 | Prendre le dossier suivant | Must (Should pour la réaffectation) | — | Fait |
+| [US-402](lot-2-traitement-rh/US-402-examiner-et-decider.md) | D4 | Examiner et décider | Must | — | Fait |
+| [US-403](lot-2-traitement-rh/US-403-traiter-les-signalements.md) | D4 | Traiter les signalements | Must | — | Fait |
+| [US-601](lot-2-traitement-rh/US-601-voir-l-etat-des-dossiers-d-un-coup-d-il.md) | D6 | Voir l'état des dossiers d'un coup d'œil | Must | — | Fait |
+| [US-602](lot-2-traitement-rh/US-602-trouver-les-employes-qualifies-en-une-minute.md) | D6 | Trouver les employés qualifiés en une minute | Must | — | Fait |
+| [US-603](lot-2-traitement-rh/US-603-exporter-une-liste.md) | D6 | Exporter une liste | Should | — | Fait |
+| [US-604](lot-2-traitement-rh/US-604-rendre-compte-de-chaque-action.md) | D6 | Rendre compte de chaque action | Must | — | Fait |
 | [US-901](lot-2-traitement-rh/US-901-enregistrer-une-demande-recue-par-lettre.md) | D9 | Enregistrer une demande reçue par lettre | Must | — | Pas encore |
 | [US-903](lot-2-traitement-rh/US-903-controler-les-mouvements-lus-dans-les-lettres.md) | D9 | Contrôler les mouvements lus dans les lettres | Should (Must pour l'ancienneté) | ancienneté dans le poste au lot 4 | Pas encore |
 | [US-904](lot-2-traitement-rh/US-904-reprendre-l-historique-des-demandes.md) | D9 | Reprendre l'historique des demandes | Should | — | Pas encore |
@@ -84,13 +84,13 @@ Une story appartient au lot où elle est livrée ; quand un complément arrive p
 
 | Story | Epic | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|---|
-| [US-205](lot-4-carriere-et-engagement/US-205-confirmer-mes-informations-chaque-annee.md) | D2 | Confirmer mes informations chaque année | Must | — | Pas encore |
+| [US-205](lot-4-carriere-et-engagement/US-205-confirmer-mes-informations-chaque-annee.md) | D2 | Confirmer mes informations chaque année | Must | envoi du rappel avec US-701 | Fait |
 | [US-503](lot-4-carriere-et-engagement/US-503-gerer-le-referentiel-a-l-ecran.md) | D5 | Gérer le référentiel à l'écran | Should | — | Pas encore |
 | [US-606](lot-4-carriere-et-engagement/US-606-changer-une-regle-sans-developpeur.md) | D6 | Changer une règle sans développeur | Should | — | Pas encore |
-| [US-801](lot-4-carriere-et-engagement/US-801-voir-les-postes-auxquels-je-suis-eligible.md) | D8 | Voir les postes auxquels je suis éligible | Must | — | Pas encore |
-| [US-802](lot-4-carriere-et-engagement/US-802-publier-un-poste.md) | D8 | Publier un poste | Must (Should pour la confidentialité) | — | Pas encore |
+| [US-801](lot-4-carriere-et-engagement/US-801-voir-les-postes-auxquels-je-suis-eligible.md) | D8 | Voir les postes auxquels je suis éligible | Must | — | En cours |
+| [US-802](lot-4-carriere-et-engagement/US-802-publier-un-poste.md) | D8 | Publier un poste | Must (Should pour la confidentialité) | poste confidentiel (EF-807, Should) plus tard | Fait |
 | [US-803](lot-4-carriere-et-engagement/US-803-ajouter-mes-formations-et-experiences.md) | D8 | Ajouter mes formations et expériences | Should | — | Pas encore |
-| [US-902](lot-4-carriere-et-engagement/US-902-deposer-et-suivre-ma-demande-en-ligne.md) | D9 | Déposer et suivre ma demande en ligne | Must | — | Pas encore |
+| [US-902](lot-4-carriere-et-engagement/US-902-deposer-et-suivre-ma-demande-en-ligne.md) | D9 | Déposer et suivre ma demande en ligne | Must | demande spontanée (sans poste ouvert) plus tard | Fait |
 
 ### [Lot distinct — Lettres et retour au système RH](lot-distinct-lettres-et-systeme-rh/README.md)
 

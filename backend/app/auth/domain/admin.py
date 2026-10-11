@@ -57,6 +57,13 @@ class AdminAccount(Lockable):
     failed_attempts: int = 0
     locked_until: datetime | None = None
     last_login_at: datetime | None = None
+    # --- US-104 : gestion des comptes RH (A10) ---
+    full_name: str | None = None
+    email: str | None = None
+    employee_id: str | None = None
+    """Matricule rattaché à l'agent RH (sert à ne jamais lui proposer ses propres certificats, RG-42)."""
+    is_active: bool = True
+    """CA-02 : un compte désactivé ne peut plus se connecter ; son historique reste visible."""
     # --- US-102 : double authentification ---
     mfa_method: MfaMethod | None = None
     """Méthode enregistrée ; None tant que la personne n'en a pas choisi (première connexion, réinitialisation)."""

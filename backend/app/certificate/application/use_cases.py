@@ -16,6 +16,7 @@ from app.certificate.domain.certificate import (
     Certificate,
     CertificateFields,
     CertificateFile,
+    CertificateHistoryEntry,
     CertificateStatus,
     RATINGS,
     SEARCHABLE,
@@ -27,6 +28,7 @@ from app.certificate.domain.certificate import (
     needs_domain,
 )
 from app.certificate.domain.errors import (
+    CannotDeleteValidatedCertificate,
     CertificateFileTooLarge,
     CertificateNotFound,
     InvalidRating,
@@ -114,6 +116,8 @@ class CertificateView:
     status_label: str
     submitted_at: datetime
     unlocks: Unlocks
+    replaces_id: str | None = None
+    is_archived: bool = False
 
 
 def certificate_view(certificate: Certificate) -> CertificateView:
@@ -136,6 +140,8 @@ def certificate_view(certificate: Certificate) -> CertificateView:
         STATUS_LABELS[certificate.status],
         certificate.submitted_at,
         Unlocks(unlocked_level(certificate.level)),
+        replaces_id=certificate.replaces_id,
+        is_archived=certificate.is_archived,
     )
 
 
@@ -215,7 +221,8 @@ class ReceiveLocalUpload:
 
 class DepositCertificate(_DepositRules):
     """CA-01 → CA-05 : le fichier reçu est contrôlé sur son contenu réel, puis le certificat est enregistré « Reçu ».
-    Un champ manquant laisse le fichier en place : l'employé corrige et renvoie sans tout recommencer."""
+    Un champ manquant laisse le fichier en place : l'employé corrige et renvoie sans tout recommencer.
+    US-304 CA-02 : si replaces_id est renseigné, l'ancien certificat validé reste archivé avec son historique."""
 
     def __init__(
         self,
@@ -229,10 +236,49 @@ class DepositCertificate(_DepositRules):
         self._storage = storage
         self._clock = clock
 
-    def execute(self, employee_id: str, fields: CertificateFields, upload_id: str, original_name: str) -> CertificateView:
+    def execute(
+        self,
+        employee_id: str,
+        fields: CertificateFields,
+        upload_id: str,
+        original_name: str,
+        replaces_id: str | None = None,
+    ) -> CertificateView:
         self._check_open(employee_id)
+        now = self._clock.now()
+
+        # US-304 CA-02 : archivage de l'ancien certificat remplacé
+        if replaces_id:
+            old_cert = self._certificates.get(replaces_id)
+            if not old_cert or old_cert.employee_id != employee_id:
+                raise CertificateNotFound()
+            archived_old = Certificate(
+                id=old_cert.id,
+                employee_id=old_cert.employee_id,
+                certificate_type=old_cert.certificate_type,
+                level=old_cert.level,
+                title=old_cert.title,
+                institution=old_cert.institution,
+                year=old_cert.year,
+                country=old_cert.country,
+                domain=old_cert.domain,
+                domain_other=old_cert.domain_other,
+                status=old_cert.status,
+                submitted_at=old_cert.submitted_at,
+                assigned_to=old_cert.assigned_to,
+                assigned_at=old_cert.assigned_at,
+                decided_by=old_cert.decided_by,
+                decided_at=old_cert.decided_at,
+                rejection_reason=old_cert.rejection_reason,
+                rejection_comment=old_cert.rejection_comment,
+                original_level=old_cert.original_level,
+                replaces_id=old_cert.replaces_id,
+                is_archived=True,
+            )
+            self._certificates.update(archived_old)
+
         key = storage_key(employee_id, upload_id)
-        cleaned = clean_fields(fields, self._clock.now().date())
+        cleaned = clean_fields(fields, now.date())
         size = self._storage.size(key)
         if size is None:
             raise UploadNotFound()
@@ -244,24 +290,131 @@ class DepositCertificate(_DepositRules):
         except Exception:
             self._storage.delete(key)
             raise
+        new_cert_id = str(uuid.uuid4())
         certificate = Certificate(
-            str(uuid.uuid4()),
-            employee_id,
-            cleaned.certificate_type,
-            cleaned.level,
-            cleaned.title,
-            cleaned.institution,
-            cleaned.year,
-            cleaned.country,
-            cleaned.domain,
-            cleaned.domain_other,
-            CertificateStatus.RECEIVED,
-            self._clock.now(),
+            id=new_cert_id,
+            employee_id=employee_id,
+            certificate_type=cleaned.certificate_type,
+            level=cleaned.level,
+            title=cleaned.title,
+            institution=cleaned.institution,
+            year=cleaned.year,
+            country=cleaned.country,
+            domain=cleaned.domain,
+            domain_other=cleaned.domain_other,
+            status=CertificateStatus.RECEIVED,
+            submitted_at=now,
+            replaces_id=replaces_id,
+            is_archived=False,
         )
         self._certificates.add(
             certificate, CertificateFile(certificate.id, key, clean_original_name(original_name), content_type, size)
         )
+        if replaces_id:
+            self._certificates.add_history(
+                CertificateHistoryEntry(
+                    id=None,
+                    certificate_id=replaces_id,
+                    actor_id=employee_id,
+                    actor_name=None,
+                    action="REPLACED",
+                    details=f"Remplacé par le nouveau certificat {new_cert_id}",
+                    at=now,
+                )
+            )
         return certificate_view(certificate)
+
+
+class DeleteCertificate:
+    """US-304 CA-01 : Un certificat validé constitue une preuve et ne peut jamais être supprimé."""
+
+    def __init__(self, certificates: CertificateRepository, storage: CertificateStorage) -> None:
+        self._certificates = certificates
+        self._storage = storage
+
+    def execute(self, employee_id: str, certificate_id: str) -> None:
+        cert = self._certificates.get(certificate_id)
+        if not cert or cert.employee_id != employee_id:
+            raise CertificateNotFound()
+        if cert.status == CertificateStatus.VALIDATED:
+            raise CannotDeleteValidatedCertificate()
+
+        files = self._certificates.files_of(certificate_id)
+        for f in files:
+            self._storage.delete(f.storage_key)
+        self._certificates.delete(certificate_id)
+
+
+@dataclass(frozen=True)
+class AdminEmployeeCertificateView:
+    id: str
+    certificate_type: str
+    type_label: str
+    level: str
+    level_label: str
+    title: str
+    institution: str
+    year: int
+    country: str | None
+    domain: str | None
+    domain_label: str | None
+    status: str
+    status_label: str
+    submitted_at: datetime
+    decided_by: str | None
+    decided_at: datetime | None
+    original_level: str | None
+    rejection_reason: str | None
+    rejection_comment: str | None
+    replaces_id: str | None
+    is_archived: bool
+    history: list[CertificateHistoryEntry]
+    files: list[CertificateFile]
+
+
+class GetEmployeeCertificatesForAdmin:
+    """US-304 : Retrouver tout certificat validé, même remplacé, avec son historique de décisions complet."""
+
+    def __init__(self, certificates: CertificateRepository) -> None:
+        self._certificates = certificates
+
+    def execute(self, employee_id: str) -> list[AdminEmployeeCertificateView]:
+        all_certs = self._certificates.list_for_employee(employee_id)
+        views = []
+        for c in all_certs:
+            domain_label = None
+            if c.domain:
+                domain_label = c.domain_other if c.domain == "AUTRE" else DOMAIN_LABELS.get(c.domain, c.domain)
+            history = self._certificates.history_of(c.id)
+            files = self._certificates.files_of(c.id)
+            views.append(
+                AdminEmployeeCertificateView(
+                    id=c.id,
+                    certificate_type=c.certificate_type,
+                    type_label=TYPE_LABELS.get(c.certificate_type, c.certificate_type),
+                    level=c.level,
+                    level_label=LEVEL_LABELS.get(c.level, c.level),
+                    title=c.title,
+                    institution=c.institution,
+                    year=c.year,
+                    country=c.country,
+                    domain=c.domain,
+                    domain_label=domain_label,
+                    status=c.status.value,
+                    status_label=STATUS_LABELS.get(c.status, c.status.value),
+                    submitted_at=c.submitted_at,
+                    decided_by=c.decided_by,
+                    decided_at=c.decided_at,
+                    original_level=c.original_level,
+                    rejection_reason=c.rejection_reason,
+                    rejection_comment=c.rejection_comment,
+                    replaces_id=c.replaces_id,
+                    is_archived=c.is_archived,
+                    history=history,
+                    files=files,
+                )
+            )
+        return views
 
 
 class GiveFeedback:

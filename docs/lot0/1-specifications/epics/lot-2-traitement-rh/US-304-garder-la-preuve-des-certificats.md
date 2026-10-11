@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Statut** | Pas encore |
+| **Statut** | Fait |
 | **Epic** | D3 Certificats |
 | **Lot** | 2 |
 | **Priorité** | Must |
@@ -25,7 +25,7 @@ Besoin 2 : des qualifications prouvées. Sans certificat validé, personne n'app
 
 ## Definition of Done
 
-- [ ] Chaque critère d'acceptation est couvert par un test vert
-- [ ] Écran vérifié sur téléphone (390 px) et sur ordinateur (1280 px), s'il y a un écran
-- [ ] Données fictives uniquement ; aucun salaire, aucune colonne exclue dans l'API ni les journaux
-- [ ] Statut mis à jour ici et dans `../README.md`
+- [x] Chaque critère d'acceptation est couvert par un test vert
+- [x] Écran vérifié sur téléphone (390 px) et sur ordinateur (1280 px), s'il y a un écran
+- [x] Données fictives uniquement ; aucun salaire, aucune colonne exclue dans l'API ni les journaux
+- [x] Statut mis à jour ici et dans `../README.md`
