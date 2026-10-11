@@ -3,7 +3,7 @@ import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Link, MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router'
 import EmployeeListPage from './EmployeeListPage.jsx'
-import { listEmployees } from '../../api/admin.js'
+import { searchQualifiedEmployees } from '../../api/admin.js'
 
 vi.mock('../../api/admin.js', () => ({
   listEmployees: vi.fn(),
@@ -34,7 +34,15 @@ function fakeApi({ page = 1, search = '' }) {
 
 function LocationProbe() {
   const { search } = useLocation()
-  return <output aria-label="adresse">{search}</output>
+  const navigate = useNavigate()
+  return (
+    <>
+      <output aria-label="adresse">{search}</output>
+      <button type="button" onClick={() => navigate(-1)}>
+        Page précédente
+      </button>
+    </>
+  )
 }
 
 function FolderProbe() {
@@ -78,8 +86,8 @@ describe('EmployeeSearch (US-18)', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    listEmployees.mockReset()
-    listEmployees.mockImplementation(fakeApi)
+    searchQualifiedEmployees.mockReset()
+    searchQualifiedEmployees.mockImplementation(fakeApi)
   })
 
   afterEach(() => {
@@ -88,7 +96,7 @@ describe('EmployeeSearch (US-18)', () => {
 
   it('barre de recherche : placeholder, touche « Rechercher » du clavier', async () => {
     renderAt()
-    await screen.findByText('3 employés')
+    await screen.findByText('3 employés actifs')
 
     expect(searchBox()).toHaveAttribute('placeholder', 'Rechercher par nom, prénom ou matricule…')
     expect(searchBox()).toHaveAttribute('enterkeyhint', 'search')
@@ -97,33 +105,33 @@ describe('EmployeeSearch (US-18)', () => {
 
   it('la recherche part 300 ms après la dernière frappe, pas avant', async () => {
     renderAt()
-    await screen.findByText('3 employés')
-    listEmployees.mockClear()
+    await screen.findByText('3 employés actifs')
+    searchQualifiedEmployees.mockClear()
 
     await user.type(searchBox(), 'pierre')
     act(() => vi.advanceTimersByTime(200))
-    expect(listEmployees).not.toHaveBeenCalled()
+    expect(searchQualifiedEmployees).not.toHaveBeenCalled()
 
     act(() => vi.advanceTimersByTime(100))
     expect(await screen.findByText('2 employés')).toBeInTheDocument()
-    expect(listEmployees).toHaveBeenCalledTimes(1)
-    expect(listEmployees).toHaveBeenCalledWith({ page: 1, search: 'pierre', status: '' })
+    expect(searchQualifiedEmployees).toHaveBeenCalledTimes(1)
+    expect(searchQualifiedEmployees).toHaveBeenCalledWith(expect.objectContaining({ page: 1, search: 'pierre' }))
     expect(cardNames()).toEqual(['PIERRE Marie', 'PIERRE Marie'])
   })
 
   it('le terme est conservé dans l’adresse et la page revient à 1', async () => {
-    renderAt('/admin/employes?page=2&status=NOT_UPDATED')
+    renderAt('/admin/employes?page=2&domain=Finance')
     await screen.findByText(/employés?$/)
 
     await user.type(searchBox(), 'pierre')
     act(() => vi.advanceTimersByTime(300))
 
-    await vi.waitFor(() => expect(screen.getByLabelText('adresse')).toHaveTextContent('?status=NOT_UPDATED&search=pierre'))
+    await vi.waitFor(() => expect(screen.getByLabelText('adresse')).toHaveTextContent('?domain=Finance&search=pierre'))
   })
 
   it('CA-07 : aucun résultat → message et « Effacer la recherche » ; CA-08 : la liste complète revient', async () => {
     renderAt()
-    await screen.findByText('3 employés')
+    await screen.findByText('3 employés actifs')
 
     await user.type(searchBox(), 'zzz')
     act(() => vi.advanceTimersByTime(300))
@@ -132,7 +140,7 @@ describe('EmployeeSearch (US-18)', () => {
     expect(screen.queryByText(/0 employé/)).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Effacer la recherche' }))
 
-    expect(await screen.findByText('3 employés')).toBeInTheDocument()
+    expect(await screen.findByText('3 employés actifs')).toBeInTheDocument()
     expect(searchBox()).toHaveValue('')
     expect(screen.getByLabelText('adresse')).toHaveTextContent(/^$/)
   })
@@ -144,7 +152,7 @@ describe('EmployeeSearch (US-18)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Effacer' }))
 
-    expect(await screen.findByText('3 employés')).toBeInTheDocument()
+    expect(await screen.findByText('3 employés actifs')).toBeInTheDocument()
     expect(searchBox()).toHaveValue('')
     expect(searchBox()).toHaveFocus()
   })
@@ -156,12 +164,12 @@ describe('EmployeeSearch (US-18)', () => {
     await user.clear(searchBox())
     act(() => vi.advanceTimersByTime(300))
 
-    expect(await screen.findByText('3 employés')).toBeInTheDocument()
+    expect(await screen.findByText('3 employés actifs')).toBeInTheDocument()
   })
 
   it('Entrée lance la recherche sans attendre', async () => {
     renderAt()
-    await screen.findByText('3 employés')
+    await screen.findByText('3 employés actifs')
 
     await user.type(searchBox(), 'baptiste{Enter}')
 
@@ -170,7 +178,7 @@ describe('EmployeeSearch (US-18)', () => {
 
   it('CA-11 : retour depuis un dossier → même recherche et mêmes résultats', async () => {
     renderAt()
-    await screen.findByText('3 employés')
+    await screen.findByText('3 employés actifs')
     await user.type(searchBox(), 'pierre')
     act(() => vi.advanceTimersByTime(300))
     await screen.findByText('2 employés')
@@ -185,7 +193,7 @@ describe('EmployeeSearch (US-18)', () => {
 
   it('les frappes successives ne créent pas d’entrées d’historique (retour arrière = écran précédent)', async () => {
     renderAt()
-    await screen.findByText('3 employés')
+    await screen.findByText('3 employés actifs')
     await user.type(searchBox(), 'pi')
     act(() => vi.advanceTimersByTime(300))
     await user.type(searchBox(), 'erre')
@@ -193,7 +201,7 @@ describe('EmployeeSearch (US-18)', () => {
     await screen.findByText('2 employés')
 
     // Un seul retour suffit à revenir au tableau de bord.
-    await user.click(screen.getByRole('button', { name: 'Retour' }))
+    await user.click(screen.getByRole('button', { name: 'Page précédente' }))
 
     expect(await screen.findByRole('link', { name: 'Tableau de bord' })).toBeInTheDocument()
   })

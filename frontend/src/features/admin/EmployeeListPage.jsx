@@ -1,69 +1,63 @@
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
-import * as adminApi from '../../api/admin.js'
+import { getEmployeesExportUrl, searchQualifiedEmployees } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
-
-const listEmployees = adminApi.listEmployees
-const searchQualifiedEmployees = adminApi.searchQualifiedEmployees
-const getEmployeesExportUrl = adminApi.getEmployeesExportUrl || (() => '#')
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
-import { AdminStatusBadge } from '../../components/StatusBadge.jsx'
-import EmployeeSearch from './EmployeeSearch.jsx'
-import StatusFilter, { readStatus } from './StatusFilter.jsx'
+import { formatLocalDate } from '../../lib/format.js'
 import { useLoader } from '../../lib/useLoader.js'
+import EmployeeSearch from './EmployeeSearch.jsx'
+import { useUnits } from './useUnits.js'
 
+const PAGE_SIZE = 20
 const folderUrl = (employee) => `/admin/employes/${employee.id}`
 const plural = (count) => `${count} employé${count > 1 ? 's' : ''}`
+
+/** Filtres de l'écran A06 : nom du paramètre dans l'adresse, libellé, valeur « tout ». */
+const FILTERS = [
+  { key: 'agency', label: 'Agence', all: 'Toutes' },
+  { key: 'region', label: 'Région', all: 'Toutes' },
+  { key: 'direction', label: 'Direction', all: 'Toutes' },
+  { key: 'folder_status', label: 'Statut du dossier', all: 'Tous', options: ['Profil incomplet', 'Profil complet', 'Dossier complet'] },
+  { key: 'min_level', label: 'Niveau validé', all: 'Tous', options: ['au moins Baccalauréat', 'au moins Licence', 'au moins Master'] },
+  {
+    key: 'domain',
+    label: 'Domaine',
+    all: 'Tous',
+    options: ['Comptabilité', 'Gestion', 'Finance', 'Économie', 'Informatique', 'Droit', 'Agronomie', 'Autre'],
+  },
+]
 
 function readPage(searchParams) {
   const page = Number.parseInt(searchParams.get('page') ?? '1', 10)
   return Number.isInteger(page) && page > 0 ? page : 1
 }
 
-/** Nouveau nom en principal, ancien en dessous en gris (SD-03). */
-function EmployeeName({ employee }) {
+const FOLDER_TONES = {
+  FOLDER_COMPLETE: 'border-status-done-border bg-status-done-bg text-status-done-text',
+  PROFILE_COMPLETE: 'border-info-border bg-info-bg text-info-text',
+  INCOMPLETE: 'border-status-progress-border bg-status-progress-bg text-status-progress-text',
+}
+
+/** A06 : statut du dossier (Profil incomplet, Profil complet, Dossier complet). */
+function FolderStatusBadge({ employee }) {
   return (
-    <span className="flex min-w-0 flex-col">
-      <span className="font-semibold text-heading">{employee.display_name}</span>
-      {employee.previous_name && <span className="text-sm text-muted">anciennement {employee.previous_name}</span>}
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${FOLDER_TONES[employee.folder_status] ?? FOLDER_TONES.INCOMPLETE}`}
+    >
+      {employee.folder_status_label}
     </span>
   )
 }
 
-function FolderStatusBadge({ status, label }) {
-  if (status === 'FOLDER_COMPLETE') {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-[#15803D] border border-green-200">
-        <svg className="w-3 h-3 mr-1 text-[#15803D]" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-        </svg>
-        {label || 'Dossier complet'}
-      </span>
-    )
-  }
-  if (status === 'PROFILE_COMPLETE') {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-        <svg className="w-3 h-3 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-        </svg>
-        {label || 'Profil complet'}
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-[#B45309] border border-amber-200">
-      {label || 'Profil incomplet'}
-    </span>
-  )
-}
+const agencyOf = (employee) => employee.agency_name || employee.agency_code
+const dateOf = (employee) => (employee.updated_at ? formatLocalDate(employee.updated_at) : '—')
 
 function useFolderState() {
   return { listSearch: useLocation().search }
 }
 
-function EmployeeCards({ employees, isQualifiedView }) {
+function EmployeeCards({ employees }) {
   const state = useFolderState()
   return (
     <ul aria-label="Employés" className="flex flex-col gap-2 lg:hidden">
@@ -72,26 +66,20 @@ function EmployeeCards({ employees, isQualifiedView }) {
           <Link
             to={folderUrl(employee)}
             state={state}
-            className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-card hover:border-primary"
+            className="flex min-h-11 items-center gap-3 rounded-lg border border-rh-line bg-surface p-4 hover:border-primary"
           >
             <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <EmployeeName employee={employee} />
-              <span className="text-sm text-help">
-                {employee.employee_code} · {employee.agency_name || `Agence ${employee.agency_code}`}
+              <span className="font-semibold text-primary">{employee.display_name}</span>
+              <span className="text-sm text-rh-text">
+                {employee.employee_code} · {agencyOf(employee)} · {employee.position}
               </span>
-              {isQualifiedView ? (
-                <>
-                  <div className="flex flex-wrap gap-2 text-xs text-help">
-                    {employee.validated_level_label && <span>Niveau : {employee.validated_level_label}</span>}
-                    {employee.validated_domain_label && <span>Domaine : {employee.validated_domain_label}</span>}
-                  </div>
-                  <FolderStatusBadge status={employee.folder_status} label={employee.folder_status_label} />
-                </>
-              ) : (
-                <AdminStatusBadge status={employee.status} />
-              )}
+              <span className="flex flex-wrap items-center gap-2 text-sm text-rh-muted">
+                <FolderStatusBadge employee={employee} />
+                {employee.validated_level_label && <span>{employee.validated_level_label}</span>}
+                {employee.validated_domain_label && <span>· {employee.validated_domain_label}</span>}
+              </span>
             </span>
-            <span className="material-symbols-outlined text-muted" aria-hidden="true">chevron_right</span>
+            <span className="material-symbols-outlined text-rh-muted" aria-hidden="true">chevron_right</span>
           </Link>
         </li>
       ))}
@@ -99,93 +87,46 @@ function EmployeeCards({ employees, isQualifiedView }) {
   )
 }
 
-function EmployeeTable({ employees, isQualifiedView }) {
+function EmployeeTable({ employees }) {
   const navigate = useNavigate()
   const state = useFolderState()
-
-  if (isQualifiedView) {
-    return (
-      <div className="hidden overflow-hidden rounded-xl border border-border bg-surface shadow-card lg:block">
-        <table aria-label="Employés" className="w-full text-left">
-          <thead className="border-b border-border bg-canvas text-sm text-help">
-            <tr>
-              <th scope="col" className="px-4 py-3 font-semibold">Nom</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Matricule</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Agence</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Poste</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Statut du dossier</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Niveau validé</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Domaine</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Dernière mise à jour</th>
-              <th scope="col" className="w-12 px-4 py-3"><span className="sr-only">Ouvrir</span></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {employees.map((employee) => (
-              <tr
-                key={employee.id}
-                onClick={() => navigate(folderUrl(employee), { state })}
-                className="cursor-pointer hover:bg-canvas"
-              >
-                <td className="px-4 py-3">
-                  <Link to={folderUrl(employee)} state={state} className="hover:underline font-medium text-[#1E1E82]" onClick={(event) => event.stopPropagation()}>
-                    <EmployeeName employee={employee} />
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-help font-mono text-xs">{employee.employee_code}</td>
-                <td className="px-4 py-3 text-help">{employee.agency_name || employee.agency_code}</td>
-                <td className="px-4 py-3 text-help">{employee.position}</td>
-                <td className="px-4 py-3">
-                  <FolderStatusBadge status={employee.folder_status} label={employee.folder_status_label} />
-                </td>
-                <td className="px-4 py-3 text-help">{employee.validated_level_label || '—'}</td>
-                <td className="px-4 py-3 text-help">{employee.validated_domain_label || '—'}</td>
-                <td className="px-4 py-3 text-help text-xs">
-                  {employee.updated_at ? new Date(employee.updated_at).toLocaleDateString('fr-FR') : '—'}
-                </td>
-                <td className="px-4 py-3 text-muted">
-                  <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )
-  }
-
   return (
-    <div className="hidden overflow-hidden rounded-xl border border-border bg-surface shadow-card lg:block">
-      <table aria-label="Employés" className="w-full text-left">
-        <thead className="border-b border-border bg-canvas text-sm text-help">
-          <tr>
-            <th scope="col" className="px-4 py-3 font-semibold">Nom</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Matricule</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Agence</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Poste</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Statut</th>
-            <th scope="col" className="w-12 px-4 py-3"><span className="sr-only">Ouvrir</span></th>
+    <div className="hidden overflow-x-auto lg:block">
+      <table aria-label="Employés" className="w-full text-left text-sm">
+        <thead>
+          <tr className="border-b border-rh-line text-xs font-semibold tracking-wider text-rh-muted uppercase">
+            <th scope="col" className="px-4 py-3">Nom</th>
+            <th scope="col" className="px-4 py-3">Matricule</th>
+            <th scope="col" className="px-4 py-3">Agence</th>
+            <th scope="col" className="px-4 py-3">Poste</th>
+            <th scope="col" className="px-4 py-3">Statut du dossier</th>
+            <th scope="col" className="px-4 py-3">Niveau validé</th>
+            <th scope="col" className="px-4 py-3">Domaine</th>
+            <th scope="col" className="px-4 py-3">Dernière mise à jour</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-rh-hover text-rh-text">
           {employees.map((employee) => (
-            <tr
-              key={employee.id}
-              onClick={() => navigate(folderUrl(employee), { state })}
-              className="cursor-pointer hover:bg-canvas"
-            >
-              <td className="px-4 py-3">
-                <Link to={folderUrl(employee)} state={state} className="hover:underline" onClick={(event) => event.stopPropagation()}>
-                  <EmployeeName employee={employee} />
+            <tr key={employee.id} onClick={() => navigate(folderUrl(employee), { state })} className="cursor-pointer hover:bg-rh-canvas">
+              <td className="px-4 py-3.5">
+                <Link
+                  to={folderUrl(employee)}
+                  state={state}
+                  onClick={(event) => event.stopPropagation()}
+                  className="font-medium text-primary hover:underline"
+                >
+                  {employee.display_name}
                 </Link>
               </td>
-              <td className="px-4 py-3 text-help">{employee.employee_code}</td>
-              <td className="px-4 py-3 text-help">{employee.agency_code}</td>
-              <td className="px-4 py-3 text-help">{employee.position}</td>
-              <td className="px-4 py-3"><AdminStatusBadge status={employee.status} /></td>
-              <td className="px-4 py-3 text-muted">
-                <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              <td className="px-4 py-3.5 whitespace-nowrap">{employee.employee_code}</td>
+              <td className="px-4 py-3.5">{agencyOf(employee)}</td>
+              <td className="px-4 py-3.5">{employee.position}</td>
+              <td className="px-4 py-3.5">
+                <FolderStatusBadge employee={employee} />
               </td>
+              <td className="px-4 py-3.5">{employee.validated_level_label || '—'}</td>
+              <td className="px-4 py-3.5">{employee.validated_domain_label || '—'}</td>
+              <td className="px-4 py-3.5 whitespace-nowrap tabular-nums">{dateOf(employee)}</td>
             </tr>
           ))}
         </tbody>
@@ -194,72 +135,67 @@ function EmployeeTable({ employees, isQualifiedView }) {
   )
 }
 
-function Pagination({ page, pageCount, onChange }) {
-  if (pageCount <= 1) return null
+/** A06 : « 1 à 5 sur 12 » et la pagination sous le tableau. */
+function TableFooter({ data, onChange }) {
+  const first = (data.page - 1) * data.page_size + 1
+  const last = first + data.items.length - 1
   return (
-    <nav aria-label="Pagination" className="flex items-center gap-3">
-      <Button variant="secondary" onClick={() => onChange(page - 1)} disabled={page <= 1} className="flex-1 lg:flex-none lg:w-40">
-        <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-        Précédent
-      </Button>
-      <p className="shrink-0 text-sm text-help">Page {page} sur {pageCount}</p>
-      <Button variant="secondary" onClick={() => onChange(page + 1)} disabled={page >= pageCount} className="flex-1 lg:flex-none lg:w-40">
-        Suivant
-        <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-      </Button>
-    </nav>
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-rh-line pt-4 text-sm text-rh-text">
+      <span className="tabular-nums">
+        {first} à {last} sur {data.total}
+      </span>
+      {data.page_count > 1 && (
+        <nav aria-label="Pagination" className="flex items-center gap-2">
+          <Button variant="secondary" className="w-auto" onClick={() => onChange(data.page - 1)} disabled={data.page <= 1}>
+            Précédent
+          </Button>
+          <span className="shrink-0 tabular-nums">
+            Page {data.page} sur {data.page_count}
+          </span>
+          <Button
+            variant="secondary"
+            className="w-auto"
+            onClick={() => onChange(data.page + 1)}
+            disabled={data.page >= data.page_count}
+          >
+            Suivant
+          </Button>
+        </nav>
+      )}
+    </div>
   )
 }
 
-function EmptyState({ search, status, onClearSearch }) {
+function EmptyState({ search, onClearSearch }) {
   if (search?.trim()) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-card">
-        <span className="material-symbols-outlined text-[32px] text-muted" aria-hidden="true">search_off</span>
-        <p className="font-semibold text-heading">Aucun employé ne correspond à votre recherche.</p>
+      <div className="flex flex-col items-center gap-3 rounded-lg border border-rh-line p-6 text-center">
+        <span className="material-symbols-outlined text-[32px] text-rh-muted" aria-hidden="true">search_off</span>
+        <p className="font-semibold text-rh-strong">Aucun employé ne correspond à votre recherche.</p>
         <div className="w-full max-w-xs">
-          <Button variant="secondary" onClick={onClearSearch}>Effacer la recherche</Button>
+          <Button variant="secondary" onClick={onClearSearch}>
+            Effacer la recherche
+          </Button>
         </div>
       </div>
     )
   }
-  if (status) {
-    return (
-      <p className="rounded-xl border border-border bg-surface p-6 text-center text-help shadow-card">
-        Aucun employé avec ce statut.
-      </p>
-    )
-  }
-  return (
-    <p className="rounded-xl border border-border bg-surface p-6 text-center text-help shadow-card">
-      Aucun employé à afficher.
-    </p>
-  )
+  return <p className="rounded-lg border border-rh-line p-6 text-center text-rh-text">Aucun employé ne correspond à ces filtres.</p>
 }
 
-function ExportMenu({ search, agency, region, direction, folderStatus, minLevel, domain }) {
+function ExportMenu({ criteria }) {
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpen(false)
-      }
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const csvUrl =
-    typeof getEmployeesExportUrl === 'function'
-      ? getEmployeesExportUrl({ search, agency, region, direction, folderStatus, minLevel, domain, format: 'csv' })
-      : '#'
-  const xlsxUrl =
-    typeof getEmployeesExportUrl === 'function'
-      ? getEmployeesExportUrl({ search, agency, region, direction, folderStatus, minLevel, domain, format: 'xlsx' })
-      : '#'
-
+  const urlFor = (format) => getEmployeesExportUrl({ ...criteria, format })
   return (
     <div className="relative inline-block text-left" ref={menuRef}>
       <button
@@ -267,33 +203,17 @@ function ExportMenu({ search, agency, region, direction, folderStatus, minLevel,
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-haspopup="true"
-        className="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none"
+        className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border-input bg-surface px-4 text-sm font-medium text-rh-text hover:bg-rh-canvas"
       >
-        <svg className="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
+        <span className="material-symbols-outlined text-lg text-rh-muted" aria-hidden="true">download</span>
         Exporter (Excel, CSV)
-        <span className="material-symbols-outlined ml-1.5 text-base" aria-hidden="true">arrow_drop_down</span>
       </button>
-
       {open && (
-        <div className="absolute right-0 mt-1.5 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 py-1 text-left">
-          <a
-            href={csvUrl}
-            download
-            onClick={() => setOpen(false)}
-            className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <span className="material-symbols-outlined mr-2.5 text-slate-400 text-lg" aria-hidden="true">csv</span>
+        <div className="absolute right-0 z-20 mt-1.5 w-52 rounded-md border border-rh-line bg-surface py-1 shadow-modal">
+          <a href={urlFor('csv')} download onClick={() => setOpen(false)} className="flex min-h-11 items-center px-4 text-sm text-rh-text hover:bg-rh-hover">
             Exporter en CSV (.csv)
           </a>
-          <a
-            href={xlsxUrl}
-            download
-            onClick={() => setOpen(false)}
-            className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <span className="material-symbols-outlined mr-2.5 text-slate-400 text-lg" aria-hidden="true">table_chart</span>
+          <a href={urlFor('xlsx')} download onClick={() => setOpen(false)} className="flex min-h-11 items-center px-4 text-sm text-rh-text hover:bg-rh-hover">
             Exporter en Excel (.xlsx)
           </a>
         </div>
@@ -302,36 +222,36 @@ function ExportMenu({ search, agency, region, direction, folderStatus, minLevel,
   )
 }
 
+/**
+ * US-17 → US-19, US-602, US-603 ; US-108 : écran A06 « Employés ».
+ * Recherche, six filtres, filtres actifs, tableau (statut du dossier, niveau validé, domaine, dernière mise à jour),
+ * pagination ; l'agence s'affiche avec son libellé officiel.
+ */
 export default function EmployeeListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { agencies, regions, directions } = useUnits()
   const page = readPage(searchParams)
   const search = searchParams.get('search') ?? ''
-  const status = readStatus(searchParams)
+  const values = Object.fromEntries(FILTERS.map(({ key }) => [key, searchParams.get(key) ?? '']))
+  const criteria = {
+    search,
+    agency: values.agency,
+    region: values.region,
+    direction: values.direction,
+    folderStatus: values.folder_status,
+    minLevel: values.min_level,
+    domain: values.domain,
+  }
+  const unitOptions = { agency: agencies, region: regions, direction: directions }
 
-  // Filtres A06 (US-602)
-  const agency = searchParams.get('agency') ?? ''
-  const region = searchParams.get('region') ?? ''
-  const direction = searchParams.get('direction') ?? ''
-  const folderStatus = searchParams.get('folder_status') ?? ''
-  const minLevel = searchParams.get('min_level') ?? ''
-  const domain = searchParams.get('domain') ?? ''
-
-  const hasAdvancedFilters = Boolean(agency || region || direction || folderStatus || minLevel || domain)
-
-  const { data, error, loading } = useLoader(
-    () =>
-      hasAdvancedFilters
-        ? searchQualifiedEmployees({ search, agency, region, direction, folderStatus, minLevel, domain })
-        : listEmployees({ page, search, status }),
-    {
-      loginPath: '/admin/connexion',
-      key: `${search}|${status}|${agency}|${region}|${direction}|${folderStatus}|${minLevel}|${domain}|${page}`,
-    }
-  )
+  const { data, error, loading } = useLoader(() => searchQualifiedEmployees({ ...criteria, page, pageSize: PAGE_SIZE }), {
+    loginPath: '/admin/connexion',
+    key: searchParams.toString(),
+  })
 
   function changeCriteria(name, value) {
     const params = new URLSearchParams(searchParams)
-    if (value && value !== 'Toutes' && value !== 'Tous' && value.trim()) {
+    if (value && value.trim() && !FILTERS.some((filter) => filter.key === name && filter.all === value)) {
       params.set(name, value)
     } else {
       params.delete(name)
@@ -340,224 +260,100 @@ export default function EmployeeListPage() {
     setSearchParams(params, { replace: true })
   }
 
+  function changePage(next) {
+    const params = new URLSearchParams(searchParams)
+    params.set('page', String(next))
+    setSearchParams(params)
+    window.scrollTo?.({ top: 0 })
+  }
+
   function clearAllFilters() {
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     setSearchParams(params, { replace: true })
   }
 
-  function removeFilter(key) {
-    changeCriteria(key, '')
-  }
-
-  const activeFilters = []
-  if (agency && agency !== 'Toutes') activeFilters.push({ key: 'agency', label: `Agence : ${agency}` })
-  if (region && region !== 'Toutes') activeFilters.push({ key: 'region', label: `Région : ${region}` })
-  if (direction && direction !== 'Toutes') activeFilters.push({ key: 'direction', label: `Direction : ${direction}` })
-  if (folderStatus && folderStatus !== 'Tous') activeFilters.push({ key: 'folder_status', label: `Statut : ${folderStatus}` })
-  if (minLevel && minLevel !== 'Tous') activeFilters.push({ key: 'min_level', label: `Niveau validé : ${minLevel}` })
-  if (domain && domain !== 'Tous') activeFilters.push({ key: 'domain', label: `Domaine : ${domain}` })
+  const activeFilters = FILTERS.filter(({ key }) => values[key]).map(({ key, label }) => ({ key, label: `${label} : ${values[key]}` }))
+  const unfiltered = !search && activeFilters.length === 0
 
   return (
-    <Page account="admin" wide title="Employés" backTo="/admin">
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1E1E82]">Employés</h1>
-          {(!search || (data?.total !== undefined && data.total > 0)) && (
-            <p className="text-sm text-slate-600 mt-0.5">
-              {data?.total !== undefined && data.total > 0 ? `${data.total} employés actifs` : '364 employés actifs'}
-            </p>
-          )}
+    <Page
+      account="admin"
+      wide
+      title="Employés"
+      subtitle={unfiltered && data ? `${plural(data.total)} actif${data.total > 1 ? 's' : ''}` : undefined}
+      headerActions={
+        <div className="flex flex-col items-end gap-1.5">
+          <ExportMenu criteria={criteria} />
+          <p className="text-xs text-rh-muted">Chaque export est enregistré dans le journal d'audit.</p>
         </div>
-        <div className="text-right">
-          <ExportMenu
-            search={search}
-            agency={agency}
-            region={region}
-            direction={direction}
-            folderStatus={folderStatus}
-            minLevel={minLevel}
-            domain={domain}
-          />
-          <p className="text-xs text-slate-500 mt-1.5">Chaque export est enregistré dans le journal d'audit.</p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
+      }
+    >
+      <div className="flex flex-col gap-5 rounded-xl border border-rh-line bg-surface p-4 shadow-card sm:p-6">
         <EmployeeSearch value={search} onSearch={(term) => changeCriteria('search', term)} />
 
-        {/* 6 FILTRES SUR UNE LIGNE (A06) */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-5 mt-4">
-          <div>
-            <label htmlFor="filter-agency" className="block text-xs font-semibold text-slate-600 mb-1">Agence</label>
-            <select
-              id="filter-agency"
-              value={agency || 'Toutes'}
-              onChange={(e) => changeCriteria('agency', e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none"
-            >
-              <option>Toutes</option>
-              <option>Agence Démo Nord</option>
-              <option>Agence Démo Sud</option>
-              <option>Agence Démo Centre</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="filter-region" className="block text-xs font-semibold text-slate-600 mb-1">Région</label>
-            <select
-              id="filter-region"
-              value={region || 'Toutes'}
-              onChange={(e) => changeCriteria('region', e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none"
-            >
-              <option>Toutes</option>
-              <option>Région Démo 1</option>
-              <option>Région Démo 2</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="filter-direction" className="block text-xs font-semibold text-slate-600 mb-1">Direction</label>
-            <select
-              id="filter-direction"
-              value={direction || 'Toutes'}
-              onChange={(e) => changeCriteria('direction', e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none"
-            >
-              <option>Toutes</option>
-              <option>Direction Démo des Opérations</option>
-              <option>Direction Démo du Crédit</option>
-              <option>Direction Démo du Recouvrement</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="filter-folder-status" className="block text-xs font-semibold text-slate-600 mb-1">Statut du dossier</label>
-            <select
-              id="filter-folder-status"
-              value={folderStatus || 'Tous'}
-              onChange={(e) => changeCriteria('folder_status', e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none"
-            >
-              <option>Tous</option>
-              <option>Profil incomplet</option>
-              <option>Profil complet</option>
-              <option>Dossier complet</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="filter-min-level" className="block text-xs font-semibold text-slate-600 mb-1">Niveau validé</label>
-            <select
-              id="filter-min-level"
-              value={minLevel || 'Tous'}
-              onChange={(e) => changeCriteria('min_level', e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 font-medium text-[#1E1E82] focus:outline-none"
-            >
-              <option>Tous</option>
-              <option>au moins Licence</option>
-              <option>au moins Master</option>
-              <option>au moins Baccalauréat</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="filter-domain" className="block text-xs font-semibold text-slate-600 mb-1">Domaine</label>
-            <select
-              id="filter-domain"
-              value={domain || 'Tous'}
-              onChange={(e) => changeCriteria('domain', e.target.value)}
-              className="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 font-medium text-[#1E1E82] focus:outline-none"
-            >
-              <option>Tous</option>
-              <option>Comptabilité</option>
-              <option>Gestion</option>
-              <option>Finance</option>
-              <option>Économie</option>
-              <option>Informatique</option>
-              <option>Droit</option>
-              <option>Agronomie</option>
-              <option>Autre</option>
-            </select>
-          </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          {FILTERS.map((filter) => (
+            <div key={filter.key} className="flex min-w-0 flex-col gap-1">
+              <label htmlFor={`filter-${filter.key}`} className="text-xs font-semibold text-rh-text">
+                {filter.label}
+              </label>
+              <select
+                id={`filter-${filter.key}`}
+                value={values[filter.key] || filter.all}
+                onChange={(event) => changeCriteria(filter.key, event.target.value)}
+                className="min-h-11 w-full min-w-0 rounded-md border border-border-input bg-surface px-2 text-sm text-rh-text"
+              >
+                <option>{filter.all}</option>
+                {(filter.options ?? unitOptions[filter.key].map((unit) => unit.label)).map((option) => (
+                  <option key={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+          ))}
         </div>
 
-        {/* FILTRES ACTIFS ET RÉSULTATS (A06) */}
         {activeFilters.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between pb-4 border-b border-slate-100 mb-5 gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rh-hover pb-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">Filtres actifs :</span>
-              {activeFilters.map((f) => (
+              <span className="text-xs font-medium text-rh-muted">Filtres actifs :</span>
+              {activeFilters.map((filter) => (
                 <span
-                  key={f.key}
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
+                  key={filter.key}
+                  className="inline-flex items-center gap-1 rounded-full border border-info-border bg-info-bg py-1 pr-1 pl-2.5 text-xs font-medium text-info-text"
                 >
-                  {f.label}
+                  {filter.label}
                   <button
                     type="button"
-                    aria-label={`Supprimer le filtre ${f.label}`}
-                    onClick={() => removeFilter(f.key)}
-                    className="ml-1.5 inline-flex text-slate-400 hover:text-slate-600"
+                    aria-label={`Supprimer le filtre ${filter.label}`}
+                    onClick={() => changeCriteria(filter.key, '')}
+                    className="inline-flex size-6 items-center justify-center rounded-full hover:bg-info-border"
                   >
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </span>
               ))}
-              <button
-                type="button"
-                onClick={clearAllFilters}
-                className="text-xs text-[#1E1E82] hover:underline font-medium ml-2"
-              >
+              <button type="button" onClick={clearAllFilters} className="min-h-11 px-2 text-xs font-medium text-primary hover:underline">
                 Tout effacer
               </button>
             </div>
-            <div>
-              <span className="text-xs font-semibold text-slate-700">
-                {data ? `${data.items.length} employés` : ''}
-              </span>
-            </div>
+            {data && <span className="text-sm font-semibold text-rh-text">{plural(data.total)}</span>}
           </div>
         )}
 
-        {!hasAdvancedFilters && (
-          <StatusFilter value={status} counts={data?.counts} onChange={(value) => changeCriteria('status', value)} />
-        )}
-
-        {loading ? (
-          <p role="status" className="mt-4">Chargement…</p>
+        {loading && !data ? (
+          <p role="status">Chargement…</p>
         ) : error ? (
-          <Alert className="mt-4">{error.message}</Alert>
+          <Alert>{error.message}</Alert>
+        ) : data.items.length === 0 ? (
+          <EmptyState search={search} onClearSearch={() => changeCriteria('search', '')} />
         ) : (
-          <div className="mt-4">
-            {data.total > 0 && !activeFilters.length && (
-              <p className="text-help mb-4">{plural(data.total)}</p>
-            )}
-            {data.items.length === 0 ? (
-              <EmptyState search={search} status={status} onClearSearch={() => changeCriteria('search', '')} />
-            ) : (
-              <>
-                <EmployeeCards employees={data.items} isQualifiedView={hasAdvancedFilters} />
-                <EmployeeTable employees={data.items} isQualifiedView={hasAdvancedFilters} />
-              </>
-            )}
-            {!hasAdvancedFilters && data.page_count && (
-              <div className="mt-4">
-                <Pagination
-                  page={data.page}
-                  pageCount={data.page_count}
-                  onChange={(next) => {
-                    const params = new URLSearchParams(searchParams)
-                    params.set('page', String(next))
-                    setSearchParams(params)
-                    window.scrollTo?.({ top: 0 })
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <>
+            {search && activeFilters.length === 0 && <p className="text-sm text-rh-text">{plural(data.total)}</p>}
+            <EmployeeCards employees={data.items} />
+            <EmployeeTable employees={data.items} />
+            <TableFooter data={data} onChange={changePage} />
+          </>
         )}
       </div>
     </Page>

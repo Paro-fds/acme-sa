@@ -102,6 +102,7 @@ def test_ca04_me(admin_client):
     assert admin_client.get(ME).json() == {
         "id": admin_client.get(ME).json()["id"],
         "username": ADMIN_USERNAME,
+        "display_name": ADMIN_USERNAME,
         "role": "ADMIN",
         "role_label": "Administrateur",
         "must_change_password": False,

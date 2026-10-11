@@ -232,3 +232,34 @@ class DecideErrorReport:
             decided_at=now,
             resolution_comment=clean_comment,
         )
+
+
+@dataclass(frozen=True)
+class EmployeeReportView:
+    id: int | None
+    at: datetime
+    field_label: str
+    status: str
+    status_label: str
+    note: str | None
+
+
+class ListEmployeeReports:
+    """US-108 (écran A07) : les signalements d'un employé, du plus récent au plus ancien, dans son dossier."""
+
+    def __init__(self, dossiers: DossierRepository) -> None:
+        self._dossiers = dossiers
+
+    def execute(self, employee_id: str) -> list[EmployeeReportView]:
+        reports = sorted(self._dossiers.reports(employee_id), key=lambda r: r.at, reverse=True)
+        return [
+            EmployeeReportView(
+                id=r.id,
+                at=r.at,
+                field_label=_field_label(r.information),
+                status=r.status,
+                status_label=REPORT_STATUS_LABELS.get(ReportStatus(r.status), r.status),
+                note=r.resolution_comment or r.comment,
+            )
+            for r in reports
+        ]

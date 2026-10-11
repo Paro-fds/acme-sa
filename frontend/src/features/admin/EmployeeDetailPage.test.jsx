@@ -3,56 +3,70 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import EmployeeDetailPage from './EmployeeDetailPage.jsx'
-import { getEmployee, listEmployeeDocuments } from '../../api/admin.js'
+import { getEmployee, getEmployeeDossier, listEmployeeCertificates, listEmployeeDocuments } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
 vi.mock('../../api/admin.js', () => ({
   getEmployee: vi.fn(),
+  getEmployeeDossier: vi.fn(),
   listEmployeeDocuments: vi.fn(),
-  listEmployeeCertificates: vi.fn().mockResolvedValue([]),
+  listEmployeeCertificates: vi.fn(),
   employeeDocumentFileUrl: (id) => `/api/admin/documents/${id}/file`,
   certificateFileUrl: (id) => `/api/admin/validation/${id}/file`,
 }))
+vi.mock('../../api/adminFrame.js', () => ({ getAdminFrame: vi.fn().mockRejectedValue(new Error('hors test')) }))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
 
-const BASE = {
+const FOLDER = {
   id: '1001',
   employee_code: 'AC-1001',
-  last_name: 'JOSEPH',
-  first_name: 'Jean',
   display_name: 'JOSEPH Jean',
   previous_name: null,
-  gender: 'M',
-  birth_date: '1996-03-15',
-  telephone_number: '+50937221111',
-  email_address: 'jean.joseph@exemple.test',
-  address_line_1: 'Delmas 33',
-  agency_code: 'PV',
-  department: 'Crédit',
   position: 'Agent de crédit',
-  grade: '12',
-  level: '2',
-  contract_nature: 'CDI',
-  hire_date: '2019-02-01',
+  agency_code: 'PV',
   status: 'NOT_UPDATED',
   submitted_at: null,
   declined: false,
   changes: [],
-  account_activated: false,
-}
-
-const SUBMITTED = {
-  ...BASE,
-  status: 'UPDATED',
-  telephone_number: '+50937222222',
-  address_line_1: '12 rue des Palmiers',
-  submitted_at: '2026-10-04T14:32:00',
-  changes: [
-    { field_name: 'telephone_number', label: 'Téléphone', section: 'CONTACT', old_value: '+50937221111', new_value: '+50937222222' },
-    { field_name: 'address_line_1', label: 'Adresse', section: 'CONTACT', old_value: 'Delmas 33', new_value: '12 rue des Palmiers' },
-  ],
   account_activated: true,
 }
+
+const field = (value, confirmed_at = '2026-10-01T09:00:00Z') => ({ value, complete: value !== null, confirmed_at: value ? confirmed_at : null })
+const hr = (key, label, value, status = 'CONFIRMED') => ({
+  key,
+  label,
+  value,
+  status,
+  answered_at: status === 'TO_CONFIRM' ? null : '2026-10-01T09:00:00Z',
+})
+
+const DOSSIER = {
+  consent: { information_notice_at: '2026-10-01T09:00:00Z', whatsapp: false },
+  telephone: field('3722 1111'),
+  address: field('12 rue Capois, Port-au-Prince'),
+  email: { ...field(null), no_email: true, complete: true, confirmed_at: '2026-10-01T09:00:00Z' },
+  emergency_contact: { name: 'Paul Pierre', relationship: 'SIBLING', telephone: '4812 8901', complete: true, confirmed_at: '2026-10-01T09:00:00Z' },
+  education_level: field('LICENCE'),
+  completion: { percent: 100, complete: 8, total: 8 },
+  hr_information: [
+    hr('agency_confirmed', 'Agence', 'Agence Démo Nord'),
+    hr('position_confirmed', 'Poste', 'Agent de crédit'),
+    hr('hire_date_confirmed', "Date d'embauche", '01/02/2019', 'REPORTED'),
+  ],
+  relationships: [{ value: 'SIBLING', label: 'Frère ou sœur' }],
+  education_levels: [{ value: 'LICENCE', label: 'Licence', examples: '' }],
+}
+
+const REPORT = {
+  id: 4,
+  at: '2026-09-28T09:00:00Z',
+  field_label: "Date d'embauche",
+  status: 'CLOSED_ACCURATE',
+  status_label: 'Clos — valeur exacte',
+  note: 'La valeur actuelle est juste.',
+}
+
+const VALIDATED = { id: 'c1', status: 'VALIDATED', is_archived: false, type_label: 'Diplôme', level_label: 'Licence', title: 'Licence en Gestion', institution: 'Université', year: 2019, history: [] }
 
 function ListProbe() {
   const { search } = useLocation()
@@ -71,149 +85,120 @@ function renderAt(entry = '/admin/employes/1001') {
   )
 }
 
-const block = (name) => screen.getByRole('region', { name })
-
-describe('EmployeeDetailPage (US-20)', () => {
+describe('EmployeeDetailPage (US-20, US-108 : écran A07)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    getEmployee.mockResolvedValue(FOLDER)
+    getEmployeeDossier.mockResolvedValue({ dossier: DOSSIER, reports: [] })
+    listEmployeeCertificates.mockResolvedValue([])
     listEmployeeDocuments.mockResolvedValue([])
   })
 
-  it('en-tête : badge « Lecture seule », nom, matricule, agence, poste, statut', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
+  it('A07 : en-tête avec nom, matricule, poste, agence officielle, statut du dossier et profil en %', async () => {
     renderAt()
 
     const header = await screen.findByRole('region', { name: 'Employé' })
-    expect(within(header).getByText('Lecture seule')).toBeInTheDocument()
-    expect(within(header).getByRole('heading', { name: 'JOSEPH Jean · AC-1001' })).toBeInTheDocument()
-    expect(within(header).getByText('Agent de crédit · Agence PV')).toBeInTheDocument()
-    expect(within(header).getByText('Mise à jour effectuée')).toBeInTheDocument()
-    expect(getEmployee).toHaveBeenCalledWith('1001')
+    expect(within(header).getByRole('heading', { level: 1, name: 'JOSEPH Jean · AC-1001' })).toBeInTheDocument()
+    expect(header).toHaveTextContent('Agent de crédit · Agence Démo Nord')
+    expect(within(header).getByText('Profil complet')).toBeInTheDocument()
+    expect(within(header).getByText('Profil : 100 %')).toBeInTheDocument()
+    expect(screen.getByText(/Votre consultation de ce dossier est enregistrée dans le journal d'audit/)).toBeInTheDocument()
+    expect(getEmployeeDossier).toHaveBeenCalledWith('1001')
   })
 
-  it('reprend la structure de la maquette A07 sans inventer de fonctions non disponibles', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
+  it('A07 : « Dossier complet » avec un profil complet et au moins un certificat validé', async () => {
+    listEmployeeCertificates.mockResolvedValue([VALIDATED])
     renderAt()
 
-    expect(await screen.findByRole('banner')).toHaveTextContent('Portail RH')
-    const navigation = screen.getByRole('navigation', { name: 'Navigation principale RH' })
-    expect(within(navigation).getByRole('link', { name: 'Employés' })).toHaveAttribute('aria-current', 'page')
-    expect(within(navigation).getByText('File de validation')).toHaveAttribute('aria-disabled', 'true')
-    expect(within(navigation).getByText('Signalements')).toHaveAttribute('aria-disabled', 'true')
-
-    const profile = screen.getByRole('region', { name: 'Profil' })
-    expect(within(profile).getByText('Téléphone')).toBeInTheDocument()
-    expect(within(profile).getByText('+50937222222')).toBeInTheDocument()
-    expect(screen.queryByText('Dossier complet')).not.toBeInTheDocument()
-    expect(screen.queryByText(/consultation de ce dossier est enregistrée/i)).not.toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: 'Certificats' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: 'Signalements' })).not.toBeInTheDocument()
+    const header = await screen.findByRole('region', { name: 'Employé' })
+    expect(within(header).getByText('Dossier complet')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Certificats' })).toHaveTextContent('Licence en Gestion')
   })
 
-  it('CA-01 : date de soumission et changements « Ancienne → Nouvelle »', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
-    renderAt()
-
-    const update = await screen.findByRole('region', { name: 'Mise à jour' })
-    expect(within(update).getByText('Mise à jour effectuée le 04/10/2026 à 14:32')).toBeInTheDocument()
-    expect(within(update).getByText('2 informations modifiées')).toBeInTheDocument()
-    const changes = within(update).getAllByRole('article')
-    expect(within(changes[0]).getByText('Téléphone')).toBeInTheDocument()
-    expect(within(changes[0]).getByText('+50937221111')).toBeInTheDocument()
-    expect(within(changes[0]).getByText('+50937222222')).toBeInTheDocument()
-    expect(within(changes[1]).getByText('12 rue des Palmiers')).toBeInTheDocument()
-  })
-
-  it('CA-01 : les informations affichent les nouvelles valeurs, sans mention « Modifiable »', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
+  it('A07 : profil V2, chaque information avec la date de confirmation de l’employé', async () => {
     renderAt()
 
     const profile = await screen.findByRole('region', { name: 'Profil' })
-    expect(within(profile).getByText('+50937222222')).toBeInTheDocument()
-    expect(profile).toHaveTextContent('15/03/1996')
-    expect(profile).toHaveTextContent('Crédit')
-    expect(screen.queryByText('Modifiable')).not.toBeInTheDocument()
-    expect(screen.queryByRole('img', { name: 'Non modifiable' })).not.toBeInTheDocument()
+    const rows = within(profile).getAllByRole('term').map((term) => term.textContent)
+    expect(rows).toEqual([
+      'Téléphone',
+      'Email',
+      'Adresse',
+      "Contact d'urgence",
+      "Niveau d'études déclaré",
+      'Agence',
+      'Poste',
+      "Date d'embauche",
+    ])
+    expect(profile).toHaveTextContent("3722 1111Confirmé par l'employé le 01/10/2026")
+    expect(profile).toHaveTextContent("Pas d'adresse email")
+    expect(profile).toHaveTextContent('Paul Pierre · Frère ou sœur · 4812 8901')
+    expect(profile).toHaveTextContent('Licence')
+    expect(profile).toHaveTextContent("01/02/2019Signalé par l'employé le 01/10/2026")
   })
 
-  it('nom modifié : « anciennement … » sous le nouveau nom', async () => {
-    getEmployee.mockResolvedValue({ ...SUBMITTED, last_name: 'JOSEPH-PAUL', display_name: 'JOSEPH-PAUL Jean', previous_name: 'JOSEPH' })
-    renderAt()
-
-    expect(await screen.findByRole('heading', { name: 'JOSEPH-PAUL Jean · AC-1001' })).toBeInTheDocument()
-    expect(screen.getByText('anciennement JOSEPH')).toBeInTheDocument()
-  })
-
-  it('CA-02 : non effectuée (brouillon ou rien) → « Mise à jour non effectuée », sans changement', async () => {
-    getEmployee.mockResolvedValue(BASE)
-    renderAt()
-
-    const update = await screen.findByRole('region', { name: 'Mise à jour' })
-    expect(within(update).getByText('Mise à jour non effectuée')).toBeInTheDocument()
-    expect(within(update).queryByRole('article')).not.toBeInTheDocument()
-    expect(screen.queryByText(/ne pas souhaiter/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/brouillon|en cours/i)).not.toBeInTheDocument()
-  })
-
-  it('CA-03 : réponse « Non » → mention', async () => {
-    getEmployee.mockResolvedValue({ ...BASE, declined: true })
-    renderAt()
-
-    expect(await screen.findByText("L'employé a indiqué ne pas souhaiter mettre à jour son dossier")).toBeInTheDocument()
-  })
-
-  it('CA-04 : aucun champ de saisie ni bouton de modification', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
-    renderAt()
-    await screen.findByRole('region', { name: 'Mise à jour' })
-
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-    // Seule action possible sur le dossier : la réinitialisation de l'accès (US-22).
-    const buttons = screen.queryAllByRole('button')
-    expect(buttons).toHaveLength(2)
-    expect(screen.getByRole('link', { name: 'Retour à la liste des employés' })).toHaveAttribute('href', '/admin/employes')
-    expect(buttons[0]).toHaveAccessibleName('Menu du compte')
-    expect(buttons[1]).toHaveAccessibleName("Réinitialiser l'accès")
-  })
-
-  it('US-21 : bloc « Documents » chargé avec le dossier', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
-    listEmployeeDocuments.mockResolvedValue([
-      {
-        id: 'd1',
-        document_type: 'DIPLOME',
-        type_label: 'Diplôme',
-        original_name: 'licence.pdf',
-        content_type: 'application/pdf',
-        size_bytes: 2048,
-        uploaded_at: '2026-10-04T09:00:00',
+  it('A07 : une information non complétée reste « Non renseigné » et « À compléter »', async () => {
+    getEmployeeDossier.mockResolvedValue({
+      dossier: {
+        ...DOSSIER,
+        telephone: { value: '+509 3722 0000', complete: false, confirmed_at: null },
+        completion: { percent: 87, complete: 7, total: 8 },
+        hr_information: [hr('agency_confirmed', 'Agence', 'Agence Démo Nord', 'TO_CONFIRM')],
       },
+      reports: [],
+    })
+    renderAt()
+
+    const profile = await screen.findByRole('region', { name: 'Profil' })
+    expect(profile).toHaveTextContent('Non renseignéÀ compléter par l’employé')
+    expect(profile).toHaveTextContent('À confirmer par l’employé')
+    expect(screen.getByText('Profil incomplet')).toBeInTheDocument()
+  })
+
+  it('A07 : signalements de l’employé avec leur statut', async () => {
+    getEmployeeDossier.mockResolvedValue({ dossier: DOSSIER, reports: [REPORT] })
+    renderAt()
+
+    const reports = await screen.findByRole('region', { name: 'Signalements' })
+    expect(reports).toHaveTextContent("28/09/2026Date d'embaucheClos — valeur exacteLa valeur actuelle est juste.")
+  })
+
+  it('aucun bloc de l’ancien parcours quand rien n’a été envoyé ; aucun document → pas de bloc', async () => {
+    renderAt()
+    await screen.findByRole('region', { name: 'Profil' })
+
+    expect(screen.queryByText(/Mise à jour non effectuée/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Documents' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Signalements' })).not.toBeInTheDocument()
+  })
+
+  it('US-206 : une mise à jour envoyée avec l’ancien portail reste lisible, avec ses documents (US-21)', async () => {
+    getEmployee.mockResolvedValue({
+      ...FOLDER,
+      status: 'UPDATED',
+      submitted_at: '2026-10-04T14:32:00',
+      changes: [{ field_name: 'telephone_number', label: 'Téléphone', section: 'CONTACT', old_value: '+50937221111', new_value: '+50937222222' }],
+    })
+    listEmployeeDocuments.mockResolvedValue([
+      { id: 'd1', document_type: 'DIPLOME', type_label: 'Diplôme', original_name: 'licence.pdf', content_type: 'application/pdf', size_bytes: 2048, uploaded_at: '2026-10-04T09:00:00' },
     ])
     renderAt()
 
-    const documents = await screen.findByRole('region', { name: 'Documents' })
-    expect(within(documents).getByText('licence.pdf')).toBeInTheDocument()
-    expect(listEmployeeDocuments).toHaveBeenCalledWith('1001')
+    const update = await screen.findByRole('region', { name: "Mise à jour envoyée avec l'ancien portail" })
+    expect(within(update).getByText('Envoyée le 04/10/2026 à 14:32')).toBeInTheDocument()
+    expect(within(update).getByText('+50937222222')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'Documents' })).getByText('licence.pdf')).toBeInTheDocument()
   })
 
-  it('US-21 : aucun document → « Aucun document transmis »', async () => {
-    getEmployee.mockResolvedValue(BASE)
+  it('CA-04 : lecture seule, seule action : réinitialiser l’accès (US-22)', async () => {
     renderAt()
+    await screen.findByRole('region', { name: 'Profil' })
 
-    expect(within(await screen.findByRole('region', { name: 'Documents' })).getByText('Aucun document transmis')).toBeInTheDocument()
-  })
-
-  it('CA-07 : état du compte', async () => {
-    getEmployee.mockResolvedValue(SUBMITTED)
-    renderAt()
-    expect(within(await screen.findByRole('region', { name: 'Accès' })).getByText('Compte activé')).toBeInTheDocument()
-  })
-
-  it('CA-07 : compte non activé', async () => {
-    getEmployee.mockResolvedValue(BASE)
-    renderAt()
-    expect(within(await screen.findByRole('region', { name: 'Accès' })).getByText('Compte non activé')).toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    const buttons = within(screen.getByRole('main')).queryAllByRole('button')
+    expect(buttons).toHaveLength(1)
+    expect(buttons[0]).toHaveAccessibleName("Réinitialiser l'accès")
+    expect(within(screen.getByRole('region', { name: 'Accès' })).getByText('Compte activé')).toBeInTheDocument()
   })
 
   it('CA-06 : employé inconnu ou inactif → « Employé introuvable » et lien vers la liste', async () => {
@@ -226,21 +211,18 @@ describe('EmployeeDetailPage (US-20)', () => {
     expect(await screen.findByText(/^Liste/)).toBeInTheDocument()
   })
 
-  it('le bouton retour ramène à la liste avec la recherche et le filtre en cours', async () => {
-    getEmployee.mockResolvedValue(BASE)
+  it('le lien « Employés » ramène à la liste avec la recherche et les filtres en cours', async () => {
     const user = userEvent.setup()
-    renderAt({ pathname: '/admin/employes/1001', state: { listSearch: '?search=pierre&status=NOT_UPDATED' } })
-    await screen.findByRole('region', { name: 'Mise à jour' })
+    renderAt({ pathname: '/admin/employes/1001', state: { listSearch: '?search=pierre&domain=Finance' } })
+    await screen.findByRole('region', { name: 'Profil' })
 
     await user.click(screen.getByRole('link', { name: 'Retour à la liste des employés' }))
-
-    expect(await screen.findByText('Liste ?search=pierre&status=NOT_UPDATED')).toBeInTheDocument()
+    expect(await screen.findByText('Liste ?search=pierre&domain=Finance')).toBeInTheDocument()
   })
 
   it('sans session → connexion admin', async () => {
     getEmployee.mockRejectedValue(new ApiError(401, 'NOT_AUTHENTICATED', 'Vous devez être connecté.'))
     renderAt()
-
     expect(await screen.findByText('Écran connexion admin')).toBeInTheDocument()
   })
 })

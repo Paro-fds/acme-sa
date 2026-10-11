@@ -26,7 +26,7 @@ function Badge({ tone, children }) {
     info: 'border-info-border bg-info-bg text-info-text',
     neutral: 'border-border bg-status-neutral-bg text-help',
     success: 'border-status-done-border bg-status-done-bg text-status-done-text',
-    warning: 'border-warning-border bg-warning-bg/20 text-warning-text',
+    warning: 'border-status-progress-border bg-status-progress-bg/20 text-status-progress-text',
   }
   return <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${tones[tone] || tones.neutral}`}>{children}</span>
 }
@@ -92,7 +92,7 @@ function DeactivateConfirmation({ username, deactivating, onConfirm, onCancel })
       aria-labelledby={titleId}
       aria-describedby={`${titleId}-detail`}
       onKeyDown={(event) => event.key === 'Escape' && !deactivating && onCancel()}
-      className="flex flex-col gap-3 rounded-lg border border-warning-border bg-warning-bg/20 p-3"
+      className="flex flex-col gap-3 rounded-lg border border-status-progress-border bg-status-progress-bg/20 p-3"
     >
       <div className="flex flex-col gap-0.5">
         <p id={titleId} className="font-semibold text-heading">Désactiver le compte de {username}{'\u00a0'}?</p>
@@ -114,7 +114,7 @@ function DeactivateConfirmation({ username, deactivating, onConfirm, onCancel })
           type="button"
           onClick={onConfirm}
           disabled={deactivating}
-          className="min-h-11 rounded-lg bg-warning-text font-semibold text-white disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-status-progress-text font-semibold text-white disabled:opacity-60"
         >
           {deactivating ? 'Désactivation…' : 'Désactiver'}
         </button>
@@ -212,105 +212,83 @@ function AdminItem({
 
   const isActive = admin.is_active !== false
 
+  const facts = [
+    ['Email', admin.email || '—'],
+    ['Rôle', admin.role_label || 'Administrateur'],
+    ['Matricule rattaché', admin.employee_id || '—'],
+    [
+      'Double authentification',
+      admin.mfa_method ? METHODS[admin.mfa_method]?.title || 'Activée' : 'À choisir à la prochaine connexion',
+    ],
+    ['Dernière connexion', admin.last_login_at ? formatDateTime(admin.last_login_at) : 'Jamais connecté'],
+  ]
+
   return (
-    <li className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
-      <div className="flex items-start gap-3">
-        <span
-          className={`flex size-11 shrink-0 items-center justify-center rounded-full ${
-            isActive ? 'bg-info-bg text-info-text' : 'bg-status-neutral-bg text-help'
-          }`}
-          aria-hidden="true"
-        >
-          <span className="material-symbols-outlined">{isActive ? 'shield_person' : 'person_off'}</span>
+    <li className="flex flex-col gap-3 px-4 py-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="font-semibold break-all text-rh-strong">
+          {admin.full_name ? `${admin.full_name} (${admin.username})` : admin.username}
+        </p>
+        {admin.is_me && <Badge tone="info">Vous</Badge>}
+        {admin.must_change_password && <Badge tone="neutral">Mot de passe provisoire</Badge>}
+        <span className="ml-auto">
+          {isActive ? <Badge tone="success">Actif</Badge> : <Badge tone="neutral">Désactivé</Badge>}
         </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold break-all text-heading">
-              {admin.full_name ? `${admin.full_name} (${admin.username})` : admin.username}
-            </p>
-            {admin.is_me && <Badge tone="info">Vous</Badge>}
-            <Badge tone="info">{admin.role_label || 'Administrateur'}</Badge>
-            {admin.must_change_password && <Badge tone="neutral">Mot de passe provisoire</Badge>}
-            {isActive ? (
-              <Badge tone="success">Actif</Badge>
-            ) : (
-              <Badge tone="neutral">Désactivé</Badge>
-            )}
-          </div>
-
-          {admin.email && (
-            <p className="text-sm text-help flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">mail</span>
-              {admin.email}
-            </p>
-          )}
-
-          {admin.employee_id && (
-            <p className="text-sm text-help flex items-center gap-1 font-mono">
-              <span className="material-symbols-outlined text-[16px]">badge</span>
-              Matricule : {admin.employee_id}
-            </p>
-          )}
-
-          <p className="text-sm text-help">
-            Ajouté le {formatLocalDate(admin.created_at)}
-            {admin.created_by ? ` par ${admin.created_by}` : ''}
-          </p>
-          <p className="text-sm text-help">
-            {admin.last_login_at ? `Dernière connexion le ${formatDateTime(admin.last_login_at)}` : 'Jamais connecté'}
-          </p>
-          <p className="text-sm text-help">
-            Double authentification{' '}:{' '}
-            {admin.mfa_method ? (METHODS[admin.mfa_method]?.title || 'Activée') : 'à choisir à la prochaine connexion'}
-          </p>
-
-          {isSuperAdmin && (
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <label htmlFor={`role-${admin.id}`} className="text-xs font-medium text-help">
-                  Rôle de {admin.username}{' '}:
-                </label>
-                <select
-                  id={`role-${admin.id}`}
-                  value={admin.role || 'ADMIN'}
-                  onChange={handleRoleSelect}
-                  disabled={changingRole || !isActive}
-                  className="rounded border border-border bg-surface px-2 py-1 text-xs font-semibold text-heading disabled:opacity-60"
-                >
-                  <option value="ADMIN">Administrateur</option>
-                  <option value="AGENT_RH">Agent RH</option>
-                  <option value="REFERENTIAL">Responsable du référentiel</option>
-                  <option value="READONLY">Lecture seule</option>
-                </select>
-              </div>
-
-              {!admin.is_me && (
-                <div className="flex items-center gap-2">
-                  {isActive ? (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmingDeactivate(true)}
-                      disabled={updatingStatus}
-                      className="text-xs font-semibold text-warning-text hover:underline cursor-pointer"
-                    >
-                      Désactiver le compte
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleActivate}
-                      disabled={updatingStatus}
-                      className="text-xs font-semibold text-status-done-text hover:underline cursor-pointer"
-                    >
-                      Réactiver le compte
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
+        {facts.map(([label, value]) => (
+          <div key={label} className="flex min-w-0 flex-col">
+            <dt className="text-xs font-medium text-rh-muted">{label}</dt>
+            <dd className="break-words text-rh-text">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-xs text-rh-muted">
+        Ajouté le {formatLocalDate(admin.created_at)}
+        {admin.created_by ? ` par ${admin.created_by}` : ''}
+      </p>
+
+      {isSuperAdmin && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label htmlFor={`role-${admin.id}`} className="text-xs font-medium text-rh-text">
+              Rôle de {admin.username}{' '}:
+            </label>
+            <select
+              id={`role-${admin.id}`}
+              value={admin.role || 'ADMIN'}
+              onChange={handleRoleSelect}
+              disabled={changingRole || !isActive}
+              className="min-h-9 rounded border border-border-input bg-surface px-2 text-xs font-semibold text-rh-strong disabled:opacity-60"
+            >
+              <option value="ADMIN">Administrateur</option>
+              <option value="AGENT_RH">Agent RH</option>
+              <option value="REFERENTIAL">Responsable du référentiel</option>
+              <option value="READONLY">Lecture seule</option>
+            </select>
+          </div>
+          {!admin.is_me &&
+            (isActive ? (
+              <button
+                type="button"
+                onClick={() => setConfirmingDeactivate(true)}
+                disabled={updatingStatus}
+                className="min-h-9 cursor-pointer text-xs font-semibold text-status-progress-text hover:underline"
+              >
+                Désactiver le compte
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleActivate}
+                disabled={updatingStatus}
+                className="min-h-9 cursor-pointer text-xs font-semibold text-status-done-text hover:underline"
+              >
+                Réactiver le compte
+              </button>
+            ))}
+        </div>
+      )}
 
       {confirmingDeactivate && (
         <DeactivateConfirmation
@@ -370,7 +348,7 @@ function AdminItem({
 }
 
 /** CA-05, CA-06 : ajout avec un mot de passe provisoire ; US-103 : rôle choisi à la création ; US-104 : champs A10. */
-function AddAdminForm({ onAdded, onCancel }) {
+function AddAdminForm({ onAdded }) {
   const redirectIfUnauthorized = useUnauthorizedRedirect(LOGIN_PATH)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -382,6 +360,17 @@ function AddAdminForm({ onAdded, onCancel }) {
   const [failure, setFailure] = useState(null)
   const [sending, setSending] = useState(false)
   const complete = username.trim() !== '' && password !== ''
+
+  function reset() {
+    setFullName('')
+    setEmail('')
+    setUsername('')
+    setPassword('')
+    setRole('AGENT_RH')
+    setEmployeeId('')
+    setErrors({})
+    setFailure(null)
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -401,12 +390,7 @@ function AddAdminForm({ onAdded, onCancel }) {
               employeeId: employeeId.trim() || null,
             })
           : await addAdmin(username.trim(), password, role)
-      setFullName('')
-      setEmail('')
-      setUsername('')
-      setPassword('')
-      setRole('AGENT_RH')
-      setEmployeeId('')
+      reset()
       onAdded(created)
     } catch (apiError) {
       if (redirectIfUnauthorized(apiError)) return
@@ -420,23 +404,16 @@ function AddAdminForm({ onAdded, onCancel }) {
   }
 
   return (
-    <Block icon="person_add" title="Ajouter un compte RH">
+    <Block icon="person_add" title="Créer un compte">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <TextField
-            label="Nom"
-            placeholder="ex. Agent RH Démo 1"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-          <TextField
-            label="Email"
-            type="email"
-            placeholder="ex. agent1.demo@domaine-demo.local"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        <TextField label="Nom" placeholder="Nom complet" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <TextField
+          label="Email"
+          type="email"
+          placeholder="adresse@domaine.fr"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
         <TextField
           label="Identifiant"
@@ -495,15 +472,12 @@ function AddAdminForm({ onAdded, onCancel }) {
 
         <Alert>{failure}</Alert>
 
-        <div className="flex items-center gap-3 pt-2">
-          {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel}>
-              Fermer le formulaire
-            </Button>
-          )}
-          <Button type="submit" variant="secondary" disabled={!complete || sending}>
-            <span className="material-symbols-outlined" aria-hidden="true">person_add</span>
-            {sending ? 'Ajout…' : "Ajouter l'administrateur"}
+        <div className="flex items-center justify-end gap-3 border-t border-rh-line pt-4">
+          <Button type="button" variant="ghost" className="w-auto" onClick={reset}>
+            Annuler
+          </Button>
+          <Button type="submit" className="w-auto whitespace-nowrap" disabled={!complete || sending}>
+            {sending ? 'Création…' : 'Créer le compte'}
           </Button>
         </div>
       </form>
@@ -644,11 +618,15 @@ export default function AdminAccountsPage() {
   const { data: admins, error, loading, reload } = useLoader(listAdmins, { loginPath: LOGIN_PATH })
   const [notice, setNotice] = useState(null)
   const [failure, setFailure] = useState(null)
-  const [formOpen, setFormOpen] = useState(false)
   const listId = useId()
 
-  const page = (children) => (
-    <Page account="admin" title="Comptes et rôles" backTo="/admin">
+  const page = (children, headerActions) => (
+    <Page
+      account="admin"
+      title="Comptes et rôles"
+      subtitle="Gérez les accès à l'espace RH et attribuez les rôles : Administrateur, Agent RH, Responsable du référentiel ou Lecture seule."
+      headerActions={headerActions}
+    >
       {children}
     </Page>
   )
@@ -725,66 +703,53 @@ export default function AdminAccountsPage() {
     setNotice(
       `Compte « ${created.username} » ajouté avec le rôle « ${created.role_label} ». Transmettez-lui son mot de passe provisoire.`,
     )
-    setFormOpen(false)
     reload()
   }
 
+  const createButton = isSuperAdmin && (
+    <button
+      type="button"
+      onClick={() => document.getElementById('create-account-section')?.querySelector('input')?.focus()}
+      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 font-semibold text-white shadow-card hover:bg-primary-active"
+    >
+      Créer un compte
+    </button>
+  )
+
   return page(
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-[26px] leading-8 font-bold text-heading">Comptes et rôles</h2>
-          <p className="text-sm text-help">
-            Gérez les accès à l'espace RH et attribuez les rôles : Administrateur, Agent RH, Responsable du référentiel ou Lecture seule.
-          </p>
-        </div>
-
-        {isSuperAdmin && (
-          <button
-            type="button"
-            onClick={() => setFormOpen((prev) => !prev)}
-            className="flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 font-semibold text-white shadow hover:bg-primary/90 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">person_add</span>
-            Créer un compte
-          </button>
-        )}
-      </div>
-
       {notice && <Alert tone="success">{notice}</Alert>}
       <Alert>{failure}</Alert>
 
-      {/* Tableau des comptes RH (A10) */}
-      <section aria-labelledby={listId} className="flex flex-col gap-3">
-        <div className="flex items-center justify-between px-1">
-          <h3 id={listId} className="text-lg font-semibold text-heading">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
+        {/* Comptes RH (A10) */}
+        <section aria-labelledby={listId} className="overflow-hidden rounded-xl border border-rh-line bg-surface shadow-card xl:col-span-7">
+          <h3 id={listId} className="border-b border-rh-line bg-rh-canvas px-4 py-3 text-sm font-semibold text-rh-text">
             {admins.length} compte{admins.length > 1 ? 's' : ''}
           </h3>
-        </div>
+          <ul aria-label="Comptes administrateurs" className="flex flex-col divide-y divide-rh-line">
+            {admins.map((admin) => (
+              <AdminItem
+                key={admin.id}
+                admin={admin}
+                isSuperAdmin={isSuperAdmin}
+                deletable={!admin.is_me && admins.length > 1 && isSuperAdmin}
+                onRoleChange={handleRoleChange}
+                onStatusChange={handleStatusChange}
+                onDelete={handleDelete}
+                onResetMfa={handleResetMfa}
+              />
+            ))}
+          </ul>
+        </section>
 
-        {/* Liste accessible pour mobile et tests */}
-        <ul aria-label="Comptes administrateurs" className="flex flex-col gap-3">
-          {admins.map((admin) => (
-            <AdminItem
-              key={admin.id}
-              admin={admin}
-              isSuperAdmin={isSuperAdmin}
-              deletable={!admin.is_me && admins.length > 1 && isSuperAdmin}
-              onRoleChange={handleRoleChange}
-              onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
-              onResetMfa={handleResetMfa}
-            />
-          ))}
-        </ul>
-      </section>
-
-      {/* Formulaire d'ajout / Tiroir A10 */}
-      {isSuperAdmin && (
-        <div id="create-account-section">
-          <AddAdminForm onAdded={handleAdded} onCancel={() => setFormOpen(false)} />
-        </div>
-      )}
+        {/* Volet « Créer un compte » (A10) */}
+        {isSuperAdmin && (
+          <div id="create-account-section" className="xl:sticky xl:top-22 xl:col-span-5">
+            <AddAdminForm onAdded={handleAdded} />
+          </div>
+        )}
+      </div>
 
       {/* Section Accès des employés (A10) */}
       {isSuperAdmin && (
@@ -794,5 +759,6 @@ export default function AdminAccountsPage() {
         />
       )}
     </>,
+    createButton,
   )
 }

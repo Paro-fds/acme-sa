@@ -29,7 +29,7 @@ test('administrateurs : ajout, mot de passe provisoire puis choisi', async ({ pa
 
   await page.getByLabel('Identifiant').fill('e2e.marie')
   await page.getByLabel('Mot de passe provisoire', { exact: true }).fill(PROVISIONAL)
-  await page.getByRole('button', { name: "Ajouter l'administrateur" }).click()
+  await page.getByRole('button', { name: 'Créer le compte' }).click()
   await expect(page.getByText(/Administrateur « e2e\.marie » ajouté/)).toBeVisible()
   const marie = list.getByRole('listitem').filter({ hasText: 'e2e.marie' })
   await expect(marie).toContainText('Mot de passe provisoire')

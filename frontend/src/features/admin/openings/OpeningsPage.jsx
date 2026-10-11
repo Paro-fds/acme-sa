@@ -37,15 +37,14 @@ export default function OpeningsPage() {
   const { data, loading, error } = useLoader(load, { loginPath: LOGIN_PATH })
 
   return (
-    <Page account="admin" wide title="Postes ouverts">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="hidden text-2xl font-bold tracking-tight text-primary md:block">Postes ouverts</h2>
-          <p className="text-sm text-help">
-            Un Agent RH saisit le poste ; un Administrateur le valide et le publie.
-          </p>
-        </div>
-        {data && canEdit(data.me) && (
+    <Page
+      account="admin"
+      wide
+      title="Postes ouverts"
+      subtitle="Un Agent RH saisit le poste ; un Administrateur le valide et le publie."
+      headerActions={
+        data &&
+        canEdit(data.me) && (
           <Link
             to={`${OPENINGS_PATH}/nouveau`}
             className="flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-base font-semibold text-white hover:bg-primary-active"
@@ -53,8 +52,9 @@ export default function OpeningsPage() {
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
             Saisir un poste
           </Link>
-        )}
-      </div>
+        )
+      }
+    >
       {loading && <p role="status">Chargement…</p>}
       {error && <Alert>{error.message}</Alert>}
       {data && data.openings.length === 0 && <p className="text-help">Aucun poste saisi pour le moment.</p>}

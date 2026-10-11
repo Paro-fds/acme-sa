@@ -5,14 +5,14 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import AdminLoginPage from './AdminLoginPage.jsx'
 import EmployeeListPage from './EmployeeListPage.jsx'
 import { adminLogin, adminLogout } from '../../api/auth.js'
-import { getAdminMe, listEmployees } from '../../api/admin.js'
+import { getAdminMe, searchQualifiedEmployees } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 import { loginMfa } from '../../api/mfa.js'
 
 vi.mock('../../api/auth.js', () => ({ adminLogin: vi.fn(), adminLogout: vi.fn(), logout: vi.fn() }))
 vi.mock('../../api/admin.js', () => ({
   getAdminMe: vi.fn(),
-  listEmployees: vi.fn(),
+  searchQualifiedEmployees: vi.fn(),
   searchQualifiedEmployees: vi.fn(),
   getEmployeesExportUrl: vi.fn(() => '#'),
 }))
@@ -122,7 +122,7 @@ describe('AdminLoginPage (US-15, US-107)', () => {
   })
 
   it('CA-05 : route admin sans session → retour à /admin/connexion', async () => {
-    listEmployees.mockRejectedValue(new ApiError(401, 'NOT_AUTHENTICATED', 'Vous devez être connecté.'))
+    searchQualifiedEmployees.mockRejectedValue(new ApiError(401, 'NOT_AUTHENTICATED', 'Vous devez être connecté.'))
     renderAt('/admin/employes')
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
@@ -130,14 +130,14 @@ describe('AdminLoginPage (US-15, US-107)', () => {
   })
 
   it('CA-07 : session expirée → retour à la connexion avec le message', async () => {
-    listEmployees.mockRejectedValue(new ApiError(401, 'SESSION_EXPIRED', 'Votre session a expiré. Reconnectez-vous.'))
+    searchQualifiedEmployees.mockRejectedValue(new ApiError(401, 'SESSION_EXPIRED', 'Votre session a expiré. Reconnectez-vous.'))
     renderAt('/admin/employes')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Votre session a expiré. Reconnectez-vous.')
   })
 
   it('CA-06 : « Se déconnecter » ferme la session admin et revient à /admin/connexion', async () => {
-    listEmployees.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 })
+    searchQualifiedEmployees.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 })
     adminLogout.mockResolvedValue(null)
     const user = userEvent.setup()
     renderAt('/admin/employes')
@@ -249,7 +249,7 @@ describe('AdminLoginPage (US-15, US-107)', () => {
   })
 
   it('US-102 : écran RH ouvert sans le code → retour à la double authentification', async () => {
-    listEmployees.mockRejectedValue(new ApiError(401, 'MFA_REQUIRED', 'Saisissez votre code de vérification pour continuer.'))
+    searchQualifiedEmployees.mockRejectedValue(new ApiError(401, 'MFA_REQUIRED', 'Saisissez votre code de vérification pour continuer.'))
     renderAt('/admin/employes')
 
     expect(await screen.findByText('Double authentification')).toBeInTheDocument()

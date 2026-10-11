@@ -189,7 +189,7 @@ export default function OpeningDetailPage() {
   )
 
   return (
-    <Page account="admin" title="Postes ouverts" backTo={OPENINGS_PATH}>
+    <Page account="admin" backTo={OPENINGS_PATH} backLabel="Postes ouverts">
       {loading && <p role="status">Chargement…</p>}
       {error && <Alert>{error.message}</Alert>}
       {data && <OpeningDetail key={id} id={id} initial={data.opening} me={data.me} applications={data.applications} />}

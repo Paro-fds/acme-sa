@@ -8,6 +8,11 @@ export function getPilotDashboard() {
   return request('/admin/dashboard')
 }
 
+/** US-108 (écran A07) : dossier V2 d'un employé (coordonnées, dates de confirmation, informations RH) et ses signalements. */
+export function getEmployeeDossier(id) {
+  return request(`/admin/employees/${encodeURIComponent(id)}/dossier`)
+}
+
 export function getEmployee(id) {
   return request(`/admin/employees/${encodeURIComponent(id)}`)
 }
@@ -48,6 +53,8 @@ export function searchQualifiedEmployees({
   folderStatus = '',
   minLevel = '',
   domain = '',
+  page = 1,
+  pageSize = 20,
 } = {}) {
   const params = new URLSearchParams()
   if (search && search.trim()) params.set('search', search.trim())
@@ -57,6 +64,8 @@ export function searchQualifiedEmployees({
   if (folderStatus && folderStatus !== 'Tous') params.set('folder_status', folderStatus)
   if (minLevel && minLevel !== 'Tous') params.set('min_level', minLevel)
   if (domain && domain !== 'Tous') params.set('domain', domain)
+  if (page > 1) params.set('page', String(page))
+  params.set('page_size', String(pageSize))
   return request(`/admin/employees/search?${params}`)
 }
 

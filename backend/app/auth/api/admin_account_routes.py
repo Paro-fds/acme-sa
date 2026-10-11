@@ -23,6 +23,8 @@ router = APIRouter(prefix="/api/admin", tags=["admin-accounts"])
 class AdminMeOut(BaseModel):
     id: str
     username: str
+    display_name: str
+    """US-108 : nom affiché dans l'en-tête de l'espace RH (nom complet, sinon identifiant)."""
     role: str
     role_label: str
     must_change_password: bool
@@ -116,6 +118,7 @@ def me(request: Request, admin_id: str = Depends(current_admin_pending)) -> Admi
     return AdminMeOut(
         id=admin.id,
         username=admin.username,
+        display_name=admin.full_name or admin.username,
         role=admin.role.value,
         role_label=ROLE_LABELS.get(admin.role, admin.role.value),
         must_change_password=admin.must_change_password,

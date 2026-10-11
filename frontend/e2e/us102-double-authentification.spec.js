@@ -29,7 +29,7 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
   await page.goto('/admin/administrateurs')
   await page.getByLabel('Identifiant').fill('e2e.paul')
   await page.getByLabel('Mot de passe provisoire', { exact: true }).fill(PASSWORD)
-  await page.getByRole('button', { name: "Ajouter l'administrateur" }).click()
+  await page.getByRole('button', { name: 'Créer le compte' }).click()
   await expect(page.getByText(/Administrateur « e2e\.paul » ajouté/)).toBeVisible()
   await logout(page)
 

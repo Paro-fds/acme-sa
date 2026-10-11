@@ -54,7 +54,7 @@ function CertificateCard({ cert }) {
               En vérification
             </span>
           ) : cert.status === 'TO_CORRECT' ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-warning-border bg-warning-bg px-2.5 py-0.5 text-xs font-semibold text-warning-text">
+            <span className="inline-flex items-center gap-1 rounded-full border border-status-progress-border bg-status-progress-bg px-2.5 py-0.5 text-xs font-semibold text-status-progress-text">
               <span className="material-symbols-outlined text-[14px]" aria-hidden="true">error</span>
               À corriger
             </span>

@@ -193,7 +193,6 @@ export default function OpeningFormPage() {
 
   return (
     <Page account="admin" title={title} backTo={id ? `${OPENINGS_PATH}/${id}` : OPENINGS_PATH}>
-      <h2 className="hidden text-2xl font-bold tracking-tight text-primary md:block">{title}</h2>
       {loading && <p role="status">Chargement…</p>}
       {error && <Alert>{error.message}</Alert>}
       {data && <OpeningForm id={id} form={data.form} opening={data.opening} />}

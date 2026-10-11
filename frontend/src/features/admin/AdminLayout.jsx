@@ -1,161 +1,132 @@
-import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router'
+import { useEffect, useState } from 'react'
+import { Link, NavLink } from 'react-router'
+import { getAdminFrame } from '../../api/adminFrame.js'
 import logo from '../../assets/logo-acme.png'
 import AccountMenu from '../../components/AccountMenu.jsx'
+import { useLogout } from '../../lib/useLogout.js'
 
+/** Rubriques des écrans validés A02 → A11, dans leur ordre, plus « Postes ouverts » (US-802, lot 4, sans maquette). */
 const NAV_ITEMS = [
-  { to: '/admin', end: true, label: 'Tableau de bord', icon: 'dashboard' },
-  { to: '/admin/validation', end: false, label: 'File de validation', icon: 'fact_check', badge: '27', badgeTone: 'neutral' },
-  { to: '/admin/employes', end: false, label: 'Employés', icon: 'groups' },
-  { to: '/admin/postes', end: false, label: 'Postes ouverts', icon: 'work' },
-  { to: '/admin/signalements', end: false, label: 'Signalements', icon: 'report_problem', badge: '9', badgeTone: 'warning' },
-  { to: '/admin/referentiel', end: false, label: 'À rattacher', icon: 'account_tree', badge: '2', badgeTone: 'warning' },
-  { to: '/admin/comptes', end: false, label: 'Comptes et rôles', icon: 'manage_accounts' },
-  { to: '/admin/audit', end: false, label: "Journal d'audit", icon: 'history' },
+  { to: '/admin', end: true, label: 'Tableau de bord' },
+  { to: '/admin/validation', label: 'File de validation', count: 'validation', tone: 'neutral' },
+  { to: '/admin/employes', label: 'Employés' },
+  { to: '/admin/postes', label: 'Postes ouverts' },
+  { to: '/admin/signalements', label: 'Signalements', count: 'reports', tone: 'warning' },
+  { to: '/admin/referentiel', label: 'À rattacher', count: 'to_attach', tone: 'warning' },
+  { to: '/admin/comptes', label: 'Comptes et rôles' },
+  { to: '/admin/audit', label: "Journal d'audit" },
 ]
 
-/**
- * Layout officiel de l'espace RH aligné sur les maquettes A02 à A10 validées par la direction.
- * Comprend :
- * - L'en-tête supérieur bleu marine (#1E1E82) avec le logo ACME SA, « Portail RH », le titre, les actions et le menu de compte.
- * - La barre latérale (Sidebar) gauche avec les 7 rubriques des maquettes, plus « Postes ouverts » (US-802, lot 4, sans maquette).
- * - Le conteneur principal avec fond clair et contenu de la page.
- * - Un menu escamotable sur mobile (zones tactiles ≥ 44 px).
- */
-export default function AdminLayout({
-  title,
-  backTo,
-  headerActions,
-  wide = false,
-  children,
-}) {
-  const navigate = useNavigate()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+const BADGE_TONES = {
+  neutral: 'bg-status-neutral-bg text-status-neutral-text',
+  warning: 'bg-status-progress-bg text-status-progress-text',
+}
 
-  const navLinkClass = ({ isActive }) =>
-    `flex min-h-11 items-center justify-between rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-      isActive
-        ? 'bg-[#1E1E82] text-white shadow-sm font-semibold'
-        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-    }`
+/** US-108 CA-02 : nom, rôle et compteurs réels ; en cas d'échec, le cadre s'affiche sans eux (la page gère la session). */
+function useAdminFrame() {
+  const [frame, setFrame] = useState(null)
+  useEffect(() => {
+    let active = true
+    getAdminFrame()
+      .then((result) => active && setFrame(result))
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
+  return frame
+}
+
+function navLinkClass({ isActive }) {
+  return `flex min-h-11 items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+    isActive ? 'bg-primary text-white shadow-card' : 'text-rh-text hover:bg-rh-hover hover:text-rh-strong'
+  }`
+}
+
+/**
+ * US-108 : cadre de l'espace RH repris de l'écran validé A02 :
+ * en-tête bleu marine (logo, « Portail RH », « Nom · Rôle », « Se déconnecter »), menu latéral à gauche,
+ * titre de la page en tête du contenu. À 390 px, le menu s'ouvre par un bouton.
+ */
+export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Retour', headerActions, wide = false, children }) {
+  const frame = useAdminFrame()
+  const logout = useLogout('admin')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const accountLabel = frame ? `${frame.me.display_name} · ${frame.me.role_label}` : undefined
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#F8FAFC] text-slate-800 antialiased">
-      {/* En-tête supérieur global RH (TopHeader officiel A02/A10) */}
-      <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between bg-[#1E1E82] px-4 text-white shadow-sm sm:px-6">
-        <div className="flex items-center gap-3">
-          {/* Bouton mobile pour ouvrir le menu latéral */}
+    <div className="flex min-h-dvh flex-col bg-rh-canvas text-rh-strong">
+      <header className="sticky top-[env(safe-area-inset-top,0px)] z-30 flex h-16 shrink-0 items-center justify-between gap-3 bg-primary px-4 text-white sm:px-8">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu de navigation RH"
-            aria-expanded={mobileMenuOpen}
-            className="-ml-2 flex size-11 items-center justify-center rounded-lg text-white hover:bg-white/10 lg:hidden"
+            aria-expanded={menuOpen}
+            className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-surface/10 lg:hidden"
           >
-            <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
-              {mobileMenuOpen ? 'close' : 'menu'}
-            </span>
+            <span className="material-symbols-outlined" aria-hidden="true">{menuOpen ? 'close' : 'menu'}</span>
           </button>
-
-          {backTo && (
-            <button
-              type="button"
-              onClick={() => navigate(backTo)}
-              aria-label="Retour"
-              className="-ml-2 flex size-11 items-center justify-center rounded-lg text-white hover:bg-white/10"
-            >
-              <span className="material-symbols-outlined" aria-hidden="true">
-                arrow_back
-              </span>
-            </button>
-          )}
-
-          <img
-            src={logo}
-            alt="ACME SA"
-            width="32"
-            height="32"
-            className="size-8 rounded bg-white p-0.5 object-contain"
-          />
-          <span className="text-lg font-light text-white/40" aria-hidden="true">
-            |
-          </span>
-          <span className="text-base font-normal tracking-wide text-white">Portail RH</span>
-
-          {title && (
-            <h1 className="ml-2 hidden text-base font-semibold text-white/90 md:inline">
-              {title}
-            </h1>
-          )}
+          <img src={logo} alt="ACME SA" width="32" height="32" className="h-8 w-auto shrink-0 rounded bg-surface object-contain p-0.5" />
+          <span className="text-lg text-white/40" aria-hidden="true">|</span>
+          <span className="truncate text-base font-medium">Portail RH</span>
         </div>
-
-        <div className="flex items-center gap-3">
-          {headerActions && <div className="flex items-center gap-2">{headerActions}</div>}
-          <div className="text-white">
-            <AccountMenu space="admin" />
-          </div>
+        <div className="flex shrink-0 items-center gap-2 text-sm">
+          <AccountMenu space="admin" label={accountLabel} />
+          <span className="hidden text-white/40 sm:inline" aria-hidden="true">·</span>
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="hidden min-h-11 px-1 text-white/80 underline underline-offset-2 hover:text-white sm:inline"
+          >
+            Se déconnecter
+          </button>
         </div>
       </header>
 
-      {/* Conteneur principal avec menu latéral et zone centrale */}
       <div className="flex flex-1">
-        {/* Voile sombre pour mobile quand le menu est ouvert */}
-        {mobileMenuOpen && (
-          <div
-            className="fixed inset-0 z-20 bg-slate-900/50 backdrop-blur-xs lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-hidden="true"
-          />
+        {menuOpen && (
+          <div className="fixed inset-0 z-20 bg-rh-strong/50 lg:hidden" onClick={() => setMenuOpen(false)} aria-hidden="true" />
         )}
-
-        {/* Menu latéral gauche fixe (Sidebar A02/A10) */}
         <aside
-          className={`fixed inset-y-16 left-0 z-20 flex w-64 shrink-0 flex-col justify-between border-r border-slate-200 bg-white py-6 transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
-            mobileMenuOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full'
+          className={`fixed top-16 bottom-0 left-0 z-20 w-64 shrink-0 overflow-y-auto border-r border-rh-line bg-surface py-6 transition-transform lg:static lg:translate-x-0 lg:overflow-visible ${
+            menuOpen ? 'translate-x-0 shadow-modal' : '-translate-x-full'
           }`}
         >
-          <nav aria-label="Menu principal RH" className="flex flex-col gap-1 px-3">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={() => setMobileMenuOpen(false)}
-                className={navLinkClass}
-              >
-                <span className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    {item.icon}
-                  </span>
+          <nav aria-label="Menu principal RH" className="flex flex-col gap-1 px-3 lg:sticky lg:top-22">
+            {NAV_ITEMS.map((item) => {
+              const count = item.count ? frame?.counts[item.count] : 0
+              return (
+                <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMenuOpen(false)} className={navLinkClass}>
                   <span>{item.label}</span>
-                </span>
-                {item.badge && (
-                  <span
-                    className={`inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold ${
-                      item.badgeTone === 'warning'
-                        ? 'bg-[#FEF3C7] text-[#B45309]'
-                        : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </NavLink>
-            ))}
+                  {count > 0 && (
+                    <span
+                      className={`inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${BADGE_TONES[item.tone]}`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </NavLink>
+              )
+            })}
           </nav>
-
-          <div className="px-6 text-xs text-slate-400">
-            <p className="font-semibold text-slate-500">ACME SA Carrière</p>
-            <p>Version 2.0 · Espace RH</p>
-          </div>
         </aside>
 
-        {/* Zone principale de contenu */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="min-w-0 flex-1 px-4 py-6 md:p-8">
           <div className={`mx-auto flex w-full flex-col gap-6 ${wide ? 'max-w-6xl' : 'max-w-4xl'}`}>
+            {backTo && (
+              <Link to={backTo} className="-mb-3 inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-primary hover:underline">
+                <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span>
+                {backLabel}
+              </Link>
+            )}
             {title && (
-              <div className="flex flex-wrap items-center justify-between gap-4 md:hidden">
-                <h1 className="text-2xl font-bold tracking-tight text-[#1E1E82]">{title}</h1>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <h1 className="text-2xl font-bold tracking-tight break-words text-primary">{title}</h1>
+                  {subtitle && <p className="text-sm text-rh-muted">{subtitle}</p>}
+                </div>
+                {headerActions && <div className="flex flex-wrap items-center gap-2">{headerActions}</div>}
               </div>
             )}
             {children}

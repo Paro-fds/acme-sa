@@ -23,12 +23,13 @@ function EmployeeHeader() {
 
 /**
  * Mise en page commune :
- * - Si `account === 'admin'` : layout officiel RH (maquettes A02 à A10) avec en-tête bleu marine et barre latérale.
+ * - Si `account === 'admin'` : cadre de l'espace RH (US-108, écrans A02 → A11) : en-tête bleu marine, menu latéral, titre et `subtitle`.
  * - Si `account === true` : espace employé (écrans 06 à 13) avec en-tête « Portail Carrière » et barre du bas.
  * - Sinon : en-tête simple `AppHeader`.
  */
 export default function Page({
   title,
+  subtitle,
   backTo,
   backLabel = 'Retour',
   headerActions,
@@ -42,6 +43,7 @@ export default function Page({
     return (
       <AdminLayout
         title={title}
+        subtitle={subtitle}
         backTo={backTo}
         backLabel={backLabel}
         headerActions={headerActions}

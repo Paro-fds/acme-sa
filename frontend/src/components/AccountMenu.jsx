@@ -16,8 +16,11 @@ const ADMIN_LINKS = [
   { to: '/admin/securite', icon: 'verified_user', label: 'Ma double authentification' },
 ]
 
-/** Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23 ; « Mon parcours » : US-25). */
-export default function AccountMenu({ space = 'employee' }) {
+/**
+ * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23 ; « Mon parcours » : US-25).
+ * `label` (US-108, écran A02) : « Nom · Rôle » affiché à la place de l'avatar, en blanc sur l'en-tête bleu marine de l'espace RH.
+ */
+export default function AccountMenu({ space = 'employee', label }) {
   const logout = useLogout(space)
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -60,15 +63,27 @@ export default function AccountMenu({ space = 'employee' }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        className="-mr-2 flex size-11 items-center justify-center rounded-full text-primary hover:bg-canvas"
+        className={
+          label
+            ? 'flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm text-white/90 hover:bg-white/10 hover:text-white'
+            : '-mr-2 flex size-11 items-center justify-center rounded-full text-primary hover:bg-canvas'
+        }
       >
-        <span className="material-symbols-outlined text-[32px]" aria-hidden="true">account_circle</span>
+        {label ? (
+          <>
+            <span className="material-symbols-outlined text-[28px] sm:hidden" aria-hidden="true">account_circle</span>
+            <span className="hidden max-w-64 truncate sm:inline">{label}</span>
+            <span className="material-symbols-outlined hidden text-xl sm:inline" aria-hidden="true">expand_more</span>
+          </>
+        ) : (
+          <span className="material-symbols-outlined text-[32px]" aria-hidden="true">account_circle</span>
+        )}
       </button>
       {open && (
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
+          className="absolute right-0 z-40 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
         >
           {(space === 'admin' ? ADMIN_LINKS : EMPLOYEE_LINKS).map((link) => (
             <Link key={link.to} to={link.to} role="menuitem" onClick={() => setOpen(false)} className={MENU_ITEM}>

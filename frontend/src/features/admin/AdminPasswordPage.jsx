@@ -28,7 +28,16 @@ export default function AdminPasswordPage() {
   const forced = me?.must_change_password
   const title = forced ? 'Choisissez votre mot de passe' : 'Changer mon mot de passe'
   const page = (children) => (
-    <Page account="admin" title="Mot de passe" backTo={forced || !me ? undefined : '/admin'}>
+    <Page
+      account="admin"
+      title={me ? title : 'Mot de passe'}
+      subtitle={
+        me &&
+        (forced
+          ? `Bienvenue, ${me.username}. Votre mot de passe actuel est provisoire : choisissez le vôtre pour accéder à l'administration.`
+          : 'Vos autres connexions seront fermées.')
+      }
+    >
       {children}
     </Page>
   )
@@ -69,14 +78,6 @@ export default function AdminPasswordPage() {
 
   return page(
     <>
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[26px] leading-8 font-bold">{title}</h2>
-        <p>
-          {forced
-            ? `Bienvenue, ${me.username}. Votre mot de passe actuel est provisoire : choisissez le vôtre pour accéder à l'administration.`
-            : 'Vos autres connexions seront fermées.'}
-        </p>
-      </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
         <PasswordField

@@ -51,7 +51,7 @@ function TotpInstructions({ totp }) {
         <img
           src={totp.qr_code}
           alt="QR code à scanner avec l'application d'authentification"
-          className="size-52 self-center rounded-lg border border-border bg-white p-1"
+          className="size-52 self-center rounded-lg border border-border bg-surface p-1"
         />
         <span className="text-sm text-help">
           Impossible de scanner{' '}? Saisissez cette clé{' '}:{' '}

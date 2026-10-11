@@ -142,20 +142,20 @@ describe('ReferentialPage — À rattacher (US-502)', () => {
   it('CA-01 : chaque valeur sans unité, avec le nombre d’employés concernés', async () => {
     renderPage()
 
-    const block = await screen.findByRole('region', { name: 'À rattacher' })
-    const rows = within(block).getAllByRole('listitem').map((item) => item.textContent)
-    expect(rows).toEqual([
-      expect.stringMatching(/PB.*Agence.*3 employés/),
-      expect.stringMatching(/Direction Opération.*Direction ou service.*1 employé$/),
-    ])
-    expect(block).toHaveTextContent('Ces employés voient « Unité à confirmer »')
+    // US-108 (écran A09) : tableau « Valeur trouvée · Colonne de l'export · Employés concernés ».
+    expect(await screen.findByRole('heading', { level: 1, name: 'Valeurs à rattacher' })).toBeInTheDocument()
+    const block = screen.getByRole('region', { name: 'Valeurs à rattacher' })
+    const rows = within(block).getAllByRole('row').slice(1).map((row) => row.textContent)
+    expect(rows).toEqual(['PBAgence3', 'Direction OpérationDirection ou service1'])
+    expect(block).toHaveTextContent('1 à 2 sur 2')
+    expect(screen.getByText(/Les employés concernés voient « Unité à confirmer »/)).toBeInTheDocument()
   })
 
   it('CA-03 : rien à rattacher, un message le dit', async () => {
     getReferential.mockResolvedValue({ ...REFERENTIAL, to_attach: [] })
     renderPage()
 
-    expect(await within(await screen.findByRole('region', { name: 'À rattacher' })).findByText(
+    expect(await within(await screen.findByRole('region', { name: 'Valeurs à rattacher' })).findByText(
       "Toutes les valeurs de l'export sont rattachées à une unité officielle.",
     )).toBeInTheDocument()
   })

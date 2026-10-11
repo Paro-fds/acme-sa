@@ -137,6 +137,16 @@ S = [
    "« Mot de passe oublié ? » affiche « Demandez à un Administrateur de réinitialiser votre accès » : aucune réinitialisation en libre-service (EF-105).",
    "À la première connexion, ou après une réinitialisation, l'étape 2 devient « Protégez votre compte » sur la même carte ; les règles de US-102 sont inchangées (méthodes ouvertes, code faux, suspension, message unique)."],
   "Demande de l'utilisateur du 2026-10-09 : aligner la connexion RH sur l'écran A01 validé par M. Hilaire (D-47) et la placer au lot 1. US-102 reste au lot 3, « En cours », jusqu'au choix du service d'envoi des codes (D-41)."),
+ ("108","D1","Aligner l'espace RH sur les écrans validés","2","",
+  "Must","—","RG-80","D-47",
+  "personne des RH","retrouver dans l'espace RH les écrans que la direction a validés",
+  "que l'espace RH soit celui qui a été montré et approuvé",
+  ["Chaque écran RH a le cadre de l'écran A02 : en-tête bleu marine avec le logo et « Portail RH », à droite « Nom · Rôle » et « Se déconnecter » ; à gauche le menu des écrans validés (Tableau de bord, File de validation, Employés, Signalements, À rattacher, Comptes et rôles, Journal d'audit), plus « Postes ouverts » (lot 4) ; le titre de la page en tête du contenu.",
+   "Les compteurs du menu sont réels : certificats en attente (File de validation), signalements à traiter (Signalements), valeurs à rattacher (À rattacher) ; aucun compteur quand il vaut 0.",
+   "Les écrans A02 à A11 reprennent la présentation de leur maquette (`code.html` fait foi) ; quand le texte d'un écran contredit une règle du registre, la règle l'emporte (D-47).",
+   "À 1280 px, le menu reste visible et n'est jamais écrasé par le contenu ; à 390 px, il s'ouvre par un bouton et rien ne défile horizontalement.",
+   "Couleurs et styles passent par les jetons du portail, jamais par des valeurs écrites dans les écrans."],
+  "Demande de l'utilisateur du 2026-10-11 (« les pages RH et Admin ne sont pas encore alignées ») : cadre et écrans A02 → A11 dans une seule story, au lot 2. US-207 prévoyait de reprendre les écrans RH au début du lot 2. Choix du 2026-10-11 pour A06 : suivre la maquette (statut du dossier, niveau validé, domaine, dernière mise à jour, liste paginée) ; le statut « Mise à jour effectuée / non effectuée » et ses puces (ancien parcours, US-206) disparaissent. A07 lit le dossier V2 (`GET /api/admin/employees/{id}/dossier`) avec la date de chaque confirmation ; ce qui a été envoyé avec l'ancien portail reste lisible. A09 : le rattachement se fait par l'import du fichier (D-27) présenté à côté du tableau ; la saisie à l'écran viendra avec US-503. Compteurs du menu : `GET /api/admin/menu-counts`."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -413,7 +423,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

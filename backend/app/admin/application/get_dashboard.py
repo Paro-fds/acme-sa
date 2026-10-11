@@ -237,3 +237,30 @@ class GetPilotDashboard:
             by_region=by_region,
             by_direction=by_direction,
         )
+
+
+@dataclass(frozen=True)
+class MenuCounts:
+    validation: int
+    reports: int
+    to_attach: int
+
+
+class GetMenuCounts:
+    """US-108 CA-02 : compteurs du menu de l'espace RH (écran A02), calculés comme au tableau de bord."""
+
+    def __init__(
+        self, certificates: CertificateRepository, dossiers: DossierRepository, referentials: ReferentialRepository
+    ) -> None:
+        self._certificates = certificates
+        self._dossiers = dossiers
+        self._referentials = referentials
+
+    def execute(self) -> MenuCounts:
+        waiting = (CertificateStatus.RECEIVED, CertificateStatus.IN_REVIEW)
+        pending = (ReportStatus.NEW.value, ReportStatus.IN_PROGRESS.value)
+        return MenuCounts(
+            validation=sum(1 for c in self._certificates.list_all() if c.status in waiting),
+            reports=sum(1 for r in self._dossiers.list_all_reports() if r.status in pending),
+            to_attach=sum(1 for m in self._referentials.mappings() if not m.unit_code),
+        )

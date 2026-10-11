@@ -41,11 +41,11 @@ function RejectionModal({ certificate, onConfirm, onCancel, submitting }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-lg font-bold text-[#1E1E82]">Rejeter ce certificat</h2>
-          <p className="text-xs font-medium text-slate-500">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-rh-strong/60 p-4 backdrop-blur-xs">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface shadow-2xl">
+        <div className="border-b border-rh-hover px-6 py-4">
+          <h2 className="text-lg font-bold text-primary">Rejeter ce certificat</h2>
+          <p className="text-xs font-medium text-rh-muted">
             {certificate.title} · {certificate.level}
           </p>
         </div>
@@ -53,12 +53,12 @@ function RejectionModal({ certificate, onConfirm, onCancel, submitting }) {
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-y-auto p-6">
           <div className="flex flex-col gap-4">
             <div>
-              <p className="mb-2 text-sm font-semibold text-slate-900">Motif du rejet (un seul)</p>
+              <p className="mb-2 text-sm font-semibold text-rh-strong">Motif du rejet (un seul)</p>
               <div className="flex flex-col gap-1.5 text-sm">
                 {MOTIFS_REJET.map((motif) => (
                   <label
                     key={motif}
-                    className="flex cursor-pointer items-start gap-3 rounded p-1.5 transition-colors hover:bg-slate-50"
+                    className="flex cursor-pointer items-start gap-3 rounded p-1.5 transition-colors hover:bg-rh-canvas"
                   >
                     <input
                       type="radio"
@@ -69,16 +69,16 @@ function RejectionModal({ certificate, onConfirm, onCancel, submitting }) {
                         setReason(e.target.value)
                         setError(null)
                       }}
-                      className="mt-0.5 size-4 text-[#1E1E82] focus:ring-0"
+                      className="mt-0.5 size-4 text-primary focus:ring-0"
                     />
-                    <span className="text-slate-800">{motif}</span>
+                    <span className="text-rh-strong">{motif}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label htmlFor="reject-comment" className="mb-1 block text-sm font-semibold text-slate-900">
+              <label htmlFor="reject-comment" className="mb-1 block text-sm font-semibold text-rh-strong">
                 Commentaire pour l’employé (facultatif, obligatoire si « Autre »)
               </label>
               <textarea
@@ -90,36 +90,36 @@ function RejectionModal({ certificate, onConfirm, onCancel, submitting }) {
                   setError(null)
                 }}
                 placeholder="Explication claire et bienveillante pour aider l'employé…"
-                className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-800 focus:border-[#1E1E82] focus:ring-1 focus:ring-[#1E1E82] focus:outline-none"
+                className="w-full rounded-lg border border-border-input p-2.5 text-sm text-rh-strong focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
               />
             </div>
 
             {error && <Alert>{error}</Alert>}
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <span className="block text-xs font-semibold text-slate-600 uppercase">
+            <div className="rounded-lg border border-rh-line bg-rh-canvas p-3">
+              <span className="block text-xs font-semibold text-rh-text uppercase">
                 Aperçu de la notification
               </span>
-              <p className="mt-1 text-xs text-slate-700">
+              <p className="mt-1 text-xs text-rh-text">
                 Votre certificat « {certificate.title} » n'a pas pu être validé ({reason.toLowerCase()}).{' '}
                 {comment ? comment : 'Merci de vérifier votre document et de le soumettre à nouveau.'}
               </p>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+          <div className="mt-6 flex items-center justify-end gap-3 border-t border-rh-hover pt-4">
             <button
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              className="min-h-11 rounded-lg px-4 font-semibold text-slate-600 transition-colors hover:text-slate-900"
+              className="min-h-11 rounded-lg px-4 font-semibold text-rh-text transition-colors hover:text-rh-strong"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-amber-700 px-5 font-semibold text-white shadow-sm transition-colors hover:bg-amber-800 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-status-progress-text px-5 font-semibold text-white shadow-card transition-colors hover:bg-status-progress-text disabled:opacity-60"
             >
               {submitting ? 'Enregistrement…' : 'Confirmer le rejet'}
             </button>
@@ -216,7 +216,7 @@ export default function ReviewCertificatePage() {
   if (loading) {
     return (
       <Page account="admin" title="Examiner un certificat" backTo="/admin/validation" wide>
-        <p role="status" className="py-12 text-center text-slate-500">
+        <p role="status" className="py-12 text-center text-rh-muted">
           Chargement du dossier…
         </p>
       </Page>
@@ -236,23 +236,23 @@ export default function ReviewCertificatePage() {
   const isImage = files?.[0]?.content_type?.startsWith('image/')
 
   return (
-    <Page account="admin" title="Examiner un certificat" backTo="/admin/validation" wide>
+    <Page account="admin" wide>
       <div className="flex flex-col gap-6 pb-24">
         {/* Fil d'Ariane & En-tête */}
         <div className="flex flex-col gap-2">
-          <nav aria-label="Fil d'Ariane" className="text-xs text-slate-500">
-            <Link to="/admin/validation" className="hover:text-slate-800">
+          <nav aria-label="Fil d'Ariane" className="text-xs text-rh-muted">
+            <Link to="/admin/validation" className="hover:text-rh-strong">
               File de validation
             </Link>{' '}
-            › <span className="font-semibold text-slate-800">{employee.name}</span>
+            › <span className="font-semibold text-rh-strong">{employee.name}</span>
           </nav>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-            <h1 className="text-2xl font-bold text-[#1E1E82]">{certificate.title}</h1>
+            <h1 className="text-2xl font-bold text-primary">{certificate.title}</h1>
             <div className="flex items-center gap-3 text-xs">
-              <span className="font-medium text-slate-600">
+              <span className="font-medium text-rh-text">
                 Déposé il y a {business_days} j ouvrable{business_days > 1 ? 's' : ''}
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-semibold text-blue-700">
+              <span className="inline-flex items-center gap-1 rounded-full border border-info-border bg-info-bg px-2.5 py-1 font-semibold text-info-text">
                 <span className="material-symbols-outlined text-[14px]">person</span>
                 En cours — {certificate.assigned_to || 'Non assigné'}
               </span>
@@ -266,32 +266,32 @@ export default function ReviewCertificatePage() {
         {/* CONTENU PRINCIPAL EN 2 COLONNES (Maquette A04) */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* COLONNE GAUCHE (7/12) : APERÇU DU DOCUMENT */}
-          <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:col-span-7">
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-700">
+          <div className="flex flex-col overflow-hidden rounded-lg border border-rh-line bg-surface shadow-card lg:col-span-7">
+            <div className="flex items-center justify-between border-b border-rh-line bg-rh-canvas px-4 py-2.5 text-xs text-rh-text">
               <span className="font-semibold">{files?.[0]?.original_name || 'Document'}</span>
               <a
                 href={fileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 font-semibold text-[#1E1E82] hover:underline"
+                className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
               >
                 <span className="material-symbols-outlined text-[16px]">open_in_new</span>
                 Plein écran
               </a>
             </div>
 
-            <div className="flex min-h-[560px] flex-1 items-center justify-center bg-slate-100 p-4">
+            <div className="flex min-h-[560px] flex-1 items-center justify-center bg-rh-hover p-4">
               {isImage ? (
                 <img
                   src={fileUrl}
                   alt={`Certificat de ${employee.name}`}
-                  className="max-h-[600px] w-auto max-w-full rounded border border-slate-300 bg-white object-contain shadow-md"
+                  className="max-h-[600px] w-auto max-w-full rounded border border-border-input bg-surface object-contain shadow-md"
                 />
               ) : (
                 <iframe
                   src={fileUrl}
                   title={`Certificat de ${employee.name}`}
-                  className="h-[600px] w-full rounded border border-slate-300 bg-white shadow-sm"
+                  className="h-[600px] w-full rounded border border-border-input bg-surface shadow-card"
                 />
               )}
             </div>
@@ -300,40 +300,40 @@ export default function ReviewCertificatePage() {
           {/* COLONNE DROITE (5/12) : 3 BLOCS */}
           <div className="flex flex-col gap-5 lg:col-span-5">
             {/* 1. BLOC L'EMPLOYÉ */}
-            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-xs font-bold tracking-wider text-slate-400 uppercase">
+            <section className="rounded-lg border border-rh-line bg-surface p-5 shadow-card">
+              <h2 className="mb-3 text-xs font-bold tracking-wider text-rh-muted uppercase">
                 L'employé
               </h2>
-              <dl className="flex flex-col divide-y divide-slate-100 text-xs">
+              <dl className="flex flex-col divide-y divide-rh-hover text-xs">
                 <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-slate-500">Identité</dt>
-                  <dd className="font-semibold text-slate-900">
+                  <dt className="text-rh-muted">Identité</dt>
+                  <dd className="font-semibold text-rh-strong">
                     {employee.name} · {employee.employee_code}
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-slate-500">Poste &amp; Agence</dt>
-                  <dd className="font-medium text-slate-800">
+                  <dt className="text-rh-muted">Poste &amp; Agence</dt>
+                  <dd className="font-medium text-rh-strong">
                     {employee.position} · {employee.agency_name}
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-slate-500">Embauche</dt>
-                  <dd className="font-medium text-slate-800">
+                  <dt className="text-rh-muted">Embauche</dt>
+                  <dd className="font-medium text-rh-strong">
                     {employee.hire_date ? `Embauché le ${formatLocalDate(employee.hire_date)}` : '—'}
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-slate-500">État du profil</dt>
-                  <dd className="font-semibold text-emerald-700">Profil complet</dd>
+                  <dt className="text-rh-muted">État du profil</dt>
+                  <dd className="font-semibold text-status-done-text">Profil complet</dd>
                 </div>
                 <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-slate-500">Niveau déclaré</dt>
-                  <dd className="font-medium text-slate-800">{employee.declared_level_label}</dd>
+                  <dt className="text-rh-muted">Niveau déclaré</dt>
+                  <dd className="font-medium text-rh-strong">{employee.declared_level_label}</dd>
                 </div>
                 <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-slate-500">Certificats déjà validés</dt>
-                  <dd className="font-medium text-slate-800">
+                  <dt className="text-rh-muted">Certificats déjà validés</dt>
+                  <dd className="font-medium text-rh-strong">
                     {employee.already_validated_certificates.length > 0
                       ? employee.already_validated_certificates.join(', ')
                       : 'Aucun pour le moment'}
@@ -343,9 +343,9 @@ export default function ReviewCertificatePage() {
             </section>
 
             {/* 2. BLOC INFORMATIONS DU CERTIFICAT AVEC CORRECTION */}
-            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-lg border border-rh-line bg-surface p-5 shadow-card">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                <h2 className="text-xs font-bold tracking-wider text-rh-muted uppercase">
                   Informations du certificat
                 </h2>
                 {dirty && (
@@ -353,7 +353,7 @@ export default function ReviewCertificatePage() {
                     type="button"
                     onClick={handleSaveCorrections}
                     disabled={savingFields}
-                    className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-[#1E1E82] hover:bg-slate-200 disabled:opacity-60"
+                    className="rounded bg-rh-hover px-2 py-0.5 text-xs font-semibold text-primary hover:bg-rh-line disabled:opacity-60"
                   >
                     {savingFields ? 'Enregistrement…' : 'Enregistrer la correction'}
                   </button>
@@ -363,7 +363,7 @@ export default function ReviewCertificatePage() {
               <div className="flex flex-col gap-3 text-xs">
                 {/* Type */}
                 <div>
-                  <label htmlFor="field-type" className="mb-1 block font-medium text-slate-700">
+                  <label htmlFor="field-type" className="mb-1 block font-medium text-rh-text">
                     Type
                   </label>
                   <select
@@ -373,7 +373,7 @@ export default function ReviewCertificatePage() {
                       setFormFields({ ...formFields, certificate_type: e.target.value })
                       setDirty(true)
                     }}
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-slate-800 focus:border-[#1E1E82] focus:outline-none"
+                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
                   >
                     <option value="DIPLOME">Diplôme</option>
                     <option value="CERTIFICAT">Certificat</option>
@@ -384,7 +384,7 @@ export default function ReviewCertificatePage() {
 
                 {/* Niveau */}
                 <div>
-                  <label htmlFor="field-level" className="mb-1 block font-medium text-slate-700">
+                  <label htmlFor="field-level" className="mb-1 block font-medium text-rh-text">
                     Niveau
                   </label>
                   <select
@@ -394,7 +394,7 @@ export default function ReviewCertificatePage() {
                       setFormFields({ ...formFields, level: e.target.value })
                       setDirty(true)
                     }}
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-slate-800 focus:border-[#1E1E82] focus:outline-none"
+                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
                   >
                     <option value="FONDAMENTAL">Primaire / Fondamental</option>
                     <option value="SECONDAIRE">Secondaire</option>
@@ -408,7 +408,7 @@ export default function ReviewCertificatePage() {
                     <option value="FORMATION_CONTINUE">Formation continue / Attestation</option>
                   </select>
                   {certificate.original_level && (
-                    <p className="mt-1 text-[11px] text-slate-500 italic">
+                    <p className="mt-1 text-[11px] text-rh-muted italic">
                       Modifié par vous — valeur d'origine : {certificate.original_level}
                     </p>
                   )}
@@ -416,7 +416,7 @@ export default function ReviewCertificatePage() {
 
                 {/* Intitulé */}
                 <div>
-                  <label htmlFor="field-title" className="mb-1 block font-medium text-slate-700">
+                  <label htmlFor="field-title" className="mb-1 block font-medium text-rh-text">
                     Intitulé
                   </label>
                   <input
@@ -427,13 +427,13 @@ export default function ReviewCertificatePage() {
                       setFormFields({ ...formFields, title: e.target.value })
                       setDirty(true)
                     }}
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-slate-800 focus:border-[#1E1E82] focus:outline-none"
+                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
                   />
                 </div>
 
                 {/* Établissement */}
                 <div>
-                  <label htmlFor="field-institution" className="mb-1 block font-medium text-slate-700">
+                  <label htmlFor="field-institution" className="mb-1 block font-medium text-rh-text">
                     Établissement
                   </label>
                   <input
@@ -444,13 +444,13 @@ export default function ReviewCertificatePage() {
                       setFormFields({ ...formFields, institution: e.target.value })
                       setDirty(true)
                     }}
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-slate-800 focus:border-[#1E1E82] focus:outline-none"
+                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
                   />
                 </div>
 
                 {/* Année */}
                 <div>
-                  <label htmlFor="field-year" className="mb-1 block font-medium text-slate-700">
+                  <label htmlFor="field-year" className="mb-1 block font-medium text-rh-text">
                     Année
                   </label>
                   <input
@@ -461,27 +461,27 @@ export default function ReviewCertificatePage() {
                       setFormFields({ ...formFields, year: Number.parseInt(e.target.value, 10) || 2020 })
                       setDirty(true)
                     }}
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-slate-800 focus:border-[#1E1E82] focus:outline-none"
+                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
             </section>
 
             {/* 3. BLOC HISTORIQUE */}
-            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-xs font-bold tracking-wider text-[#1E1E82] uppercase">
+            <section className="rounded-lg border border-rh-line bg-surface p-5 shadow-card">
+              <h2 className="mb-3 text-xs font-bold tracking-wider text-primary uppercase">
                 Historique du traitement
               </h2>
-              <ul className="flex flex-col gap-2.5 text-xs text-slate-700">
+              <ul className="flex flex-col gap-2.5 text-xs text-rh-text">
                 <li className="flex items-start gap-2">
-                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-slate-400" />
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-rh-muted" />
                   <span>
                     Déposé par l'employé — {formatDateTime(certificate.submitted_at)}
                   </span>
                 </li>
                 {history.map((h, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#1E1E82]" />
+                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
                     <span>
                       {h.details || h.action} — {formatDateTime(h.at)}
                     </span>
@@ -493,12 +493,12 @@ export default function ReviewCertificatePage() {
         </div>
 
         {/* BARRE D'ACTIONS FIXÉE EN BAS (Maquette A04) */}
-        <footer className="fixed right-0 bottom-0 left-0 z-30 flex items-center justify-end gap-4 border-t border-slate-200 bg-white/95 px-8 py-3.5 shadow-lg backdrop-blur sm:left-64">
+        <footer className="fixed right-0 bottom-0 left-0 z-30 flex items-center justify-end gap-4 border-t border-rh-line bg-surface/95 px-8 py-3.5 shadow-lg backdrop-blur sm:left-64">
           <button
             type="button"
             onClick={() => setRejectModalOpen(true)}
             disabled={deciding}
-            className="inline-flex min-h-11 items-center justify-center rounded-md border-2 border-amber-600 px-5 text-xs font-semibold tracking-wide text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border-2 border-status-progress-dot px-5 text-xs font-semibold tracking-wide text-status-progress-text transition-colors hover:bg-status-progress-bg disabled:opacity-60"
           >
             Rejeter
           </button>
@@ -506,7 +506,7 @@ export default function ReviewCertificatePage() {
             type="button"
             onClick={handleValidate}
             disabled={deciding}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#15803D] px-6 text-xs font-semibold tracking-wide text-white shadow-sm transition-colors hover:bg-[#166534] disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-status-done-text px-6 text-xs font-semibold tracking-wide text-white shadow-card transition-colors hover:bg-status-done-text disabled:opacity-60"
           >
             {deciding ? 'Validation…' : 'Valider'}
           </button>

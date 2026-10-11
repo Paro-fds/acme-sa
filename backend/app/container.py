@@ -11,7 +11,7 @@ from app.admin.application.audit_cases import RecordDossierConsultation
 from app.admin.application.employee_documents import GetEmployeeDocumentFile, ListEmployeeDocuments
 from app.admin.application.export_employees import ExportEmployeesList
 from app.admin.application.get_audit_log import GetAuditLog
-from app.admin.application.get_dashboard import GetPilotDashboard
+from app.admin.application.get_dashboard import GetMenuCounts, GetPilotDashboard
 from app.admin.application.get_employee_folder import GetEmployeeFolder
 from app.admin.application.get_engagement import GetEngagement
 from app.admin.application.get_statistics import GetStatistics
@@ -110,7 +110,7 @@ from app.document.application.use_cases import UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
 from app.document.infrastructure.remote_file_storage import S3FileStorage
 from app.document.infrastructure.sql_document_repository import SqlDocumentRepository
-from app.dossier.application.error_reports_queue import DecideErrorReport, GetErrorReportsQueue
+from app.dossier.application.error_reports_queue import DecideErrorReport, GetErrorReportsQueue, ListEmployeeReports
 from app.dossier.application.use_cases import (
     ConfirmHrInformation,
     ConfirmStillAccurate,
@@ -320,6 +320,9 @@ class Container:
     def get_pilot_dashboard(self) -> GetPilotDashboard:
         return GetPilotDashboard(self.employees, self.dossiers, self.certificates, self.referential, self.clock)
 
+    def get_menu_counts(self) -> GetMenuCounts:
+        return GetMenuCounts(self.certificates, self.dossiers, self.referential)
+
     def get_employee_folder(self) -> GetEmployeeFolder:
         return GetEmployeeFolder(self.employees, self.updates, self.accounts)
 
@@ -440,6 +443,9 @@ class Container:
 
     def get_error_reports_queue(self) -> GetErrorReportsQueue:
         return GetErrorReportsQueue(self.dossiers, self.employees, self.referential)
+
+    def list_employee_reports(self) -> ListEmployeeReports:
+        return ListEmployeeReports(self.dossiers)
 
     def decide_error_report(self) -> DecideErrorReport:
         return DecideErrorReport(self.dossiers, self.clock)

@@ -12,6 +12,7 @@ from app.auth.api.dependencies import (
     require_not_readonly,
 )
 from app.auth.domain.admin import AdminAccount
+from app.dossier.api.routes import DossierOut
 from app.dossier.application.error_reports_queue import ErrorReportItemView, ErrorReportQueueView
 
 router = APIRouter(prefix="/api/admin/reports", tags=["admin-reports"], dependencies=[Depends(current_admin)])
@@ -83,3 +84,31 @@ def decide_report(
         comment=payload.comment,
     )
     return ErrorReportItemOut(**view.__dict__)
+
+
+employee_router = APIRouter(prefix="/api/admin/employees", tags=["admin-dossier"], dependencies=[Depends(current_admin)])
+
+
+class EmployeeReportOut(BaseModel):
+    id: int | None
+    at: datetime
+    field_label: str
+    status: str
+    status_label: str
+    note: str | None
+
+
+class EmployeeDossierOut(BaseModel):
+    dossier: DossierOut
+    reports: list[EmployeeReportOut]
+
+
+@employee_router.get("/{employee_id}/dossier", response_model=EmployeeDossierOut)
+def employee_dossier(employee_id: str, request: Request) -> EmployeeDossierOut:
+    """US-108 (écran A07) : dossier V2 d'un employé en lecture seule, avec la date de chaque confirmation,
+    et ses signalements. La consultation est tracée par `GET /api/admin/employees/{id}`, chargé avec lui."""
+    c = container(request)
+    return EmployeeDossierOut(
+        dossier=DossierOut.of(c.get_my_dossier().execute(employee_id)),
+        reports=[EmployeeReportOut(**view.__dict__) for view in c.list_employee_reports().execute(employee_id)],
+    )

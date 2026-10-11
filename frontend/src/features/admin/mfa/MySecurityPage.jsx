@@ -66,7 +66,11 @@ export default function MySecurityPage() {
   const [notice, setNotice] = useState(null)
 
   const page = (children) => (
-    <Page account="admin" title="Ma double authentification" backTo="/admin">
+    <Page
+      account="admin"
+      title="Ma double authentification"
+      subtitle="Le code demandé à chaque connexion, en plus de votre mot de passe."
+    >
       {children}
     </Page>
   )
@@ -77,10 +81,6 @@ export default function MySecurityPage() {
   const current = METHODS[status.method]
   return page(
     <>
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[26px] leading-8 font-bold">Ma double authentification</h2>
-        <p>Le code demandé à chaque connexion, en plus de votre mot de passe.</p>
-      </div>
       {notice && <Alert tone="success">{notice}</Alert>}
 
       <Block icon="verified_user" title="Méthode actuelle">

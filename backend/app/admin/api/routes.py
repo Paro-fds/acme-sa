@@ -139,6 +139,18 @@ def pilot_dashboard(request: Request) -> DashboardOut:
     )
 
 
+class MenuCountsOut(BaseModel):
+    validation: int
+    reports: int
+    to_attach: int
+
+
+@router.get("/menu-counts", response_model=MenuCountsOut)
+def menu_counts(request: Request) -> MenuCountsOut:
+    """US-108 CA-02 : compteurs réels du menu de l'espace RH."""
+    return MenuCountsOut(**container(request).get_menu_counts().execute().__dict__)
+
+
 @router.get("/employees", response_model=EmployeePageOut)
 def list_employees(
     request: Request,
@@ -186,6 +198,9 @@ class QualifiedEmployeeItemOut(BaseModel):
 class QualifiedEmployeesSearchResultOut(BaseModel):
     items: list[QualifiedEmployeeItemOut]
     total: int
+    page: int
+    page_size: int
+    page_count: int
 
 
 @router.get("/employees/search", response_model=QualifiedEmployeesSearchResultOut)
@@ -198,8 +213,10 @@ def search_qualified_employees(
     folder_status: str = Query("", max_length=100),
     min_level: str = Query("", max_length=100),
     domain: str = Query("", max_length=100),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
 ) -> QualifiedEmployeesSearchResultOut:
-    """US-602 : Recherche multi-critères d'employés qualifiés (Écran A06)."""
+    """US-602 : Recherche multi-critères d'employés qualifiés (Écran A06) ; US-108 : liste paginée comme A06."""
     result = container(request).search_qualified_employees().execute(
         search=search or None,
         agency=agency or None,
@@ -209,9 +226,14 @@ def search_qualified_employees(
         min_level=min_level or None,
         domain=domain or None,
     )
+    page_count = max(1, -(-result.total // page_size))
+    start = (min(page, page_count) - 1) * page_size
     return QualifiedEmployeesSearchResultOut(
-        items=[QualifiedEmployeeItemOut(**item.__dict__) for item in result.items],
+        items=[QualifiedEmployeeItemOut(**item.__dict__) for item in result.items[start : start + page_size]],
         total=result.total,
+        page=min(page, page_count),
+        page_size=page_size,
+        page_count=page_count,
     )
 
 

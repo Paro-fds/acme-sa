@@ -46,6 +46,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(certificate_routes.router)
     app.include_router(admin_certificate_routes.router)
     app.include_router(admin_report_routes.router)
+    app.include_router(admin_report_routes.employee_router)
     app.include_router(job_routes.router)
     app.include_router(job_routes.me_router)
     app.include_router(job_routes.my_applications_router)

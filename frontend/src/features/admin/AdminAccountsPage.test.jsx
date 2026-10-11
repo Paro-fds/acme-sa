@@ -67,7 +67,8 @@ describe('AdminAccountsPage (US-23)', () => {
     expect(within(me).getByText('admin')).toBeInTheDocument()
     expect(within(me).getByText('Vous')).toBeInTheDocument()
     expect(within(me).getByText('Ajouté le 01/10/2026')).toBeInTheDocument()
-    expect(within(me).getByText(/^Dernière connexion le 05\/10\/2026 à \d\d:\d\d$/)).toBeInTheDocument()
+    // US-108 (A10) : colonne « Dernière connexion »
+    expect(within(me).getByText(/^05\/10\/2026 à \d\d:\d\d$/)).toBeInTheDocument()
     expect(within(marie).getByText('Ajouté le 05/10/2026 par admin')).toBeInTheDocument()
     expect(within(marie).getByText('Jamais connecté')).toBeInTheDocument()
     expect(within(marie).getByText('Mot de passe provisoire')).toBeInTheDocument()
@@ -95,7 +96,7 @@ describe('AdminAccountsPage (US-23)', () => {
     const user = userEvent.setup()
     renderPage()
     await items()
-    const submit = screen.getByRole('button', { name: "Ajouter l'administrateur" })
+    const submit = screen.getByRole('button', { name: 'Créer le compte' })
     expect(submit).toBeDisabled()
 
     await user.type(screen.getByLabelText('Identifiant'), ' marie.pierre ')
@@ -117,7 +118,7 @@ describe('AdminAccountsPage (US-23)', () => {
 
     await user.type(screen.getByLabelText('Identifiant'), 'Admin')
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
-    await user.click(screen.getByRole('button', { name: "Ajouter l'administrateur" }))
+    await user.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     const field = screen.getByLabelText('Identifiant')
     expect(await screen.findByText('Cet identifiant est déjà utilisé.')).toBeInTheDocument()
@@ -134,7 +135,7 @@ describe('AdminAccountsPage (US-23)', () => {
 
     await user.type(screen.getByLabelText('Identifiant'), 'marie.pierre')
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'court')
-    await user.click(screen.getByRole('button', { name: "Ajouter l'administrateur" }))
+    await user.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     expect(await screen.findByText('Le mot de passe doit contenir au moins 12 caractères.')).toBeInTheDocument()
     expect(screen.getByLabelText('Mot de passe provisoire')).toHaveAttribute('aria-invalid', 'true')
@@ -163,7 +164,7 @@ describe('AdminAccountsPage (US-23)', () => {
     const [, marie] = await items()
 
     await user.click(within(marie).getByRole('button', { name: 'Supprimer marie.pierre' }))
-    await user.click(screen.getByRole('button', { name: 'Annuler' }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Annuler' }))
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(deleteAdmin).not.toHaveBeenCalled()
@@ -198,7 +199,7 @@ describe('AdminAccountsPage — double authentification (US-102 CA-05)', () => {
 
     const [me, marie, paul] = await items()
     expect(within(me).getByText(/Application d'authentification/)).toBeInTheDocument()
-    expect(within(marie).getByText(/à choisir à la prochaine connexion/)).toBeInTheDocument()
+    expect(within(marie).getByText(/à choisir à la prochaine connexion/i)).toBeInTheDocument()
     expect(within(paul).getByText(/WhatsApp/)).toBeInTheDocument()
     expect(within(me).queryByRole('button', { name: /Réinitialiser/ })).not.toBeInTheDocument()
     expect(within(marie).queryByRole('button', { name: /Réinitialiser/ })).not.toBeInTheDocument()
@@ -229,8 +230,8 @@ describe('AdminAccountsPage — rôles des comptes RH (US-103)', () => {
     renderPage()
 
     const [me, marie] = await items()
-    expect(within(me).getByText('Administrateur', { selector: 'span' })).toBeInTheDocument()
-    expect(within(marie).getByText('Agent RH', { selector: 'span' })).toBeInTheDocument()
+    expect(within(me).getByText('Administrateur', { selector: 'dd' })).toBeInTheDocument()
+    expect(within(marie).getByText('Agent RH', { selector: 'dd' })).toBeInTheDocument()
   })
 
   it('un administrateur peut modifier le rôle d’un compte', async () => {
@@ -267,7 +268,7 @@ describe('AdminAccountsPage — rôles des comptes RH (US-103)', () => {
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
     await user.selectOptions(screen.getByLabelText('Rôle initial'), 'READONLY')
 
-    await user.click(screen.getByRole('button', { name: "Ajouter l'administrateur" }))
+    await user.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     expect(addAdmin).toHaveBeenCalledWith('lucie.audit', 'Provisoire-2026!', 'READONLY')
   })
@@ -279,8 +280,8 @@ describe('AdminAccountsPage — rôles des comptes RH (US-103)', () => {
     renderPage()
 
     expect(await screen.findByText('2 comptes')).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Ajouter un compte RH' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: "Ajouter l'administrateur" })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Créer un compte' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Créer le compte' })).not.toBeInTheDocument()
   })
 })
 

@@ -53,6 +53,16 @@
   --color-error-text: #763300; /* on-tertiary-fixed-variant */
   --color-error-dot: #e67932; /* on-tertiary-container */
 
+  /* Espace RH (écrans A02 → A11, US-108) : neutres ardoise des maquettes */
+  --color-rh-canvas: #f8fafc; /* fond de page (slate-50) */
+  --color-rh-line: #e2e8f0; /* bordures et séparateurs (slate-200) */
+  --color-rh-hover: #f1f5f9; /* survol d'une ligne ou d'un lien du menu (slate-100) */
+  --color-rh-strong: #0f172a; /* chiffres et textes forts (slate-900) */
+  --color-rh-text: #334155; /* texte courant et menu (slate-700) */
+  --color-rh-muted: #64748b; /* légendes et en-têtes de tableau (slate-500) */
+  --color-rh-chart-incomplete: #fbbf24; /* « Profil incomplet » de la répartition (A02) */
+  --color-rh-chart-profile: #3b82f6; /* « Profil complet » de la répartition (A02) */
+
   /* Ombres */
   --shadow-card: 0 1px 3px 0 rgb(17 28 45 / 0.08), 0 1px 2px -1px rgb(17 28 45 / 0.06); /* shadow-sm des écrans */
   --shadow-sticky: 0 -4px 12px 0 rgb(15 23 42 / 0.08);

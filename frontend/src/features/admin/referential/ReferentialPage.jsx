@@ -88,18 +88,22 @@ function ImportForm({ onImported }) {
   }
 
   return (
-    <Block icon="upload_file" title="Importer le fichier du référentiel">
-      <p>Le fichier décrit le référentiel complet. S'il contient une erreur, rien n'est importé et chaque problème est indiqué avec sa ligne.</p>
-      <ul className="flex flex-col gap-2 text-sm text-help">
+    <Block icon="upload_file" title="Rattacher par le fichier du référentiel">
+      <p>
+        Ajoutez la correspondance dans l'onglet « Correspondances » du fichier, puis importez-le : la valeur disparaît de la
+        liste. Le fichier décrit le référentiel complet ; s'il contient une erreur, rien n'est importé et chaque problème est
+        indiqué avec sa ligne.
+      </p>
+      <ul className="flex flex-col gap-2 text-sm text-rh-muted">
         {SHEETS.map((sheet) => (
           <li key={sheet.name}>
-            <span className="font-semibold text-heading">Onglet « {sheet.name} »</span> : {sheet.columns}
+            <span className="font-semibold text-rh-strong">Onglet « {sheet.name} »</span> : {sheet.columns}
           </li>
         ))}
       </ul>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={inputId} className="font-semibold text-heading">
+          <label htmlFor={inputId} className="font-semibold text-rh-strong">
             Classeur Excel (.xlsx)
           </label>
           <input
@@ -124,13 +128,13 @@ function ImportForm({ onImported }) {
 
 function UnitLine({ unit }) {
   return (
-    <li className="flex flex-col gap-0.5 border-t border-border py-2 first:border-t-0">
+    <li className="flex flex-col gap-0.5 border-t border-rh-line py-2 first:border-t-0">
       <p className="flex flex-wrap items-baseline gap-x-2">
-        <span className="font-semibold text-heading">{unit.label}</span>
-        <span className="font-mono text-sm text-help">{unit.code}</span>
+        <span className="font-semibold text-rh-strong">{unit.label}</span>
+        <span className="font-mono text-sm text-rh-muted">{unit.code}</span>
       </p>
       {unit.since && (
-        <p className="text-sm text-help">
+        <p className="text-sm text-rh-muted">
           Rattachée depuis le {formatDate(unit.since)}
           {unit.history.length > 1 &&
             ` ; avant : ${unit.history
@@ -140,7 +144,7 @@ function UnitLine({ unit }) {
         </p>
       )}
       {unit.former_labels.length > 0 && (
-        <p className="text-sm text-help">Ancien libellé : {unit.former_labels.join(', ')}</p>
+        <p className="text-sm text-rh-muted">Ancien libellé : {unit.former_labels.join(', ')}</p>
       )}
     </li>
   )
@@ -148,37 +152,40 @@ function UnitLine({ unit }) {
 
 const COLUMN_LABELS = { agency_code: 'Agence', department: 'Direction ou service' }
 
-/** US-502 : les valeurs de l'export sans unité officielle, avec le nombre d'employés concernés (RG-17). */
+/** US-502 ; US-108 (écran A09) : les valeurs de l'export sans unité officielle, avec le nombre d'employés concernés (RG-17). */
 function ToAttach({ items }) {
   return (
-    <Block icon="link_off" title="À rattacher">
+    <section aria-label="Valeurs à rattacher" className="overflow-hidden rounded-xl border border-rh-line bg-surface shadow-card">
       {items.length === 0 ? (
-        <p>Toutes les valeurs de l'export sont rattachées à une unité officielle.</p>
+        <p className="p-4 text-rh-text sm:p-6">Toutes les valeurs de l'export sont rattachées à une unité officielle.</p>
       ) : (
         <>
-          <p>
-            Ces employés voient « Unité à confirmer », sans être bloqués. Ajoutez la correspondance dans le fichier du
-            référentiel puis importez-le : la valeur disparaît de la liste.
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-rh-line bg-rh-canvas text-xs font-semibold text-rh-muted">
+                  <th scope="col" className="px-4 py-3">Valeur trouvée</th>
+                  <th scope="col" className="px-4 py-3">Colonne de l'export</th>
+                  <th scope="col" className="px-4 py-3 text-right">Employés concernés</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-rh-line text-rh-text">
+                {items.map((item) => (
+                  <tr key={`${item.column}-${item.value}`}>
+                    <td className="px-4 py-3.5 font-semibold text-rh-strong">{item.value}</td>
+                    <td className="px-4 py-3.5">{COLUMN_LABELS[item.column] ?? item.column}</td>
+                    <td className="px-4 py-3.5 text-right tabular-nums">{item.employees}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="border-t border-rh-line px-4 py-3 text-xs text-rh-muted tabular-nums">
+            1 à {items.length} sur {items.length}
           </p>
-          <ul className="flex flex-col">
-            {items.map((item) => (
-              <li
-                key={`${item.column}-${item.value}`}
-                className="flex flex-wrap items-baseline justify-between gap-x-3 border-t border-border py-2 first:border-t-0"
-              >
-                <span>
-                  <span className="font-semibold text-heading">{item.value}</span>{' '}
-                  <span className="text-sm text-help">· {COLUMN_LABELS[item.column] ?? item.column}</span>
-                </span>
-                <span className="text-sm text-help tabular-nums">
-                  {item.employees} employé{item.employees > 1 ? 's' : ''}
-                </span>
-              </li>
-            ))}
-          </ul>
         </>
       )}
-    </Block>
+    </section>
   )
 }
 
@@ -190,11 +197,11 @@ function UnitTree({ units }) {
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {parents.map((parent) => (
-        <section key={parent.code} aria-label={parent.label} className="rounded-xl border border-border bg-surface p-4 shadow-card">
+        <section key={parent.code} aria-label={parent.label} className="rounded-xl border border-rh-line bg-surface p-4 shadow-card">
           <h4 className="flex flex-wrap items-baseline gap-x-2 text-lg font-semibold">
-            {parent.label} <span className="font-mono text-sm font-normal text-help">{parent.code}</span>
+            {parent.label} <span className="font-mono text-sm font-normal text-rh-muted">{parent.code}</span>
           </h4>
-          <p className="text-sm text-help">{parent.type_label}</p>
+          <p className="text-sm text-rh-muted">{parent.type_label}</p>
           <ul className="mt-2">
             {children(parent.code).map((unit) => (
               <UnitLine key={unit.code} unit={unit} />
@@ -203,7 +210,7 @@ function UnitTree({ units }) {
         </section>
       ))}
       {others.length > 0 && (
-        <section aria-label="Autres unités" className="rounded-xl border border-border bg-surface p-4 shadow-card">
+        <section aria-label="Autres unités" className="rounded-xl border border-rh-line bg-surface p-4 shadow-card">
           <h4 className="text-lg font-semibold">Autres unités</h4>
           <ul className="mt-2">
             {others.map((unit) => (
@@ -216,13 +223,21 @@ function UnitTree({ units }) {
   )
 }
 
-/** US-501 : référentiel officiel des unités (lot 1 : import d'un fichier Excel, D-27 ; interface au lot 4). */
+/**
+ * US-501, US-502 ; US-108 : écran A09 « Valeurs à rattacher », puis le référentiel officiel des unités.
+ * Le rattachement se fait par l'import du fichier (D-27) ; l'écran de saisie de A09 viendra avec US-503 (lot 4).
+ */
 export default function ReferentialPage() {
   const { data, error, loading, reload } = useLoader(getReferential, { loginPath: LOGIN_PATH })
   const unitsId = useId()
 
   const page = (children) => (
-    <Page account="admin" title="Référentiel" backTo="/admin" wide>
+    <Page
+      account="admin"
+      wide
+      title="Valeurs à rattacher"
+      subtitle="Valeurs de l'export RH qui ne correspondent à aucune unité du référentiel."
+    >
       {children}
     </Page>
   )
@@ -233,20 +248,29 @@ export default function ReferentialPage() {
   const unmapped = data.mappings.filter((mapping) => !mapping.unit_code)
   return page(
     <>
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[26px] leading-8 font-bold">Référentiel des unités</h2>
-        <p>
-          Agences, régions, directions et services officiels. Chaque unité garde son code, même si elle change de nom ;
-          une agence a une seule région à la fois.
+      {(data.to_attach ?? []).length > 0 && (
+        <p className="flex items-center gap-2 rounded-lg border border-status-progress-border bg-status-progress-bg px-4 py-3 text-sm text-status-progress-text">
+          <span className="material-symbols-outlined shrink-0" aria-hidden="true">info</span>
+          Les employés concernés voient « Unité à confirmer » sur leur dossier jusqu'au rattachement, sans être bloqués.
         </p>
+      )}
+
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
+        <div className="xl:col-span-7">
+          <ToAttach items={data.to_attach ?? []} />
+        </div>
+        <div className="xl:col-span-5">
+          <ImportForm onImported={reload} />
+        </div>
       </div>
 
-      <ImportForm onImported={reload} />
-
-      <ToAttach items={data.to_attach ?? []} />
-
       <section aria-labelledby={unitsId} className="flex flex-col gap-3">
-        <h3 id={unitsId} className="px-1 text-lg font-semibold">
+        <h2 className="text-xl font-bold text-primary">Référentiel des unités</h2>
+        <p className="text-sm text-rh-muted">
+          Agences, régions, directions et services officiels. Chaque unité garde son code, même si elle change de nom ; une
+          agence a une seule région à la fois.
+        </p>
+        <h3 id={unitsId} className="text-lg font-semibold">
           {data.units.length === 0
             ? 'Aucune unité : importez le fichier du référentiel.'
             : `${data.units.length} unité${data.units.length > 1 ? 's' : ''}`}
