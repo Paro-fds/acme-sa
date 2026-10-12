@@ -5,7 +5,7 @@ import { acceptConsent, createPassword, EMP_H1 } from './auth.js'
 test('première connexion : création du mot de passe puis accès au profil', async ({ page }) => {
   // Depuis l'écran de connexion, le lien mène à la création du mot de passe
   await page.goto('/connexion')
-  await page.getByRole('link', { name: 'Première connexion ? Créer mon mot de passe' }).click()
+  await page.getByRole('link', { name: 'Créer mon mot de passe' }).click()
   await expect(page.getByRole('heading', { name: 'Première connexion' })).toBeVisible()
 
   // Erreur de confirmation, corrigée ensuite

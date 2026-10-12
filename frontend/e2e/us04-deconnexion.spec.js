@@ -24,6 +24,6 @@ test('déconnexion : message, retour arrière sans données', async ({ page }) =
 
   // CA-02 : l'accès direct au profil renvoie aussi à l'identification
   await page.goto('/profil')
-  await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Connexion' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Avant de commencer' })).toHaveCount(0)
 })

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -29,7 +29,9 @@ function renderPage(state) {
 async function fill(user, password = 'Bonjour-2026') {
   await user.type(screen.getByLabelText('Nom de famille'), 'JOSEPH')
   await user.type(screen.getByLabelText('Prénom'), 'Jean')
-  await user.type(screen.getByLabelText('Date de naissance'), '1996-03-15')
+  await user.type(screen.getByLabelText('Jour'), '15')
+  await user.type(screen.getByLabelText('Mois'), '03')
+  await user.type(screen.getByLabelText('Année'), '1996')
   await user.type(screen.getByLabelText('Mot de passe'), password)
 }
 
@@ -43,12 +45,23 @@ describe('LoginPage (US-101)', () => {
   it('CA-05 : nom, prénom, date de naissance et mot de passe sur un seul écran', () => {
     renderPage()
 
-    expect(screen.getByRole('heading', { name: 'Bienvenue' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
     expect(screen.getByLabelText('Nom de famille')).toBeInTheDocument()
     expect(screen.getByLabelText('Prénom')).toBeInTheDocument()
-    expect(screen.getByLabelText('Date de naissance')).toHaveAttribute('type', 'date')
+    // US-110 CA-04 : la date en trois cases Jour / Mois / Année
+    const date = screen.getByRole('group', { name: 'Date de naissance' })
+    expect(within(date).getAllByRole('textbox')).toHaveLength(3)
     expect(screen.getByLabelText('Mot de passe')).toHaveAttribute('type', 'password')
-    expect(screen.getByRole('figure', { name: 'La Penseuse' })).toBeInTheDocument()
+  })
+
+  it('US-110 CA-03 : « C’est votre première fois ? » passe avant le formulaire ; ni mascotte, la photo de l’équipe', () => {
+    renderPage()
+
+    const firstTime = screen.getByRole('region', { name: 'C’est votre première fois ?' })
+    const form = screen.getByRole('form', { name: 'Vous avez déjà un mot de passe' })
+    expect(firstTime.compareDocumentPosition(form) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.queryByText(/Penseuse/)).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /équipe d.ACME SA/ })).toBeInTheDocument()
   })
 
   it('le bouton reste inactif tant que le formulaire est incomplet', async () => {
@@ -123,7 +136,7 @@ describe('LoginPage (US-101)', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('link', { name: 'Première connexion ? Créer mon mot de passe' }))
+    await user.click(screen.getByRole('link', { name: 'Créer mon mot de passe' }))
 
     expect(screen.getByText('Écran création du mot de passe')).toBeInTheDocument()
   })
@@ -145,20 +158,18 @@ describe('LoginPage (US-101)', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Vous êtes déconnecté.')
   })
 
-  it('« Mot de passe oublié ? » explique comment retrouver l’accès', async () => {
-    const user = userEvent.setup()
+  it('US-110 CA-03 : « Mot de passe oublié ? » donne sa réponse sans clic', () => {
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: 'Mot de passe oublié ?' }))
-
-    expect(screen.getByRole('status')).toHaveTextContent("Contactez l'administration")
+    expect(screen.getByText('Mot de passe oublié ?')).toBeInTheDocument()
+    expect(screen.getByText(/Demandez au service RH de réinitialiser votre accès/)).toBeInTheDocument()
   })
 
   it('le retour mène à la page d’accueil', async () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: 'Retour' }))
+    await user.click(screen.getByRole('link', { name: "Retour à l'accueil" }))
 
     expect(screen.getByText('Écran accueil')).toBeInTheDocument()
   })

@@ -7,7 +7,11 @@ export const PASSWORD = 'Bonjour-2026'
 async function fillIdentity(page, person) {
   await page.getByLabel('Nom de famille').fill(person.lastName)
   await page.getByLabel('Prénom').fill(person.firstName)
-  await page.getByLabel('Date de naissance').fill(person.birthDate)
+  // US-110 : la date en trois cases Jour / Mois / Année (person.birthDate : AAAA-MM-JJ)
+  const [year, month, day] = person.birthDate.split('-')
+  await page.getByLabel('Jour').fill(day)
+  await page.getByLabel('Mois').fill(month)
+  await page.getByLabel('Année').fill(year)
 }
 
 /** Première connexion : crée le mot de passe et ouvre le profil. */

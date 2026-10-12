@@ -25,7 +25,7 @@ test('icônes : case vide tant que la police manque, puis dessinées par la peti
   })
 
   await page.goto('/')
-  await expect(page.getByRole('link', { name: /Se connecter/ })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   // CA-01 : police arrivée → icônes visibles, dessinées par la police du portail, chacune dans sa case de 1em.
   await expect.poll(async () => (await iconStates(page)).every((icon) => !icon.hidden && icon.fitsItsBox)).toBe(true)

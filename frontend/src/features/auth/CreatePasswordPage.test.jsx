@@ -28,7 +28,9 @@ function renderPage() {
 async function fill(user, password = 'Bonjour-2026', confirmation = password) {
   await user.type(screen.getByLabelText('Nom de famille'), 'JOSEPH')
   await user.type(screen.getByLabelText('Prénom'), 'Jean')
-  await user.type(screen.getByLabelText('Date de naissance'), '1996-03-15')
+  await user.type(screen.getByLabelText('Jour'), '15')
+  await user.type(screen.getByLabelText('Mois'), '03')
+  await user.type(screen.getByLabelText('Année'), '1996')
   await user.type(screen.getByLabelText('Mot de passe'), password)
   await user.type(screen.getByLabelText('Confirmer le mot de passe'), confirmation)
 }
