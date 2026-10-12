@@ -208,7 +208,7 @@ export default function ValidationQueuePage() {
                       to={`/admin/validation/${item.certificate_id}`}
                       className="inline-flex min-h-11 items-center justify-center rounded bg-primary px-4 py-2 font-semibold text-white"
                     >
-                      {item.assigned_to ? 'Réaffecter' : 'Traiter'}
+                      Traiter
                     </Link>
                   </div>
                 </li>
@@ -272,7 +272,7 @@ export default function ValidationQueuePage() {
                           to={`/admin/validation/${item.certificate_id}`}
                           className="inline-flex min-h-9 items-center justify-center rounded bg-primary px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-active"
                         >
-                          {item.assigned_to ? 'Réaffecter' : 'Traiter'}
+                          Traiter
                         </Link>
                       </td>
                     </tr>

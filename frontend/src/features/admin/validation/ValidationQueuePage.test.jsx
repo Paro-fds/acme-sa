@@ -73,6 +73,10 @@ describe('ValidationQueuePage (US-401)', () => {
     expect(screen.getAllByText(/Lucie Exemple · EMP-0418/)[0]).toBeInTheDocument()
     expect(screen.getAllByText(/En cours — Agent RH Démo 1/)[0]).toBeInTheDocument()
 
+    // Le bouton ouvre la fiche : « Traiter » même si le certificat est déjà pris (la réaffectation se fait sur la fiche)
+    expect(screen.queryByRole('link', { name: 'Réaffecter' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Traiter' }).length).toBeGreaterThan(0)
+
     // Note d'information
     expect(
       screen.getByText(/Vos propres certificats n'apparaissent pas dans votre file/),
