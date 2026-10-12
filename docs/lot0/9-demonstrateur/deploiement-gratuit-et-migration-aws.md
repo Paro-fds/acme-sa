@@ -107,7 +107,7 @@ Si un jour des données doivent vraiment être reprises (ce qui ne doit pas arri
 ## 7. Règles non négociables sur les services gratuits
 
 - **Données fictives uniquement.** Ces services sont hors du contrôle d'ACME SA : une seule vraie fiche employé y serait une faute (message de lancement §5). Aucun import de vrai CSV n'est possible quand `APP_ENV=demo`.
-- Bandeau « Démonstration · données fictives » sur chaque écran.
+- ~~Bandeau « Démonstration · données fictives » sur chaque écran.~~ Retiré le 2026-10-12 (données toujours fictives).
 - Région la plus proche d'Haïti (côte est des États-Unis) pour Supabase et Render.
 - Les clés de service ne vont jamais dans le dépôt Git.
 

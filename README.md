@@ -10,7 +10,7 @@ Portail web mobile-first : l'employé complète son dossier et dépose ses certi
 
 **Adresse : https://acme-sa-frontend.vercel.app/**
 
-Toutes les données sont **fictives** : aucun employé réel, aucun vrai référentiel (bandeau « Démonstration · données fictives »). L'API est hébergée sur Render en offre gratuite : la première page peut mettre une minute à répondre après une période d'inactivité.
+Toutes les données sont **fictives** : aucun employé réel, aucun vrai référentiel. L'API est hébergée sur Render en offre gratuite : la première page peut mettre une minute à répondre après une période d'inactivité.
 
 ### Comptes employés
 

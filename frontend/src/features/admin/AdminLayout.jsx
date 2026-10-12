@@ -74,7 +74,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
           <span className="truncate text-base font-medium">Espace de gestion</span>
         </div>
         <div className="flex shrink-0 items-center gap-2 text-sm">
-          <AccountMenu space="admin" label={accountLabel} role={role} />
+          <AccountMenu space="admin" label={accountLabel} role={role} mfaRequired={frame?.me.mfa_required !== false} />
           <span className="hidden text-white/40 sm:inline" aria-hidden="true">·</span>
           <button
             type="button"

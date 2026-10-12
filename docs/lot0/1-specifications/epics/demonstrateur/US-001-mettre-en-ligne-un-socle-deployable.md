@@ -23,7 +23,7 @@ Sans socle fiable, aucune donnée réelle ne peut entrer (Aucune donnée réelle
 - **CA-01** Un envoi sur la branche de démonstration met l'application en ligne sans action manuelle.
 - **CA-02** La base est PostgreSQL et les fichiers sont dans un stockage compatible S3, dès le démonstrateur.
 - **CA-03** Aucune adresse, aucun secret n'est écrit dans le code : tout passe par des variables d'environnement.
-- **CA-04** Un bandeau « Démonstration · données fictives » figure sur chaque écran hors production.
+- **CA-04** Hors production, seules des données fictives sont affichées (le bandeau « Démonstration · données fictives » a été retiré le 2026-10-12, à la demande de l'utilisateur).
 - **CA-05** Seul un jeu de données fictif est chargé ; aucun import de vrai CSV n'est possible hors production.
 - **CA-06** Hébergement gratuit : site sur Vercel (ou équivalent), API en conteneur sur Render (ou équivalent), base sur Supabase utilisé seulement comme PostgreSQL, fichiers dans un compartiment privé de Supabase Storage, par son interface S3 (liens signés à courte durée) ; aucune fonction propre à ces services (Supabase Auth, accès direct du navigateur à la base, fonctions Vercel, client Supabase dans le navigateur).
 - **CA-07** Le schéma de la base est créé par des migrations Alembic ; les fichiers passent par un port `FileStorage`.

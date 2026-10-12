@@ -76,7 +76,7 @@ Les autres valeurs sont déjà dans `render.yaml` : `APP_ENV=demo`, `MFA_METHODS
 2. Sur vercel.com, connectez-vous avec GitHub, puis **Add New** → **Project** → dépôt `acme-sa`, et réglez :
    - **Root Directory** : `frontend` ;
    - **Framework** : Vite (détecté automatiquement) ;
-   - **Environment Variables** : `VITE_APP_ENV` = `demo` (cette variable affiche le bandeau « Démonstration · données fictives ») ;
+   - **Environment Variables** : `VITE_APP_ENV` = `demo` ;
    - après le premier déploiement : **Settings** → **Git** → **Production Branch** = `v2`.
 3. Ouvrez l'adresse Vercel (`https://….vercel.app`). Le bandeau jaune doit apparaître en haut de chaque écran.
 
@@ -84,7 +84,7 @@ Les autres valeurs sont déjà dans `render.yaml` : `APP_ENV=demo`, `MFA_METHODS
 
 | Contrôle | Attendu |
 |---|---|
-| Accueil `/` | Bandeau « Démonstration · données fictives » |
+| Accueil `/` | Page d'accueil (le bandeau « Démonstration · données fictives » a été retiré le 2026-10-12) |
 | Connexion employé : JOSEPH Jean, 15/03/1996, « Première connexion ? » | Création du mot de passe, puis le profil |
 | Connexion RH `/admin/connexion` avec `rh.demo` | Écran « Protégez votre compte » (voir §6) |
 | Déposer une photo dans un dossier employé | Le fichier apparaît dans Supabase → Storage → `certificats` |

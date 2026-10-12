@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test'
 import { adminLogin, enterLocalCode } from './admin.js'
 
+// US-112 : la double authentification est coupée par défaut (ADMIN_MFA_REQUIRED=false sur le serveur de test).
+// Ce parcours reste dans le code ; il se rejoue en passant le réglage à true dans e2e/start-server.mjs.
+test.skip(true, 'Double authentification coupée (US-112)')
+
 const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/714b2012-8130-4f37-90c0-b587e71ccc7a/scratchpad/captures'
 
 const PASSWORD = 'Paul-Provisoire-E2E-2026'

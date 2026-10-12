@@ -69,10 +69,21 @@ def logout(request: Request, response: Response) -> None:
 # --- Administrateur ---------------------------------------------------------
 
 
+@router.get("/api/auth/admin-options")
+def admin_login_options(request: Request) -> dict[str, bool]:
+    """US-112 : l'écran de connexion de gestion annonce, ou non, l'étape du code."""
+    return {"mfa_required": container(request).settings.admin_mfa_required}
+
+
 @router.post("/api/admin/auth/login", status_code=202, response_model=LoginStepOut)
-def admin_login(payload: AdminLoginIn, request: Request) -> JSONResponse:
-    """US-102 : mot de passe vérifié ; la session reste « en attente du code » jusqu'au second facteur."""
+def admin_login(payload: AdminLoginIn, request: Request) -> Response:
+    """US-102 : mot de passe vérifié ; la session reste « en attente du code » jusqu'au second facteur.
+    US-112 : double authentification coupée, la session complète s'ouvre (204)."""
     result = container(request).login_admin().execute(payload.username, payload.password)
+    if result.mfa is None:
+        opened = Response(status_code=204)
+        set_session_cookie(request, opened, result.token)
+        return opened
     step = LoginStepOut(mfa=MfaStatusOut.of(result.mfa), code=CodeSentOut.of(result.code))
     accepted = JSONResponse(step.model_dump(mode="json"), status_code=202)
     set_session_cookie(request, accepted, result.token)

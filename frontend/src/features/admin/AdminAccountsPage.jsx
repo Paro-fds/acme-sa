@@ -18,6 +18,7 @@ import { formatDateTime, formatLocalDate } from '../../lib/format.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 import Block from './Block.jsx'
 import { METHODS } from './mfa/methods.js'
+import { useMfaRequired } from './mfa/useMfaRequired.js'
 
 const LOGIN_PATH = '/admin/connexion'
 
@@ -166,6 +167,7 @@ function AdminItem({
   onStatusChange,
   onDelete,
   onResetMfa,
+  mfaRequired,
 }) {
   const [resettingMfa, setResettingMfa] = useState(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -216,10 +218,13 @@ function AdminItem({
     ['Email', admin.email || '—'],
     ['Rôle', admin.role_label || 'Administrateur'],
     ['Matricule rattaché', admin.employee_id || '—'],
-    [
-      'Double authentification',
-      admin.mfa_method ? METHODS[admin.mfa_method]?.title || 'Activée' : 'À choisir à la prochaine connexion',
-    ],
+    // US-112 : rubrique masquée quand la double authentification est coupée
+    ...(mfaRequired
+      ? [[
+          'Double authentification',
+          admin.mfa_method ? METHODS[admin.mfa_method]?.title || 'Activée' : 'À choisir à la prochaine connexion',
+        ]]
+      : []),
     ['Dernière connexion', admin.last_login_at ? formatDateTime(admin.last_login_at) : 'Jamais connecté'],
   ]
 
@@ -299,7 +304,7 @@ function AdminItem({
         />
       )}
 
-      {!admin.is_me && admin.mfa_method && resettingMfa !== null && (
+      {mfaRequired && !admin.is_me && admin.mfa_method && resettingMfa !== null && (
         <ResetMfaConfirmation
           username={admin.username}
           resetting={resettingMfa}
@@ -312,7 +317,7 @@ function AdminItem({
         />
       )}
 
-      {!admin.is_me && admin.mfa_method && resettingMfa === null && (
+      {mfaRequired && !admin.is_me && admin.mfa_method && resettingMfa === null && (
         <div className="flex justify-end">
           <button
             type="button"
@@ -616,6 +621,7 @@ function EmployeeAccessSection({ onNotice, onFailure }) {
 export default function AdminAccountsPage() {
   const redirectIfUnauthorized = useUnauthorizedRedirect(LOGIN_PATH)
   const { data: admins, error, loading, reload } = useLoader(listAdmins, { loginPath: LOGIN_PATH })
+  const mfaRequired = useMfaRequired() === true
   const [notice, setNotice] = useState(null)
   const [failure, setFailure] = useState(null)
   const listId = useId()
@@ -738,6 +744,7 @@ export default function AdminAccountsPage() {
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
                 onResetMfa={handleResetMfa}
+                mfaRequired={mfaRequired}
               />
             ))}
           </ul>

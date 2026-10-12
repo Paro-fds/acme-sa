@@ -126,7 +126,7 @@ SPA mobile d'abord (390 px), vérifiée aussi à 1280 px. Dossiers `frontend/src
 | Dossier | Contenu |
 |---|---|
 | `api/` | Client HTTP (`client.js`, `ApiError`) et une fonction par route |
-| `components/` | Composants du design system (`Page`, `Button`, `TextField`, `StatusBadge`, `Mascot`, `DemoBanner`…) |
+| `components/` | Composants du design system (`Page`, `Button`, `TextField`, `StatusBadge`, `Mascot`…) |
 | `lib/` | Hooks et formats communs (`useLoader`, `format.js`, `env.js`) |
 | `features/home`, `auth` | Accueil public (US-105), connexion (US-101) |
 | `features/dashboard` | « Accueil » de l'employé après la connexion (US-207, écran validé 06) |

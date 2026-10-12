@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { passSecondFactor } from './admin.js'
 
 const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/714b2012-8130-4f37-90c0-b587e71ccc7a/scratchpad/captures'
 
@@ -30,7 +29,6 @@ test('connexion admin : refus, accès, déconnexion, routes protégées', async 
   // CA-01 : connexion → tableau de bord (US-16)
   await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
   await page.getByRole('button', { name: 'Continuer' }).click()
-  await passSecondFactor(page) // US-102
   await expect(page).toHaveURL(/\/admin$/)
   await expect(page.getByRole('heading', { name: 'Suivi de la campagne' })).toBeVisible()
   await page.getByRole('link', { name: 'Voir la liste des employés' }).click()

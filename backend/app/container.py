@@ -226,7 +226,14 @@ class Container:
         )
 
     def login_admin(self) -> LoginAdmin:
-        return LoginAdmin(self.admin_accounts, self.password_hasher, self.session_service(), self.clock, self.mfa_codes())
+        return LoginAdmin(
+            self.admin_accounts,
+            self.password_hasher,
+            self.session_service(),
+            self.clock,
+            self.mfa_codes(),
+            mfa_required=self.settings.admin_mfa_required,
+        )
 
     # --- double authentification RH (US-102) ---------------------------------------
 

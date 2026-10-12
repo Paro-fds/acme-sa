@@ -61,6 +61,7 @@ def settings(tmp_path: Path, admin_password_hash: str) -> Settings:
         frontend_dist_dir=tmp_path / "no-frontend",
         admin_username=ADMIN_USERNAME,
         admin_password_hash=admin_password_hash,
+        admin_mfa_required=True,  # US-102 testée ; la connexion directe (US-112) a ses propres tests
     )
 
 

@@ -40,7 +40,7 @@ S = [
   ["Un envoi sur la branche de démonstration met l'application en ligne sans action manuelle.",
    "La base est PostgreSQL et les fichiers sont dans un stockage compatible S3, dès le démonstrateur.",
    "Aucune adresse, aucun secret n'est écrit dans le code : tout passe par des variables d'environnement.",
-   "Un bandeau « Démonstration · données fictives » figure sur chaque écran hors production.",
+   "Hors production, seules des données fictives sont affichées (le bandeau « Démonstration · données fictives » a été retiré le 2026-10-12, à la demande de l'utilisateur).",
    "Seul un jeu de données fictif est chargé ; aucun import de vrai CSV n'est possible hors production.",
    "Hébergement gratuit : site sur Vercel (ou équivalent), API en conteneur sur Render (ou équivalent), base sur Supabase utilisé seulement comme PostgreSQL, fichiers dans un compartiment privé de Supabase Storage, par son interface S3 (liens signés à courte durée) ; aucune fonction propre à ces services (Supabase Auth, accès direct du navigateur à la base, fonctions Vercel, client Supabase dans le navigateur).",
    "Le schéma de la base est créé par des migrations Alembic ; les fichiers passent par un port `FileStorage`.",
@@ -175,6 +175,15 @@ S = [
    "Un message reçu en arrivant (« Vous devez être connecté », session expirée) s'affiche en information, jamais comme une erreur.",
    "« Mot de passe oublié ? » donne sa réponse sans clic : demander à un Administrateur de réinitialiser l'accès."],
   "Choix de l'utilisateur du 2026-10-11 d'après la maquette « Connexion RH et Administrateur » (canvas « Accueil et connexion — avant / après ») : sobre mais soigné, des personnes haut placées l'utiliseront ; « Espace de gestion » plutôt qu'« Espace RH » (A01). À confirmer par M. Hilaire."),
+ ("112","D1","Me connecter à l'espace de gestion sans code","2","",
+  "Must","EF-104","RG-80","",
+  "personne des RH, administrateur ou membre de la direction","me connecter avec mon identifiant et mon mot de passe seulement",
+  "entrer dans l'outil sans étape supplémentaire tant que la double authentification n'est pas mise en service",
+  ["Un réglage du serveur (ADMIN_MFA_REQUIRED) décide si le code à 6 chiffres est demandé ; il est coupé par défaut, pour tous les rôles.",
+   "Réglage coupé : le bon mot de passe ouvre directement l'espace de gestion ; le blocage après 5 erreurs et le mot de passe provisoire (US-23) restent.",
+   "Réglage coupé : l'écran de connexion n'annonce ni étape ni code ; « Ma double authentification » disparaît du menu du compte, et la méthode et sa réinitialisation de l'écran des comptes.",
+   "Réglage allumé (true dans Render ou backend/.env) : la double authentification de US-102 revient telle quelle, sans changement de code."],
+  "Demande de l'utilisateur du 2026-10-12 : « faisons une connexion directe pour l'admin mais vous pouvez laisser cela dans le code ». La double authentification (US-102) reste écrite et testée ; à confirmer par M. Hilaire avant la mise en production."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -451,7 +460,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

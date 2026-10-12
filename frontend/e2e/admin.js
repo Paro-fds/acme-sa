@@ -31,12 +31,11 @@ export async function passSecondFactor(page, email = 'rh.e2e@exemple.test') {
   }
 }
 
-/** Connexion RH complète : identifiant, mot de passe, puis le second facteur. */
+/** Connexion à l'espace de gestion : identifiant, mot de passe (US-112 : sans code, réglage par défaut). */
 export async function adminLogin(page, username = 'admin', password = ADMIN_PASSWORD) {
   await page.goto('/admin/connexion')
   await page.getByLabel('Identifiant').fill(username)
   await page.getByLabel('Mot de passe', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Continuer' }).click()
-  await passSecondFactor(page)
   await expect(page).toHaveURL(/\/admin(\/mot-de-passe)?$/)
 }

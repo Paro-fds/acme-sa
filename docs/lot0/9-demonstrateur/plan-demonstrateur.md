@@ -18,7 +18,7 @@
 **Règles non négociables** (message de lancement §5 ; registre v1.8) :
 
 - Aucune donnée réelle d'employé, aucun vrai CSV, aucun salaire.
-- Un bandeau « Démonstration · données fictives » sur chaque écran.
+- ~~Un bandeau « Démonstration · données fictives » sur chaque écran.~~ Retiré le 2026-10-12 à la demande de l'utilisateur (les données restent fictives).
 - Les employés fictifs, agences et directions sont ceux des maquettes (Lucie Exemple EMP-0418, Agence Démo Nord…).
 
 ## 2. Décision à faire noter par le directeur

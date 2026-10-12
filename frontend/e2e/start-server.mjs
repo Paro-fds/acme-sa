@@ -34,6 +34,7 @@ const server = spawn(
       ACME_DATA_DIR: dataDir,
       ADMIN_USERNAME: 'admin',
       ADMIN_PASSWORD_HASH: adminPasswordHash,
+      ADMIN_MFA_REQUIRED: 'false', // US-112 : réglage par défaut, quel que soit backend/.env
     },
   },
 )

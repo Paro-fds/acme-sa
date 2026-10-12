@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import AdminAccountsPage from './AdminAccountsPage.jsx'
 import { addAdmin, changeAdminRole, deleteAdmin, listAdmins } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
-import { resetAdminMfa } from '../../api/mfa.js'
+import { getMfaOptions, resetAdminMfa } from '../../api/mfa.js'
 
 vi.mock('../../api/admin.js', () => ({
   addAdmin: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('../../api/admin.js', () => ({
   listAdmins: vi.fn(),
 }))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
-vi.mock('../../api/mfa.js', () => ({ resetAdminMfa: vi.fn() }))
+vi.mock('../../api/mfa.js', () => ({ resetAdminMfa: vi.fn(), getMfaOptions: vi.fn() }))
 
 const ME = {
   id: 'a1',
@@ -192,6 +192,7 @@ describe('AdminAccountsPage — double authentification (US-102 CA-05)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     listAdmins.mockResolvedValue([{ ...ME, mfa_method: 'TOTP' }, MARIE, PAUL])
+    getMfaOptions.mockResolvedValue({ mfa_required: true })
   })
 
   it('chaque compte indique sa méthode, ou qu’elle reste à choisir', async () => {
@@ -217,6 +218,16 @@ describe('AdminAccountsPage — double authentification (US-102 CA-05)', () => {
 
     expect(resetAdminMfa).toHaveBeenCalledWith('a3')
     expect(await screen.findByText('Double authentification de « paul.louis » réinitialisée.')).toBeInTheDocument()
+  })
+
+  it('US-112 : double authentification coupée, ni méthode ni réinitialisation', async () => {
+    getMfaOptions.mockResolvedValue({ mfa_required: false })
+    renderPage()
+
+    const paul = (await items())[2]
+    expect(within(paul).queryByText(/WhatsApp/)).not.toBeInTheDocument()
+    expect(screen.queryByText('Double authentification')).not.toBeInTheDocument()
+    expect(within(paul).queryByRole('button', { name: /Réinitialiser la double/ })).not.toBeInTheDocument()
   })
 })
 

@@ -7,7 +7,7 @@ import EmployeeListPage from './EmployeeListPage.jsx'
 import { adminLogin, adminLogout } from '../../api/auth.js'
 import { getAdminMe, searchQualifiedEmployees } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
-import { loginMfa } from '../../api/mfa.js'
+import { getMfaOptions, loginMfa } from '../../api/mfa.js'
 
 vi.mock('../../api/auth.js', () => ({ adminLogin: vi.fn(), adminLogout: vi.fn(), logout: vi.fn() }))
 vi.mock('../../api/admin.js', () => ({
@@ -17,6 +17,7 @@ vi.mock('../../api/admin.js', () => ({
   getEmployeesExportUrl: vi.fn(() => '#'),
 }))
 vi.mock('../../api/mfa.js', () => ({
+  getMfaOptions: vi.fn(),
   loginMfa: { status: vi.fn(), start: vi.fn(), confirm: vi.fn(), resend: vi.fn(), verify: vi.fn() },
 }))
 
@@ -52,6 +53,7 @@ describe('AdminLoginPage (US-15, US-107)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     getAdminMe.mockResolvedValue({ id: 'a1', username: 'admin', must_change_password: false })
+    getMfaOptions.mockResolvedValue({ mfa_required: true }) // US-102 ; mode direct : voir US-112 plus bas
   })
 
   it('US-23 CA-07 : mot de passe provisoire → écran de choix du mot de passe', async () => {
@@ -153,14 +155,14 @@ describe('AdminLoginPage (US-15, US-107)', () => {
     expect(adminLogout).toHaveBeenCalledOnce()
   })
 
-  it('US-111 CA-01, CA-02 : « Espace de gestion » pour tous les rôles, « Étape 1 sur 2 · Connexion », mention du réseau', () => {
+  it('US-111 CA-01, CA-02 : « Espace de gestion » pour tous les rôles, « Étape 1 sur 2 · Connexion », mention du réseau', async () => {
     renderAt('/admin/connexion')
 
     expect(screen.getByText('Espace de gestion')).toBeInTheDocument()
     expect(screen.getByText(/Pour les équipes RH, les administrateurs et la direction/)).toBeInTheDocument()
     expect(screen.queryByText(/Espace RH/)).not.toBeInTheDocument()
     expect(screen.getAllByRole('img', { name: 'ACME SA' }).length).toBeGreaterThan(0)
-    expect(screen.getByText('Étape 1 sur 2')).toBeInTheDocument()
+    expect(await screen.findByText('Étape 1 sur 2')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
     expect(screen.getAllByText("Accès réservé au réseau de l'institution ou au VPN.").length).toBeGreaterThan(0)
     expect(screen.queryByLabelText('Code de vérification')).not.toBeInTheDocument()
@@ -258,5 +260,33 @@ describe('AdminLoginPage (US-15, US-107)', () => {
     renderAt('/admin/employes')
 
     expect(await screen.findByText('Double authentification')).toBeInTheDocument()
+  })
+})
+
+describe('AdminLoginPage — connexion directe (US-112)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    getAdminMe.mockResolvedValue({ id: 'a1', username: 'admin', must_change_password: false })
+    getMfaOptions.mockResolvedValue({ mfa_required: false })
+  })
+
+  it('CA-04 : un seul écran, aucune étape ni code annoncés', async () => {
+    renderAt('/admin/connexion')
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
+    await vi.waitFor(() => expect(getMfaOptions).toHaveBeenCalled())
+    expect(screen.queryByText(/Étape \d sur 2/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/code à 6 chiffres/)).not.toBeInTheDocument()
+  })
+
+  it('CA-02 : le mot de passe ouvre directement le tableau de bord', async () => {
+    adminLogin.mockResolvedValue(null)
+    const user = userEvent.setup()
+    renderAt('/admin/connexion')
+
+    await fillAndSubmit(user)
+
+    expect(await screen.findByText('Tableau de bord')).toBeInTheDocument()
+    expect(loginMfa.status).not.toHaveBeenCalled()
   })
 })

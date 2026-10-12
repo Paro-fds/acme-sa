@@ -106,6 +106,7 @@ def test_ca04_me(admin_client):
         "role": "ADMIN",
         "role_label": "Administrateur",
         "must_change_password": False,
+        "mfa_required": True,  # US-112 : réglage des tests
     }
 
 

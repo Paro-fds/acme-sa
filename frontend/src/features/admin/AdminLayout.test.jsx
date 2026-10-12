@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getAdminFrame } from '../../api/adminFrame.js'
@@ -96,5 +97,24 @@ describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
 
   it('Administrateur : toutes les rubriques', async () => {
     expect(await menuFor('ADMIN')).toHaveLength(8)
+  })
+})
+
+describe('US-112 — menu du compte selon la double authentification', () => {
+  async function accountMenu(mfaRequired) {
+    getAdminFrame.mockResolvedValue({ ...FRAME, me: { ...FRAME.me, mfa_required: mfaRequired } })
+    const user = userEvent.setup()
+    renderLayout()
+    await screen.findByText('Administrateur Démo · Administrateur')
+    await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
+    return screen.getByRole('menu')
+  }
+
+  it('coupée : pas de « Ma double authentification »', async () => {
+    expect(within(await accountMenu(false)).queryByRole('menuitem', { name: 'Ma double authentification' })).not.toBeInTheDocument()
+  })
+
+  it('demandée : le lien reste', async () => {
+    expect(within(await accountMenu(true)).getByRole('menuitem', { name: 'Ma double authentification' })).toBeInTheDocument()
   })
 })

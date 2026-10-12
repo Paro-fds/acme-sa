@@ -5,7 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus
+from app.auth.application.admin_mfa import CodeSent, MfaCodes, MfaStatus, complete_login
 from app.auth.application.sessions import SessionService
 from app.auth.domain.admin import AdminAccount, AdminRole, RoleChange, ROLE_LABELS, validate_admin_password, validate_username
 from app.auth.domain.errors import (
@@ -60,8 +60,9 @@ class AdminView:
 @dataclass(frozen=True)
 class AdminLoginResult:
     token: str
-    """Session « en attente du code » (US-102) : le second facteur ouvre la session RH."""
-    mfa: MfaStatus
+    """Session « en attente du code » (US-102) : le second facteur ouvre la session RH.
+    Connexion directe (US-112) : session complète, et `mfa` vaut None."""
+    mfa: MfaStatus | None
     code: CodeSent | None = None
     """Code envoyé dès la connexion quand la méthode enregistrée est WhatsApp ou email."""
 
@@ -74,6 +75,7 @@ class LoginAdmin:
 
     US-102 : le bon mot de passe n'ouvre qu'une session en attente du code ; le compteur d'erreurs
     n'est remis à zéro qu'une fois le code vérifié.
+    US-112 : double authentification coupée (`mfa_required=False`), le bon mot de passe ouvre la session.
     """
 
     def __init__(
@@ -83,7 +85,9 @@ class LoginAdmin:
         sessions: SessionService,
         clock: Clock,
         mfa: MfaCodes,
+        mfa_required: bool = True,
     ) -> None:
+        self._mfa_required = mfa_required
         self._admins = admins
         self._hasher = hasher
         self._sessions = sessions
@@ -110,6 +114,8 @@ class LoginAdmin:
                 raise AccountLocked(admin.seconds_until_unlock(now))
             raise InvalidAdminCredentials()
 
+        if not self._mfa_required:
+            return AdminLoginResult(complete_login(self._mfa, self._sessions, admin, method="PASSWORD"), None)
         return self._second_factor(admin)
 
     def _second_factor(self, admin: AdminAccount) -> AdminLoginResult:

@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     admin_password_hash: str = ""
     employee_session_minutes: int = 30
     admin_session_minutes: int = 120
+    admin_mfa_required: bool = False
+    """US-112 : double authentification de l'espace de gestion. Coupée par défaut (connexion directe) ;
+    `ADMIN_MFA_REQUIRED=true` la rallume sans toucher au code (US-102)."""
     mfa_methods: str = "TOTP,EMAIL,WHATSAPP"
     """US-102 : méthodes de double authentification proposées."""
     demo_show_mfa_codes: bool = False

@@ -28,6 +28,8 @@ class AdminMeOut(BaseModel):
     role: str
     role_label: str
     must_change_password: bool
+    mfa_required: bool = True
+    """US-112 : faux quand la double authentification est coupée (menu et comptes sans rubrique du code)."""
 
 
 class AdminOut(BaseModel):
@@ -122,6 +124,7 @@ def me(request: Request, admin_id: str = Depends(current_admin_pending)) -> Admi
         role=admin.role.value,
         role_label=ROLE_LABELS.get(admin.role, admin.role.value),
         must_change_password=admin.must_change_password,
+        mfa_required=container(request).settings.admin_mfa_required,
     )
 
 

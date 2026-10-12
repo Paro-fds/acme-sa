@@ -9,8 +9,9 @@ import TextField from '../../components/TextField.jsx'
 import { ADMIN_PASSWORD_PATH } from '../../lib/useLoader.js'
 import GestionLoginLayout, { LoginNote } from './GestionLoginLayout.jsx'
 import MfaStep, { mfaStepTitle } from './mfa/MfaStep.jsx'
+import { useMfaRequired } from './mfa/useMfaRequired.js'
 
-/** Après la double authentification : le tableau de bord, ou le choix du mot de passe s'il est provisoire (US-23). */
+/** Une fois connecté (avec ou sans double authentification) : le tableau de bord, ou le choix du mot de passe s'il est provisoire (US-23). */
 export async function enterRhSpace(navigate) {
   const me = await getAdminMe()
   navigate(me.must_change_password ? ADMIN_PASSWORD_PATH : '/admin', { replace: true })
@@ -20,6 +21,7 @@ export async function enterRhSpace(navigate) {
  * US-15, US-107 ; US-111 : connexion à l'espace de gestion en deux étapes, chacune sur son écran épuré.
  * 1 Connexion (identifiant, mot de passe) ; 2 Vérification (US-102), sans changer d'adresse.
  * Un message reçu en arrivant (« Vous devez être connecté », session expirée) est une information, pas une erreur.
+ * US-112 : double authentification coupée (réglage serveur), un seul écran : le mot de passe ouvre l'espace.
  */
 export default function AdminLoginPage() {
   const navigate = useNavigate()
@@ -30,6 +32,7 @@ export default function AdminLoginPage() {
   const [notice, setNotice] = useState(location.state?.notice ?? location.state?.message ?? null)
   const [sending, setSending] = useState(false)
   const [step, setStep] = useState(null)
+  const mfaRequired = useMfaRequired() === true
   const complete = username.trim() !== '' && password !== ''
 
   async function handleSubmit(event) {
@@ -78,7 +81,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <GestionLoginLayout step={1} title="Connexion" intro="Saisissez l'identifiant et le mot de passe de votre compte.">
+    <GestionLoginLayout step={mfaRequired ? 1 : undefined} title="Connexion" intro="Saisissez l'identifiant et le mot de passe de votre compte.">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         <Alert tone="info">{notice}</Alert>
         <TextField
@@ -106,7 +109,7 @@ export default function AdminLoginPage() {
           <strong className="text-heading">Mot de passe oublié ?</strong> Demandez à un Administrateur de réinitialiser
           votre accès.
         </p>
-        <p>Ensuite, un code à 6 chiffres vous sera demandé pour confirmer que c'est bien vous.</p>
+        {mfaRequired && <p>Ensuite, un code à 6 chiffres vous sera demandé pour confirmer que c'est bien vous.</p>}
       </LoginNote>
     </GestionLoginLayout>
   )

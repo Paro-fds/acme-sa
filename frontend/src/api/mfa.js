@@ -5,6 +5,11 @@ import { request } from './client.js'
  * Connexion (`/admin/auth/mfa/*`, après le mot de passe) et changement depuis son compte (`/admin/me/mfa/*`).
  */
 
+/** US-112 : réglage public lu par l'écran de connexion (double authentification demandée ou non). */
+export function getMfaOptions() {
+  return request('/auth/admin-options')
+}
+
 export const loginMfa = {
   status: () => request('/admin/auth/mfa'),
   start: (method, destination) => request('/admin/auth/mfa/setup', { method: 'POST', body: { method, destination } }),

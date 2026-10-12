@@ -133,12 +133,13 @@ class MfaCodes:
         return TotpSetup(secret, uri, self._totp.qr_code(uri))
 
 
-def _complete_login(codes: MfaCodes, sessions: SessionService, admin: AdminAccount) -> str:
+def complete_login(codes: MfaCodes, sessions: SessionService, admin: AdminAccount, method: str | None = None) -> str:
+    """Ouvre la session complète de l'espace de gestion. `method` : `PASSWORD` pour une connexion directe (US-112)."""
     admin.register_success()
     admin.last_login_at = codes.clock.now()
     codes.admins.save(admin)
     sessions.close_all_for(SubjectType.ADMIN_MFA, admin.id)
-    codes.log.record("ADMIN_LOGIN_SUCCEEDED", admin.id, method=admin.mfa_method.value)
+    codes.log.record("ADMIN_LOGIN_SUCCEEDED", admin.id, method=method or admin.mfa_method.value)
     return sessions.open(SubjectType.ADMIN, admin.id)
 
 
@@ -203,7 +204,7 @@ class ConfirmMfaSetup:
         admin.mfa_change_allowed_until = None
         self._codes.log.record("MFA_CHANGED" if changed else "MFA_ENROLLED", admin.id, method=method.value)
         if open_session:
-            return _complete_login(self._codes, self._sessions, admin)
+            return complete_login(self._codes, self._sessions, admin)
         admin.register_success()
         self._codes.admins.save(admin)
         return None
@@ -236,7 +237,7 @@ class VerifyMfa:
         if not admin.mfa_enrolled:
             raise MfaNotEnrolled()
         self._codes.check(admin, code, admin.mfa_method, admin.mfa_secret, "ADMIN_LOGIN")
-        return _complete_login(self._codes, self._sessions, admin)
+        return complete_login(self._codes, self._sessions, admin)
 
 
 class ConfirmMfaChange:

@@ -28,6 +28,7 @@ function Network({ className = '' }) {
  * US-111 : connexion de l'espace de gestion (RH, administrateurs, direction), sobre et soignée.
  * Ordinateur : panneau bleu de la charte à gauche, formulaire à droite ; téléphone : bandeau en haut.
  * Chaque étape a son écran : « Étape n sur 2 », son titre, puis son contenu.
+ * US-112 : sans double authentification, la prop step est omise et aucune étape n'est annoncée.
  */
 export default function GestionLoginLayout({ step, title, intro, children }) {
   return (
@@ -51,7 +52,7 @@ export default function GestionLoginLayout({ step, title, intro, children }) {
         <main className="flex flex-1 items-start justify-center px-5 py-7 lg:items-center lg:px-12">
           <div className="flex w-full max-w-[400px] flex-col gap-7">
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-muted">Étape {step} sur 2</p>
+              {step && <p className="text-sm font-medium text-muted">Étape {step} sur 2</p>}
               <h1 className="text-[26px] leading-8 font-bold text-heading lg:text-[32px] lg:leading-10">{title}</h1>
               {intro && <p className="leading-relaxed text-help">{intro}</p>}
             </div>

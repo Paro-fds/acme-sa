@@ -13,14 +13,15 @@ const ADMIN_LINKS = [
   { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs', roles: ['ADMIN'] },
   { to: '/admin/referentiel', icon: 'account_tree', label: 'Référentiel', roles: ['ADMIN', 'REFERENTIAL'] },
   { to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' },
-  { to: '/admin/securite', icon: 'verified_user', label: 'Ma double authentification' },
+  { to: '/admin/securite', icon: 'verified_user', label: 'Ma double authentification', mfa: true },
 ]
 
 /**
  * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23 ; « Mon parcours » : US-25).
+ * `mfaRequired` (US-112) : faux, « Ma double authentification » disparaît du menu.
  * `label` (US-108, écran A02) : « Nom · Rôle » affiché à la place de l'avatar, en blanc sur l'en-tête bleu marine de l'espace RH.
  */
-export default function AccountMenu({ space = 'employee', label, role }) {
+export default function AccountMenu({ space = 'employee', label, role, mfaRequired = true }) {
   const logout = useLogout(space)
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -86,7 +87,7 @@ export default function AccountMenu({ space = 'employee', label, role }) {
           className="absolute right-0 z-40 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
         >
           {(space === 'admin' ? ADMIN_LINKS : EMPLOYEE_LINKS)
-            .filter((link) => !link.roles || link.roles.includes(role))
+            .filter((link) => (!link.roles || link.roles.includes(role)) && (!link.mfa || mfaRequired))
             .map((link) => (
             <Link key={link.to} to={link.to} role="menuitem" onClick={() => setOpen(false)} className={MENU_ITEM}>
               <span className="material-symbols-outlined" aria-hidden="true">{link.icon}</span>
