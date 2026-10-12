@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { createOpening, getOpening, getOpeningForm, updateOpening } from '../../../api/openings.js'
 import Alert from '../../../components/Alert.jsx'
 import Button from '../../../components/Button.jsx'
@@ -93,6 +93,14 @@ function OpeningForm({ id, form, opening }) {
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
       {opening?.status === 'PUBLISHED' && (
         <Alert tone="info">Ce poste est publié. Toute modification des critères est tracée, avec son auteur et sa date.</Alert>
+      )}
+      {form.units.length === 0 && (
+        <Alert tone="info">
+          Aucune unité à proposer : le référentiel des unités n'a pas encore été importé.{' '}
+          <Link to="/admin/referentiel" className="font-semibold underline underline-offset-4">
+            Importer le référentiel
+          </Link>
+        </Alert>
       )}
       <section aria-labelledby="fiche-title" className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card sm:p-6">
         <h2 id="fiche-title" className="text-lg font-semibold text-heading">

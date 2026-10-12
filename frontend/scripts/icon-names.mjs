@@ -33,7 +33,7 @@ export function unknownIconNames(all = allIconNames()) {
   for (const file of sourceFiles(join(FRONTEND, 'src'))) {
     const text = readFileSync(file, 'utf8')
     const written = [
-      ...text.matchAll(/material-symbols-outlined[^>]*>([a-z0-9_]+)</g),
+      ...text.matchAll(/material-symbols-outlined[^>]*>\s*([a-z0-9_]+)\s*</g),
       ...text.matchAll(/icon[:=]\s*['"]([a-z0-9_]+)['"]/g),
     ]
     for (const match of written) {
@@ -48,7 +48,7 @@ export function usedIconNames(all = allIconNames()) {
   const used = new Set()
   for (const file of sourceFiles(join(FRONTEND, 'src'))) {
     const text = readFileSync(file, 'utf8')
-    for (const match of text.matchAll(/['"`>]([a-z0-9_]+)['"`<]/g)) {
+    for (const match of text.matchAll(/['"`>]\s*([a-z0-9_]+)\s*['"`<]/g)) {
       if (all.has(match[1])) used.add(match[1])
     }
   }

@@ -174,6 +174,14 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     expect(await screen.findByRole('heading', { name: 'Chargé de crédit' })).toBeInTheDocument()
   })
 
+  it("sans référentiel importé, le formulaire dit pourquoi aucune unité n'est proposée", async () => {
+    getOpeningForm.mockResolvedValue({ ...FORM, units: [] })
+    renderAt('/admin/postes/nouveau')
+
+    expect(await screen.findByText(/Aucune unité à proposer/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Importer le référentiel' })).toHaveAttribute('href', '/admin/referentiel')
+  })
+
   it("une erreur s'affiche sous le champ concerné", async () => {
     const user = userEvent.setup()
     createOpening.mockRejectedValue(

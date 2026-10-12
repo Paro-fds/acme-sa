@@ -48,7 +48,7 @@ function RelationshipSelect({ options, value, onChange, error }) {
           className="material-symbols-outlined pointer-events-none absolute inset-y-0 right-3 flex items-center text-xl text-muted"
           aria-hidden="true"
         >
-          expand_more
+          keyboard_arrow_down
         </span>
       </div>
       {error && (
