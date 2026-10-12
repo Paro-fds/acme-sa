@@ -55,7 +55,6 @@ function renderPage() {
         <Route path="/connexion" element={<IdentifyProbe />} />
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/certificats" element={<p>Écran Mes certificats</p>} />
-        <Route path="/parcours" element={<p>Écran Mon parcours</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -148,14 +147,10 @@ describe('ProfilePage (US-05)', () => {
     expect(screen.getByRole('link', { name: /Mes certificats.*Disponible dès votre profil complet/ })).toBeInTheDocument()
   })
 
-  it('US-25 CA-03 : la carte « Mon parcours » ouvre le parcours', async () => {
+  it('US-114 : plus de carte « Mon parcours » (il est dans « Ma carrière »)', async () => {
     await renderProfile()
 
-    const career = screen.getByRole('link', { name: /Mon parcours/ })
-    expect(career).toHaveTextContent('Diplômes, formations, expériences et compétences')
-
-    await userEvent.setup().click(career)
-    expect(await screen.findByText('Écran Mon parcours')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Mon parcours/ })).not.toBeInTheDocument()
   })
 
   it('CA-06 : sans session, retour à l’identification', async () => {
@@ -217,7 +212,7 @@ describe('ProfilePage — Mon dossier sur ordinateur (US-113)', () => {
       const side = await screen.findByRole('complementary', { name: 'Aide et progression' })
       expect(within(side).getByRole('progressbar', { name: 'Progression du dossier' })).toBeInTheDocument()
       expect(within(side).getByRole('link', { name: /Mes coordonnées/ })).toBeInTheDocument()
-      // Certificats et Parcours sont dans le menu de gauche, plus en cartes
+      // Mes certificats est dans le menu de gauche, plus en carte
       expect(within(screen.getByRole('main')).queryByRole('link', { name: /Disponible dès votre profil complet|Déposer et suivre/ })).not.toBeInTheDocument()
       expect(screen.queryByText('Photo officielle')).not.toBeInTheDocument()
     } finally {

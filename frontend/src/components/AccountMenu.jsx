@@ -5,8 +5,8 @@ import { useLogout } from '../lib/useLogout.js'
 const MENU_ITEM =
   'flex min-h-11 items-center gap-3 rounded-md px-3 text-left font-semibold text-heading hover:bg-canvas disabled:opacity-60'
 
-/** Liens supplémentaires de l'espace employé (V2, US-25). */
-const EMPLOYEE_LINKS = [{ to: '/parcours', icon: 'workspace_premium', label: 'Mon parcours' }]
+/** Liens supplémentaires de l'espace employé : aucun depuis US-114 (« Mon parcours » est dans « Ma carrière »). */
+const EMPLOYEE_LINKS = []
 
 /** Liens supplémentaires de l'espace admin (US-23). */
 const ADMIN_LINKS = [
@@ -17,7 +17,7 @@ const ADMIN_LINKS = [
 ]
 
 /**
- * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23 ; « Mon parcours » : US-25).
+ * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23).
  * `mfaRequired` (US-112) : faux, « Ma double authentification » disparaît du menu.
  * `label` (US-108, écran A02) : « Nom · Rôle » affiché à la place de l'avatar, en blanc sur l'en-tête bleu marine de l'espace RH.
  */

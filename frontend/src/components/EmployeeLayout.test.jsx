@@ -57,9 +57,10 @@ describe('US-113 — cadre de l’espace employé', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ouvrir le menu' }))
     const drawer = screen.getByRole('dialog', { name: 'Menu' })
-    for (const label of ['Accueil', 'Mon dossier', 'Mes certificats', 'Mon parcours', 'Ma carrière']) {
+    for (const label of ['Accueil', 'Mon dossier', 'Mes certificats', 'Ma carrière']) {
       expect(within(drawer).getByRole('link', { name: new RegExp(label) })).toBeInTheDocument()
     }
+    expect(within(drawer).queryByRole('link', { name: /Mon parcours/ })).not.toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: /Se déconnecter/ })).toBeInTheDocument()
     expect(await within(drawer).findByText('Jean JOSEPH')).toBeInTheDocument()
 
@@ -67,13 +68,14 @@ describe('US-113 — cadre de l’espace employé', () => {
     expect(screen.queryByRole('dialog', { name: 'Menu' })).not.toBeInTheDocument()
   })
 
-  it('CA-01 : sur ordinateur, le menu à gauche avec Mon parcours, le nom et le poste, sans barre du bas', async () => {
+  it('CA-01 : sur ordinateur, le menu à gauche avec Ma carrière, le nom et le poste, sans barre du bas', async () => {
     setDesktop(true)
     renderPage({}, '/accueil')
 
     const side = screen.getByRole('navigation', { name: 'Espace employé' })
     expect(within(side).getByRole('link', { name: /Accueil/ })).toHaveAttribute('aria-current', 'page')
-    expect(within(side).getByRole('link', { name: /Mon parcours/ })).toHaveAttribute('href', '/parcours')
+    expect(within(side).getByRole('link', { name: /Ma carrière/ })).toHaveAttribute('href', '/carriere')
+    expect(within(side).queryByRole('link', { name: /Mon parcours/ })).not.toBeInTheDocument()
     expect(await screen.findByText('Jean JOSEPH')).toBeInTheDocument()
     expect(screen.getByText('Agent de crédit')).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Navigation principale' })).not.toBeInTheDocument()

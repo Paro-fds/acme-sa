@@ -104,7 +104,6 @@ export default function ProfilePage() {
             title="Mes certificats"
             text={profile.completion.is_complete ? 'Déposer et suivre mes certificats' : 'Disponible dès votre profil complet'}
           />
-          <NavCard to="/parcours" icon="timeline" title="Mon parcours" text="Diplômes, formations, expériences et compétences" />
         </>
       )}
 

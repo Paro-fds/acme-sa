@@ -194,6 +194,16 @@ S = [
    "La photo officielle de l'employé (système RH) s'affiche dans le menu, sur Mon dossier, et dans la liste et la fiche de l'espace de gestion ; tant qu'elle n'existe pas, les initiales occupent la même place et la même taille.",
    "Sur ordinateur, les boutons d'enregistrement sont en bas du formulaire, plus dans une barre collée."],
   "Choix de l'utilisateur du 2026-10-12 d'après les maquettes « Espace employé sur ordinateur » et « Photo officielle » (canvas « Accueil et connexion — avant / après ») : menu à gauche, bouton menu sur téléphone. La source des photos (système du directeur) reste à préciser : le champ photo_url est exposé vide, sans import ni lien « Ma photo n'est plus à jour » pour l'instant. Aucune vraie photo hors production."),
+ ("114","D2","Retracer mon parcours dans Ma carrière","2","",
+  "Should","EF-201 (écran)","","D-17",
+  "employé","voir mon parcours en une frise, de mes études à mon poste d'aujourd'hui, à côté des postes ouverts",
+  "comprendre d'où je viens et ce qui peut m'ouvrir un nouveau poste",
+  ["En haut de « Ma carrière », « Aujourd'hui » : poste, agence et ancienneté chez ACME SA (depuis la date d'embauche du système RH).",
+   "La frise va du plus récent au plus ancien, par année : entrée chez ACME SA (système RH), certificats déposés (« Validé par les RH » ou « En cours d'examen » ; un certificat à corriger ou remplacé n'y figure pas), diplômes, formations et expériences déjà saisis (« Déclaré par vous ») ; les compétences s'affichent en étiquettes sous la frise.",
+   "Des filtres réduisent la frise : Tout, Chez ACME, Diplômes, Formations, Expériences.",
+   "Les postes ouverts et les candidatures restent sur la page, à droite sur ordinateur, sous la frise sur téléphone ; les candidatures ne sont pas dans la frise.",
+   "« Mon parcours » disparaît du menu, du menu du compte et de Mon dossier ; l'adresse /parcours mène à « Ma carrière »."],
+  "Suggestion du directeur rapportée le 2026-10-12 (« une sorte de timeline pour retracer le parcours de l'employé ») et choix de l'utilisateur (maquette « Ma carrière en frise » du canvas) : « enlever Mon parcours, laissons seulement Ma carrière ». Le portail ne connaît que le poste actuel et la date d'embauche : les anciens postes chez ACME viendront quand la source sera connue (à demander au directeur, peut-être les mouvements lus dans les lettres, US-903). Les RH gardent l'affichage actuel du parcours sur la fiche employé. Ajouter des formations ou des expériences depuis le portail reste hors périmètre."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -470,7 +480,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

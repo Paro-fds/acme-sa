@@ -17,7 +17,6 @@ import ErrorReportQueuePage from './features/admin/reports/ErrorReportQueuePage.
 import ValidationQueuePage from './features/admin/validation/ValidationQueuePage.jsx'
 import ReviewCertificatePage from './features/admin/validation/ReviewCertificatePage.jsx'
 import AmbiguousIdentityPage from './features/auth/AmbiguousIdentityPage.jsx'
-import CareerPage from './features/career/CareerPage.jsx'
 import CertificatesPage from './features/certificates/CertificatesPage.jsx'
 import DepositPage from './features/certificates/DepositPage.jsx'
 import ThanksPage from './features/certificates/ThanksPage.jsx'
@@ -47,8 +46,9 @@ export default function AppRoutes() {
       <Route path="/certificats" element={<CertificatesPage />} />
       <Route path="/certificats/deposer" element={<DepositPage />} />
       <Route path="/certificats/merci" element={<ThanksPage />} />
-      <Route path="/parcours" element={<CareerPage />} />
       <Route path="/carriere" element={<MyOpeningsPage />} />
+      {/* US-114 : « Mon parcours » est fondu dans « Ma carrière ». */}
+      <Route path="/parcours/*" element={<Navigate to="/carriere" replace />} />
       {/* US-206 : les adresses de l'ancien parcours du MVP ramènent à « Mon dossier ». */}
       <Route path="/documents" element={<Navigate to="/profil" replace />} />
       <Route path="/mise-a-jour/*" element={<Navigate to="/profil" replace />} />

@@ -1,9 +1,13 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getMyCareer } from '../../api/career.js'
+import { listCertificates } from '../../api/certificates.js'
 import { ApiError } from '../../api/client.js'
+import { getProfile } from '../../api/employee.js'
 import { applyToOpening, listMyApplications, listMyOpenings, sendCv, withdrawApplication } from '../../api/openings.js'
+import { setDesktop } from '../../lib/testViewport.js'
 import MyOpeningsPage from './MyOpeningsPage.jsx'
 
 vi.mock('../../api/openings.js', () => ({
@@ -14,6 +18,34 @@ vi.mock('../../api/openings.js', () => ({
   sendCv: vi.fn(),
 }))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn(), adminLogout: vi.fn() }))
+vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn() }))
+vi.mock('../../api/career.js', () => ({ getMyCareer: vi.fn() }))
+vi.mock('../../api/certificates.js', () => ({ listCertificates: vi.fn() }))
+
+const PROFILE = {
+  first_name: 'Jean',
+  last_name: 'JOSEPH',
+  position: 'Agent de crédit',
+  affectation: { agency: 'Agence Démo Nord' },
+  hire_date: '2018-09-03',
+  photo_url: null,
+}
+
+const CAREER = {
+  kinds: [
+    {
+      kind: 'EXPERIENCE',
+      items: [{ id: 'e1', kind: 'EXPERIENCE', title: 'Caissier', organization: 'Coopérative Démo', location: null, start_month: '2016-01', end_month: '2018-08', duration_hours: null, description: null }],
+    },
+    { kind: 'SKILL', items: [{ id: 's1', kind: 'SKILL', title: 'Excel', skill_level_label: 'Avancé' }] },
+  ],
+}
+
+const CERTIFICATES = {
+  certificates: [
+    { id: 'c1', title: 'Licence en sciences comptables', type_label: 'Diplôme', institution: 'Université Démo', year: 2019, status: 'VALIDATED', is_archived: false },
+  ],
+}
 
 const OPENING = {
   id: 7,
@@ -61,6 +93,71 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   listMyApplications.mockResolvedValue({ items: [] })
+  listMyOpenings.mockResolvedValue({ items: [] })
+  getProfile.mockResolvedValue(PROFILE)
+  getMyCareer.mockResolvedValue(CAREER)
+  listCertificates.mockResolvedValue(CERTIFICATES)
+})
+
+afterEach(() => setDesktop(false))
+
+describe('US-114 — retracer mon parcours dans Ma carrière', () => {
+  it('CA-01 : « Aujourd’hui » donne le poste, l’agence et l’ancienneté', async () => {
+    renderPage()
+    const today = await screen.findByRole('region', { name: 'Aujourd’hui' })
+    expect(today).toHaveTextContent('Agent de crédit · Agence Démo Nord')
+    expect(today).toHaveTextContent(/\d+ ans chez ACME SA/)
+  })
+
+  it('CA-02 : la frise, du plus récent au plus ancien, avec la source de chaque élément', async () => {
+    renderPage()
+    const frise = await screen.findByRole('list', { name: 'Mon parcours, du plus récent au plus ancien' })
+    const items = within(frise).getAllByRole('article')
+    expect(items.map((item) => within(item).getByRole('heading').textContent)).toEqual([
+      'Licence en sciences comptables',
+      'Entrée chez ACME SA',
+      'Caissier',
+    ])
+    expect(items[0]).toHaveTextContent('Validé par les RH')
+    expect(items[1]).toHaveTextContent('Système RH')
+    expect(items[2]).toHaveTextContent('Déclaré par vous')
+    expect(screen.getByRole('list', { name: 'Compétences' })).toHaveTextContent('Excel')
+  })
+
+  it('CA-03 : un filtre réduit la frise', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const frise = await screen.findByRole('list', { name: 'Mon parcours, du plus récent au plus ancien' })
+    await user.click(screen.getByRole('button', { name: 'Chez ACME' }))
+    expect(screen.getByRole('button', { name: 'Chez ACME' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(frise).getAllByRole('article')).toHaveLength(1)
+    expect(frise).toHaveTextContent('Entrée chez ACME SA')
+  })
+
+  it('CA-04 : sur ordinateur, les postes ouverts sont dans la colonne de droite', async () => {
+    setDesktop(true)
+    listMyOpenings.mockResolvedValue({ items: [OPENING] })
+    renderPage()
+    const side = await screen.findByRole('complementary', { name: 'Postes et candidatures' })
+    expect(await within(side).findByRole('list', { name: 'Postes ouverts pour vous' })).toBeInTheDocument()
+  })
+
+  it('frise sans élément : invitation à déposer un certificat', async () => {
+    getProfile.mockResolvedValue({ ...PROFILE, hire_date: null })
+    getMyCareer.mockResolvedValue({ kinds: [] })
+    listCertificates.mockResolvedValue({ certificates: [] })
+    renderPage()
+    const invite = await screen.findByText(/Votre parcours se construit avec vos certificats/)
+    expect(within(invite.closest('div')).getByRole('link', { name: 'Déposer un certificat' })).toHaveAttribute('href', '/certificats/deposer')
+  })
+
+  it('la frise ne se charge pas : les postes restent affichés', async () => {
+    getMyCareer.mockRejectedValue(new ApiError(500, 'SERVER_ERROR', 'Parcours indisponible.'))
+    listMyOpenings.mockResolvedValue({ items: [OPENING] })
+    renderPage()
+    expect(await screen.findByText('Parcours indisponible.')).toBeInTheDocument()
+    expect(await screen.findByRole('list', { name: 'Postes ouverts pour vous' })).toBeInTheDocument()
+  })
 })
 
 describe('US-801 — postes ouverts pour l’employé apte', () => {

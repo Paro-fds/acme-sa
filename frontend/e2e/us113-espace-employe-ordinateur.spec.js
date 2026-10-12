@@ -9,7 +9,6 @@ const PAGES = [
   ['dossier', '/profil', 'Mon dossier'],
   ['coordonnees', '/profil/coordonnees', 'Mon dossier'],
   ['certificats', '/certificats', 'Mes certificats'],
-  ['parcours', '/parcours', 'Mon parcours'],
   ['carriere', '/carriere', 'Ma carrière'],
 ]
 
@@ -48,9 +47,10 @@ test('espace employé : menu à gauche sur ordinateur, bouton menu sur télépho
 
   await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
   const drawer = page.getByRole('dialog', { name: 'Menu' })
-  await expect(drawer.getByRole('link', { name: /Mon parcours/ })).toBeVisible()
+  await expect(drawer.getByRole('link', { name: /Ma carrière/ })).toBeVisible()
+  await expect(drawer.getByRole('link', { name: /Mon parcours/ })).toHaveCount(0)
   await page.screenshot({ path: `${CAPTURES}/us113-menu-390.png` })
-  await drawer.getByRole('link', { name: /Mon parcours/ }).click()
-  await expect(page).toHaveURL(/\/parcours$/)
+  await drawer.getByRole('link', { name: /Ma carrière/ }).click()
+  await expect(page).toHaveURL(/\/carriere$/)
   await expect(page.getByRole('dialog', { name: 'Menu' })).toHaveCount(0)
 })

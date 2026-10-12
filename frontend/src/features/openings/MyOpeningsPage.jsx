@@ -5,6 +5,7 @@ import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import Tip from '../../components/Tip.jsx'
+import CareerTimeline from '../career/CareerTimeline.jsx'
 import { formatDate, formatLocalDate } from '../../lib/format.js'
 import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
@@ -203,6 +204,7 @@ function ApplicationItem({ application, onWithdrawn }) {
 /**
  * US-801, US-902 (choix du 2026-10-11) : « Ma carrière » montre les postes publiés auxquels l'employé est apte,
  * lui permet d'y postuler et de suivre ses candidatures dans le circuit des RH.
+ * US-114 : la frise du parcours vient en premier ; postes et candidatures à droite sur ordinateur, dessous sur téléphone.
  */
 export default function MyOpeningsPage() {
   const { data, loading, error, reload } = useLoader(load)
@@ -226,10 +228,10 @@ export default function MyOpeningsPage() {
     </Tip>
   )
 
-  return (
-    <Page account title="Ma carrière" aside={desktop ? tip : undefined}>
+  const opportunities = (
+    <>
       <div className="flex flex-col gap-1">
-        <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-primary-active">Postes ouverts pour vous</h2>
+        <h2 className="text-xl font-bold text-primary-active">Postes ouverts pour vous</h2>
         <p className="text-sm text-help">
           Les postes publiés par les RH dont vous remplissez les critères, d’après vos certificats validés, votre
           ancienneté, votre grade et votre unité.
@@ -254,7 +256,7 @@ export default function MyOpeningsPage() {
           <p className="rounded-xl bg-surface p-4 text-base text-heading shadow-card">
             Aucun poste ouvert ne correspond à votre profil pour le moment.
           </p>
-          {!desktop && tip}
+          {tip}
         </div>
       )}
       {data && data.applications.length > 0 && (
@@ -267,6 +269,27 @@ export default function MyOpeningsPage() {
           </ul>
         </section>
       )}
+    </>
+  )
+
+  return (
+    <Page account wide title="Ma carrière">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-primary-active">Ma carrière</h2>
+        <p className="text-help">Votre parcours, de vos études à aujourd’hui, et les postes ouverts pour vous.</p>
+      </div>
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+        <div className="flex min-w-0 flex-col gap-6">
+          <CareerTimeline />
+        </div>
+        {desktop ? (
+          <aside aria-label="Postes et candidatures" className="flex flex-col gap-4">
+            {opportunities}
+          </aside>
+        ) : (
+          <div className="flex flex-col gap-4">{opportunities}</div>
+        )}
+      </div>
     </Page>
   )
 }
