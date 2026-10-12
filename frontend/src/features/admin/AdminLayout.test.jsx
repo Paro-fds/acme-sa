@@ -28,10 +28,10 @@ beforeEach(() => {
 })
 
 describe('US-108 — cadre de l’espace RH (écran A02)', () => {
-  it('CA-01 : en-tête « Portail RH », nom et rôle du compte, « Se déconnecter »', async () => {
+  it('CA-01 : en-tête « Espace de gestion » (US-111), nom et rôle du compte, « Se déconnecter »', async () => {
     renderLayout()
     const header = screen.getByRole('banner')
-    expect(header).toHaveTextContent('Portail RH')
+    expect(header).toHaveTextContent('Espace de gestion')
     expect(await within(header).findByText('Administrateur Démo · Administrateur')).toBeInTheDocument()
     expect(within(header).getByRole('button', { name: 'Se déconnecter' })).toBeInTheDocument()
   })

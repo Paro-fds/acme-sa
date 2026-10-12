@@ -125,15 +125,18 @@ describe('AdminLoginPage (US-15, US-107)', () => {
     searchQualifiedEmployees.mockRejectedValue(new ApiError(401, 'NOT_AUTHENTICATED', 'Vous devez être connecté.'))
     renderAt('/admin/employes')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
-    expect(screen.getByRole('alert')).toHaveTextContent('Vous devez être connecté.')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
+    // US-111 CA-04 : un message reçu en arrivant est une information, jamais une erreur
+    expect(screen.getByRole('status')).toHaveTextContent('Vous devez être connecté.')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('CA-07 : session expirée → retour à la connexion avec le message', async () => {
     searchQualifiedEmployees.mockRejectedValue(new ApiError(401, 'SESSION_EXPIRED', 'Votre session a expiré. Reconnectez-vous.'))
     renderAt('/admin/employes')
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Votre session a expiré. Reconnectez-vous.')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Votre session a expiré. Reconnectez-vous.')
   })
 
   it('CA-06 : « Se déconnecter » ferme la session admin et revient à /admin/connexion', async () => {
@@ -145,19 +148,21 @@ describe('AdminLoginPage (US-15, US-107)', () => {
     await user.click(await screen.findByRole('button', { name: 'Menu du compte' }))
     await user.click(screen.getByRole('menuitem', { name: 'Se déconnecter' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('Vous êtes déconnecté.')
     expect(adminLogout).toHaveBeenCalledOnce()
   })
 
-  it('US-107 CA-01 : écran A01, carte « Espace RH » avec le logo, deux étapes et la mention du réseau', () => {
+  it('US-111 CA-01, CA-02 : « Espace de gestion » pour tous les rôles, « Étape 1 sur 2 · Connexion », mention du réseau', () => {
     renderAt('/admin/connexion')
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'ACME SA' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /Identifiants/ })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /Vérification de sécurité/ })).toBeInTheDocument()
-    expect(screen.getByText("Espace réservé au réseau de l'institution ou au VPN.")).toBeInTheDocument()
+    expect(screen.getByText('Espace de gestion')).toBeInTheDocument()
+    expect(screen.getByText(/Pour les équipes RH, les administrateurs et la direction/)).toBeInTheDocument()
+    expect(screen.queryByText(/Espace RH/)).not.toBeInTheDocument()
+    expect(screen.getAllByRole('img', { name: 'ACME SA' }).length).toBeGreaterThan(0)
+    expect(screen.getByText('Étape 1 sur 2')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Connexion' })).toBeInTheDocument()
+    expect(screen.getAllByText("Accès réservé au réseau de l'institution ou au VPN.").length).toBeGreaterThan(0)
     expect(screen.queryByLabelText('Code de vérification')).not.toBeInTheDocument()
   })
 
@@ -170,7 +175,9 @@ describe('AdminLoginPage (US-15, US-107)', () => {
     await fillAndSubmit(user, 'rh.demo')
 
     const code = await screen.findByLabelText('Code de vérification')
-    expect(screen.getByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
+    // US-111 CA-03 : l'étape 2 a son propre écran
+    expect(screen.getByText('Étape 2 sur 2')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Vérification' })).toBeInTheDocument()
     expect(screen.getByText('rh.demo')).toBeInTheDocument()
     expect(screen.queryByLabelText('Mot de passe')).not.toBeInTheDocument()
     expect(getAdminMe).not.toHaveBeenCalled()
@@ -210,13 +217,11 @@ describe('AdminLoginPage (US-15, US-107)', () => {
     expect(await screen.findByRole('button', { name: 'Renvoyer le code' })).toBeInTheDocument()
   })
 
-  it('US-107 CA-05 : « Mot de passe oublié ? » renvoie vers un Administrateur', async () => {
-    const user = userEvent.setup()
+  it('US-111 CA-05 : « Mot de passe oublié ? » renvoie vers un Administrateur, sans clic', () => {
     renderAt('/admin/connexion')
 
-    await user.click(screen.getByRole('button', { name: 'Mot de passe oublié ?' }))
-
-    expect(screen.getByRole('status')).toHaveTextContent('Demandez à un Administrateur de réinitialiser votre accès.')
+    expect(screen.getByText('Mot de passe oublié ?')).toBeInTheDocument()
+    expect(screen.getByText(/Demandez à un Administrateur de réinitialiser\s+votre accès/)).toBeInTheDocument()
   })
 
   it('US-107 CA-06 : première connexion → « Protégez votre compte » sur la même carte', async () => {
@@ -229,7 +234,7 @@ describe('AdminLoginPage (US-15, US-107)', () => {
 
     await fillAndSubmit(user)
 
-    expect(await screen.findByRole('heading', { name: 'Protégez votre compte' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Protégez votre compte' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Application d'authentification/ })).toBeEnabled()
     expect(screen.getByRole('radio', { name: /WhatsApp/ })).toBeDisabled()
     expect(getAdminMe).not.toHaveBeenCalled()

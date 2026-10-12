@@ -30,7 +30,7 @@ test('cadre de l’espace RH : en-tête, menu et titre sur chaque écran, à 128
   for (const screen of SCREENS) {
     await page.goto(screen.path)
     const header = page.getByRole('banner')
-    await expect(header).toContainText('Portail RH')
+    await expect(header).toContainText('Espace de gestion')
     await expect(header.getByText(/ · Administrateur$/)).toBeVisible()
     await expect(header.getByRole('button', { name: 'Se déconnecter' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(screen.heading)

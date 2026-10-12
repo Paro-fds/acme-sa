@@ -46,7 +46,7 @@ function navLinkClass({ isActive }) {
 
 /**
  * US-108 : cadre de l'espace RH repris de l'écran validé A02 :
- * en-tête bleu marine (logo, « Portail RH », « Nom · Rôle », « Se déconnecter »), menu latéral à gauche,
+ * en-tête bleu marine (logo, « Espace de gestion » depuis US-111, « Nom · Rôle », « Se déconnecter »), menu latéral à gauche,
  * titre de la page en tête du contenu. À 390 px, le menu s'ouvre par un bouton.
  */
 export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Retour', headerActions, wide = false, children }) {
@@ -71,7 +71,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
           </button>
           <img src={logo} alt="ACME SA" width="32" height="32" className="h-8 w-auto shrink-0 rounded bg-surface object-contain p-0.5" />
           <span className="text-lg text-white/40" aria-hidden="true">|</span>
-          <span className="truncate text-base font-medium">Portail RH</span>
+          <span className="truncate text-base font-medium">Espace de gestion</span>
         </div>
         <div className="flex shrink-0 items-center gap-2 text-sm">
           <AccountMenu space="admin" label={accountLabel} role={role} />

@@ -122,9 +122,9 @@ describe('MfaLoginPage — connexions suivantes (US-102 CA-02, CA-03)', () => {
     const user = userEvent.setup()
     renderPage({ mfa: WHATSAPP, code: SENT })
 
-    expect(await screen.findByRole('heading', { name: /Vérification de sécurité/ })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 1, name: 'Espace RH' })).toBeInTheDocument()
-    expect(screen.getByText('Mot de passe vérifié')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Vérification' })).toBeInTheDocument()
+    expect(screen.getByText('Étape 2 sur 2')).toBeInTheDocument()
+    expect(screen.getByText('Mot de passe vérifié.')).toBeInTheDocument()
     expect(screen.getByText('Saisissez le code à 6 chiffres envoyé par WhatsApp au +509 •••• 1111.')).toBeInTheDocument()
     await user.type(screen.getByLabelText('Code de vérification'), '482913')
     await user.click(screen.getByRole('button', { name: 'Valider' }))

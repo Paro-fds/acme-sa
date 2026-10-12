@@ -124,7 +124,7 @@ export default function AuditLogPage() {
         {/* FILTRES SUR UNE LIGNE (A11) */}
         <div className="bg-surface p-4 rounded-xl border border-rh-line shadow-card flex flex-wrap items-center gap-6 text-sm">
           {/* Filtre Période */}
-          <div className="flex items-center space-x-2">
+          <div className="flex max-w-full min-w-0 items-center space-x-2">
             <label htmlFor="filter-period" className="text-xs font-semibold text-rh-muted uppercase tracking-wider">
               Période
             </label>
@@ -132,7 +132,7 @@ export default function AuditLogPage() {
               id="filter-period"
               value={period || 'Toutes'}
               onChange={(e) => changeFilter('period', e.target.value)}
-              className="border border-border-input rounded-lg px-3 py-1.5 text-sm bg-rh-canvas text-rh-text focus:outline-none focus:ring-1 focus:ring-primary"
+              className="max-w-full min-w-0 border border-border-input rounded-lg px-3 py-1.5 text-sm bg-rh-canvas text-rh-text focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="Toutes">Toutes</option>
               <option value="2026-10">Octobre 2026</option>
@@ -142,7 +142,7 @@ export default function AuditLogPage() {
           </div>
 
           {/* Filtre Personne */}
-          <div className="flex items-center space-x-2">
+          <div className="flex max-w-full min-w-0 items-center space-x-2">
             <label htmlFor="filter-actor" className="text-xs font-semibold text-rh-muted uppercase tracking-wider">
               Personne
             </label>
@@ -150,7 +150,7 @@ export default function AuditLogPage() {
               id="filter-actor"
               value={actor || 'Toutes'}
               onChange={(e) => changeFilter('actor', e.target.value)}
-              className="border border-border-input rounded-lg px-3 py-1.5 text-sm bg-rh-canvas text-rh-text focus:outline-none focus:ring-1 focus:ring-primary"
+              className="max-w-full min-w-0 border border-border-input rounded-lg px-3 py-1.5 text-sm bg-rh-canvas text-rh-text focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="Toutes">Toutes</option>
               {data?.actors?.map((a) => (
@@ -162,7 +162,7 @@ export default function AuditLogPage() {
           </div>
 
           {/* Filtre Type d'action */}
-          <div className="flex items-center space-x-2">
+          <div className="flex max-w-full min-w-0 items-center space-x-2">
             <label htmlFor="filter-action" className="text-xs font-semibold text-rh-muted uppercase tracking-wider">
               Type d'action
             </label>
@@ -170,7 +170,7 @@ export default function AuditLogPage() {
               id="filter-action"
               value={action || 'Tous'}
               onChange={(e) => changeFilter('action', e.target.value)}
-              className="border border-border-input rounded-lg px-3 py-1.5 text-sm bg-rh-canvas text-rh-text focus:outline-none focus:ring-1 focus:ring-primary"
+              className="max-w-full min-w-0 border border-border-input rounded-lg px-3 py-1.5 text-sm bg-rh-canvas text-rh-text focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="Tous">Tous</option>
               <option value="DOSSIER_VIEW">Consultation d'un dossier</option>

@@ -165,6 +165,16 @@ S = [
    "La date de naissance se saisit en trois cases Jour / Mois / Année, au clavier numérique, à la connexion comme à la création du mot de passe.",
    "Sur ordinateur, la photo est à côté du texte (accueil) ou du formulaire (connexion) ; sur téléphone, au-dessus."],
   "Choix de l'utilisateur du 2026-10-11 d'après les maquettes « Après 3 » (canvas « Accueil et connexion — avant / après ») : le directeur trouvait les pages trop « IA » et veut que les employés aient envie d'utiliser le portail. Remplace la mascotte de US-105 (CA-03) sur ces deux écrans ; à confirmer par M. Hilaire, ainsi que l'accord des personnes de la photo (droit à l'image)."),
+ ("111","D1","Refaire la connexion de l'espace de gestion","2","",
+  "Must","EF-104 (écran)","RG-80, RG-81, RG-82","D-47, D-42",
+  "personne des RH, administrateur ou membre de la direction","me connecter sur un écran sobre et soigné qui me concerne",
+  "entrer dans l'outil de gestion avec confiance",
+  ["L'espace s'appelle « Espace de gestion » (connexion et en-tête des écrans intérieurs) : il sert aux Agents RH, aux Administrateurs, au Responsable du référentiel et à la direction (Lecture seule).",
+   "Sur ordinateur, un panneau bleu de la charte à gauche (logo, « Espace de gestion », à qui il s'adresse, mention du réseau ou du VPN) et le formulaire à droite ; sur téléphone, le panneau devient un bandeau en haut.",
+   "Deux étapes, chacune avec son écran épuré : « Étape 1 sur 2 · Connexion » (identifiant, mot de passe), puis « Étape 2 sur 2 · Vérification » (code à 6 chiffres) ; les règles de US-102 et US-107 sont inchangées.",
+   "Un message reçu en arrivant (« Vous devez être connecté », session expirée) s'affiche en information, jamais comme une erreur.",
+   "« Mot de passe oublié ? » donne sa réponse sans clic : demander à un Administrateur de réinitialiser l'accès."],
+  "Choix de l'utilisateur du 2026-10-11 d'après la maquette « Connexion RH et Administrateur » (canvas « Accueil et connexion — avant / après ») : sobre mais soigné, des personnes haut placées l'utiliseront ; « Espace de gestion » plutôt qu'« Espace RH » (A01). À confirmer par M. Hilaire."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -441,7 +451,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

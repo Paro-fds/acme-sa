@@ -14,7 +14,7 @@ test('connexion admin : refus, accès, déconnexion, routes protégées', async 
   await expect(page).toHaveURL(/\/admin\/connexion$/)
 
   // US-107 : écran A01, à 390 px et à 1280 px, sans défilement horizontal
-  await expect(page.getByRole('heading', { level: 1, name: 'Espace RH' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Connexion' })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await page.screenshot({ path: `${CAPTURES}/us107-connexion-rh-390.png`, fullPage: true })
   await page.setViewportSize({ width: 1280, height: 900 })

@@ -3,24 +3,25 @@ import CodeForm from './CodeForm.jsx'
 import MethodSetup from './MethodSetup.jsx'
 import { METHODS, codeInstruction } from './methods.js'
 
+/** US-111 : titre et présentation de l'étape 2, selon que la méthode est déjà choisie ou non. */
+export function mfaStepTitle(status) {
+  if (!status.enrolled) {
+    return {
+      title: 'Protégez votre compte',
+      intro:
+        "L'espace de gestion donne accès aux dossiers de tous les employés. À chaque connexion, en plus de votre mot de passe, un code à 6 chiffres vous sera demandé.",
+    }
+  }
+  return { title: 'Vérification', intro: undefined }
+}
+
 /**
- * US-102, US-107 : étape 2 de la connexion RH. Première fois (ou après réinitialisation) : choix de la méthode ;
- * ensuite : le code de la méthode enregistrée. `sent` : code envoyé à la connexion (WhatsApp, email).
+ * US-102, US-107, US-111 : étape 2 de la connexion à l'espace de gestion. Première fois (ou après réinitialisation) :
+ * choix de la méthode ; ensuite : le code de la méthode enregistrée. `sent` : code envoyé à la connexion (WhatsApp, email).
  */
 export default function MfaStep({ status, sent, onDone }) {
   if (!status.enrolled) {
-    return (
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-bold text-heading">Protégez votre compte</h3>
-          <p>
-            L'espace RH donne accès aux dossiers de tous les employés. À chaque connexion, en plus de votre mot de
-            passe, un code à 6 chiffres vous sera demandé.
-          </p>
-        </div>
-        <MethodSetup api={loginMfa} onDone={onDone} available={status.available_methods} />
-      </div>
-    )
+    return <MethodSetup api={loginMfa} onDone={onDone} available={status.available_methods} />
   }
 
   const sendsCode = status.method !== 'TOTP'
@@ -42,8 +43,7 @@ export default function MfaStep({ status, sent, onDone }) {
         submitLabel="Valider"
       />
       <p className="text-sm text-help">
-        Téléphone perdu ou changé{' '}? Demandez à un autre compte RH de réinitialiser votre double
-        authentification.
+        Téléphone perdu ou changé{' '}? Demandez à un Administrateur de réinitialiser votre double authentification.
       </p>
     </div>
   )

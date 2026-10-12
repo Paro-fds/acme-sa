@@ -58,7 +58,7 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
 
   // Connexion suivante : le code part vers WhatsApp ; un code faux est refusé
   await login(page, 'e2e.paul', CHOSEN)
-  await expect(page.getByRole('heading', { name: /Vérification de sécurité/ })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Vérification' })).toBeVisible()
   await expect(page.getByText('Saisissez le code à 6 chiffres envoyé par WhatsApp au +509 •••• 3333.')).toBeVisible()
   await page.getByLabel('Code de vérification').fill('482')
   await page.screenshot({ path: `${CAPTURES}/us107-code-390.png`, fullPage: true })

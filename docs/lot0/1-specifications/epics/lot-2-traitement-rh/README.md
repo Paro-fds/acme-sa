@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-17 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+18 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -17,6 +17,7 @@ Chacun entre dans le portail simplement, et les comptes RH sont fortement proté
 | [US-108](US-108-aligner-l-espace-rh-sur-les-ecrans-valides.md) | Aligner l'espace RH sur les écrans validés | Must | — | Fait |
 | [US-109](US-109-charger-les-pages-sans-texte-d-icone.md) | Charger les pages sans texte d'icône | Must | — | Fait |
 | [US-110](US-110-refaire-l-accueil-et-la-connexion-pour-donner-envie.md) | Refaire l'accueil et la connexion pour donner envie | Must | — | Fait |
+| [US-111](US-111-refaire-la-connexion-de-l-espace-de-gestion.md) | Refaire la connexion de l'espace de gestion | Must | — | Fait |
 
 ## D3 Certificats
 
