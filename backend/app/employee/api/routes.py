@@ -65,6 +65,8 @@ class ProfileOut(BaseModel):
     editable_fields: list[str]
     update: UpdateOut
     completion: CompletionOut
+    photo_url: str | None = None
+    """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
 
 
 @router.get("/profile", response_model=ProfileOut)

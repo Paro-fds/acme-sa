@@ -175,11 +175,10 @@ describe('CareerPage (US-25)', () => {
     expect(within(skillSection).getByText('Nombre maximum d’éléments atteint pour cette rubrique (2).')).toBeInTheDocument()
   })
 
-  it('le retour mène au profil', async () => {
+  it('US-113 : Mon parcours est une rubrique du menu, sans retour vers le profil', async () => {
     await renderPage()
 
-    await userEvent.setup().click(within(screen.getByRole('main')).getByRole('link', { name: 'Mon profil' }))
-    expect(await screen.findByText('Écran profil')).toBeInTheDocument()
+    expect(within(screen.getByRole('main')).queryByRole('link', { name: /Mon profil|Mon dossier/ })).not.toBeInTheDocument()
   })
 
   it('sans session, retour à l’identification', async () => {

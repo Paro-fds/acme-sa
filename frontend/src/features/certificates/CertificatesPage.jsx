@@ -2,8 +2,9 @@ import { Link } from 'react-router'
 import { listCertificates } from '../../api/certificates.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { DossierProgress } from '../dossier/SectionParts.jsx'
 import CertificateList from './CertificateList.jsx'
@@ -51,11 +52,15 @@ function Checklist({ completion }) {
   )
 }
 
-/** US-204 (verrou et liste de ce qui reste), US-301 (accès au dépôt), US-303 (suivi des certificats). */
+/**
+ * US-204 (verrou et liste de ce qui reste), US-301 (accès au dépôt), US-303 (suivi des certificats).
+ * US-113 : sur ordinateur, progression, niveau validé et conseils dans la colonne de droite.
+ */
 export default function CertificatesPage() {
   const { data, error, loading } = useLoader(load)
-  const page = (children) => (
-    <Page account title="Mes certificats">
+  const desktop = useIsDesktop()
+  const page = (children, aside) => (
+    <Page account title="Mes certificats" aside={desktop ? aside : undefined}>
       {children}
     </Page>
   )
@@ -64,18 +69,40 @@ export default function CertificatesPage() {
   if (error) return page(<Alert>{error.message}</Alert>)
   const { completion } = data
   if (!completion.is_complete) {
+    const side = (
+      <>
+        <Tip>
+          Vous y êtes presque ! Dès votre profil complété, cet espace vous permettra de déposer vos diplômes et attestations
+          pour les faire valider par les RH.
+        </Tip>
+        <DossierProgress completion={completion} />
+      </>
+    )
     return page(
       <>
-        <Mascot role="Conseil carrière">
-          « Vous y êtes presque ! Dès votre profil complété, cet espace vous permettra de déposer vos diplômes et attestations
-          pour les faire valider par les RH. »
-        </Mascot>
-        <DossierProgress completion={completion} />
+        {!desktop && side}
         <Checklist completion={completion} />
       </>,
+      side,
     )
   }
   const full = data.certificates.length >= data.limit
+  const level = (
+    <section aria-label="Niveau d'études validé" className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-info-bg text-info-text" aria-hidden="true">
+        <span className="material-symbols-outlined">workspace_premium</span>
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="text-sm font-semibold tracking-wide text-help uppercase">Niveau d'études validé</span>
+        <span className="font-semibold text-heading">{data.validated_level ?? "Aucun pour l'instant"}</span>
+        {!data.validated_level && <span className="text-sm text-help">Il sera établi par vos certificats validés par les RH.</span>}
+      </div>
+    </section>
+  )
+  const tip = (
+    <Tip>Retrouvez ici l'état de vos titres. Vos diplômes validés enrichissent vos opportunités de mobilité interne.</Tip>
+  )
+  const help = <p className="text-center text-sm text-help lg:text-left">Une question sur vos documents ? Adressez-vous au service RH de votre agence.</p>
   return page(
     <>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -84,32 +111,26 @@ export default function CertificatesPage() {
           {data.certificates.length} titre{data.certificates.length > 1 ? 's' : ''} déposé{data.certificates.length > 1 ? 's' : ''}
         </span>
       </div>
-      <section aria-label="Niveau d'études validé" className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-info-bg text-info-text" aria-hidden="true">
-          <span className="material-symbols-outlined">workspace_premium</span>
-        </span>
-        <div className="flex min-w-0 flex-col">
-          <span className="text-sm font-semibold tracking-wide text-help uppercase">Niveau d'études validé</span>
-          <span className="font-semibold text-heading">{data.validated_level ?? "Aucun pour l'instant"}</span>
-          {!data.validated_level && <span className="text-sm text-help">Il sera établi par vos certificats validés par les RH.</span>}
-        </div>
-      </section>
-      <Mascot role="Conseil RH">
-        « Retrouvez ici l'état de vos titres. Vos diplômes validés enrichissent vos opportunités de mobilité interne. »
-      </Mascot>
+      {!desktop && level}
+      {!desktop && tip}
       {full ? (
         <Alert tone="info">Vous avez déposé {data.limit} certificats, le nombre maximum.</Alert>
       ) : (
         <Link
           to={DEPOSIT_PATH}
-          className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active lg:w-fit"
         >
           <span className="material-symbols-outlined" aria-hidden="true">upload_file</span>
           Déposer un certificat
         </Link>
       )}
       <CertificateList certificates={data.certificates} />
-      <p className="text-center text-sm text-help">Une question sur vos documents ? Adressez-vous au service RH de votre agence.</p>
+      {!desktop && help}
+    </>,
+    <>
+      {level}
+      {tip}
+      {help}
     </>,
   )
 }

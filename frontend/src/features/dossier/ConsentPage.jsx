@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router'
 import { getDossier, giveConsent } from '../../api/dossier.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 
 const REASONS = [
@@ -54,7 +54,7 @@ function FullNotice() {
         </p>
         <p>
           <strong className="text-heading">Vos informations :</strong> vous pouvez les consulter et les corriger à tout
-          moment dans « Mon profil ». Pour toute question, adressez-vous au service RH de votre agence.
+          moment dans « Mon dossier ». Pour toute question, adressez-vous au service RH de votre agence.
         </p>
       </div>
     </details>
@@ -147,9 +147,9 @@ export default function ConsentPage() {
         </span>
       </p>
 
-      <Mascot role="Transparence et protection de vos données personnelles">
+      <Tip title="Transparence et protection de vos données personnelles" icon="shield_person">
         Votre parcours mérite une écoute respectueuse et sécurisée.
-      </Mascot>
+      </Tip>
       <div className="flex flex-col gap-1">
         <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-primary">Avant de commencer</h2>
         <p className="leading-relaxed text-help">

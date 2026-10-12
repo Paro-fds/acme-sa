@@ -1,12 +1,8 @@
 import { NavLink } from 'react-router'
+import { EMPLOYEE_NAV } from './employeeNav.js'
 
-/** US-207 CA-02 : barre du bas de l'espace employé (écrans validés 06 → 13) ; « Ma carrière » ajoutée par US-801. */
-const ITEMS = [
-  { to: '/accueil', icon: 'home', label: 'Accueil' },
-  { to: '/profil', icon: 'person', label: 'Mon profil' },
-  { to: '/certificats', icon: 'verified', label: 'Mes certificats' },
-  { to: '/carriere', icon: 'work', label: 'Ma carrière' },
-]
+/** US-207 CA-02 : barre du bas de l'espace employé sur téléphone ; « Ma carrière » ajoutée par US-801 ; « Mon dossier » (US-113). */
+const ITEMS = EMPLOYEE_NAV.filter((item) => item.bottom)
 
 export default function BottomNav() {
   return (

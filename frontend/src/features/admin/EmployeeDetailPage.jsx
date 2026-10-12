@@ -1,6 +1,7 @@
 import { Link, useLocation, useParams } from 'react-router'
 import * as adminApi from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
+import Avatar from '../../components/Avatar.jsx'
 import Page from '../../components/Page.jsx'
 import ValueComparison from '../../components/ValueComparison.jsx'
 import { formatDateTime, formatLocalDate } from '../../lib/format.js'
@@ -36,14 +37,18 @@ function FolderHeader({ folder, dossier, certificates }) {
       aria-label="Employé"
       className="flex flex-col gap-4 rounded-lg border border-rh-line bg-surface p-4 shadow-card sm:flex-row sm:items-start sm:justify-between sm:p-6"
     >
-      <div className="flex min-w-0 flex-col gap-1">
-        <h1 className="text-2xl leading-tight font-bold break-words text-rh-strong">
-          {folder.display_name} · {folder.employee_code}
-        </h1>
-        {folder.previous_name && <p className="text-sm text-rh-muted">anciennement {folder.previous_name}</p>}
-        <p className="text-sm text-rh-text">
-          {hrItem(dossier, 'position_confirmed')?.value || folder.position} · {hrItem(dossier, 'agency_confirmed')?.value}
-        </p>
+      {/* US-113 : photo officielle du système RH, sinon les initiales */}
+      <div className="flex min-w-0 items-center gap-4">
+        <Avatar firstName={folder.first_name} lastName={folder.last_name} photoUrl={folder.photo_url} size="lg" ring />
+        <div className="flex min-w-0 flex-col gap-1">
+          <h1 className="text-2xl leading-tight font-bold break-words text-rh-strong">
+            {folder.display_name} · {folder.employee_code}
+          </h1>
+          {folder.previous_name && <p className="text-sm text-rh-muted">anciennement {folder.previous_name}</p>}
+          <p className="text-sm text-rh-text">
+            {hrItem(dossier, 'position_confirmed')?.value || folder.position} · {hrItem(dossier, 'agency_confirmed')?.value}
+          </p>
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${status.tone}`}>{status.label}</span>

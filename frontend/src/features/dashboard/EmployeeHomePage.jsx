@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router'
 import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
 import { DEPOSIT_PATH } from '../certificates/paths.js'
@@ -174,19 +174,23 @@ function DepositCard({ open }) {
   )
 }
 
-/** US-207 CA-01, écran validé 06 : l'accueil de l'employé après la connexion. */
+/**
+ * US-207 CA-01, écran validé 06 : l'accueil de l'employé après la connexion.
+ * US-113 : sans La Penseuse ; sur ordinateur, la progression et l'aide passent dans la colonne de droite.
+ */
 export default function EmployeeHomePage() {
   const navigate = useNavigate()
   const { data, error, loading } = useLoader(load)
   const needsConsent = data && !data.consentGiven
+  const desktop = useIsDesktop()
 
   // Écran 05 : à la première connexion, « Avant de commencer » passe d'abord.
   useEffect(() => {
     if (needsConsent) navigate(CONSENT_PATH, { replace: true, state: { next: HOME_PATH } })
   }, [needsConsent, navigate])
 
-  const page = (children) => (
-    <Page account title="Accueil">
+  const page = (children, aside) => (
+    <Page account title="Accueil" aside={aside}>
       {children}
     </Page>
   )
@@ -196,55 +200,62 @@ export default function EmployeeHomePage() {
   const { profile } = data
   const { completion } = profile
   const missing = completion.elements.filter((element) => !element.complete)
+  const progress = (
+    <section className="flex flex-col items-center gap-4 rounded-xl bg-surface p-4 text-center shadow-card sm:flex-row sm:text-left lg:flex-col lg:items-start">
+      <Ring percent={completion.percent} />
+      <div className="flex min-w-0 flex-col">
+        <p className="mb-1 flex items-center justify-center gap-1.5 text-sm font-semibold tracking-wider text-primary uppercase sm:justify-start">
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">task_alt</span>
+          Avancement du profil
+        </p>
+        <h3 className="text-lg font-bold">Votre dossier est complet à {completion.percent} %</h3>
+        <p className="mt-1 text-help">
+          {completion.complete} élément{completion.complete > 1 ? 's' : ''} complété{completion.complete > 1 ? 's' : ''}{' '}
+          sur {completion.total} au total.
+        </p>
+      </div>
+    </section>
+  )
+const help = (
+    <section className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
+      <span
+        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-highlight text-primary-active"
+        aria-hidden="true"
+      >
+        <span className="material-symbols-outlined text-xl">support_agent</span>
+      </span>
+      <p className="flex flex-col">
+        <span className="text-sm font-semibold text-heading">Besoin d'aide pour votre profil ?</span>
+        <span className="text-sm text-help">Une question ? Adressez-vous au service RH de votre agence.</span>
+      </p>
+      </section>
+  )
   return page(
     <>
-      <section className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
-        <div className="flex flex-col">
-          <p className="text-sm text-help">Bienvenue sur votre espace</p>
-          <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-balance text-primary-active">
-            Bonjour {profile.first_name}
-          </h2>
-          <p className="mt-0.5 text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
-        </div>
-        <Mascot role="Conseil carrière">
+      <section className="flex flex-col gap-1 rounded-xl bg-surface p-4 shadow-card lg:bg-transparent lg:p-0 lg:shadow-none">
+        <p className="text-sm text-help">Bienvenue sur votre espace</p>
+        <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-balance text-primary-active lg:text-[30px] lg:leading-[38px]">
+          Bonjour {profile.first_name}
+        </h2>
+        <p className="text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
+        <p className="mt-2 font-semibold text-primary">
           {missing.length > 0
-            ? `« Plus que ${missing.length} étape${missing.length > 1 ? 's' : ''}, ${profile.first_name} ! »`
-            : `« Bravo ${profile.first_name}, votre profil est complet ! »`}
-        </Mascot>
+            ? `Plus que ${missing.length} étape${missing.length > 1 ? 's' : ''} pour compléter votre dossier.`
+            : 'Bravo, votre dossier est complet !'}
+        </p>
       </section>
 
       <StillAccurateCard freshness={data.freshness} />
-
-      <section className="flex flex-col items-center gap-4 rounded-xl bg-surface p-4 text-center shadow-card sm:flex-row sm:text-left">
-        <Ring percent={completion.percent} />
-        <div className="flex min-w-0 flex-col">
-          <p className="mb-1 flex items-center justify-center gap-1.5 text-sm font-semibold tracking-wider text-primary uppercase sm:justify-start">
-            <span className="material-symbols-outlined text-lg" aria-hidden="true">task_alt</span>
-            Avancement du profil
-          </p>
-          <h3 className="text-lg font-bold">Votre dossier est complet à {completion.percent} %</h3>
-          <p className="mt-1 text-help">
-            {completion.complete} élément{completion.complete > 1 ? 's' : ''} complété{completion.complete > 1 ? 's' : ''}{' '}
-            sur {completion.total} au total.
-          </p>
-        </div>
-      </section>
-
+      {!desktop && progress}
       {missing.length > 0 && <Remaining elements={missing} />}
       <DepositCard open={completion.is_complete} />
-
-      <section className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
-        <span
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-highlight text-primary-active"
-          aria-hidden="true"
-        >
-          <span className="material-symbols-outlined text-xl">support_agent</span>
-        </span>
-        <p className="flex flex-col">
-          <span className="text-sm font-semibold text-heading">Besoin d'aide pour votre profil ?</span>
-          <span className="text-sm text-help">Une question ? Adressez-vous au service RH de votre agence.</span>
-        </p>
-      </section>
+      {!desktop && help}
     </>,
+    desktop ? (
+      <>
+        {progress}
+        {help}
+      </>
+    ) : undefined,
   )
 }

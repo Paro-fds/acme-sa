@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router'
 import { saveContactAndEducation } from '../../api/dossier.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import TextField from '../../components/TextField.jsx'
 import { DossierProgress, FieldStatus, SectionHeading } from './SectionParts.jsx'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { HR_INFORMATION_PATH } from './paths.js'
 import { useDossierSection } from './useDossierSection.js'
 
@@ -121,7 +122,10 @@ function EducationLevels({ levels, value, onChange, status, error }) {
   )
 }
 
-function ContactEducationForm({ section }) {
+const PROGRESS_LABEL = 'Section 2 sur 3 · Contact et études'
+const TIP = 'Ces renseignements protègent votre quotidien et valorisent vos compétences pour les promotions internes.'
+
+function ContactEducationForm({ section, desktop }) {
   const navigate = useNavigate()
   const { dossier, save, error, fieldError } = section
   const contact = dossier.emergency_contact
@@ -144,10 +148,12 @@ function ContactEducationForm({ section }) {
       <SectionHeading number={2} title="Contact d'urgence & études">
         Renseignez votre contact prioritaire et votre parcours académique.
       </SectionHeading>
-      <Mascot role="Conseil carrière">
-        « Ces renseignements protègent votre quotidien et valorisent vos compétences pour les promotions internes. »
-      </Mascot>
-      <DossierProgress completion={dossier.completion} section="Section 2 sur 3 · Contact et études" />
+      {!desktop && (
+        <>
+          <Tip>{TIP}</Tip>
+          <DossierProgress completion={dossier.completion} section={PROGRESS_LABEL} />
+        </>
+      )}
 
       <section aria-labelledby="contact-title" className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
         <div className="flex items-center justify-between gap-2">
@@ -202,8 +208,16 @@ function ContactEducationForm({ section }) {
 /** US-202, maquette 09 : section 2 / 3 « Contact d'urgence & études » (CA-04 : lien choisi dans une liste). */
 export default function ContactEducationPage() {
   const section = useDossierSection()
+  const desktop = useIsDesktop()
+  const aside =
+    desktop && section.dossier ? (
+      <>
+        <DossierProgress completion={section.dossier.completion} section={PROGRESS_LABEL} />
+        <Tip title="Pourquoi ces informations ?">{TIP}</Tip>
+      </>
+    ) : undefined
   const page = (children, actions) => (
-    <Page account title="Mon profil" backTo="/profil" backLabel="Mon profil" actions={actions}>
+    <Page account title="Mon dossier" backTo="/profil" backLabel="Mon dossier" actions={actions} aside={aside}>
       {children}
     </Page>
   )
@@ -211,7 +225,7 @@ export default function ContactEducationPage() {
   if (section.loading) return page(<p role="status">Chargement…</p>)
   if (section.loadError) return page(<Alert>{section.loadError.message}</Alert>)
   return page(
-    <ContactEducationForm section={section} />,
+    <ContactEducationForm section={section} desktop={desktop} />,
     <Button type="submit" form="contact-education" disabled={section.sending}>
       {section.sending ? 'Enregistrement…' : 'Enregistrer et continuer'}
       <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>

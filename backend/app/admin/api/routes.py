@@ -73,6 +73,8 @@ class EmployeeListItemOut(BaseModel):
     agency_code: str
     position: str
     status: str
+    photo_url: str | None = None
+    """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
 
 
 class StatusCountsOut(BaseModel):
@@ -116,6 +118,8 @@ class EmployeeFolderOut(BaseModel):
     declined: bool
     changes: list[ChangeOut]
     account_activated: bool
+    photo_url: str | None = None
+    """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
 
 
 @router.get("/statistics", response_model=StatisticsOut)
@@ -193,6 +197,8 @@ class QualifiedEmployeeItemOut(BaseModel):
     validated_domain: str | None
     validated_domain_label: str | None
     updated_at: datetime | None
+    photo_url: str | None = None
+    """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
 
 
 class QualifiedEmployeesSearchResultOut(BaseModel):

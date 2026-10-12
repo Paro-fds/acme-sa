@@ -205,3 +205,32 @@ describe('ProfilePage — erreurs de chargement', () => {
     expect(await screen.findByText('Impossible de charger le profil.')).toBeInTheDocument()
   })
 })
+
+describe('ProfilePage — Mon dossier sur ordinateur (US-113)', () => {
+  it('photo absente : les initiales ; progression et sections dans la colonne de droite', async () => {
+    const { setDesktop } = await import('../../lib/testViewport.js')
+    setDesktop(true)
+    try {
+      getProfile.mockResolvedValue({ ...PROFILE, photo_url: null })
+      renderPage()
+
+      const side = await screen.findByRole('complementary', { name: 'Aide et progression' })
+      expect(within(side).getByRole('progressbar', { name: 'Progression du dossier' })).toBeInTheDocument()
+      expect(within(side).getByRole('link', { name: /Mes coordonnées/ })).toBeInTheDocument()
+      // Certificats et Parcours sont dans le menu de gauche, plus en cartes
+      expect(within(screen.getByRole('main')).queryByRole('link', { name: /Disponible dès votre profil complet|Déposer et suivre/ })).not.toBeInTheDocument()
+      expect(screen.queryByText('Photo officielle')).not.toBeInTheDocument()
+    } finally {
+      setDesktop(false)
+    }
+  })
+
+  it('photo officielle : l’image et la mention « Photo officielle »', async () => {
+    getProfile.mockResolvedValue({ ...PROFILE, photo_url: '/photos/AC-1001.jpg' })
+    renderPage()
+
+    const summary = await screen.findByRole('region', { name: new RegExp(PROFILE.last_name) })
+    expect(within(summary).getByRole('img', { name: /^Photo de / })).toHaveAttribute('src', '/photos/AC-1001.jpg')
+    expect(within(summary).getByText('Photo officielle')).toBeInTheDocument()
+  })
+})

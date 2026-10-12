@@ -4,8 +4,8 @@ import { getCertificateForm } from '../../api/certificates.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import TextField from '../../components/TextField.jsx'
 import { formatSize } from '../../lib/format.js'
 import { resizeImage } from '../../lib/resizeImage.js'
@@ -197,9 +197,7 @@ function DepositForm({ form, firstName, depositing }) {
 
   return (
     <form id="deposit" onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
-      <Mascot role="Conseil carrière">
-        « Bravo ! Votre profil est complet : déposez votre certificat pour le faire valider par les RH sous 5 jours ouvrables. »
-      </Mascot>
+      <Tip>Bravo ! Votre profil est complet : déposez votre certificat pour le faire valider par les RH sous 5 jours ouvrables.</Tip>
       <FilePicker file={file} onFile={setFile} maxMb={form.max_mb} error={fieldError('file')} progress={progress} />
 
       <section aria-labelledby="fields-title" className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">

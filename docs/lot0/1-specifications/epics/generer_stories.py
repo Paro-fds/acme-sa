@@ -184,6 +184,16 @@ S = [
    "Réglage coupé : l'écran de connexion n'annonce ni étape ni code ; « Ma double authentification » disparaît du menu du compte, et la méthode et sa réinitialisation de l'écran des comptes.",
    "Réglage allumé (true dans Render ou backend/.env) : la double authentification de US-102 revient telle quelle, sans changement de code."],
   "Demande de l'utilisateur du 2026-10-12 : « faisons une connexion directe pour l'admin mais vous pouvez laisser cela dans le code ». La double authentification (US-102) reste écrite et testée ; à confirmer par M. Hilaire avant la mise en production."),
+ ("113","D2","Retrouver mon espace sur ordinateur, avec ma photo","2","",
+  "Must","EF-201 (écran)","","",
+  "employé","utiliser le portail aussi bien sur un ordinateur que sur mon téléphone, et m'y reconnaître",
+  "avoir envie d'y revenir pour tenir mon dossier à jour",
+  ["Sur ordinateur, un menu à gauche (Accueil, Mon dossier, Mes certificats, Mon parcours, Ma carrière ; nom, poste et « Se déconnecter » en bas), le contenu au centre et, à droite, la progression et l'aide de la page ; la barre du bas du téléphone n'y figure pas.",
+   "Sur téléphone, la barre du bas reste (« Mon profil » devient « Mon dossier ») et un bouton menu (☰) ouvre toutes les rubriques, dont Mon parcours, avec « Se déconnecter ».",
+   "La Penseuse est retirée des écrans employé, comme de l'accueil et de la connexion ; ses messages deviennent des conseils sobres.",
+   "La photo officielle de l'employé (système RH) s'affiche dans le menu, sur Mon dossier, et dans la liste et la fiche de l'espace de gestion ; tant qu'elle n'existe pas, les initiales occupent la même place et la même taille.",
+   "Sur ordinateur, les boutons d'enregistrement sont en bas du formulaire, plus dans une barre collée."],
+  "Choix de l'utilisateur du 2026-10-12 d'après les maquettes « Espace employé sur ordinateur » et « Photo officielle » (canvas « Accueil et connexion — avant / après ») : menu à gauche, bouton menu sur téléphone. La source des photos (système du directeur) reste à préciser : le champ photo_url est exposé vide, sans import ni lien « Ma photo n'est plus à jour » pour l'instant. Aucune vraie photo hors production."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -460,7 +470,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

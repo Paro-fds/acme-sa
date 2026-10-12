@@ -2,8 +2,9 @@ import { useId } from 'react'
 import { Link } from 'react-router'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
+import Avatar from '../../components/Avatar.jsx'
 import Page from '../../components/Page.jsx'
-import { initials } from '../../lib/format.js'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { CERTIFICATES_PATH } from '../certificates/paths.js'
 import { CONTACT_EDUCATION_PATH, COORDINATES_PATH, HR_INFORMATION_PATH } from '../dossier/paths.js'
@@ -11,19 +12,23 @@ import CompletionCard from './CompletionCard.jsx'
 import InfoSection from './InfoSection.jsx'
 import { UNIT_TO_CONFIRM, profileSections } from './profileSections.js'
 
-function ProfileSummary({ profile }) {
+/** US-113 : photo officielle du système RH (cadenas : elle ne se change pas ici), sinon les initiales. */
+function ProfileSummary({ profile, large }) {
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} className="rounded-xl bg-surface p-4 shadow-card">
-      <div className="flex items-center gap-4">
-        <div
-          aria-hidden="true"
-          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-white"
-        >
-          {initials(profile.last_name, profile.first_name)}
+    <section aria-labelledby={titleId} className="rounded-xl bg-surface p-4 shadow-card lg:p-6">
+      <div className="flex items-center gap-4 lg:gap-7">
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <Avatar firstName={profile.first_name} lastName={profile.last_name} photoUrl={profile.photo_url} size={large ? 'xl' : 'lg'} ring />
+          {profile.photo_url && (
+            <span className="flex items-center gap-1 text-xs text-muted">
+              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">lock</span>
+              Photo officielle
+            </span>
+          )}
         </div>
         <div className="flex min-w-0 flex-col">
-          <h2 id={titleId} className="text-xl font-bold break-words">
+          <h2 id={titleId} className="text-xl font-bold break-words lg:text-2xl">
             {profile.last_name} {profile.first_name}
           </h2>
           <p className="font-semibold text-info-text">{profile.position}</p>
@@ -37,6 +42,8 @@ function ProfileSummary({ profile }) {
     </section>
   )
 }
+
+const TITLE = 'Mon dossier'
 
 /** US-202 : sections du dossier à compléter (maquettes 08, 09). */
 const DOSSIER_SECTIONS = [
@@ -63,30 +70,43 @@ function NavCard({ to, icon, title, text }) {
   )
 }
 
-/** US-201 (dossier et pourcentage), sections du dossier (US-202, US-203), « Mes certificats » (US-204, US-301) et « Mon parcours » (hérité de la V2, D-44). */
+/**
+ * US-201 (dossier et pourcentage), sections du dossier (US-202, US-203), « Mes certificats » (US-204, US-301) et « Mon parcours » (hérité de la V2, D-44).
+ * US-113 : « Mon dossier » ; sur ordinateur, la progression et les 3 sections à droite, Certificats et Parcours dans le menu à gauche.
+ */
 export default function ProfilePage() {
   const { data: profile, error, loading } = useLoader(getProfile)
+  const desktop = useIsDesktop()
 
-  if (loading) return <Page account title="Mon profil"><p role="status">Chargement…</p></Page>
-  if (error) return <Page account title="Mon profil"><Alert>{error.message}</Alert></Page>
-  if (!profile) return <Page account title="Mon profil"><Alert>Impossible de charger le profil.</Alert></Page>
+  if (loading) return <Page account title={TITLE}><p role="status">Chargement…</p></Page>
+  if (error) return <Page account title={TITLE}><Alert>{error.message}</Alert></Page>
+  if (!profile) return <Page account title={TITLE}><Alert>Impossible de charger le profil.</Alert></Page>
 
   const editable = (fieldName) => profile.editable_fields.includes(fieldName)
-
-  return (
-    <Page account title="Mon profil">
-      <ProfileSummary profile={profile} />
+  const progress = (
+    <>
       <CompletionCard completion={profile.completion} />
       {DOSSIER_SECTIONS.map((section) => (
         <NavCard key={section.to} {...section} />
       ))}
-      <NavCard
-        to={CERTIFICATES_PATH}
-        icon="workspace_premium"
-        title="Mes certificats"
-        text={profile.completion.is_complete ? 'Déposer et suivre mes certificats' : 'Disponible dès votre profil complet'}
-      />
-      <NavCard to="/parcours" icon="timeline" title="Mon parcours" text="Diplômes, formations, expériences et compétences" />
+    </>
+  )
+
+  return (
+    <Page account title={TITLE} aside={desktop ? progress : undefined}>
+      <ProfileSummary profile={profile} large={desktop} />
+      {!desktop && progress}
+      {!desktop && (
+        <>
+          <NavCard
+            to={CERTIFICATES_PATH}
+            icon="workspace_premium"
+            title="Mes certificats"
+            text={profile.completion.is_complete ? 'Déposer et suivre mes certificats' : 'Disponible dès votre profil complet'}
+          />
+          <NavCard to="/parcours" icon="timeline" title="Mon parcours" text="Diplômes, formations, expériences et compétences" />
+        </>
+      )}
 
       {profileSections(profile).map(({ icon, title, fields }) => (
         <InfoSection

@@ -3,9 +3,10 @@ import { Link } from 'react-router'
 import { applyToOpening, listMyApplications, listMyOpenings, sendCv, withdrawApplication } from '../../api/openings.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import { formatDate, formatLocalDate } from '../../lib/format.js'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 
 const STEP_COUNT = 7
@@ -206,6 +207,7 @@ function ApplicationItem({ application, onWithdrawn }) {
 export default function MyOpeningsPage() {
   const { data, loading, error, reload } = useLoader(load)
   const [received, setReceived] = useState(null)
+  const desktop = useIsDesktop()
   const active = (openingId) =>
     data?.applications.find((application) => application.opening_id === openingId && application.step !== 'CLOSED')
 
@@ -214,8 +216,18 @@ export default function MyOpeningsPage() {
     reload()
   }
 
+  const tip = (
+    <Tip title="Ce qui compte">
+      Chaque certificat validé peut vous ouvrir de nouveaux postes. Déposez-les dans{' '}
+      <Link to="/certificats" className="font-semibold text-primary underline underline-offset-2">
+        Mes certificats
+      </Link>
+      .
+    </Tip>
+  )
+
   return (
-    <Page account title="Ma carrière">
+    <Page account title="Ma carrière" aside={desktop ? tip : undefined}>
       <div className="flex flex-col gap-1">
         <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-primary-active">Postes ouverts pour vous</h2>
         <p className="text-sm text-help">
@@ -242,13 +254,7 @@ export default function MyOpeningsPage() {
           <p className="rounded-xl bg-surface p-4 text-base text-heading shadow-card">
             Aucun poste ouvert ne correspond à votre profil pour le moment.
           </p>
-          <Mascot role="Conseil carrière">
-            « Chaque certificat validé peut vous ouvrir de nouveaux postes. Déposez-les dans{' '}
-            <Link to="/certificats" className="font-semibold text-primary underline underline-offset-2">
-              Mes certificats
-            </Link>
-            . »
-          </Mascot>
+          {!desktop && tip}
         </div>
       )}
       {data && data.applications.length > 0 && (

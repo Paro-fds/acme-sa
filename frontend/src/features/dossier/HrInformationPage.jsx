@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router'
 import { confirmHrInformation, reportHrError } from '../../api/dossier.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import TextField from '../../components/TextField.jsx'
 import { formatLocalDate } from '../../lib/format.js'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { DossierProgress, SectionHeading } from './SectionParts.jsx'
 import { useDossierSection } from './useDossierSection.js'
 
@@ -133,8 +134,17 @@ function HrItemCard({ item, section }) {
 export default function HrInformationPage() {
   const navigate = useNavigate()
   const section = useDossierSection()
+  const desktop = useIsDesktop()
+  const tip = <Tip>Confirmer votre poste et votre agence aide les RH à préparer vos prochaines opportunités.</Tip>
+  const aside =
+    desktop && section.dossier ? (
+      <>
+        <DossierProgress completion={section.dossier.completion} />
+        {tip}
+      </>
+    ) : undefined
   const page = (children, actions) => (
-    <Page account title="Mon profil" backTo="/profil" backLabel="Mon profil" actions={actions}>
+    <Page account title="Mon dossier" backTo="/profil" backLabel="Mon dossier" actions={actions} aside={aside}>
       {children}
     </Page>
   )
@@ -148,8 +158,12 @@ export default function HrInformationPage() {
         Ces informations viennent du service RH. Vérifiez-les : vous ne pouvez pas les modifier, mais vous pouvez signaler une
         erreur.
       </SectionHeading>
-      <Mascot role="Conseil RH">« Confirmer votre poste et votre agence aide les RH à préparer vos prochaines opportunités. »</Mascot>
-      <DossierProgress completion={current.completion} />
+      {!desktop && (
+        <>
+          {tip}
+          <DossierProgress completion={current.completion} />
+        </>
+      )}
       {current.hr_information.map((item) => (
         <HrItemCard key={item.key} item={item} section={section} />
       ))}

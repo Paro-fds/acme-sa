@@ -49,7 +49,7 @@ export default function AppRoutes() {
       <Route path="/certificats/merci" element={<ThanksPage />} />
       <Route path="/parcours" element={<CareerPage />} />
       <Route path="/carriere" element={<MyOpeningsPage />} />
-      {/* US-206 : les adresses de l'ancien parcours du MVP ramènent à « Mon profil ». */}
+      {/* US-206 : les adresses de l'ancien parcours du MVP ramènent à « Mon dossier ». */}
       <Route path="/documents" element={<Navigate to="/profil" replace />} />
       <Route path="/mise-a-jour/*" element={<Navigate to="/profil" replace />} />
       <Route path="/admin/connexion" element={<AdminLoginPage />} />

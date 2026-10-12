@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
+import { setDesktop } from '../../lib/testViewport.js'
 import EmployeeHomePage from './EmployeeHomePage.jsx'
 
 vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn() }))
@@ -36,6 +37,8 @@ function ConsentProbe() {
   return <p>Avant de commencer, puis {useLocation().state?.next}</p>
 }
 
+afterEach(() => setDesktop(false))
+
 function renderPage() {
   render(
     <MemoryRouter initialEntries={['/accueil']}>
@@ -62,7 +65,20 @@ describe('US-207 CA-01 — Accueil de l’employé (écran 06)', () => {
     expect(screen.getByText('Chargée de crédit · Agence Démo')).toBeVisible()
     expect(screen.getByRole('heading', { name: 'Votre dossier est complet à 62 %' })).toBeVisible()
     expect(screen.getByRole('progressbar', { name: 'Progression du dossier' })).toHaveAttribute('aria-valuenow', '62')
-    expect(screen.getByText('« Plus que 3 étapes, Lucie ! »')).toBeVisible()
+    expect(screen.getByText('Plus que 3 étapes pour compléter votre dossier.')).toBeVisible()
+    // US-113 : La Penseuse est retirée de l'espace employé
+    expect(screen.queryByText(/Penseuse/)).not.toBeInTheDocument()
+  })
+
+  it('US-113 : sur ordinateur, la progression et l’aide passent dans la colonne de droite', async () => {
+    setDesktop(true)
+    getProfile.mockResolvedValue(profile(['emergency_contact', 'education_level', 'position_confirmed']))
+    renderPage()
+
+    const side = await screen.findByRole('complementary', { name: 'Aide et progression' })
+    expect(within(side).getByRole('heading', { name: 'Votre dossier est complet à 62 %' })).toBeInTheDocument()
+    expect(within(side).getByText("Besoin d'aide pour votre profil ?")).toBeInTheDocument()
+    expect(within(screen.getByRole('main')).getAllByRole('heading', { name: 'Votre dossier est complet à 62 %' })).toHaveLength(1)
   })
 
   it('ce qui reste, avec un bouton par élément', async () => {

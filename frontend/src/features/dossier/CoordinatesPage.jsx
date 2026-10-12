@@ -2,14 +2,17 @@ import { useState } from 'react'
 import { saveCoordinates } from '../../api/dossier.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import TextField from '../../components/TextField.jsx'
+import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import IdentityBlock from './IdentityBlock.jsx'
 import { DossierProgress, FieldStatus, SectionHeading } from './SectionParts.jsx'
 import { useDossierSection } from './useDossierSection.js'
 
 const TITLE = 'Mes coordonnées'
+const PROGRESS_LABEL = 'Section 1 sur 3 · Coordonnées personnelles'
+const TIP = 'Vos coordonnées permettent aux RH et à votre agence de rester en contact direct avec vous.'
 
 function initialValues(dossier) {
   return {
@@ -20,7 +23,7 @@ function initialValues(dossier) {
   }
 }
 
-function CoordinatesForm({ section }) {
+function CoordinatesForm({ section, desktop }) {
   const { dossier, save, saved, error, fieldError } = section
   const [values, setValues] = useState(() => initialValues(dossier))
   const set = (name) => (event) => setValues((current) => ({ ...current, [name]: event.target.value }))
@@ -36,9 +39,13 @@ function CoordinatesForm({ section }) {
       <SectionHeading number={1} title={TITLE}>
         Mettez à jour vos informations de contact.
       </SectionHeading>
-      <Mascot role="Guide carrière">« Vos coordonnées permettent aux RH et à votre agence de rester en contact direct avec vous. »</Mascot>
-      <DossierProgress completion={dossier.completion} section="Section 1 sur 3 · Coordonnées personnelles" />
-      <IdentityBlock />
+      {!desktop && (
+        <>
+          <Tip>{TIP}</Tip>
+          <DossierProgress completion={dossier.completion} section={PROGRESS_LABEL} />
+          <IdentityBlock />
+        </>
+      )}
 
       <section aria-labelledby="coordinates-title" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
@@ -113,11 +120,23 @@ function CoordinatesForm({ section }) {
   )
 }
 
-/** US-202, maquette 08 : section 1 / 3 « Mes coordonnées » (téléphone, adresse, email ou « pas d'adresse email »). */
+/**
+ * US-202, maquette 08 : section 1 / 3 « Mes coordonnées » (téléphone, adresse, email ou « pas d'adresse email »).
+ * US-113 : sur ordinateur, progression, identité vérifiée et conseil dans la colonne de droite.
+ */
 export default function CoordinatesPage() {
   const section = useDossierSection()
+  const desktop = useIsDesktop()
+  const aside =
+    desktop && section.dossier ? (
+      <>
+        <DossierProgress completion={section.dossier.completion} section={PROGRESS_LABEL} />
+        <IdentityBlock />
+        <Tip title="Pourquoi ces informations ?">{TIP}</Tip>
+      </>
+    ) : undefined
   const page = (children, actions) => (
-    <Page account title="Mon profil" backTo="/profil" backLabel="Mon profil" actions={actions}>
+    <Page account title="Mon dossier" backTo="/profil" backLabel="Mon dossier" actions={actions} aside={aside}>
       {children}
     </Page>
   )
@@ -125,7 +144,7 @@ export default function CoordinatesPage() {
   if (section.loading) return page(<p role="status">Chargement…</p>)
   if (section.loadError) return page(<Alert>{section.loadError.message}</Alert>)
   return page(
-    <CoordinatesForm section={section} />,
+    <CoordinatesForm section={section} desktop={desktop} />,
     <Button type="submit" form="coordinates" disabled={section.sending}>
       <span className="material-symbols-outlined" aria-hidden="true">save</span>
       {section.sending ? 'Enregistrement…' : 'Enregistrer'}

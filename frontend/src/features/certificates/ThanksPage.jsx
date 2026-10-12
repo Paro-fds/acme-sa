@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router'
 import { sendFeedback } from '../../api/certificates.js'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
+import Tip from '../../components/Tip.jsx'
 import { formatSize } from '../../lib/format.js'
 import CertificateStatus from './CertificateStatus.jsx'
 import { CERTIFICATES_PATH, DEPOSIT_PATH } from './paths.js'
@@ -65,9 +65,7 @@ export default function ThanksPage() {
         <h2 className="text-[26px] leading-8 font-bold">{firstName ? `Merci, ${firstName} !` : 'Merci !'}</h2>
         <p>Votre document a bien été transmis au service des Ressources Humaines.</p>
       </div>
-      <Mascot role="Conseil RH">
-        « Félicitations pour cette démarche. Chaque titre validé renforce vos perspectives au sein du réseau. »
-      </Mascot>
+      <Tip>Félicitations pour cette démarche. Chaque titre validé renforce vos perspectives au sein du réseau.</Tip>
 
       <section aria-labelledby="summary-title" className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
         <h3 id="summary-title" className="text-lg font-semibold">

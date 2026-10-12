@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router'
 import { register } from '../../api/auth.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
-import Mascot from '../../components/Mascot.jsx'
 import Page from '../../components/Page.jsx'
 import PasswordField from '../../components/PasswordField.jsx'
 import { EMPLOYEE_LOGIN_PATH } from '../../lib/paths.js'
@@ -48,8 +47,6 @@ export default function CreatePasswordPage() {
 
   return (
     <Page title="Connexion" backTo={EMPLOYEE_LOGIN_PATH}>
-      <Mascot role="Conseillère RH">« Bienvenue ! Choisissez un mot de passe pour sécuriser votre dossier. »</Mascot>
-
       <div className="flex flex-col gap-2">
         <h2 className="text-[26px] leading-8 font-bold">Première connexion</h2>
         <p>Saisissez vos informations telles qu'elles figurent dans votre dossier RH, puis choisissez votre mot de passe.</p>

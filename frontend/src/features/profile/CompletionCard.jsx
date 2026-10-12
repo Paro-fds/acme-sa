@@ -6,7 +6,7 @@ export default function CompletionCard({ completion }) {
   const { percent, complete, total } = completion
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
-      <h2 id={titleId} className="text-xl font-bold">
+      <h2 id={titleId} className="text-xl font-bold text-balance lg:text-lg">
         Votre dossier est complet à {percent} %
       </h2>
       <div

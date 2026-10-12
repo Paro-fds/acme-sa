@@ -7,6 +7,7 @@
 //   us206 → EMP-B (anciennes adresses du MVP)
 //   lot1-parcours-certificat → EMP-A (profil complet, dépôt d’un certificat)
 //   us201 → EMP-H1 (lit son dossier)        us202 → EMP-E (dossier : consentement, coordonnées, contact, études)
+//   us113 → EMP-H2 (parcourt les écrans employé sur ordinateur et téléphone, sans rien enregistrer)
 import { execFileSync, spawn } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'

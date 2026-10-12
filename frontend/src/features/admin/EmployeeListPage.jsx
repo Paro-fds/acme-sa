@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { getEmployeesExportUrl, searchQualifiedEmployees } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
+import Avatar from '../../components/Avatar.jsx'
 import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import { formatLocalDate } from '../../lib/format.js'
@@ -68,6 +69,7 @@ function EmployeeCards({ employees }) {
             state={state}
             className="flex min-h-11 items-center gap-3 rounded-lg border border-rh-line bg-surface p-4 hover:border-primary"
           >
+            <Avatar firstName={employee.first_name} lastName={employee.last_name} photoUrl={employee.photo_url} size="md" />
             <span className="flex min-w-0 flex-1 flex-col gap-1.5">
               <span className="font-semibold text-primary">{employee.display_name}</span>
               <span className="text-sm text-rh-text">
@@ -113,8 +115,9 @@ function EmployeeTable({ employees }) {
                   to={folderUrl(employee)}
                   state={state}
                   onClick={(event) => event.stopPropagation()}
-                  className="font-medium text-primary hover:underline"
+                  className="flex items-center gap-3 font-medium text-primary hover:underline"
                 >
+                  <Avatar firstName={employee.first_name} lastName={employee.last_name} photoUrl={employee.photo_url} size="sm" />
                   {employee.display_name}
                 </Link>
               </td>
