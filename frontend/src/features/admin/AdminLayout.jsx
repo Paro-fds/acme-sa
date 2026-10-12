@@ -4,17 +4,18 @@ import { getAdminFrame } from '../../api/adminFrame.js'
 import logo from '../../assets/logo-acme.png'
 import AccountMenu from '../../components/AccountMenu.jsx'
 import { useLogout } from '../../lib/useLogout.js'
+import { can } from './roles.js'
 
-/** Rubriques des écrans validés A02 → A11, dans leur ordre, plus « Postes ouverts » (US-802, lot 4, sans maquette). */
+/** Rubriques des écrans validés A02 → A11, dans leur ordre, plus « Postes ouverts » (US-802, lot 4, sans maquette) ; chacune selon le rôle. */
 const NAV_ITEMS = [
-  { to: '/admin', end: true, label: 'Tableau de bord' },
-  { to: '/admin/validation', label: 'File de validation', count: 'validation', tone: 'neutral' },
-  { to: '/admin/employes', label: 'Employés' },
-  { to: '/admin/postes', label: 'Postes ouverts' },
-  { to: '/admin/signalements', label: 'Signalements', count: 'reports', tone: 'warning' },
-  { to: '/admin/referentiel', label: 'À rattacher', count: 'to_attach', tone: 'warning' },
-  { to: '/admin/comptes', label: 'Comptes et rôles' },
-  { to: '/admin/audit', label: "Journal d'audit" },
+  { to: '/admin', end: true, label: 'Tableau de bord', access: 'dashboard' },
+  { to: '/admin/validation', label: 'File de validation', access: 'validation', count: 'validation', tone: 'neutral' },
+  { to: '/admin/employes', label: 'Employés', access: 'employees' },
+  { to: '/admin/postes', label: 'Postes ouverts', access: 'openings' },
+  { to: '/admin/signalements', label: 'Signalements', access: 'reports', count: 'reports', tone: 'warning' },
+  { to: '/admin/referentiel', label: 'À rattacher', access: 'referential', count: 'to_attach', tone: 'warning' },
+  { to: '/admin/comptes', label: 'Comptes et rôles', access: 'accounts' },
+  { to: '/admin/audit', label: "Journal d'audit", access: 'audit' },
 ]
 
 const BADGE_TONES = {
@@ -53,6 +54,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
   const logout = useLogout('admin')
   const [menuOpen, setMenuOpen] = useState(false)
   const accountLabel = frame ? `${frame.me.display_name} · ${frame.me.role_label}` : undefined
+  const role = frame?.me.role
 
   return (
     <div className="flex min-h-dvh flex-col bg-rh-canvas text-rh-strong">
@@ -72,7 +74,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
           <span className="truncate text-base font-medium">Portail RH</span>
         </div>
         <div className="flex shrink-0 items-center gap-2 text-sm">
-          <AccountMenu space="admin" label={accountLabel} />
+          <AccountMenu space="admin" label={accountLabel} role={role} />
           <span className="hidden text-white/40 sm:inline" aria-hidden="true">·</span>
           <button
             type="button"
@@ -94,7 +96,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
           }`}
         >
           <nav aria-label="Menu principal RH" className="flex flex-col gap-1 px-3 lg:sticky lg:top-22">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.filter((item) => can(role, item.access)).map((item) => {
               const count = item.count ? frame?.counts[item.count] : 0
               return (
                 <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMenuOpen(false)} className={navLinkClass}>

@@ -22,7 +22,11 @@ def _actor(account: AdminAccount) -> Actor:
 
 
 def reader(request: Request) -> Actor:
-    return _actor(current_admin_account(request))
+    """Consultation : Administrateur, Agent RH, Lecture seule (US-108 : pas le Responsable du référentiel)."""
+    account = current_admin_account(request)
+    if account.role not in (AdminRole.ADMIN, AdminRole.AGENT_RH, AdminRole.READONLY):
+        raise InsufficientRole("Action non autorisée pour votre rôle.")
+    return _actor(account)
 
 
 def editor(request: Request) -> Actor:

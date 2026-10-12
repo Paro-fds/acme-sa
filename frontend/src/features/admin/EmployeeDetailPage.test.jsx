@@ -3,11 +3,12 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import EmployeeDetailPage from './EmployeeDetailPage.jsx'
-import { getEmployee, getEmployeeDossier, listEmployeeCertificates, listEmployeeDocuments } from '../../api/admin.js'
+import { getAdminMe, getEmployee, getEmployeeDossier, listEmployeeCertificates, listEmployeeDocuments } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
 vi.mock('../../api/admin.js', () => ({
   getEmployee: vi.fn(),
+  getAdminMe: vi.fn(),
   getEmployeeDossier: vi.fn(),
   listEmployeeDocuments: vi.fn(),
   listEmployeeCertificates: vi.fn(),
@@ -92,6 +93,7 @@ describe('EmployeeDetailPage (US-20, US-108 : écran A07)', () => {
     getEmployeeDossier.mockResolvedValue({ dossier: DOSSIER, reports: [] })
     listEmployeeCertificates.mockResolvedValue([])
     listEmployeeDocuments.mockResolvedValue([])
+    getAdminMe.mockResolvedValue({ role: 'ADMIN' })
   })
 
   it('A07 : en-tête avec nom, matricule, poste, agence officielle, statut du dossier et profil en %', async () => {
@@ -224,5 +226,21 @@ describe('EmployeeDetailPage (US-20, US-108 : écran A07)', () => {
     getEmployee.mockRejectedValue(new ApiError(401, 'NOT_AUTHENTICATED', 'Vous devez être connecté.'))
     renderAt()
     expect(await screen.findByText('Écran connexion admin')).toBeInTheDocument()
+  })
+})
+
+describe('EmployeeDetailPage — droits par rôle (US-108)', () => {
+  it('un Agent RH consulte le dossier sans le bouton « Réinitialiser l’accès » (Administrateur seul)', async () => {
+    vi.clearAllMocks()
+    getEmployee.mockResolvedValue(FOLDER)
+    getEmployeeDossier.mockResolvedValue({ dossier: DOSSIER, reports: [] })
+    listEmployeeCertificates.mockResolvedValue([])
+    listEmployeeDocuments.mockResolvedValue([])
+    getAdminMe.mockResolvedValue({ role: 'AGENT_RH' })
+    renderAt()
+
+    await screen.findByRole('region', { name: 'Profil' })
+    expect(screen.queryByRole('region', { name: 'Accès' })).not.toBeInTheDocument()
+    expect(within(screen.getByRole('main')).queryAllByRole('button')).toHaveLength(0)
   })
 })

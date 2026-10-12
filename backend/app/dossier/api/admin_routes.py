@@ -9,13 +9,16 @@ from app.auth.api.dependencies import (
     container,
     current_admin,
     current_admin_account,
-    require_not_readonly,
+    require_case_reader,
+    require_validator,
 )
 from app.auth.domain.admin import AdminAccount
 from app.dossier.api.routes import DossierOut
 from app.dossier.application.error_reports_queue import ErrorReportItemView, ErrorReportQueueView
 
-router = APIRouter(prefix="/api/admin/reports", tags=["admin-reports"], dependencies=[Depends(current_admin)])
+router = APIRouter(
+    prefix="/api/admin/reports", tags=["admin-reports"], dependencies=[Depends(current_admin), Depends(require_case_reader)]
+)
 
 
 class ErrorReportItemOut(BaseModel):
@@ -70,7 +73,7 @@ def list_reports(
     )
 
 
-@router.post("/{report_id}/decide", response_model=ErrorReportItemOut, dependencies=[Depends(require_not_readonly)])
+@router.post("/{report_id}/decide", response_model=ErrorReportItemOut, dependencies=[Depends(require_validator)])
 def decide_report(
     report_id: int,
     payload: DecideReportIn,

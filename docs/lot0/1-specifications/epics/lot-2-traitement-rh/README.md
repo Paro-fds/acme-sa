@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-15 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+16 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -15,6 +15,7 @@ Chacun entre dans le portail simplement, et les comptes RH sont fortement proté
 | [US-103](US-103-donner-un-role-a-chaque-compte-rh.md) | Donner un rôle à chaque compte RH | Must | — | Fait |
 | [US-104](US-104-gerer-les-comptes-et-debloquer-un-employe.md) | Gérer les comptes et débloquer un employé | Must | — | Fait |
 | [US-108](US-108-aligner-l-espace-rh-sur-les-ecrans-valides.md) | Aligner l'espace RH sur les écrans validés | Must | — | Fait |
+| [US-109](US-109-charger-les-pages-sans-texte-d-icone.md) | Charger les pages sans texte d'icône | Must | — | Fait |
 
 ## D3 Certificats
 

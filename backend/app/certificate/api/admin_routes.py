@@ -11,7 +11,8 @@ from app.auth.api.dependencies import (
     current_admin,
     current_admin_account,
     require_admin,
-    require_not_readonly,
+    require_case_reader,
+    require_validator,
 )
 from app.auth.domain.admin import AdminAccount
 from app.certificate.application.validation_queue import (
@@ -20,7 +21,9 @@ from app.certificate.application.validation_queue import (
     ValidationQueueView,
 )
 
-router = APIRouter(prefix="/api/admin/validation", tags=["validation"], dependencies=[Depends(current_admin)])
+router = APIRouter(
+    prefix="/api/admin/validation", tags=["validation"], dependencies=[Depends(current_admin), Depends(require_case_reader)]
+)
 
 
 class QueueItemOut(BaseModel):
@@ -76,7 +79,7 @@ def get_queue(
 def claim_next(
     request: Request,
     admin: AdminAccount = Depends(current_admin_account),
-    _: None = Depends(require_not_readonly),
+    _: None = Depends(require_validator),
 ) -> dict:
     cert = container(request).claim_next_certificate().execute(
         admin_username=admin.username, admin_employee_id=admin.employee_id
@@ -212,7 +215,7 @@ def correct_fields(
     body: CorrectFieldsIn,
     request: Request,
     admin: AdminAccount = Depends(current_admin_account),
-    _: None = Depends(require_not_readonly),
+    _: None = Depends(require_validator),
 ) -> dict:
     updated = container(request).correct_certificate_fields().execute(
         certificate_id=certificate_id,
@@ -260,7 +263,7 @@ def decide_certificate(
     body: DecisionIn,
     request: Request,
     admin: AdminAccount = Depends(current_admin_account),
-    _: None = Depends(require_not_readonly),
+    _: None = Depends(require_validator),
 ) -> dict:
     updated = container(request).decide_certificate().execute(
         certificate_id=certificate_id,

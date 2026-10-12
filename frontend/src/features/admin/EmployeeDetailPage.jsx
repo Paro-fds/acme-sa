@@ -9,6 +9,7 @@ import AdminCertificatesBlock from './AdminCertificatesBlock.jsx'
 import AdminDocuments from './AdminDocuments.jsx'
 import Block from './Block.jsx'
 import ResetAccess from './ResetAccess.jsx'
+import { can } from './roles.js'
 
 export const DECLINED_MENTION = "L'employé a indiqué ne pas souhaiter mettre à jour son dossier"
 
@@ -171,11 +172,12 @@ const loadFolder = (id) =>
     adminApi.getEmployeeDossier(id),
     adminApi.listEmployeeCertificates(id).catch(() => []),
     adminApi.listEmployeeDocuments(id),
+    adminApi.getAdminMe().catch(() => null),
   ])
 
 /**
  * US-20, US-21, US-304 ; US-108 : écran A07 « Dossier d'un employé », en lecture seule.
- * Profil V2 avec les dates de confirmation, certificats, signalements ; accès (US-22).
+ * Profil V2 avec les dates de confirmation, certificats, signalements ; accès (US-22, Administrateur seul).
  */
 export default function EmployeeDetailPage() {
   const { id } = useParams()
@@ -208,7 +210,7 @@ export default function EmployeeDetailPage() {
   }
   if (error) return page(<Alert>{error.message}</Alert>)
 
-  const [folder, { dossier, reports }, certificates, documents] = data
+  const [folder, { dossier, reports }, certificates, documents, me] = data
   return page(
     <>
       <div className="flex flex-col gap-3">
@@ -231,7 +233,9 @@ export default function EmployeeDetailPage() {
       <ReportsBlock reports={reports} />
       <PreviousUpdateBlock folder={folder} />
       {documents.length > 0 && <AdminDocuments documents={documents} />}
-      <ResetAccess employeeId={folder.id} name={folder.display_name} activated={folder.account_activated} onReset={reload} />
+      {can(me?.role, 'resetAccess') && (
+        <ResetAccess employeeId={folder.id} name={folder.display_name} activated={folder.account_activated} onReset={reload} />
+      )}
     </>,
   )
 }

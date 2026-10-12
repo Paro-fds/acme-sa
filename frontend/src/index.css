@@ -69,6 +69,45 @@
   --shadow-modal: 0 10px 25px -5px rgb(15 23 42 / 0.12);
 }
 
+/*
+ * US-109 : police d'icônes réduite aux icônes du portail (12 Ko au lieu de 4 Mo), fabriquée par `npm run icons`
+ * et préchargée dans index.html. En attendant qu'elle arrive, l'icône reste une case vide de 1em :
+ * son nom (« login », « rocket_launch »…) ne s'affiche jamais en texte (`icons-ready`, posé par main.jsx).
+ * La règle de l'icône est dans la couche de base : les tailles et couleurs des écrans (`text-sm`…) s'y appliquent.
+ */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/material-symbols.woff2') format('woff2');
+}
+
+html:not(.icons-ready) .material-symbols-outlined {
+  color: transparent;
+}
+
+@layer base {
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  width: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+}
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;

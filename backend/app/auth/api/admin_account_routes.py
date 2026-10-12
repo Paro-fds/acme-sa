@@ -136,13 +136,13 @@ def change_my_password(
 
 
 @router.get("/roles", response_model=list[RoleOptionOut])
-def list_roles(admin_id: str = Depends(current_admin)) -> list[RoleOptionOut]:
+def list_roles(admin_id: str = Depends(require_admin)) -> list[RoleOptionOut]:
     """US-103 : rôles disponibles pour les comptes RH."""
     return [RoleOptionOut(value=role.value, label=label) for role, label in ROLE_LABELS.items()]
 
 
 @router.get("/admins", response_model=list[AdminOut])
-def list_admins(request: Request, admin_id: str = Depends(current_admin)) -> list[AdminOut]:
+def list_admins(request: Request, admin_id: str = Depends(require_admin)) -> list[AdminOut]:
     return [AdminOut.of(view, admin_id) for view in container(request).list_admins().execute()]
 
 

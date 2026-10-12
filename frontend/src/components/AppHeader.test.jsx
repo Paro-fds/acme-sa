@@ -153,22 +153,16 @@ describe('AppHeader — menu du compte admin (US-23)', () => {
     render(<RouterProvider router={router} />)
   }
 
-  it('propose « Administrateurs », « Changer mon mot de passe » et « Ma double authentification » (US-102)', async () => {
+  it('rôle inconnu : « Changer mon mot de passe » et « Ma double authentification » (US-102), sans les liens réservés (US-108)', async () => {
     const user = userEvent.setup()
     renderHeader('admin')
 
     await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
     const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
-    expect(items).toEqual([
-      'manage_accountsAdministrateurs',
-      'account_treeRéférentiel',
-      'passwordChanger mon mot de passe',
-      'verified_userMa double authentification',
-      'logoutSe déconnecter',
-    ])
+    expect(items).toEqual(['passwordChanger mon mot de passe', 'verified_userMa double authentification', 'logoutSe déconnecter'])
 
-    await user.click(screen.getByRole('menuitem', { name: 'Administrateurs' }))
-    expect(await screen.findByText('Écran administrateurs')).toBeInTheDocument()
+    await user.click(screen.getByRole('menuitem', { name: 'Changer mon mot de passe' }))
+    expect(await screen.findByText('Écran mot de passe')).toBeInTheDocument()
   })
 
   it('le menu employé ne contient que « Mon parcours » (US-25) et « Se déconnecter »', async () => {

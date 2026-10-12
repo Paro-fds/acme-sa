@@ -8,7 +8,7 @@ vi.mock('../../api/adminFrame.js', () => ({ getAdminFrame: vi.fn() }))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn(), adminLogout: vi.fn() }))
 
 const FRAME = {
-  me: { display_name: 'Administrateur Démo', role_label: 'Administrateur' },
+  me: { display_name: 'Administrateur Démo', role: 'ADMIN', role_label: 'Administrateur' },
   counts: { validation: 27, reports: 9, to_attach: 0 },
 }
 
@@ -39,6 +39,7 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
   it('CA-01 : menu des écrans validés, rubrique active, titre de la page dans le contenu', async () => {
     renderLayout()
     const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
+    await screen.findByText('Administrateur Démo · Administrateur')
     const labels = within(nav).getAllByRole('link').map((link) => link.textContent.replace(/\d+$/, ''))
     expect(labels).toEqual([
       'Tableau de bord',
@@ -53,7 +54,6 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
     expect(within(nav).getByRole('link', { name: /File de validation/ })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { level: 1, name: 'File de validation des certificats' })).toBeInTheDocument()
     expect(screen.getByText('27 certificats en attente')).toBeInTheDocument()
-    await screen.findByText('Administrateur Démo · Administrateur')
   })
 
   it('CA-02 : compteurs réels du menu, aucun compteur à 0', async () => {
@@ -64,11 +64,37 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
     expect(within(nav).getByRole('link', { name: 'À rattacher' })).toBeInTheDocument()
   })
 
-  it('CA-02 : sans réponse de l’API, le cadre s’affiche sans compteur ni nom', async () => {
+  it('CA-02 : sans réponse de l’API, le cadre s’affiche avec les seules rubriques ouvertes à tous', async () => {
     getAdminFrame.mockRejectedValue(new Error('hors ligne'))
     renderLayout()
     const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
-    expect(within(nav).getByRole('link', { name: 'File de validation' })).toBeInTheDocument()
+    expect(within(nav).getAllByRole('link').map((link) => link.textContent)).toEqual(['Tableau de bord', 'Employés'])
     expect(screen.getByText('Contenu')).toBeInTheDocument()
+  })
+})
+
+describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
+  const menuFor = async (role) => {
+    getAdminFrame.mockResolvedValue({ ...FRAME, me: { ...FRAME.me, role } })
+    renderLayout()
+    const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
+    await screen.findByText(/Administrateur Démo/)
+    return within(nav).getAllByRole('link').map((link) => link.textContent.replace(/\d+$/, ''))
+  }
+
+  it('Agent RH : ni « À rattacher », ni « Comptes et rôles », ni « Journal d’audit »', async () => {
+    expect(await menuFor('AGENT_RH')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes ouverts', 'Signalements'])
+  })
+
+  it('Responsable du référentiel : tableau de bord, employés et « À rattacher »', async () => {
+    expect(await menuFor('REFERENTIAL')).toEqual(['Tableau de bord', 'Employés', 'À rattacher'])
+  })
+
+  it('Lecture seule : consultation, sans référentiel, comptes ni journal', async () => {
+    expect(await menuFor('READONLY')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes ouverts', 'Signalements'])
+  })
+
+  it('Administrateur : toutes les rubriques', async () => {
+    expect(await menuFor('ADMIN')).toHaveLength(8)
   })
 })

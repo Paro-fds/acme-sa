@@ -146,7 +146,15 @@ S = [
    "Les écrans A02 à A11 reprennent la présentation de leur maquette (`code.html` fait foi) ; quand le texte d'un écran contredit une règle du registre, la règle l'emporte (D-47).",
    "À 1280 px, le menu reste visible et n'est jamais écrasé par le contenu ; à 390 px, il s'ouvre par un bouton et rien ne défile horizontalement.",
    "Couleurs et styles passent par les jetons du portail, jamais par des valeurs écrites dans les écrans."],
-  "Demande de l'utilisateur du 2026-10-11 (« les pages RH et Admin ne sont pas encore alignées ») : cadre et écrans A02 → A11 dans une seule story, au lot 2. US-207 prévoyait de reprendre les écrans RH au début du lot 2. Choix du 2026-10-11 pour A06 : suivre la maquette (statut du dossier, niveau validé, domaine, dernière mise à jour, liste paginée) ; le statut « Mise à jour effectuée / non effectuée » et ses puces (ancien parcours, US-206) disparaissent. A07 lit le dossier V2 (`GET /api/admin/employees/{id}/dossier`) avec la date de chaque confirmation ; ce qui a été envoyé avec l'ancien portail reste lisible. A09 : le rattachement se fait par l'import du fichier (D-27) présenté à côté du tableau ; la saisie à l'écran viendra avec US-503. Compteurs du menu : `GET /api/admin/menu-counts`."),
+  "Demande de l'utilisateur du 2026-10-11 (« les pages RH et Admin ne sont pas encore alignées ») : cadre et écrans A02 → A11 dans une seule story, au lot 2. US-207 prévoyait de reprendre les écrans RH au début du lot 2. Choix du 2026-10-11 pour A06 : suivre la maquette (statut du dossier, niveau validé, domaine, dernière mise à jour, liste paginée) ; le statut « Mise à jour effectuée / non effectuée » et ses puces (ancien parcours, US-206) disparaissent. A07 lit le dossier V2 (`GET /api/admin/employees/{id}/dossier`) avec la date de chaque confirmation ; ce qui a été envoyé avec l'ancien portail reste lisible. A09 : le rattachement se fait par l'import du fichier (D-27) présenté à côté du tableau ; la saisie à l'écran viendra avec US-503. Compteurs du menu : `GET /api/admin/menu-counts`. Droits par rôle (choix du 2026-10-11, cahier des charges §4.3, à confirmer par M. Hilaire) : journal d'audit, comptes et rôles, réinitialiser un accès : Administrateur seul ; référentiel : Administrateur et Responsable du référentiel ; le Responsable du référentiel consulte aussi dossiers et tableau de bord, sans certificats, signalements ni postes ; valider un certificat et traiter un signalement : Administrateur et Agent RH. Le menu n'affiche que les rubriques du rôle et le serveur refuse le reste (403)."),
+ ("109","D1","Charger les pages sans texte d'icône","2","",
+  "Must","—","—","—",
+  "employé","voir des écrans propres dès leur ouverture, même avec une connexion lente",
+  "avoir confiance dans le portail et avoir envie de l'utiliser",
+  ["Pendant le chargement, aucune icône ne s'affiche jamais sous forme de texte (« rocket_launch », « login »…) : la place de l'icône reste vide le temps qu'elle arrive.",
+   "Le portail ne télécharge que les icônes qu'il affiche, et les demande en priorité : quelques dizaines de Ko au lieu de 4 Mo.",
+   "Une icône ajoutée dans un écran sans être ajoutée aux icônes du portail fait échouer les tests."],
+  "Demande de l'utilisateur du 2026-10-11 (« quand la page se charge, les icônes apparaissent comme du texte »). Cause : la police Material Symbols complète (4 Mo, toutes les icônes) ; au-delà de 3 s le navigateur montre le nom de l'icône. Correction : police réduite aux icônes utilisées (`npm run icons`), servie par le portail et préchargée."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -423,7 +431,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

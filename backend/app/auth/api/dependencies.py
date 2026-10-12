@@ -78,6 +78,15 @@ def require_roles(*allowed: AdminRole):
     return _checker
 
 
+# US-108 (choix du 2026-10-11, cahier des charges §4.3) : qui fait quoi dans l'espace RH.
+require_validator = require_roles(AdminRole.ADMIN, AdminRole.AGENT_RH)
+"""Valider ou rejeter un certificat, prendre le suivant, traiter un signalement."""
+require_case_reader = require_roles(AdminRole.ADMIN, AdminRole.AGENT_RH, AdminRole.READONLY)
+"""Voir la file de validation, les signalements et les postes (pas le Responsable du référentiel)."""
+require_referential_editor = require_roles(AdminRole.ADMIN, AdminRole.REFERENTIAL)
+"""Importer le référentiel et rattacher les valeurs inconnues."""
+
+
 def set_session_cookie(request: Request, response: Response, token: str) -> None:
     response.set_cookie(
         SESSION_COOKIE,

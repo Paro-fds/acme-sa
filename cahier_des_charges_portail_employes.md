@@ -140,17 +140,17 @@ Le registre les cite dans les circuits, sans dire s'ils utilisent le portail.
 
 ### 4.3 Champ d'action de chaque rôle
 
-✅ autorisé par le registre · ❌ interdit ou hors du rôle décrit · ❓ le registre ne le dit pas, à demander au directeur · *(lot)* quand la fonction arrive.
+✅ autorisé par le registre · ❌ interdit ou hors du rôle décrit · ❓ le registre ne le dit pas, à demander au directeur · *(lot)* quand la fonction arrive · ✅¹ / ❌¹ choix de l'utilisateur du 2026-10-11 (US-108), à confirmer par M. Hilaire.
 
 | Action | Employé | Agent RH | Resp. référentiel | Administrateur | Lecture seule |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Voir et compléter **son propre** dossier | ✅ | ✅ (comme employé) | ✅ (comme employé) | ✅ (comme employé) | ✅ (comme employé) |
 | Confirmer ou signaler une erreur sur agence, poste, date d'embauche | ✅ | — | — | — | — |
 | Déposer ses certificats (si dossier complet) | ✅ | ✅ (comme employé) | ✅ (comme employé) | ✅ (comme employé) | ✅ (comme employé) |
-| Consulter les dossiers des employés | ❌ | ✅ | ❓ | ✅ | ✅ |
+| Consulter les dossiers des employés | ❌ | ✅ | ✅¹ | ✅ | ✅ |
 | Valider ou rejeter un certificat, corriger son niveau | ❌ | ✅ sauf le sien | — | ✅ | ❌ |
 | Réaffecter un dossier à un autre valideur | ❌ | ❌ (avis du 2026-10-06, D-14) | — | ✅ | ❌ |
-| Traiter les signalements d'erreur *(lot 2)* | ❌ | ✅ | — | ❓ | ❌ |
+| Traiter les signalements d'erreur *(lot 2)* | ❌ | ✅ | — | ✅¹ | ❌ |
 | Modifier le référentiel des agences, régions, directions | ❌ | ❌ | ✅ | ✅ | ❌ |
 | Rattacher une valeur inconnue de l'export (« À rattacher ») | ❌ | ❌ | ✅ | ✅ | ❌ |
 | Saisir un poste ouvert *(lot 4)* | ❌ | ✅ | — | ❓ | ❌ |
@@ -159,10 +159,10 @@ Le registre les cite dans les circuits, sans dire s'ils utilisent le portail.
 | Déposer une demande de promotion ou de mobilité *(lot 4)* | ✅ | ✅ (comme employé) | ✅ (comme employé) | ✅ (comme employé) | ✅ (comme employé) |
 | Enregistrer une demande reçue par lettre | ❌ | ✅ | — | ❓ | ❌ |
 | Contrôler les mouvements de carrière extraits des lettres *(lot 2)* | ❌ | ✅ | — | ❓ | ❌ |
-| Voir les tableaux de bord | ❌ | ❓ | ❓ | ✅ | ✅ |
+| Voir les tableaux de bord | ❌ | ✅¹ | ✅¹ | ✅ | ✅ |
 | Exporter des listes | ❌ | ❓ | ❓ | ❓ | ❓ |
 | Gérer les comptes et réinitialiser l'accès d'un employé | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Consulter le journal d'audit *(lot 2)* | ❌ | ❓ | ❓ | ❓ | ❓ |
+| Consulter le journal d'audit *(lot 2)* | ❌ | ❌¹ | ❌¹ | ✅¹ | ❌¹ |
 
 **Règles transversales :**
 - Un employé ne voit que **ses propres** données.

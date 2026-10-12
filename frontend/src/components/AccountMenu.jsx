@@ -10,8 +10,8 @@ const EMPLOYEE_LINKS = [{ to: '/parcours', icon: 'workspace_premium', label: 'Mo
 
 /** Liens supplémentaires de l'espace admin (US-23). */
 const ADMIN_LINKS = [
-  { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs' },
-  { to: '/admin/referentiel', icon: 'account_tree', label: 'Référentiel' },
+  { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs', roles: ['ADMIN'] },
+  { to: '/admin/referentiel', icon: 'account_tree', label: 'Référentiel', roles: ['ADMIN', 'REFERENTIAL'] },
   { to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' },
   { to: '/admin/securite', icon: 'verified_user', label: 'Ma double authentification' },
 ]
@@ -20,7 +20,7 @@ const ADMIN_LINKS = [
  * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23 ; « Mon parcours » : US-25).
  * `label` (US-108, écran A02) : « Nom · Rôle » affiché à la place de l'avatar, en blanc sur l'en-tête bleu marine de l'espace RH.
  */
-export default function AccountMenu({ space = 'employee', label }) {
+export default function AccountMenu({ space = 'employee', label, role }) {
   const logout = useLogout(space)
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -85,7 +85,9 @@ export default function AccountMenu({ space = 'employee', label }) {
           role="menu"
           className="absolute right-0 z-40 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
         >
-          {(space === 'admin' ? ADMIN_LINKS : EMPLOYEE_LINKS).map((link) => (
+          {(space === 'admin' ? ADMIN_LINKS : EMPLOYEE_LINKS)
+            .filter((link) => !link.roles || link.roles.includes(role))
+            .map((link) => (
             <Link key={link.to} to={link.to} role="menuitem" onClick={() => setOpen(false)} className={MENU_ITEM}>
               <span className="material-symbols-outlined" aria-hidden="true">{link.icon}</span>
               {link.label}
