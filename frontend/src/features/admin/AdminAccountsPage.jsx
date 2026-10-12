@@ -325,7 +325,7 @@ function AdminItem({
             aria-label={`Réinitialiser la double authentification de ${admin.username}`}
             className="flex min-h-11 items-center gap-1.5 rounded-lg px-3 font-semibold text-primary hover:bg-info-bg cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">phonelink_erase</span>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">mobile_off</span>
             Réinitialiser la double authentification
           </button>
         </div>

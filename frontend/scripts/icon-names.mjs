@@ -23,6 +23,26 @@ function sourceFiles(dir) {
   })
 }
 
+/**
+ * Noms écrits dans une icône (`<span className="material-symbols-outlined …">nom</span>`, ou `icon: 'nom'`)
+ * qui ne figurent pas dans la liste actuelle de Material Symbols : ils ne seraient pas dans la police
+ * et s'afficheraient en texte (le « E » de `expand_more`, ancien nom). Renvoie « nom (fichier) ».
+ */
+export function unknownIconNames(all = allIconNames()) {
+  const unknown = new Set()
+  for (const file of sourceFiles(join(FRONTEND, 'src'))) {
+    const text = readFileSync(file, 'utf8')
+    const written = [
+      ...text.matchAll(/material-symbols-outlined[^>]*>([a-z0-9_]+)</g),
+      ...text.matchAll(/icon[:=]\s*['"]([a-z0-9_]+)['"]/g),
+    ]
+    for (const match of written) {
+      if (!all.has(match[1])) unknown.add(`${match[1]} (${file.slice(FRONTEND.length)})`)
+    }
+  }
+  return [...unknown].sort()
+}
+
 /** Les icônes utilisées par les écrans (`src/`, sans les tests), triées. */
 export function usedIconNames(all = allIconNames()) {
   const used = new Set()

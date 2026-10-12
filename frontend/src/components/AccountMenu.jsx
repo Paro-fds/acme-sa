@@ -74,7 +74,7 @@ export default function AccountMenu({ space = 'employee', label, role, mfaRequir
           <>
             <span className="material-symbols-outlined text-[28px] sm:hidden" aria-hidden="true">account_circle</span>
             <span className="hidden max-w-64 truncate sm:inline">{label}</span>
-            <span className="material-symbols-outlined hidden text-xl sm:inline" aria-hidden="true">expand_more</span>
+            <span className="material-symbols-outlined hidden text-xl sm:inline" aria-hidden="true">keyboard_arrow_down</span>
           </>
         ) : (
           <span className="material-symbols-outlined text-[32px]" aria-hidden="true">account_circle</span>

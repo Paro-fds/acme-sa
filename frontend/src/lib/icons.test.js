@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { usedIconNames } from '../../scripts/icon-names.mjs'
+import { unknownIconNames, usedIconNames } from '../../scripts/icon-names.mjs'
 import icons from './icons.json'
 import { revealIconsWhenReady } from './icons.js'
 
@@ -13,6 +13,10 @@ describe('US-109 — icônes chargées sans texte parasite', () => {
   it('CA-03 : chaque icône affichée par un écran est dans la police du portail (sinon : npm run icons)', () => {
     const missing = usedIconNames().filter((name) => !icons.includes(name))
     expect(missing).toEqual([])
+  })
+
+  it('CA-03 : aucune icône n’utilise un ancien nom absent de Material Symbols (il s’afficherait en texte)', () => {
+    expect(unknownIconNames()).toEqual([])
   })
 
   it('CA-02 : la police ne contient que les icônes du portail (quelques dizaines de Ko, pas 4 Mo)', () => {

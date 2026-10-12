@@ -36,7 +36,7 @@ function FieldError({ id, error }) {
   if (!error) return null
   return (
     <p id={id} className="flex items-start gap-2 rounded-lg bg-error-bg p-2.5 text-sm font-medium text-error-text">
-      <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">report_problem</span>
+      <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">warning</span>
       {error}
     </p>
   )

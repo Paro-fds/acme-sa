@@ -53,7 +53,7 @@ function RelationshipSelect({ options, value, onChange, error }) {
       </div>
       {error && (
         <p id={`${id}-error`} className="flex items-start gap-2 rounded-lg bg-error-bg p-2.5 text-sm font-medium text-error-text">
-          <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">report_problem</span>
+          <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">warning</span>
           {error}
         </p>
       )}
@@ -109,7 +109,7 @@ function EducationLevels({ levels, value, onChange, status, error }) {
       </fieldset>
       {error && (
         <p id={errorId} className="flex items-start gap-2 rounded-lg bg-error-bg p-2.5 text-sm font-medium text-error-text">
-          <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">report_problem</span>
+          <span className="material-symbols-outlined shrink-0 text-[18px] text-error-dot" aria-hidden="true">warning</span>
           {error}
         </p>
       )}
