@@ -18,7 +18,9 @@ from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
 from app.admin.application.reset_access import ResetAccess
 from app.admin.application.search_qualified_employees import SearchQualifiedEmployees
+from app.admin.application.notifications import GetNotifications, MarkAllNotificationsRead, MarkNotificationRead
 from app.admin.infrastructure.sql_audit_repository import SqlAuditRepository
+from app.admin.infrastructure.sql_notification_read_repository import SqlNotificationReadRepository
 from app.auth.application.admin_mfa import (
     ConfirmMfaChange,
     ConfirmMfaSetup,
@@ -172,6 +174,7 @@ class Container:
         self.dossiers = SqlDossierRepository(self.database)
         self.certificates = SqlCertificateRepository(self.database)
         self.audit_logs = SqlAuditRepository(self.database)
+        self.notification_reads = SqlNotificationReadRepository(self.database)
         self.openings = SqlOpeningRepository(self.database)
         self.applications = SqlApplicationRepository(self.database)
         self.certificate_storage = _certificate_storage(settings)
@@ -327,6 +330,18 @@ class Container:
 
     def get_pilot_dashboard(self) -> GetPilotDashboard:
         return GetPilotDashboard(self.employees, self.dossiers, self.certificates, self.referential, self.clock)
+
+    def get_notifications(self) -> GetNotifications:
+        return GetNotifications(
+            self.certificates, self.dossiers, self.openings, self.applications, self.employees, self.notification_reads,
+            self.clock,
+        )
+
+    def mark_notification_read(self) -> MarkNotificationRead:
+        return MarkNotificationRead(self.notification_reads, self.clock)
+
+    def mark_all_notifications_read(self) -> MarkAllNotificationsRead:
+        return MarkAllNotificationsRead(self.notification_reads, self.clock)
 
     def get_menu_counts(self) -> GetMenuCounts:
         return GetMenuCounts(self.certificates, self.dossiers, self.referential)

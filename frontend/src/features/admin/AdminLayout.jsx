@@ -4,6 +4,7 @@ import { getAdminFrame } from '../../api/adminFrame.js'
 import logo from '../../assets/logo-acme.png'
 import AccountMenu from '../../components/AccountMenu.jsx'
 import { useLogout } from '../../lib/useLogout.js'
+import NotificationBell from './notifications/NotificationBell.jsx'
 import { can } from './roles.js'
 
 /** Rubriques des écrans validés A02 → A11, dans leur ordre, plus « Postes ouverts » (US-802, lot 4, sans maquette) ; chacune selon le rôle. */
@@ -48,6 +49,7 @@ function navLinkClass({ isActive }) {
  * US-108 : cadre de l'espace RH repris de l'écran validé A02 :
  * en-tête bleu marine (logo, « Espace de gestion » depuis US-111, « Nom · Rôle », « Se déconnecter »), menu latéral à gauche,
  * titre de la page en tête du contenu. À 390 px, le menu s'ouvre par un bouton.
+ * US-116 : cloche des notifications pour l'Agent RH et l'Administrateur.
  */
 export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Retour', headerActions, wide = false, children }) {
   const frame = useAdminFrame()
@@ -74,6 +76,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
           <span className="truncate text-base font-medium">Espace de gestion</span>
         </div>
         <div className="flex shrink-0 items-center gap-2 text-sm">
+          {can(role, 'notifications') && <NotificationBell />}
           <AccountMenu space="admin" label={accountLabel} role={role} mfaRequired={frame?.me.mfa_required !== false} />
           <span className="hidden text-white/40 sm:inline" aria-hidden="true">·</span>
           <button

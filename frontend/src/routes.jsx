@@ -9,6 +9,7 @@ import EmployeeListPage from './features/admin/EmployeeListPage.jsx'
 import HomePage from './features/home/HomePage.jsx'
 import MfaLoginPage from './features/admin/mfa/MfaLoginPage.jsx'
 import MySecurityPage from './features/admin/mfa/MySecurityPage.jsx'
+import NotificationsPage from './features/admin/notifications/NotificationsPage.jsx'
 import OpeningDetailPage from './features/admin/openings/OpeningDetailPage.jsx'
 import OpeningFormPage from './features/admin/openings/OpeningFormPage.jsx'
 import OpeningsPage from './features/admin/openings/OpeningsPage.jsx'
@@ -68,6 +69,7 @@ export default function AppRoutes() {
       <Route path="/admin/postes/:id/modifier" element={<OpeningFormPage />} />
       <Route path="/admin/comptes" element={<AdminAccountsPage />} />
       <Route path="/admin/audit" element={<AuditLogPage />} />
+      <Route path="/admin/notifications" element={<NotificationsPage />} />
       <Route path="/admin/administrateurs" element={<AdminAccountsPage />} />
       <Route path="/admin/mot-de-passe" element={<AdminPasswordPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

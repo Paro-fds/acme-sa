@@ -14,6 +14,8 @@ export const ACCESS = {
   accounts: ['ADMIN'],
   audit: ['ADMIN'],
   resetAccess: ['ADMIN'],
+  /** US-116 : ceux qui traitent certificats, signalements et candidatures. */
+  notifications: ['ADMIN', 'AGENT_RH'],
 }
 
 /** Vrai si ce rôle a accès ; rôle encore inconnu (chargement) : seulement ce qui est ouvert à tous. */

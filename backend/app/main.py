@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.admin.api import notification_routes as admin_notification_routes
 from app.admin.api import routes as admin_routes
 from app.auth.api import admin_account_routes, mfa_routes
 from app.auth.api import routes as auth_routes
@@ -39,6 +40,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(employee_routes.router)
     app.include_router(career_routes.router)
     app.include_router(admin_routes.router)
+    app.include_router(admin_notification_routes.router)
     app.include_router(admin_account_routes.router)
     app.include_router(mfa_routes.router)
     app.include_router(referential_routes.router)

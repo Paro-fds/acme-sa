@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-22 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+23 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -36,6 +36,7 @@ L'employé fait valoir ses qualifications en déposant ses certificats et suit l
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
 | [US-115](US-115-choisir-qui-verra-un-poste.md) | Choisir qui verra un poste | Should | — | Fait |
+| [US-116](US-116-etre-prevenu-de-ce-qui-arrive-dans-l-espace-de-gestion.md) | Être prévenu de ce qui arrive dans l'espace de gestion | Should | — | Fait |
 | [US-304](US-304-garder-la-preuve-des-certificats.md) | Garder la preuve des certificats | Must | — | Fait |
 | [US-305](US-305-un-niveau-d-etudes-prouve.md) | Un niveau d'études prouvé | Should | — | Pas encore |
 

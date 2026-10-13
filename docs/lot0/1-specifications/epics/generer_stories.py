@@ -214,6 +214,16 @@ S = [
    "L'aperçu de l'audience affiche, à chaque changement de critère, combien d'employés verront le poste et combien chaque critère en écarte, sur les seules données validées.",
    "Si personne ne verrait le poste, un avertissement le dit ; l'enregistrement reste possible."],
   "Suggestion du directeur rapportée le 2026-10-12 (« affecter telle demande à telle agence », « les postes devraient être aussi par domaine ») et choix de l'utilisateur sur la maquette « Postes ouverts : qui verra le poste » : plusieurs unités, plusieurs domaines, aperçu de l'audience détaillé, simple avertissement si personne ne voit le poste. Le domaine reste celui d'un certificat validé, pas une compétence déclarée. Questions ouvertes au directeur : plusieurs agences et plusieurs domaines pour un même poste."),
+ ("116","D3","Être prévenu de ce qui arrive dans l'espace de gestion","2","",
+  "Should","EF-401, EF-403","RG-42","",
+  "Agent RH","voir d'un coup d'œil les certificats déposés, les certificats en retard, les signalements et les candidatures arrivés depuis ma dernière visite",
+  "traiter chaque dossier à temps sans fouiller chaque file",
+  ["Une cloche dans l'en-tête de l'espace de gestion indique le nombre de notifications non lues ; sur ordinateur elle ouvre une liste, sur téléphone la page Notifications.",
+   "Quatre notifications : un employé a déposé un certificat ; un certificat attend depuis plus de 5 jours ouvrables (une seule fois par certificat) ; un employé signale une erreur ; un employé a postulé à un poste. Chacune ouvre l'élément concerné.",
+   "Seuls l'Agent RH et l'Administrateur reçoivent les notifications ; jamais pour leurs propres certificats, signalements ou candidatures.",
+   "Chaque compte a ses notifications lues et non lues ; « Tout marquer comme lu » les marque toutes.",
+   "Une notification disparaît 90 jours après l'événement ; le certificat, le signalement ou la candidature restent dans leur file et le journal d'audit."],
+  "Suggestion du directeur rapportée le 2026-10-12 (« voir quand une personne a uploadé un certificat ») et choix de l'utilisateur sur la maquette « Notifications de l'espace de gestion » : cloche et liste (point 1), aussi les retards, les signalements et les candidatures (point 4), une seule notification de retard, 90 jours de conservation. Ni email ni WhatsApp, pas de ciblage par agence (file commune, US-401) : questions ouvertes au directeur."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -490,7 +500,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 
