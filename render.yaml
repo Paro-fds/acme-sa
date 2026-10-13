@@ -21,7 +21,7 @@ services:
       - key: STORAGE_BACKEND
         value: s3
       - key: S3_BUCKET
-        value: certificats
+        value: certificat
       - key: S3_REGION
         value: us-west-2
       - key: S3_ENDPOINT_URL

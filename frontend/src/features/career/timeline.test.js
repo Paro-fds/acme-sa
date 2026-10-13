@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTimeline, filterEvents, seniorityLabel } from './timeline.js'
+import { buildTimeline, filterEvents, seniorityLabel, visibleFilters } from './timeline.js'
 
 const PROFILE = {
   position: 'Agent de crédit',
@@ -91,5 +91,13 @@ describe('US-114 — frise de « Ma carrière »', () => {
     expect(filterEvents(events, 'QUALIFICATION').map((event) => event.title)).toEqual(['Master en finance', 'Licence en sciences comptables', 'Bac'])
     expect(filterEvents(events, 'TRAINING')).toHaveLength(1)
     expect(filterEvents(events, 'EXPERIENCE')).toHaveLength(1)
+  })
+
+  it('Formations et Expériences : un filtre seulement s’il y a un élément (saisie avec US-803)', () => {
+    const { events } = buildTimeline({ profile: PROFILE, career: { kinds: [] }, certificates: CERTIFICATES }, TODAY)
+    expect(visibleFilters(events).map((filter) => filter.label)).toEqual(['Tout', 'Chez ACME', 'Diplômes'])
+
+    const withHistory = buildTimeline({ profile: PROFILE, career: CAREER, certificates: CERTIFICATES }, TODAY).events
+    expect(visibleFilters(withHistory).map((filter) => filter.label)).toEqual(['Tout', 'Chez ACME', 'Diplômes', 'Formations', 'Expériences'])
   })
 })

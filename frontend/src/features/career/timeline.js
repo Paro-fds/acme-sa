@@ -10,9 +10,17 @@ export const TIMELINE_FILTERS = [
   { id: 'ALL', label: 'Tout' },
   { id: 'ACME', label: 'Chez ACME' },
   { id: 'QUALIFICATION', label: 'Diplômes' },
-  { id: 'TRAINING', label: 'Formations' },
-  { id: 'EXPERIENCE', label: 'Expériences' },
+  { id: 'TRAINING', label: 'Formations', onlyIfFilled: true },
+  { id: 'EXPERIENCE', label: 'Expériences', onlyIfFilled: true },
 ]
+
+/**
+ * Formations et expériences ne se saisissent plus depuis le retrait de l'ancien parcours (US-114) ; leur écran
+ * viendra avec US-803. D'ici là, leur filtre n'apparaît que si l'employé en avait déjà saisi.
+ */
+export function visibleFilters(events) {
+  return TIMELINE_FILTERS.filter((filter) => !filter.onlyIfFilled || events.some((event) => event.group === filter.id))
+}
 
 /** Certificats qui comptent dans la frise : un certificat à corriger ou remplacé (archivé) n'y figure pas. */
 const CERTIFICATE_SOURCES = { VALIDATED: 'VALIDATED', RECEIVED: 'IN_REVIEW', IN_REVIEW: 'IN_REVIEW' }

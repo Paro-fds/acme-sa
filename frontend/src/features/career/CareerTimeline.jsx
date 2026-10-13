@@ -5,7 +5,7 @@ import { listCertificates } from '../../api/certificates.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import { useLoader } from '../../lib/useLoader.js'
-import { TIMELINE_FILTERS, buildTimeline, filterEvents } from './timeline.js'
+import { buildTimeline, filterEvents, visibleFilters } from './timeline.js'
 
 /** D-17 : l'employé sait que son parcours sert à le contacter pour des opportunités internes. */
 export const VISIBILITY_NOTICE =
@@ -112,10 +112,10 @@ function Frise({ events }) {
   )
 }
 
-function Filters({ value, onChange }) {
+function Filters({ filters, value, onChange }) {
   return (
     <div role="group" aria-label="Filtrer la frise" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:flex-wrap">
-      {TIMELINE_FILTERS.map((filter) => {
+      {filters.map((filter) => {
         const on = filter.id === value
         return (
           <button
@@ -193,7 +193,7 @@ export default function CareerTimeline() {
           <EmptyInvite />
         ) : (
           <>
-            <Filters value={filter} onChange={setFilter} />
+            <Filters filters={visibleFilters(data.events)} value={filter} onChange={setFilter} />
             {visible.length > 0 ? (
               <Frise events={visible} />
             ) : (

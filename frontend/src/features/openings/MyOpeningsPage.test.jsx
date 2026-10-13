@@ -142,6 +142,13 @@ describe('US-114 — retracer mon parcours dans Ma carrière', () => {
     expect(await within(side).findByRole('list', { name: 'Postes ouverts pour vous' })).toBeInTheDocument()
   })
 
+  it('Formations et Expériences : pas de filtre qui mène à une catégorie vide', async () => {
+    renderPage()
+    const filters = await screen.findByRole('group', { name: 'Filtrer la frise' })
+    expect(within(filters).getByRole('button', { name: 'Expériences' })).toBeInTheDocument()
+    expect(within(filters).queryByRole('button', { name: 'Formations' })).not.toBeInTheDocument()
+  })
+
   it('frise sans élément : invitation à déposer un certificat', async () => {
     getProfile.mockResolvedValue({ ...PROFILE, hire_date: null })
     getMyCareer.mockResolvedValue({ kinds: [] })
