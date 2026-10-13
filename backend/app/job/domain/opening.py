@@ -142,7 +142,7 @@ def check_criteria(criteria: Criteria, units: dict[str, str]) -> Criteria:
 
 
 def validate_fields(fields: OpeningFields, units: dict[str, str]) -> OpeningFields:
-    """CA-01 : contrôle la fiche et renvoie les valeurs nettoyées ; `units` = code → libellé du référentiel."""
+    """CA-01 : contrôle la fiche et renvoie les valeurs nettoyées ; `units` = code → libellé du référentiel (vide : US-117)."""
     code = _required(fields.code, "code", "Indiquez le code du poste.").upper()
     if not _CODE.match(code):
         raise InvalidOpeningField(
@@ -152,7 +152,11 @@ def validate_fields(fields: OpeningFields, units: dict[str, str]) -> OpeningFiel
     if len(title) > TITLE_MAX:
         raise InvalidOpeningField(f"L'intitulé tient en {TITLE_MAX} caractères au plus.", field="title")
     unit_code = _required(fields.unit_code, "unit_code", "Choisissez l'unité du poste.")
-    if unit_code not in units:
+    if not units:
+        # US-117 : tant que le référentiel n'est pas importé, l'unité du poste est un texte libre.
+        if len(unit_code) > TITLE_MAX:
+            raise InvalidOpeningField(f"L'unité tient en {TITLE_MAX} caractères au plus.", field="unit_code")
+    elif unit_code not in units:
         raise InvalidOpeningField("Choisissez une unité du référentiel.", field="unit_code")
     target_grade = _required(fields.target_grade, "target_grade", "Indiquez le grade visé.")
     if not _NUMBER.match(target_grade):

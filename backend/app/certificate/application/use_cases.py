@@ -29,6 +29,7 @@ from app.certificate.domain.certificate import (
 )
 from app.certificate.domain.errors import (
     CannotDeleteValidatedCertificate,
+    CertificateFileMissing,
     CertificateFileTooLarge,
     CertificateNotFound,
     InvalidRating,
@@ -343,6 +344,32 @@ class DeleteCertificate:
         for f in files:
             self._storage.delete(f.storage_key)
         self._certificates.delete(certificate_id)
+
+
+@dataclass(frozen=True)
+class CertificateFileContent:
+    original_name: str
+    content_type: str
+    content: bytes
+
+
+class GetMyCertificateFile:
+    """US-118 : l'employé ouvre le fichier de l'un de ses certificats, archivé compris (CA-01 à CA-03)."""
+
+    def __init__(self, certificates: CertificateRepository, storage: CertificateStorage) -> None:
+        self._certificates = certificates
+        self._storage = storage
+
+    def execute(self, employee_id: str, certificate_id: str) -> CertificateFileContent:
+        certificate = self._certificates.get(certificate_id)
+        if certificate is None or certificate.employee_id != employee_id:
+            raise CertificateNotFound()
+        files = self._certificates.files_of(certificate_id)
+        # CA-04 : un fichier absent du stockage se dit clairement, sans erreur serveur.
+        if not files or self._storage.size(files[0].storage_key) is None:
+            raise CertificateFileMissing()
+        file = files[0]
+        return CertificateFileContent(file.original_name, file.content_type, self._storage.read(file.storage_key))
 
 
 @dataclass(frozen=True)

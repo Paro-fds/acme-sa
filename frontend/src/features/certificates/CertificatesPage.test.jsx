@@ -6,7 +6,10 @@ import { listCertificates } from '../../api/certificates.js'
 import CertificatesPage from './CertificatesPage.jsx'
 
 vi.mock('../../api/employee.js', () => ({ getProfile: vi.fn() }))
-vi.mock('../../api/certificates.js', () => ({ listCertificates: vi.fn() }))
+vi.mock('../../api/certificates.js', () => ({
+  listCertificates: vi.fn(),
+  certificateFileUrl: (id) => `/api/me/certificates/${id}/file`,
+}))
 vi.mock('../../api/auth.js', () => ({ logout: vi.fn() }))
 
 const KEYS = [
@@ -116,6 +119,24 @@ describe('US-303 — Suivre mon certificat', () => {
       ['Master', 'Validé'],
       ['Certificat microfinance', 'À corriger'],
     ])
+  })
+
+  it('US-118 CA-01, CA-03 : chaque certificat, archivé compris, ouvre son fichier dans un nouvel onglet', async () => {
+    const base = { type_label: 'Diplôme', level_label: 'Licence', institution: 'Université Démo', year: 2019, submitted_at: '2026-10-08T09:00:00Z' }
+    listCertificates.mockResolvedValue({
+      certificates: [
+        { ...base, id: 'c1', title: 'Licence en sciences comptables', status: 'RECEIVED' },
+        { ...base, id: 'c2', title: 'Ancienne licence', status: 'VALIDATED', is_archived: true },
+      ],
+      limit: 20,
+    })
+    renderPage()
+
+    const list = await screen.findByRole('list', { name: 'Certificats déposés' })
+    const links = within(list).getAllByRole('link', { name: /Voir le fichier/ })
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/api/me/certificates/c1/file', '/api/me/certificates/c2/file'])
+    expect(links[0]).toHaveAccessibleName('Voir le fichier de Licence en sciences comptables')
+    expect(links[0]).toHaveAttribute('target', '_blank')
   })
 
   it('aucun certificat : un message, et le dépôt reste proposé', async () => {

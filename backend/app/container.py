@@ -89,6 +89,7 @@ from app.career.infrastructure.sql_career_repository import SqlCareerRepository
 from app.certificate.application.use_cases import (
     CountFeedback,
     DeleteCertificate,
+    GetMyCertificateFile,
     DepositCertificate,
     GetCertificateForm,
     GetEmployeeCertificatesForAdmin,
@@ -435,6 +436,9 @@ class Container:
 
     def delete_certificate(self) -> DeleteCertificate:
         return DeleteCertificate(self.certificates, self.certificate_storage)
+
+    def get_my_certificate_file(self) -> GetMyCertificateFile:
+        return GetMyCertificateFile(self.certificates, self.certificate_storage)
 
     def get_employee_certificates_for_admin(self) -> GetEmployeeCertificatesForAdmin:
         return GetEmployeeCertificatesForAdmin(self.certificates)

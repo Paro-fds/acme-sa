@@ -1,6 +1,7 @@
-"""US-301, US-303 : /api/me/certificates — formulaire, dépôt signé, enregistrement, liste."""
+"""US-301, US-303, US-118 : /api/me/certificates — formulaire, dépôt signé, enregistrement, liste, fichier."""
 
 from datetime import datetime
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel
@@ -160,6 +161,23 @@ def delete_certificate(
     """US-304 CA-01 : Un certificat validé constitue une preuve et ne peut pas être supprimé."""
     container(request).delete_certificate().execute(employee_id, certificate_id)
     return Response(status_code=204)
+
+
+@router.get("/{certificate_id}/file")
+def get_my_certificate_file(
+    certificate_id: str, request: Request, employee_id: str = Depends(current_employee_id)
+) -> Response:
+    """US-118 : le fichier déposé, seulement pour son propriétaire."""
+    file = container(request).get_my_certificate_file().execute(employee_id, certificate_id)
+    return Response(
+        content=file.content,
+        media_type=file.content_type,
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(file.original_name)}",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+        },
+    )
 
 
 class FeedbackIn(BaseModel):

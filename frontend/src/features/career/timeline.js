@@ -9,7 +9,7 @@ import { formatDate, formatMonth } from '../../lib/format.js'
 export const TIMELINE_FILTERS = [
   { id: 'ALL', label: 'Tout' },
   { id: 'ACME', label: 'Chez ACME' },
-  { id: 'QUALIFICATION', label: 'Diplômes' },
+  { id: 'QUALIFICATION', label: 'Hors ACME' },
   { id: 'TRAINING', label: 'Formations', onlyIfFilled: true },
   { id: 'EXPERIENCE', label: 'Expériences', onlyIfFilled: true },
 ]

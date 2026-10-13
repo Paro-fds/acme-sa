@@ -35,6 +35,11 @@ export function deleteCertificate(certificateId) {
   })
 }
 
+/** US-118 : adresse du fichier déposé (servi seulement à son propriétaire). */
+export function certificateFileUrl(certificateId) {
+  return `/api/me/certificates/${encodeURIComponent(certificateId)}/file`
+}
+
 /** US-302 CA-03 : avis en un clic après le dépôt. */
 export function sendFeedback(certificateId, rating) {
   return request(`/me/certificates/${certificateId}/feedback`, { method: 'POST', body: { rating } })

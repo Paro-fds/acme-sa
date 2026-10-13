@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-23 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+24 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -60,6 +60,14 @@ La direction et les RH savent qui est qualifié, où, et où en sont les dossier
 | [US-602](US-602-trouver-les-employes-qualifies-en-une-minute.md) | Trouver les employés qualifiés en une minute | Must | — | Fait |
 | [US-603](US-603-exporter-une-liste.md) | Exporter une liste | Should | — | Fait |
 | [US-604](US-604-rendre-compte-de-chaque-action.md) | Rendre compte de chaque action | Must | — | Fait |
+
+## D8 Carrière et postes
+
+L'employé voit les postes ouverts auxquels il est éligible et ce qui lui manque.
+
+| Story | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|
+| [US-117](US-117-creer-un-poste-sans-le-referentiel.md) | Créer un poste sans le référentiel | Must | — | Fait |
 
 ## D9 Demandes et mouvements de carrière
 

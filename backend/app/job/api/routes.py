@@ -63,7 +63,8 @@ class CriteriaIn(BaseModel):
 class OpeningIn(BaseModel):
     code: str = Field("", max_length=40)
     title: str = Field("", max_length=400)
-    unit_code: str = Field("", max_length=20)
+    # US-117 : texte libre tant que le référentiel n'est pas importé (120 caractères, contrôlés par le domaine).
+    unit_code: str = Field("", max_length=200)
     target_grade: str = Field("", max_length=10)
     mission: str = Field("", max_length=4000)
     opens_on: date | None = None

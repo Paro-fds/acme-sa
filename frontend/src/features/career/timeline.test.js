@@ -95,9 +95,9 @@ describe('US-114 — frise de « Ma carrière »', () => {
 
   it('Formations et Expériences : un filtre seulement s’il y a un élément (saisie avec US-803)', () => {
     const { events } = buildTimeline({ profile: PROFILE, career: { kinds: [] }, certificates: CERTIFICATES }, TODAY)
-    expect(visibleFilters(events).map((filter) => filter.label)).toEqual(['Tout', 'Chez ACME', 'Diplômes'])
+    expect(visibleFilters(events).map((filter) => filter.label)).toEqual(['Tout', 'Chez ACME', 'Hors ACME'])
 
     const withHistory = buildTimeline({ profile: PROFILE, career: CAREER, certificates: CERTIFICATES }, TODAY).events
-    expect(visibleFilters(withHistory).map((filter) => filter.label)).toEqual(['Tout', 'Chez ACME', 'Diplômes', 'Formations', 'Expériences'])
+    expect(visibleFilters(withHistory).map((filter) => filter.label)).toEqual(['Tout', 'Chez ACME', 'Hors ACME', 'Formations', 'Expériences'])
   })
 })

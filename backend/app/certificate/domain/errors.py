@@ -41,6 +41,13 @@ class UploadNotFound(InvalidInput):
         super().__init__(field="file")
 
 
+class CertificateFileMissing(NotFound):
+    """US-118 CA-04 : le certificat existe, mais son fichier n'est plus dans le stockage."""
+
+    code = "CERTIFICATE_FILE_MISSING"
+    message = "Le fichier de ce certificat est introuvable : déposez-le à nouveau ou contactez les RH."
+
+
 class LocalUploadsUnavailable(NotFound):
     """Le dépôt par l'API n'existe que sur le poste du développeur ; en ligne, le fichier va directement au stockage."""
 

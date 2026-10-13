@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** Un employé au dossier complet et un au dossier incomplet, en recette.
 
-17 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+18 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -35,6 +35,7 @@ L'employé fait valoir ses qualifications en déposant ses certificats et suit l
 
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
+| [US-118](US-118-voir-le-fichier-de-mon-certificat.md) | Voir le fichier de mon certificat | Must | — | Fait |
 | [US-301](US-301-deposer-un-certificat-depuis-mon-telephone.md) | Déposer un certificat depuis mon téléphone | Must | antivirus et stockage chiffré au lot 3, avec US-002 | Fait |
 | [US-302](US-302-savoir-ce-que-mon-certificat-m-apporte.md) | Savoir ce que mon certificat m'apporte | Must (Should pour « ce que ça débloque » et l'avis) | — | Fait |
 | [US-303](US-303-suivre-mon-certificat.md) | Suivre mon certificat | Must | « À corriger » et redépôt au lot 2 ; notification avec US-701 | Fait |

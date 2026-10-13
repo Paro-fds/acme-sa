@@ -74,9 +74,8 @@ test('double authentification : choix WhatsApp, connexion suivante, changement, 
   await enterLocalCode(page, 'Valider')
   await expect(page).toHaveURL(/\/admin$/)
 
-  // CA-04 : changer de méthode depuis son compte, après confirmation avec WhatsApp
-  await page.getByRole('button', { name: 'Menu du compte' }).click()
-  await page.getByRole('menuitem', { name: 'Ma double authentification' }).click()
+  // CA-04 : changer de méthode, après confirmation avec WhatsApp (page /admin/securite, retirée du menu le 2026-10-13)
+  await page.goto('/admin/securite')
   await expect(page.getByText('WhatsApp · +509 •••• 3333')).toBeVisible()
   await page.getByRole('button', { name: 'Changer de méthode' }).click()
   await page.getByRole('button', { name: 'Recevoir un code par WhatsApp' }).click()

@@ -19,17 +19,17 @@ test('administrateurs : ajout, mot de passe provisoire puis choisi', async ({ pa
   await login(page, 'admin', 'Admin-Test-2026')
   await expect(page).toHaveURL(/\/admin$/)
 
-  // CA-04, CA-05 : écran « Administrateurs » depuis le menu du compte, ajout
-  await page.getByRole('button', { name: 'Menu du compte' }).click()
-  await page.getByRole('menuitem', { name: 'Administrateurs' }).click()
-  await expect(page).toHaveURL(/\/admin\/administrateurs$/)
+  // CA-04, CA-05 : écran des comptes depuis le menu de gauche (« Comptes et rôles », US-108), ajout
+  await page.getByRole('button', { name: 'Menu de navigation RH' }).click() // téléphone : menu replié derrière ☰
+  await page.getByRole('navigation', { name: 'Menu principal RH' }).getByRole('link', { name: 'Comptes et rôles' }).click()
+  await expect(page).toHaveURL(/\/admin\/comptes$/)
   const list = page.getByRole('list', { name: 'Comptes administrateurs' })
   await expect(list.getByRole('listitem').filter({ hasText: 'admin' }).first()).toContainText('Vous')
 
   await page.getByLabel('Identifiant').fill('e2e.marie')
   await page.getByLabel('Mot de passe provisoire', { exact: true }).fill(PROVISIONAL)
   await page.getByRole('button', { name: 'Créer le compte' }).click()
-  await expect(page.getByText(/Administrateur « e2e\.marie » ajouté/)).toBeVisible()
+  await expect(page.getByText(/Compte « e2e\.marie » ajouté/)).toBeVisible()
   const marie = list.getByRole('listitem').filter({ hasText: 'e2e.marie' })
   await expect(marie).toContainText('Mot de passe provisoire')
   await expect(marie).toContainText('Jamais connecté')

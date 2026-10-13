@@ -48,7 +48,6 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
       'Employés',
       'Postes ouverts',
       'Signalements',
-      'À rattacher',
       'Comptes et rôles',
       "Journal d'audit",
     ])
@@ -62,7 +61,7 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
     const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
     expect(await within(nav).findByRole('link', { name: /^File de validation\s*27$/ })).toBeInTheDocument()
     expect(within(nav).getByRole('link', { name: /^Signalements\s*9$/ })).toBeInTheDocument()
-    expect(within(nav).getByRole('link', { name: 'À rattacher' })).toBeInTheDocument()
+    expect(within(nav).queryByRole('link', { name: /À rattacher/ })).not.toBeInTheDocument()
   })
 
   it('CA-02 : sans réponse de l’API, le cadre s’affiche avec les seules rubriques ouvertes à tous', async () => {
@@ -87,8 +86,8 @@ describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
     expect(await menuFor('AGENT_RH')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes ouverts', 'Signalements'])
   })
 
-  it('Responsable du référentiel : tableau de bord, employés et « À rattacher »', async () => {
-    expect(await menuFor('REFERENTIAL')).toEqual(['Tableau de bord', 'Employés', 'À rattacher'])
+  it('Responsable du référentiel : tableau de bord et employés (« À rattacher » retiré du menu le 2026-10-13)', async () => {
+    expect(await menuFor('REFERENTIAL')).toEqual(['Tableau de bord', 'Employés'])
   })
 
   it('Lecture seule : consultation, sans référentiel, comptes ni journal', async () => {
@@ -96,7 +95,7 @@ describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
   })
 
   it('Administrateur : toutes les rubriques', async () => {
-    expect(await menuFor('ADMIN')).toHaveLength(8)
+    expect(await menuFor('ADMIN')).toHaveLength(7)
   })
 })
 
@@ -114,7 +113,12 @@ describe('US-112 — menu du compte selon la double authentification', () => {
     expect(within(await accountMenu(false)).queryByRole('menuitem', { name: 'Ma double authentification' })).not.toBeInTheDocument()
   })
 
-  it('demandée : le lien reste', async () => {
-    expect(within(await accountMenu(true)).getByRole('menuitem', { name: 'Ma double authentification' })).toBeInTheDocument()
+  it('demandée : pas de lien non plus (retiré du menu le 2026-10-13, page /admin/securite conservée)', async () => {
+    expect(within(await accountMenu(true)).queryByRole('menuitem', { name: 'Ma double authentification' })).not.toBeInTheDocument()
+  })
+
+  it('Administrateur : ni « Administrateurs » ni « Référentiel », déjà dans le menu de gauche (choix du 2026-10-13)', async () => {
+    const items = within(await accountMenu(true)).getAllByRole('menuitem').map((item) => item.textContent)
+    expect(items).toEqual(['passwordChanger mon mot de passe', 'logoutSe déconnecter'])
   })
 })

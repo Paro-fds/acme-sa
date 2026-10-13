@@ -12,7 +12,6 @@ const SCREENS = [
   { path: '/admin/validation', name: 'a03-file-de-validation', heading: 'File de validation des certificats', menu: 'File de validation' },
   { path: '/admin/employes', name: 'a06-employes', heading: 'Employés', menu: 'Employés' },
   { path: '/admin/signalements', name: 'a08-signalements', heading: "Signalements d'erreur", menu: 'Signalements' },
-  { path: '/admin/referentiel', name: 'a09-a-rattacher', heading: 'Valeurs à rattacher', menu: 'À rattacher' },
   { path: '/admin/comptes', name: 'a10-comptes-et-roles', heading: 'Comptes et rôles', menu: 'Comptes et rôles' },
   { path: '/admin/audit', name: 'a11-journal-d-audit', heading: "Journal d'audit", menu: "Journal d'audit" },
   { path: '/admin/postes', name: 'postes-ouverts', heading: 'Postes ouverts', menu: 'Postes ouverts' },

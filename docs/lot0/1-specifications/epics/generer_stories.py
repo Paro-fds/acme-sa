@@ -200,7 +200,7 @@ S = [
   "comprendre d'où je viens et ce qui peut m'ouvrir un nouveau poste",
   ["En haut de « Ma carrière », « Aujourd'hui » : poste, agence et ancienneté chez ACME SA (depuis la date d'embauche du système RH).",
    "La frise va du plus récent au plus ancien, par année : entrée chez ACME SA (système RH), certificats déposés (« Validé par les RH » ou « En cours d'examen » ; un certificat à corriger ou remplacé n'y figure pas), diplômes, formations et expériences déjà saisis (« Déclaré par vous ») ; les compétences s'affichent en étiquettes sous la frise.",
-   "Des filtres réduisent la frise : Tout, Chez ACME, Diplômes, Formations, Expériences.",
+   "Des filtres réduisent la frise : Tout, Chez ACME, Hors ACME (certificats ; nom choisi le 2026-10-13), et Formations, Expériences seulement s'il y en a (2026-10-13).",
    "Les postes ouverts et les candidatures restent sur la page, à droite sur ordinateur, sous la frise sur téléphone ; les candidatures ne sont pas dans la frise.",
    "« Mon parcours » disparaît du menu, du menu du compte et de Mon dossier ; l'adresse /parcours mène à « Ma carrière »."],
   "Suggestion du directeur rapportée le 2026-10-12 (« une sorte de timeline pour retracer le parcours de l'employé ») et choix de l'utilisateur (maquette « Ma carrière en frise » du canvas) : « enlever Mon parcours, laissons seulement Ma carrière ». Le portail ne connaît que le poste actuel et la date d'embauche : les anciens postes chez ACME viendront quand la source sera connue (à demander au directeur, peut-être les mouvements lus dans les lettres, US-903). Les RH gardent l'affichage actuel du parcours sur la fiche employé. Ajouter des formations ou des expériences depuis le portail reste hors périmètre."),
@@ -224,6 +224,24 @@ S = [
    "Chaque compte a ses notifications lues et non lues ; « Tout marquer comme lu » les marque toutes.",
    "Une notification disparaît 90 jours après l'événement ; le certificat, le signalement ou la candidature restent dans leur file et le journal d'audit."],
   "Suggestion du directeur rapportée le 2026-10-12 (« voir quand une personne a uploadé un certificat ») et choix de l'utilisateur sur la maquette « Notifications de l'espace de gestion » : cloche et liste (point 1), aussi les retards, les signalements et les candidatures (point 4), une seule notification de retard, 90 jours de conservation. Ni email ni WhatsApp, pas de ciblage par agence (file commune, US-401) : questions ouvertes au directeur."),
+ ("117","D8","Créer un poste sans le référentiel","2","",
+  "Must","EF-803, EF-804","—","—",
+  "Agent RH","créer et publier un poste même si le référentiel des unités n'est pas encore importé",
+  "montrer et utiliser les postes ouverts sans attendre le référentiel officiel",
+  ["Tant que le référentiel n'est pas importé, « Unité du poste » est un texte libre (par exemple « Agence de Pétion-Ville »), obligatoire, de 120 caractères au plus.",
+   "Le formulaire dit que le référentiel n'est pas encore importé et que, sans unité choisie, le poste est proposé à tous les employés qui remplissent les autres critères ; « Visible seulement par les employés de… » ne s'affiche pas.",
+   "Les autres critères (niveau, domaines, ancienneté, grade) fonctionnent comme avant ; l'unité saisie s'affiche telle quelle sur la fiche et pour les employés.",
+   "Dès que le référentiel est importé, l'unité se choisit de nouveau dans la liste officielle, comme en US-802 et US-115."],
+  "Choix de l'utilisateur du 2026-10-13 (option B), pour la démonstration au directeur : le référentiel officiel n'est pas encore fourni et « Référentiel » / « À rattacher » sont retirés des menus le même jour (l'écran reste joignable par le tableau de bord). Les codes d'agence de l'export (option A) et ses directions et services (doublons, voir B-01) ne sont pas utilisés. Exception à « l'unité vient du référentiel » d'US-802 : à faire noter par M. Hilaire."),
+ ("118","D3","Voir le fichier de mon certificat","1","",
+  "Must","EF-303","RG-26","—",
+  "employé","ouvrir le fichier que j'ai déposé pour chacun de mes certificats",
+  "vérifier ce que les RH examinent et retrouver ma preuve",
+  ["Chaque certificat de « Mes certificats » a un bouton « Voir le fichier » qui ouvre le fichier déposé (PDF ou photo) dans un nouvel onglet.",
+   "L'employé ne voit que ses propres fichiers : le certificat d'un autre employé répond « introuvable », comme un certificat qui n'existe pas.",
+   "Un certificat archivé (remplacé) garde son fichier consultable : il reste une preuve.",
+   "Si le fichier manque dans le stockage, un message clair le dit au lieu d'une erreur serveur."],
+  "Demande de l'utilisateur du 2026-10-13 : « quand un employé upload son fichier il puisse aussi le voir ». Jusque-là seul l'espace de gestion lisait le fichier (US-401)."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -500,7 +518,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

@@ -1,3 +1,4 @@
+import { certificateFileUrl } from '../../api/certificates.js'
 import { formatLocalDate } from '../../lib/format.js'
 import CertificateStatus from './CertificateStatus.jsx'
 
@@ -8,7 +9,7 @@ const STATUS_NOTES = {
   VALIDATED: 'Niveau validé dans votre dossier RH.',
 }
 
-/** US-303, US-304 : chaque certificat avec son statut, y compris s'il est archivé/remplacé. */
+/** US-303, US-304, US-118 : chaque certificat avec son statut et son fichier, y compris s'il est archivé/remplacé. */
 export default function CertificateList({ certificates, onDelete }) {
   if (certificates.length === 0) {
     return <p className="rounded-xl bg-section p-4 text-help">Aucun certificat déposé pour l'instant.</p>
@@ -42,6 +43,16 @@ export default function CertificateList({ certificates, onDelete }) {
           ) : (
             STATUS_NOTES[certificate.status] && <p className="text-sm text-help">{STATUS_NOTES[certificate.status]}</p>
           )}
+          <a
+            href={certificateFileUrl(certificate.id)}
+            target="_blank"
+            rel="noopener"
+            aria-label={`Voir le fichier de ${certificate.title}`}
+            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-lg bg-info-bg px-3 font-semibold text-primary hover:bg-info-border/40"
+          >
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">visibility</span>
+            Voir le fichier
+          </a>
           <div className="flex items-center justify-between text-sm text-muted">
             <span>Déposé le {formatLocalDate(certificate.submitted_at)}</span>
             {onDelete && certificate.status !== 'VALIDATED' && (

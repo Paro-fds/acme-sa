@@ -22,7 +22,7 @@ Besoin 1 : des données fiables. Critère de réussite n°4 : 9 actifs sur 10 au
 
 - **CA-01** En haut de « Ma carrière », « Aujourd'hui » : poste, agence et ancienneté chez ACME SA (depuis la date d'embauche du système RH).
 - **CA-02** La frise va du plus récent au plus ancien, par année : entrée chez ACME SA (système RH), certificats déposés (« Validé par les RH » ou « En cours d'examen » ; un certificat à corriger ou remplacé n'y figure pas), diplômes, formations et expériences déjà saisis (« Déclaré par vous ») ; les compétences s'affichent en étiquettes sous la frise.
-- **CA-03** Des filtres réduisent la frise : Tout, Chez ACME, Diplômes, Formations, Expériences.
+- **CA-03** Des filtres réduisent la frise : Tout, Chez ACME, Hors ACME (certificats ; nom choisi le 2026-10-13), et Formations, Expériences seulement s'il y en a (2026-10-13).
 - **CA-04** Les postes ouverts et les candidatures restent sur la page, à droite sur ordinateur, sous la frise sur téléphone ; les candidatures ne sont pas dans la frise.
 - **CA-05** « Mon parcours » disparaît du menu, du menu du compte et de Mon dossier ; l'adresse /parcours mène à « Ma carrière ».
 

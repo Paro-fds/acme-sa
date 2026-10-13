@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil employé revu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  /* Jetons du portail (frontend/src/index.css) */
+  :root {
+    --primary: #1e1e82; --primary-active: #060068; --info-bg: #e7eeff; --canvas: #f9f9ff; --surface: #fff;
+    --section: #f0f3ff; --border: #d8e3fb; --heading: #111c2d; --help: #464652;
+    --done-bg: #dcfce7; --done: #166534; --progress-bg: #fef3c7; --progress: #92400e; --accent-bg: #ffedd5; --accent: #9a3412;
+    --note: #b45309; --note-bg: #fff6dc; --page: #eef1f8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--heading); font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+  .ms { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; display: inline-block; }
+  a { color: inherit; text-decoration: none; }
+  p { margin: 0; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 16px 64px; display: flex; flex-direction: column; gap: 32px; }
+  .intro h1 { margin: 0 0 6px; font-size: 26px; color: var(--primary); }
+  .intro p { color: var(--help); max-width: 80ch; }
+  .board-title { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--help); margin: 0 0 10px; }
+  .phones { display: flex; flex-wrap: wrap; gap: 32px; }
+  .rel { position: relative; }
+  .pin { position: absolute; z-index: 5; width: 26px; height: 26px; border-radius: 50%; background: var(--note); color: #fff;
+         font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #fff; }
+
+  /* Éléments communs */
+  .card { background: var(--surface); border-radius: 14px; box-shadow: 0 1px 3px rgba(17,28,45,.08); padding: 18px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 10px;
+         background: var(--primary); color: #fff; font-weight: 600; font-size: 17px; }
+  .btn-light { background: #fff; color: var(--primary); }
+  .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .chip .ms { font-size: 16px; }
+  .done { background: var(--done-bg); color: var(--done); }
+  .progress { background: var(--progress-bg); color: var(--progress); }
+  .link { color: var(--primary); font-weight: 600; display: inline-flex; align-items: center; gap: 2px; }
+  .link .ms { font-size: 20px; }
+  .muted { color: var(--help); }
+  .small { font-size: 14px; }
+  h2 { font-size: 20px; margin: 0; }
+  h3 { font-size: 17px; margin: 0; }
+  .avatar { width: 64px; height: 64px; border-radius: 50%; background: #fff; color: var(--primary); font-weight: 700; font-size: 22px;
+            display: flex; align-items: center; justify-content: center; flex: none; box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+
+  /* Bandeau d'accueil */
+  .hero { background: linear-gradient(120deg, var(--primary-active) 0%, var(--primary) 60%, #3b3bb3 100%); color: #fff; border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .hero .who { display: flex; align-items: center; gap: 14px; }
+  .hero h1 { margin: 0; font-size: 26px; line-height: 1.2; }
+  .hero .meta { opacity: .85; }
+  .hero .status { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.14); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 15px; width: fit-content; }
+
+  /* Tuiles « pour vous » */
+  .tiles { display: grid; gap: 12px; }
+  .tile { display: flex; gap: 14px; align-items: flex-start; }
+  .tile .ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .tile .big { font-size: 28px; font-weight: 700; line-height: 1; color: var(--primary); }
+  .tile .body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+
+  /* Poste à la une */
+  .job { border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .crit { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* Étapes de candidature */
+  .steps { display: flex; gap: 4px; }
+  .steps span { height: 6px; flex: 1; border-radius: 3px; background: var(--border); }
+  .steps span.on { background: var(--primary); }
+
+  /* Frise courte */
+  .mini { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .mini li { display: flex; gap: 12px; align-items: flex-start; }
+  .dot { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+  .dot .ms { font-size: 20px; }
+
+  /* Téléphone */
+  .phone { width: 390px; max-width: 100%; background: var(--canvas); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; box-shadow: 0 10px 30px rgba(17,28,45,.12); }
+  .p-head { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--primary); }
+  .logo { width: 34px; height: 34px; border-radius: 8px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .p-body { padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--border); }
+  .tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 12px; font-size: 12px; color: var(--help); min-height: 56px; }
+  .tabbar a.on { color: var(--primary); font-weight: 700; }
+
+  /* Ordinateur (rendu à 1280 px, réduit) */
+  .desk-frame { width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 30px rgba(17,28,45,.12); background: var(--canvas); }
+  .desk { width: 1280px; transform-origin: top left; display: grid; grid-template-columns: 240px 1fr; min-height: 820px; }
+  .d-head { grid-column: 1 / -1; background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .d-nav { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .d-nav a { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border-radius: 10px; font-weight: 600; color: var(--heading); }
+  .d-nav a.on { background: var(--primary); color: #fff; }
+  .d-main { padding: 28px 32px; display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+  .d-col { display: flex; flex-direction: column; gap: 20px; }
+  .d-tiles { grid-template-columns: repeat(3, 1fr); }
+
+  /* Légende */
+  .legend { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+  .legend h2 { color: var(--primary); }
+  .item { display: grid; grid-template-columns: 26px 1fr; gap: 12px; }
+  .item .pin { position: static; box-shadow: none; }
+  .item small { display: block; color: var(--help); font-size: 14px; margin-top: 2px; }
+  .ask { background: var(--note-bg); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>Accueil employé — maquette revue (Krug)</h1>
+    <p>Objectif : que l'employé voie en un coup d'œil ce qui le concerne aujourd'hui et ait envie de revenir. Tout ce qui est affiché existe déjà dans le portail (postes éligibles US-801, statuts des certificats US-303, candidatures US-902, confirmation annuelle US-205) ; données fictives. Les pastilles orange renvoient à la légende.</p>
+  </header>
+
+  <!-- ORDINATEUR -->
+  <section>
+    <p class="board-title">Ordinateur · 1280 px (réduit) · dossier complet</p>
+    <div class="desk-frame" id="deskFrame">
+      <div class="desk" id="desk">
+        <div class="d-head">
+          <a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a>
+          <span class="ms" style="font-size:32px;color:var(--primary)">account_circle</span>
+        </div>
+        <nav class="d-nav">
+          <a class="on" href="#"><span class="ms">home</span>Accueil</a>
+          <a href="#"><span class="ms">person</span>Mon dossier</a>
+          <a href="#"><span class="ms">verified</span>Mes certificats</a>
+          <a href="#"><span class="ms">work</span>Ma carrière</a>
+        </nav>
+        <div class="d-main">
+          <div class="d-col">
+            <div class="hero rel">
+              <span class="pin" style="left:-12px;top:-12px">1</span>
+              <div class="who">
+                <span class="avatar">JD</span>
+                <div>
+                  <h1>Bonjour Jean</h1>
+                  <p class="meta">Agent de crédit · Agence Démo Nord · 8 ans chez ACME SA</p>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                <span class="status"><span class="ms" style="font-size:18px">check_circle</span>Dossier complet</span>
+                <a class="btn btn-light" href="#"><span class="ms">upload_file</span>Déposer un certificat</a>
+              </div>
+            </div>
+
+            <section class="rel" style="display:flex;flex-direction:column;gap:12px">
+              <span class="pin" style="left:-12px;top:-4px">2</span>
+              <h2>Pour vous en ce moment</h2>
+              <div class="tiles d-tiles">
+                <a class="card tile" href="#">
+                  <span class="ico" style="background:var(--info-bg);color:var(--primary)"><span class="ms">work</span></span>
+                  <span class="body"><span class="big">2</span><strong>postes ouverts pour vous</strong><span class="link small">Voir les postes<span class="ms">chevron_right</span></span></span>
+                </a>
+                <a class="card tile" href="#">
+                  <span class="ico" style="background:var(--done-bg);color:var(--done)"><span class="ms">verified</span></span>
+                  <span class="body"><strong>Mes certificats</strong><span class="crit"><span class="chip done">1 validé</span><span class="chip progress">1 en examen</span></span><span class="link small">Voir le suivi<span class="ms">chevron_right</span></span></span>
+                </a>
+                <a class="card tile" href="#">
+                  <span class="ico" style="background:var(--accent-bg);color:var(--accent)"><span class="ms">send</span></span>
+                  <span class="body"><strong>Ma candidature</strong><span class="small muted">Chargé de crédit · étape 2 sur 7</span><span class="steps"><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></span><span class="link small">Suivre<span class="ms">chevron_right</span></span></span>
+                </a>
+              </div>
+            </section>
+
+            <section class="card rel" style="display:flex;flex-direction:column;gap:12px">
+              <span class="pin" style="left:-12px;top:-12px">3</span>
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Un poste qui vous correspond</h2><a class="link small" href="#">Tous les postes<span class="ms">chevron_right</span></a></div>
+              <div class="job">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+                  <div><h3>Chef d'agence adjoint</h3><p class="muted small">Agence Démo Sud · grade 12</p></div>
+                  <span class="chip progress"><span class="ms">schedule</span>Jusqu'au 15 novembre</span>
+                </div>
+                <div class="crit">
+                  <span class="chip done"><span class="ms">check</span>Licence en finance</span>
+                  <span class="chip done"><span class="ms">check</span>5 ans chez ACME SA</span>
+                  <span class="chip done"><span class="ms">check</span>Grade 10 au moins</span>
+                </div>
+                <div><a class="btn" href="#" style="min-height:44px;font-size:16px">Voir le poste et postuler</a></div>
+              </div>
+            </section>
+
+            <section class="card rel" style="display:flex;flex-direction:column;gap:12px">
+              <span class="pin" style="left:-12px;top:-12px">4</span>
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Mon parcours</h2><a class="link small" href="#">Voir la frise<span class="ms">chevron_right</span></a></div>
+              <ul class="mini">
+                <li><span class="dot" style="background:var(--done-bg);color:var(--done)"><span class="ms">school</span></span><div><strong>Licence en sciences comptables</strong><p class="small muted">Hors ACME · validé par les RH · 2019</p></div></li>
+                <li><span class="dot" style="background:var(--info-bg);color:var(--primary)"><span class="ms">apartment</span></span><div><strong>Entrée chez ACME SA</strong><p class="small muted">Chez ACME · septembre 2018</p></div></li>
+              </ul>
+            </section>
+          </div>
+
+          <aside class="d-col">
+            <section class="card rel" style="border-left:4px solid var(--note);display:flex;flex-direction:column;gap:10px">
+              <span class="pin" style="right:-12px;top:-12px">5</span>
+              <h3>Vos informations sont-elles toujours exactes ?</h3>
+              <p class="muted small">Dernière confirmation il y a 11 mois.</p>
+              <a class="btn" href="#" style="min-height:44px;font-size:16px">Tout est exact</a>
+              <a class="link small" href="#">Modifier mon dossier</a>
+            </section>
+            <section class="card" style="display:flex;gap:12px;align-items:flex-start">
+              <span class="ico" style="width:40px;height:40px;border-radius:50%;background:var(--info-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none"><span class="ms">support_agent</span></span>
+              <div><h3 style="font-size:16px">Une question ?</h3><p class="small muted">Le service RH de votre agence vous répond.</p></div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TÉLÉPHONES -->
+  <div class="phones">
+    <section>
+      <p class="board-title">Téléphone · 390 px · dossier complet</p>
+      <div class="phone">
+        <div class="p-head"><a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a><span class="ms" style="font-size:30px;color:var(--primary)">account_circle</span></div>
+        <div class="p-body">
+          <div class="hero" style="padding:18px">
+            <div class="who"><span class="avatar" style="width:52px;height:52px;font-size:18px">JD</span><div><h1 style="font-size:22px">Bonjour Jean</h1><p class="meta small">Agent de crédit · Agence Démo Nord</p></div></div>
+            <span class="status"><span class="ms" style="font-size:18px">check_circle</span>Dossier complet</span>
+            <a class="btn btn-light" href="#"><span class="ms">upload_file</span>Déposer un certificat</a>
+          </div>
+          <h2>Pour vous en ce moment</h2>
+          <div class="tiles">
+            <a class="card tile" href="#"><span class="ico" style="background:var(--info-bg);color:var(--primary)"><span class="ms">work</span></span><span class="body"><span><span class="big" style="font-size:22px">2</span> <strong>postes ouverts pour vous</strong></span><span class="small muted">Dont « Chef d'agence adjoint », jusqu'au 15 novembre</span></span><span class="ms" style="color:var(--primary);align-self:center">chevron_right</span></a>
+            <a class="card tile" href="#"><span class="ico" style="background:var(--done-bg);color:var(--done)"><span class="ms">verified</span></span><span class="body"><strong>Mes certificats</strong><span class="crit"><span class="chip done">1 validé</span><span class="chip progress">1 en examen</span></span></span><span class="ms" style="color:var(--primary);align-self:center">chevron_right</span></a>
+            <a class="card tile" href="#"><span class="ico" style="background:var(--accent-bg);color:var(--accent)"><span class="ms">send</span></span><span class="body"><strong>Ma candidature</strong><span class="small muted">Chargé de crédit · étape 2 sur 7</span><span class="steps"><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></span></span><span class="ms" style="color:var(--primary);align-self:center">chevron_right</span></a>
+          </div>
+          <section class="card" style="border-left:4px solid var(--note);display:flex;flex-direction:column;gap:8px">
+            <h3>Vos informations sont-elles toujours exactes ?</h3>
+            <a class="btn" href="#" style="min-height:44px;font-size:16px">Tout est exact</a>
+          </section>
+        </div>
+        <nav class="tabbar"><a class="on" href="#"><span class="ms">home</span>Accueil</a><a href="#"><span class="ms">person</span>Mon dossier</a><a href="#"><span class="ms">verified</span>Certificats</a><a href="#"><span class="ms">work</span>Ma carrière</a></nav>
+      </div>
+    </section>
+
+    <section>
+      <p class="board-title">Téléphone · 390 px · dossier incomplet</p>
+      <div class="phone">
+        <div class="p-head"><a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a><span class="ms" style="font-size:30px;color:var(--primary)">account_circle</span></div>
+        <div class="p-body">
+          <div class="hero rel" style="padding:18px">
+            <span class="pin" style="right:-8px;top:-10px">6</span>
+            <div class="who"><span class="avatar" style="width:52px;height:52px;font-size:18px">MP</span><div><h1 style="font-size:22px">Bonjour Marie</h1><p class="meta small">Caissière · Agence Démo Nord</p></div></div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-weight:600"><span>Votre dossier</span><span>5 sur 8</span></div>
+              <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.25);margin-top:6px"><div style="width:62%;height:8px;border-radius:4px;background:#fff"></div></div>
+            </div>
+            <p class="small" style="opacity:.9">Encore 3 informations, environ 3 minutes, et vous pourrez déposer vos diplômes.</p>
+            <a class="btn btn-light" href="#">Continuer mon dossier</a>
+          </div>
+          <h2>Ce qu'il vous reste</h2>
+          <div class="tiles">
+            <a class="card tile" href="#"><span class="ico" style="background:var(--accent-bg);color:var(--accent)"><span class="ms">contact_phone</span></span><span class="body"><strong>Contact d'urgence</strong><span class="small muted">Personne à prévenir</span></span><span class="ms" style="color:var(--primary);align-self:center">chevron_right</span></a>
+            <a class="card tile" href="#"><span class="ico" style="background:var(--accent-bg);color:var(--accent)"><span class="ms">school</span></span><span class="body"><strong>Niveau d'études</strong><span class="small muted">Votre plus haut niveau</span></span><span class="ms" style="color:var(--primary);align-self:center">chevron_right</span></a>
+            <a class="card tile" href="#"><span class="ico" style="background:var(--accent-bg);color:var(--accent)"><span class="ms">event</span></span><span class="body"><strong>Date d'embauche</strong><span class="small muted">À confirmer</span></span><span class="ms" style="color:var(--primary);align-self:center">chevron_right</span></a>
+          </div>
+          <section class="card" style="display:flex;gap:12px;align-items:flex-start;background:var(--section);box-shadow:none">
+            <span class="ms" style="color:var(--primary)">work</span>
+            <p class="small"><strong>Ensuite :</strong> vos diplômes validés vous ouvrent les postes de « Ma carrière ».</p>
+          </section>
+        </div>
+        <nav class="tabbar"><a class="on" href="#"><span class="ms">home</span>Accueil</a><a href="#"><span class="ms">person</span>Mon dossier</a><a href="#"><span class="ms">verified</span>Certificats</a><a href="#"><span class="ms">work</span>Ma carrière</a></nav>
+      </div>
+    </section>
+  </div>
+
+  <section class="legend">
+    <h2>Ce qui change, et pourquoi</h2>
+    <div class="item"><span class="pin">1</span><p><strong>Un bandeau d'accueil personnel, et « complet » dit une seule fois.</strong> Avant, la même information apparaissait quatre fois (« Bravo… », anneau 100 %, « complet à 100 % », « 8 sur 8 »), plus un cadenas sur un dépôt pourtant ouvert. Maintenant : photo ou initiales, poste, agence, ancienneté, un badge « Dossier complet » et l'action principale « Déposer un certificat ».<small>Krug : tout est du bruit jusqu'à preuve du contraire ; ce qui est affiché doit dire vrai (§5, §1). « Bienvenue sur votre espace » supprimé (§8 textes).</small></p></div>
+    <div class="item"><span class="pin">2</span><p><strong>« Pour vous en ce moment » : trois raisons de revenir</strong>, chacune cliquable, avec un chiffre réel et la suite : postes ouverts pour lui, état de ses certificats, avancement de sa candidature. Une tuile vide ne s'affiche pas (pas de candidature, pas de tuile).<small>Krug : rendre évidentes les choses que les gens viennent faire (§10) ; ce qui est cliquable en a l'air (§4).</small></p></div>
+    <div class="item"><span class="pin">3</span><p><strong>Un poste qui lui correspond</strong>, avec les critères qu'il remplit déjà (coches vertes) et la date limite. C'est ce qui « donne envie » sans promesse : seulement des postes publiés auxquels il est éligible (US-801). Sans poste ouvert : « Aucun poste ouvert pour vous pour l'instant. Un diplôme validé peut en ouvrir », avec le lien de dépôt.<small>Krug : proposition de valeur visible dès l'accueil (§8) ; choix sans ambiguïté (§6).</small></p></div>
+    <div class="item"><span class="pin">4</span><p><strong>Un aperçu de « Mon parcours »</strong> (deux derniers éléments de la frise US-114), avec le lien « Voir la frise ».<small>Krug : un avant-goût qui mène plus loin, sans encombrer.</small></p></div>
+    <div class="item"><span class="pin">5</span><p><strong>Confirmation annuelle (US-205) et aide RH à droite</strong>, seulement quand c'est utile : la carte « toujours exactes ? » n'apparaît qu'à l'approche des 12 mois.<small>Krug : zones nettes, l'essentiel au centre (§2).</small></p></div>
+    <div class="item"><span class="pin">6</span><p><strong>Dossier incomplet : le bandeau devient la progression</strong> (5 sur 8, barre, temps estimé), suivi de la liste de ce qui reste, un lien par élément, et de ce que ça ouvre ensuite.<small>Krug : l'utilisateur sait où il en est et quelle est la prochaine étape (§6, §7).</small></p></div>
+    <div class="ask">
+      <p><strong>À trancher</strong></p>
+      <p>• Charger sur l'accueil les postes éligibles, les certificats et les candidatures : les API existent, il faut les appeler depuis l'accueil (nouvelle story).</p>
+      <p>• Photo : initiales tant que la source des photos n'est pas connue (US-113).</p>
+      <p>• Validation par M. Hilaire (l'écran 06 validé change), puis un test express avec 3 employés.</p>
+    </div>
+  </section>
+</div>
+<script>
+  // Réduit la maquette ordinateur (1280 px) à la largeur disponible.
+  (function () {
+    var frame = document.getElementById('deskFrame'), desk = document.getElementById('desk');
+    function fit() {
+      var s = Math.min(1, frame.clientWidth / 1280);
+      desk.style.transform = 'scale(' + s + ')';
+      frame.style.height = desk.offsetHeight * s + 'px';
+    }
+    window.addEventListener('resize', fit); window.addEventListener('load', fit); fit();
+  })();
+</script>
+</body>
+</html>

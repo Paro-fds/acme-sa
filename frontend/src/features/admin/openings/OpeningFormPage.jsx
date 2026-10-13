@@ -77,6 +77,8 @@ function OpeningForm({ id, form, opening }) {
   const navigate = useNavigate()
   const redirect = useUnauthorizedRedirect(LOGIN_PATH)
   const [values, setValues] = useState(opening ? toValues(opening) : EMPTY)
+  // US-117 : sans référentiel importé, l'unité du poste est un texte libre et la visibilité ne se restreint pas par unité.
+  const hasReferential = form.units.length > 0
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
   const set = (name) => (event) => setValues((current) => ({ ...current, [name]: event.target.value }))
@@ -105,9 +107,10 @@ function OpeningForm({ id, form, opening }) {
       {opening?.status === 'PUBLISHED' && (
         <Alert tone="info">Ce poste est publié. Toute modification des critères est tracée, avec son auteur et sa date.</Alert>
       )}
-      {form.units.length === 0 && (
+      {!hasReferential && (
         <Alert tone="info">
-          Aucune unité à proposer : le référentiel des unités n'a pas encore été importé.{' '}
+          Le référentiel des unités n'est pas encore importé : écrivez l'unité du poste. Le poste sera proposé à tous les
+          employés qui remplissent les autres critères.{' '}
           <Link to="/admin/referentiel" className="font-semibold underline underline-offset-4">
             Importer le référentiel
           </Link>
@@ -120,7 +123,19 @@ function OpeningForm({ id, form, opening }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField label="Code du poste" required value={values.code} onChange={set('code')} help="Par exemple CC-2026-01." error={fieldError('code')} />
           <TextField label="Intitulé" required value={values.title} onChange={set('title')} error={fieldError('title')} />
-          <SelectField label="Unité du poste" required options={form.units} value={values.unit_code} onChange={set('unit_code')} error={fieldError('unit_code')} />
+          {hasReferential ? (
+            <SelectField label="Unité du poste" required options={form.units} value={values.unit_code} onChange={set('unit_code')} error={fieldError('unit_code')} />
+          ) : (
+            <TextField
+              label="Unité du poste"
+              required
+              maxLength={120}
+              value={values.unit_code}
+              onChange={set('unit_code')}
+              help="Par exemple Agence de Pétion-Ville."
+              error={fieldError('unit_code')}
+            />
+          )}
           <TextField
             label="Grade visé"
             required
@@ -145,12 +160,14 @@ function OpeningForm({ id, form, opening }) {
             dans « Ma carrière » ; les autres ne le voient pas. Seules leurs données validées comptent.
           </p>
         </div>
-        <UnitPicker
-          units={form.units}
-          value={values.criteria_unit_codes}
-          onChange={setList('criteria_unit_codes')}
-          error={fieldError('criteria_unit_codes')}
-        />
+        {hasReferential && (
+          <UnitPicker
+            units={form.units}
+            value={values.criteria_unit_codes}
+            onChange={setList('criteria_unit_codes')}
+            error={fieldError('criteria_unit_codes')}
+          />
+        )}
         <DomainChecks domains={form.domains} value={values.domains} onChange={setList('domains')} error={fieldError('domains')} />
         <p className="border-t border-border pt-4 text-sm font-semibold tracking-wide text-help uppercase">Autres critères (facultatifs)</p>
         <div className="grid gap-4 sm:grid-cols-2">

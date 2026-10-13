@@ -183,12 +183,27 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     expect(await screen.findByRole('heading', { name: 'Chargé de crédit' })).toBeInTheDocument()
   })
 
-  it("sans référentiel importé, le formulaire dit pourquoi aucune unité n'est proposée", async () => {
+  it("US-117 : sans référentiel, l'unité du poste se saisit en texte libre et le poste est visible par tous les aptes", async () => {
+    const user = userEvent.setup()
     getOpeningForm.mockResolvedValue({ ...FORM, units: [] })
+    createOpening.mockResolvedValue(OPENING)
     renderAt('/admin/postes/nouveau')
 
-    expect(await screen.findByText(/Aucune unité à proposer/)).toBeInTheDocument()
+    expect(await screen.findByText(/Le référentiel des unités n'est pas encore importé/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Importer le référentiel' })).toHaveAttribute('href', '/admin/referentiel')
+    expect(screen.queryByText('Visible seulement par les employés de…')).not.toBeInTheDocument()
+    const unit = screen.getByRole('textbox', { name: /Unité du poste/ })
+    await user.type(unit, 'Agence de Pétion-Ville')
+    await user.type(screen.getByLabelText('Code du poste'), 'cc-2026-01')
+    await user.type(screen.getByLabelText('Intitulé'), 'Chargé de crédit')
+    await user.type(screen.getByLabelText('Grade visé'), '10')
+    await user.type(screen.getByLabelText('Mission'), 'Instruire les demandes.')
+    await user.type(screen.getByLabelText("Date d'ouverture"), '2026-10-15')
+    await user.type(screen.getByLabelText('Date limite'), '2026-11-15')
+    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+
+    expect(createOpening).toHaveBeenCalledWith(expect.objectContaining({ unit_code: 'Agence de Pétion-Ville' }))
+    expect(createOpening.mock.calls[0][0].criteria.unit_codes).toEqual([])
   })
 
   it("une erreur s'affiche sous le champ concerné", async () => {

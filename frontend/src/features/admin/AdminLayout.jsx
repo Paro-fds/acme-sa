@@ -7,14 +7,16 @@ import { useLogout } from '../../lib/useLogout.js'
 import NotificationBell from './notifications/NotificationBell.jsx'
 import { can } from './roles.js'
 
-/** Rubriques des écrans validés A02 → A11, dans leur ordre, plus « Postes ouverts » (US-802, lot 4, sans maquette) ; chacune selon le rôle. */
+/**
+ * Rubriques des écrans validés A02 → A11, dans leur ordre, plus « Postes ouverts » (US-802, lot 4, sans maquette) ; chacune selon le rôle.
+ * « À rattacher » (A09) retiré du menu le 2026-10-13 : l'écran reste joignable par le tableau de bord et la fiche de poste.
+ */
 const NAV_ITEMS = [
   { to: '/admin', end: true, label: 'Tableau de bord', access: 'dashboard' },
   { to: '/admin/validation', label: 'File de validation', access: 'validation', count: 'validation', tone: 'neutral' },
   { to: '/admin/employes', label: 'Employés', access: 'employees' },
   { to: '/admin/postes', label: 'Postes ouverts', access: 'openings' },
   { to: '/admin/signalements', label: 'Signalements', access: 'reports', count: 'reports', tone: 'warning' },
-  { to: '/admin/referentiel', label: 'À rattacher', access: 'referential', count: 'to_attach', tone: 'warning' },
   { to: '/admin/comptes', label: 'Comptes et rôles', access: 'accounts' },
   { to: '/admin/audit', label: "Journal d'audit", access: 'audit' },
 ]
@@ -77,7 +79,7 @@ export default function AdminLayout({ title, subtitle, backTo, backLabel = 'Reto
         </div>
         <div className="flex shrink-0 items-center gap-2 text-sm">
           {can(role, 'notifications') && <NotificationBell />}
-          <AccountMenu space="admin" label={accountLabel} role={role} mfaRequired={frame?.me.mfa_required !== false} />
+          <AccountMenu space="admin" label={accountLabel} />
           <span className="hidden text-white/40 sm:inline" aria-hidden="true">·</span>
           <button
             type="button"
