@@ -22,7 +22,7 @@ FICHE = {
     "mission": "Instruire les demandes de crédit de l'agence.",
     "opens_on": "2026-10-15",
     "closes_on": "2026-11-15",
-    "criteria": {"min_level": "LICENCE", "domain": "FINANCE", "min_years_in_institution": 2},
+    "criteria": {"min_level": "LICENCE", "domains": ["FINANCE"], "min_years_in_institution": 2},
 }
 
 
@@ -181,7 +181,7 @@ def test_ca02_un_critere_modifie_apres_publication_est_trace(agent_client, admin
     admin_client.post(f"{OPENINGS}/{created['id']}/publish")
     clock.advance(minutes=5)
     response = agent_client.put(
-        f"{OPENINGS}/{created['id']}", json={**FICHE, "criteria": {"min_level": "MASTER", "domain": "FINANCE"}}
+        f"{OPENINGS}/{created['id']}", json={**FICHE, "criteria": {"min_level": "MASTER", "domains": ["FINANCE"]}}
     )
     assert response.status_code == 200, response.text
     [change] = response.json()["criteria_changes"]

@@ -196,8 +196,16 @@ class ResolveUnitCodes:
 
     def execute(self, agency_value: str, department_value: str) -> tuple[str, ...]:
         """Dans l'ordre : agence, sa région, puis service, sa direction."""
+        return self.execute_many([(agency_value, department_value)])[(agency_value, department_value)]
+
+    def execute_many(self, pairs) -> dict[tuple[str, str], tuple[str, ...]]:
+        """US-115 : les unités de nombreux employés en une seule lecture du référentiel (aperçu de l'audience)."""
         mappings = {(m.column, normalize(m.value)): m.unit_code for m in self._repository.mappings()}
         current = self._repository.current_attachments()
+        return {pair: self._resolve(mappings, current, *pair) for pair in pairs}
+
+    @staticmethod
+    def _resolve(mappings, current, agency_value: str, department_value: str) -> tuple[str, ...]:
         codes: list[str] = []
         for column, value in (("agency_code", agency_value), ("department", department_value)):
             code = mappings.get((column, normalize(value))) if value and value.strip() else None

@@ -46,12 +46,18 @@ def administrator(request: Request) -> Actor:
 
 
 class CriteriaIn(BaseModel):
+    """US-115 : plusieurs domaines et plusieurs unités."""
+
     min_level: str | None = Field(None, max_length=40)
-    domain: str | None = Field(None, max_length=40)
+    domains: list[str] = Field(default_factory=list, max_length=20)
     min_years_in_institution: int | None = None
     min_years_in_position: int | None = None
     min_grade: str | None = Field(None, max_length=10)
-    unit_code: str | None = Field(None, max_length=20)
+    unit_codes: list[str] = Field(default_factory=list, max_length=200)
+
+    def to_criteria(self) -> Criteria:
+        data = self.model_dump()
+        return Criteria(**data | {"domains": tuple(self.domains), "unit_codes": tuple(self.unit_codes)})
 
 
 class OpeningIn(BaseModel):
@@ -73,7 +79,7 @@ class OpeningIn(BaseModel):
             mission=self.mission,
             opens_on=self.opens_on,
             closes_on=self.closes_on,
-            criteria=Criteria(**self.criteria.model_dump()),
+            criteria=self.criteria.to_criteria(),
         )
 
 
@@ -94,11 +100,25 @@ class OpeningFormOut(BaseModel):
 
 class CriteriaOut(BaseModel):
     min_level: str | None
-    domain: str | None
+    domains: list[str]
     min_years_in_institution: int | None
     min_years_in_position: int | None
     min_grade: str | None
-    unit_code: str | None
+    unit_codes: list[str]
+
+
+class AudienceStepOut(BaseModel):
+    excluded: int
+    reason: str
+
+
+class AudienceOut(BaseModel):
+    """US-115 CA-04 : `base` employés dans les unités choisies, ce que chaque critère écarte, `visible` restants."""
+
+    base: int
+    base_label: str
+    steps: list[AudienceStepOut]
+    visible: int
 
 
 class StepOut(BaseModel):
@@ -152,6 +172,18 @@ def opening_form(request: Request, _: Actor = Depends(reader)) -> OpeningFormOut
         units=[UnitOptionOut(**unit.__dict__) for unit in form.units],
         levels=[OptionOut(**level.__dict__) for level in form.levels],
         domains=[OptionOut(**domain.__dict__) for domain in form.domains],
+    )
+
+
+@router.post("/audience", response_model=AudienceOut)
+def preview_audience(body: CriteriaIn, request: Request, _: Actor = Depends(editor)) -> AudienceOut:
+    """US-115 : combien d'employés verront le poste, recalculé pendant la saisie des critères."""
+    result = container(request).preview_audience().execute(body.to_criteria())
+    return AudienceOut(
+        base=result.base,
+        base_label=result.base_label,
+        steps=[AudienceStepOut(excluded=step.excluded, reason=step.reason) for step in result.steps],
+        visible=result.visible,
     )
 
 

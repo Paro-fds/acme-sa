@@ -18,7 +18,7 @@ from app.certificate.domain.files import SIGNATURE_LENGTH, check_announced_type,
 from app.certificate.domain.ports import CertificateRepository, CertificateStorage, UploadTicket
 from app.employee.domain.repository import EmployeeRepository, get_employee
 from app.job.domain.application import ApplicationStep, CvFile, JobApplication, Outcome
-from app.job.domain.eligibility import Candidate, ValidatedCertificate, full_years, missing
+from app.job.domain.eligibility import Audience, Candidate, ValidatedCertificate, audience, full_years, missing
 from app.job.domain.errors import (
     AlreadyApplied,
     ApplicationNotFound,
@@ -36,6 +36,7 @@ from app.job.domain.opening import (
     OpeningFields,
     OpeningStatus,
     StatusChange,
+    check_criteria,
     validate_fields,
 )
 from app.job.domain.ports import ApplicationRepository, OpeningRepository
@@ -244,6 +245,8 @@ class ChangeOpeningStatus(_OpeningCase):
 class UnitCodes(Protocol):
     def execute(self, agency_value: str, department_value: str) -> tuple[str, ...]: ...
 
+    def execute_many(self, pairs) -> dict[tuple[str, str], tuple[str, ...]]: ...
+
 
 @dataclass(frozen=True)
 class MyOpeningView:
@@ -271,15 +274,34 @@ class EmployeeEligibility:
 
     def candidate(self, employee_id: str) -> Candidate:
         employee = get_employee(self._employees, employee_id)
+        return self._candidate(
+            employee,
+            self._certificates.list_for_employee(employee_id),
+            self._unit_codes.execute(employee.agency_code, employee.department),
+        )
+
+    def all_candidates(self) -> list[Candidate]:
+        """US-115 : tous les employés en activité, en trois lectures (employés, certificats, référentiel)."""
+        employees = self._employees.list_all()
+        certificates: dict[str, list] = {}
+        for certificate in self._certificates.list_all():
+            certificates.setdefault(certificate.employee_id, []).append(certificate)
+        units = self._unit_codes.execute_many({(e.agency_code, e.department) for e in employees})
+        return [
+            self._candidate(e, certificates.get(e.id, []), units[(e.agency_code, e.department)]) for e in employees
+        ]
+
+    @staticmethod
+    def _candidate(employee, certificates, unit_codes) -> Candidate:
         return Candidate(
             certificates=tuple(
                 ValidatedCertificate(c.level, c.domain)
-                for c in self._certificates.list_for_employee(employee_id)
+                for c in certificates
                 if c.status == CertificateStatus.VALIDATED and not c.is_archived
             ),
             hire_date=employee.hire_date,
             grade=employee.grade or "",
-            unit_codes=frozenset(self._unit_codes.execute(employee.agency_code, employee.department)),
+            unit_codes=frozenset(unit_codes),
         )
 
     def snapshot(self, employee_id: str, unit_labels: dict[str, str]) -> tuple[str, ...]:
@@ -338,6 +360,20 @@ class ListMyOpenings:
             for o in self._openings.list_all()
             if self._eligibility.is_open(o, today) and not missing(o.criteria, candidate, today)
         ]
+
+
+class PreviewAudience:
+    """US-115 CA-04 : pendant la saisie, combien d'employés verront le poste et ce que chaque critère écarte."""
+
+    def __init__(self, eligibility: EmployeeEligibility, referential: ReferentialRepository, clock: Clock) -> None:
+        self._eligibility = eligibility
+        self._referential = referential
+        self._clock = clock
+
+    def execute(self, criteria: Criteria) -> Audience:
+        units = _unit_labels(self._referential)
+        criteria = check_criteria(criteria, units)
+        return audience(criteria, self._eligibility.all_candidates(), self._clock.now().date(), units)
 
 
 # --- US-902 : déposer et suivre sa candidature à un poste ---------------------------------

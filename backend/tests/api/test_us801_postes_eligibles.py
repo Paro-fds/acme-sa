@@ -61,8 +61,8 @@ def test_l_employe_apte_voit_le_poste_publie(admin_client, employee_client, cont
     # EMP_A : embauché le 03/09/2018, grade 12, agence PV (région M1), Direction Crédit.
     _certificate(container, EMP_A.id, "LICENCE", "FINANCE")
     _publish(
-        admin_client, min_level="LICENCE", domain="FINANCE", min_years_in_institution=5, min_years_in_position=5,
-        min_grade="10", unit_code="M1",
+        admin_client, min_level="LICENCE", domains=["FINANCE"], min_years_in_institution=5, min_years_in_position=5,
+        min_grade="10", unit_codes=["M1"],
     )
     response = employee_client(EMP_A).get(MY_OPENINGS)
     [item] = response.json()["items"]
@@ -77,7 +77,7 @@ def test_l_employe_apte_voit_le_poste_publie(admin_client, employee_client, cont
 def test_l_employe_qui_ne_remplit_pas_un_critere_ne_le_voit_pas(admin_client, employee_client, container):
     _certificate(container, EMP_A.id, "LICENCE", "FINANCE")
     _certificate(container, EMP_E.id, "MASTER", "FINANCE")
-    _publish(admin_client, min_level="LICENCE", domain="FINANCE", min_grade="15")
+    _publish(admin_client, min_level="LICENCE", domains=["FINANCE"], min_grade="15")
     assert _codes(employee_client(EMP_A)) == []  # grade 12
     assert _codes(employee_client(EMP_E)) == ["CC-2026-01"]  # grade 18
 

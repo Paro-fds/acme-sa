@@ -22,7 +22,7 @@ FIELDS = OpeningFields(
     mission="Instruire les demandes de crédit de l'agence.",
     opens_on=date(2026, 10, 15),
     closes_on=date(2026, 11, 15),
-    criteria=Criteria(min_level="LICENCE", domain="FINANCE", min_years_in_institution=2),
+    criteria=Criteria(min_level="LICENCE", domains=("FINANCE",), min_years_in_institution=2),
 )
 
 
@@ -70,11 +70,11 @@ def test_ca01_chaque_champ_obligatoire_est_controle(changes, field):
     [
         (Criteria(min_level="INCONNU"), "min_level"),
         (Criteria(min_level="CERTIFICATION_PRO"), "min_level"),
-        (Criteria(domain="ASTRONOMIE"), "domain"),
+        (Criteria(domains=("ASTRONOMIE",)), "domains"),
         (Criteria(min_years_in_institution=-1), "min_years_in_institution"),
         (Criteria(min_years_in_position=51), "min_years_in_position"),
         (Criteria(min_grade="huit"), "min_grade"),
-        (Criteria(unit_code="INCONNUE"), "criteria_unit_code"),
+        (Criteria(unit_codes=("INCONNUE",)), "criteria_unit_codes"),
     ],
 )
 def test_ca01_les_criteres_sont_controles(criteria, field):
@@ -90,11 +90,11 @@ def test_ca01_aucun_critere_n_est_obligatoire():
 def test_ca01_les_criteres_se_lisent_en_francais():
     criteria = Criteria(
         min_level="LICENCE",
-        domain="FINANCE",
+        domains=("FINANCE",),
         min_years_in_institution=2,
         min_years_in_position=1,
         min_grade="8",
-        unit_code="AD",
+        unit_codes=("AD",),
     )
     assert criteria.describe(UNITS) == [
         "Niveau d'études minimum : Licence",
@@ -166,7 +166,7 @@ def test_ca02_un_brouillon_se_modifie_sans_trace_de_critere():
 def test_ca02_un_critere_modifie_apres_publication_est_trace():
     opening = _opening()
     opening.publish(ADMIN, T1)
-    opening.update(replace(FIELDS, criteria=Criteria(min_level="MASTER", domain="FINANCE")), AGENT, T1)
+    opening.update(replace(FIELDS, criteria=Criteria(min_level="MASTER", domains=("FINANCE",))), AGENT, T1)
     [change] = opening.criteria_changes
     assert change.actor == AGENT
     assert change.at == T1

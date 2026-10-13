@@ -11,7 +11,7 @@ from dataclasses import dataclass, field, replace
 from datetime import date, datetime
 from enum import StrEnum
 
-from app.certificate.domain.certificate import DOMAIN_LABELS
+from app.certificate.domain.certificate import DOMAIN_LABELS, DOMAINS
 from app.job.domain.errors import InvalidOpeningField, OpeningLocked, OpeningTransitionRefused
 from app.shared.domain.levels import LEVELS_BY_CODE
 
@@ -53,32 +53,41 @@ def _years(value: int) -> str:
     return f"{value} an{'s' if value > 1 else ''} au moins"
 
 
+def domains_text(domains: tuple[str, ...]) -> str:
+    """« Comptabilité ou Finance » : un certificat dans l'un des domaines suffit (US-115)."""
+    return " ou ".join(DOMAIN_LABELS[code] for code in domains)
+
+
 @dataclass(frozen=True)
 class Criteria:
-    """EF-805 : niveau minimum, domaine, ancienneté dans l'institution, ancienneté dans le poste, grade, unité."""
+    """EF-805 : niveau minimum, domaines, ancienneté dans l'institution, ancienneté dans le poste, grade, unités.
+
+    US-115 : plusieurs domaines (un certificat validé dans l'un d'eux) et plusieurs unités (rattaché à l'une d'elles).
+    """
 
     min_level: str | None = None
-    domain: str | None = None
+    domains: tuple[str, ...] = ()
     min_years_in_institution: int | None = None
     min_years_in_position: int | None = None
     min_grade: str | None = None
-    unit_code: str | None = None
+    unit_codes: tuple[str, ...] = ()
 
     def describe(self, unit_labels: dict[str, str]) -> list[str]:
         """Les critères en phrases, pour la fiche et pour la trace des modifications."""
         lines = []
         if self.min_level:
             lines.append(f"Niveau d'études minimum : {LEVELS_BY_CODE[self.min_level].label}")
-        if self.domain:
-            lines.append(f"Domaine : {DOMAIN_LABELS[self.domain]}")
+        if self.domains:
+            lines.append(f"Domaine{'s' if len(self.domains) > 1 else ''} : {domains_text(self.domains)}")
         if self.min_years_in_institution is not None:
             lines.append(f"Ancienneté dans l'institution : {_years(self.min_years_in_institution)}")
         if self.min_years_in_position is not None:
             lines.append(f"Ancienneté dans le poste : {_years(self.min_years_in_position)}")
         if self.min_grade:
             lines.append(f"Grade minimum : {self.min_grade}")
-        if self.unit_code:
-            lines.append(f"Unité : {unit_labels.get(self.unit_code, self.unit_code)}")
+        if self.unit_codes:
+            labels = ", ".join(unit_labels.get(code, code) for code in self.unit_codes)
+            lines.append(f"Unité{'s' if len(self.unit_codes) > 1 else ''} : {labels}")
         return lines
 
 
@@ -110,18 +119,26 @@ def _check_criteria(criteria: Criteria, units: dict[str, str]) -> Criteria:
     level = LEVELS_BY_CODE.get(criteria.min_level) if criteria.min_level else None
     if criteria.min_level and (level is None or not level.on_scale):
         raise InvalidOpeningField("Choisissez un niveau d'études de la liste.", field="min_level")
-    if criteria.domain and criteria.domain not in DOMAIN_LABELS:
-        raise InvalidOpeningField("Choisissez un domaine de la liste.", field="domain")
+    if any(code not in DOMAIN_LABELS for code in criteria.domains):
+        raise InvalidOpeningField("Choisissez des domaines de la liste.", field="domains")
+    # Dans l'ordre de la liste des domaines, sans doublon.
+    domains = tuple(choice.code for choice in DOMAINS if choice.code in criteria.domains)
     _check_years(criteria.min_years_in_institution, "min_years_in_institution")
     _check_years(criteria.min_years_in_position, "min_years_in_position")
     min_grade = (criteria.min_grade or "").strip() or None
     if min_grade and not _NUMBER.match(min_grade):
         raise InvalidOpeningField("Le grade est un nombre, par exemple 8.", field="min_grade")
-    unit_code = criteria.unit_code or None
-    if unit_code and unit_code not in units:
-        raise InvalidOpeningField("Choisissez une unité du référentiel.", field="criteria_unit_code")
-    return replace(criteria, min_grade=min_grade, unit_code=unit_code, domain=criteria.domain or None,
+    if any(code not in units for code in criteria.unit_codes):
+        raise InvalidOpeningField("Choisissez des unités du référentiel.", field="criteria_unit_codes")
+    # Dans l'ordre choisi, sans doublon.
+    unit_codes = tuple(dict.fromkeys(criteria.unit_codes))
+    return replace(criteria, min_grade=min_grade, unit_codes=unit_codes, domains=domains,
                    min_level=criteria.min_level or None)
+
+
+def check_criteria(criteria: Criteria, units: dict[str, str]) -> Criteria:
+    """US-115 : critères seuls (aperçu de l'audience pendant la saisie), contrôlés et nettoyés comme dans la fiche."""
+    return _check_criteria(criteria, units)
 
 
 def validate_fields(fields: OpeningFields, units: dict[str, str]) -> OpeningFields:

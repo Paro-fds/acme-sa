@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Date, ForeignKey, Integer, String, Text, func, select
+from sqlalchemy import Date, ForeignKey, Integer, String, Text, delete, func, select
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.job.domain.opening import Actor, Criteria, CriteriaChange, JobOpening, OpeningStatus, StatusChange
@@ -22,11 +22,29 @@ class OpeningRow(Base):
     closes_on: Mapped[date] = mapped_column(Date)
     status: Mapped[str] = mapped_column(String, index=True)
     min_level: Mapped[str | None] = mapped_column(String, nullable=True)
-    domain: Mapped[str | None] = mapped_column(String, nullable=True)
     min_years_in_institution: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_years_in_position: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_grade: Mapped[str | None] = mapped_column(String, nullable=True)
-    criteria_unit_code: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class OpeningDomainRow(Base):
+    """US-115 : un domaine accepté par le poste, une ligne par domaine (dans l'ordre de la liste des domaines)."""
+
+    __tablename__ = "job_opening_domain"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    opening_id: Mapped[int] = mapped_column(ForeignKey("job_opening.id"), index=True)
+    domain: Mapped[str] = mapped_column(String)
+
+
+class OpeningUnitRow(Base):
+    """US-115 : une unité dont les employés voient le poste, une ligne par unité (dans l'ordre choisi)."""
+
+    __tablename__ = "job_opening_unit"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    opening_id: Mapped[int] = mapped_column(ForeignKey("job_opening.id"), index=True)
+    unit_code: Mapped[str] = mapped_column(String)
 
 
 class OpeningStepRow(Base):
@@ -67,11 +85,17 @@ def _write(row: OpeningRow, opening: JobOpening) -> None:
     row.status = opening.status.value
     criteria = opening.criteria
     row.min_level = criteria.min_level
-    row.domain = criteria.domain
     row.min_years_in_institution = criteria.min_years_in_institution
     row.min_years_in_position = criteria.min_years_in_position
     row.min_grade = criteria.min_grade
-    row.criteria_unit_code = criteria.unit_code
+
+
+def _write_lists(session: Session, opening: JobOpening) -> None:
+    """Domaines et unités du poste : remplacés à chaque enregistrement (les critères avant/après sont tracés à part)."""
+    session.execute(delete(OpeningDomainRow).where(OpeningDomainRow.opening_id == opening.id))
+    session.execute(delete(OpeningUnitRow).where(OpeningUnitRow.opening_id == opening.id))
+    session.add_all(OpeningDomainRow(opening_id=opening.id, domain=code) for code in opening.criteria.domains)
+    session.add_all(OpeningUnitRow(opening_id=opening.id, unit_code=code) for code in opening.criteria.unit_codes)
 
 
 def _split(text: str) -> tuple[str, ...]:
@@ -89,6 +113,7 @@ class SqlOpeningRepository:
             session.add(row)
             session.flush()
             opening.id = row.id
+            _write_lists(session, opening)
             self._append_children(session, opening)
         return opening
 
@@ -101,6 +126,7 @@ class SqlOpeningRepository:
         with self._database.session() as session:
             row = session.get(OpeningRow, opening.id)
             _write(row, opening)
+            _write_lists(session, opening)
             self._append_children(session, opening)
 
     def code_taken(self, code: str, except_id: int | None = None) -> bool:
@@ -148,6 +174,12 @@ class SqlOpeningRepository:
         changes = session.scalars(
             select(CriteriaChangeRow).where(CriteriaChangeRow.opening_id == row.id).order_by(CriteriaChangeRow.id)
         )
+        domains = session.scalars(
+            select(OpeningDomainRow.domain).where(OpeningDomainRow.opening_id == row.id).order_by(OpeningDomainRow.id)
+        )
+        units = session.scalars(
+            select(OpeningUnitRow.unit_code).where(OpeningUnitRow.opening_id == row.id).order_by(OpeningUnitRow.id)
+        )
         return JobOpening(
             id=row.id,
             code=row.code,
@@ -159,11 +191,11 @@ class SqlOpeningRepository:
             closes_on=row.closes_on,
             criteria=Criteria(
                 min_level=row.min_level,
-                domain=row.domain,
+                domains=tuple(domains),
                 min_years_in_institution=row.min_years_in_institution,
                 min_years_in_position=row.min_years_in_position,
                 min_grade=row.min_grade,
-                unit_code=row.criteria_unit_code,
+                unit_codes=tuple(units),
             ),
             status=OpeningStatus(row.status),
             history=[

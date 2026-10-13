@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -13,6 +13,7 @@ import {
   listOpeningApplications,
   listOpenings,
   moveApplication,
+  previewAudience,
   updateOpening,
 } from '../../../api/openings.js'
 import OpeningDetailPage from './OpeningDetailPage.jsx'
@@ -29,6 +30,7 @@ vi.mock('../../../api/openings.js', () => ({
   listOpeningApplications: vi.fn(),
   moveApplication: vi.fn(),
   closeApplication: vi.fn(),
+  previewAudience: vi.fn(),
   applicationCvUrl: (id) => `/api/admin/applications/${id}/cv`,
 }))
 vi.mock('../../../api/admin.js', () => ({ getAdminMe: vi.fn() }))
@@ -37,13 +39,19 @@ vi.mock('../../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }
 const FORM = {
   units: [
     { code: 'AD', label: 'Agence Démo', type_label: 'Agence' },
+    { code: 'DM', label: 'Delmas', type_label: 'Agence' },
+    { code: 'PV', label: 'Pétion-Ville', type_label: 'Agence' },
     { code: 'DCR', label: 'Direction du Crédit', type_label: 'Direction' },
   ],
   levels: [
     { code: 'LICENCE', label: 'Licence' },
     { code: 'MASTER', label: 'Master' },
   ],
-  domains: [{ code: 'FINANCE', label: 'Finance' }],
+  domains: [
+    { code: 'COMPTABILITE', label: 'Comptabilité' },
+    { code: 'FINANCE', label: 'Finance' },
+    { code: 'GESTION', label: 'Gestion' },
+  ],
 }
 
 const step = (status, statusLabel, at, actor) => ({ status, status_label: statusLabel, at, actor_name: actor })
@@ -60,11 +68,11 @@ const OPENING = {
   closes_on: '2026-11-15',
   criteria: {
     min_level: 'LICENCE',
-    domain: 'FINANCE',
+    domains: ['FINANCE'],
     min_years_in_institution: 2,
     min_years_in_position: null,
     min_grade: null,
-    unit_code: null,
+    unit_codes: [],
   },
   criteria_lines: ["Niveau d'études minimum : Licence", 'Domaine : Finance', "Ancienneté dans l'institution : 2 ans au moins"],
   status: 'DRAFT',
@@ -102,6 +110,7 @@ beforeEach(() => {
   getOpening.mockResolvedValue(OPENING)
   listOpeningApplications.mockResolvedValue({ items: [] })
   listOpenings.mockResolvedValue({ items: [PUBLISHED, { ...OPENING, id: 8, code: 'AG-2026-02', title: 'Agent de guichet' }] })
+  previewAudience.mockResolvedValue({ base: 7, base_label: 'employés en activité', steps: [], visible: 7 })
 })
 
 describe('US-802 — liste des postes', () => {
@@ -164,11 +173,11 @@ describe('US-802 CA-01 — saisir la fiche', () => {
       closes_on: '2026-11-15',
       criteria: {
         min_level: 'LICENCE',
-        domain: null,
+        domains: [],
         min_years_in_institution: 2,
         min_years_in_position: null,
         min_grade: null,
-        unit_code: null,
+        unit_codes: [],
       },
     })
     expect(await screen.findByRole('heading', { name: 'Chargé de crédit' })).toBeInTheDocument()
@@ -206,6 +215,99 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     expect(screen.getByText(/Toute modification des critères est tracée/)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
     expect(updateOpening).toHaveBeenCalledWith('7', expect.objectContaining({ code: 'CC-2026-01' }))
+  })
+})
+
+describe('US-115 — qui verra ce poste', () => {
+  async function addUnit(user, query, option) {
+    await user.type(screen.getByRole('combobox', { name: /Visible seulement par les employés de/ }), query)
+    await user.click(within(screen.getByRole('listbox', { name: 'Unités proposées' })).getByRole('option', { name: option }))
+  }
+
+  it('CA-01, CA-02 : plusieurs unités et plusieurs domaines, enregistrés avec la fiche', async () => {
+    const user = userEvent.setup()
+    createOpening.mockResolvedValue(OPENING)
+    renderAt('/admin/postes/nouveau')
+    await screen.findByLabelText('Code du poste')
+
+    await addUnit(user, 'pét', /Pétion-Ville/)
+    await addUnit(user, 'Del', /Delmas/)
+    const chosen = screen.getByRole('list', { name: 'Unités choisies' })
+    expect(within(chosen).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      expect.stringContaining('Pétion-Ville'),
+      expect.stringContaining('Delmas'),
+    ])
+    await user.click(screen.getByRole('checkbox', { name: 'Finance' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Comptabilité' }))
+    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+
+    expect(createOpening).toHaveBeenCalledWith(
+      expect.objectContaining({
+        criteria: expect.objectContaining({ unit_codes: ['PV', 'DM'], domains: ['FINANCE', 'COMPTABILITE'] }),
+      }),
+    )
+  })
+
+  it('CA-01 : une unité choisie se retire, et ne se propose plus tant qu’elle est choisie', async () => {
+    const user = userEvent.setup()
+    renderAt('/admin/postes/nouveau')
+    await screen.findByLabelText('Code du poste')
+    await addUnit(user, 'pét', /Pétion-Ville/)
+
+    await user.type(screen.getByRole('combobox', { name: /Visible seulement par les employés de/ }), 'pét')
+    expect(screen.queryByRole('listbox', { name: 'Unités proposées' })).not.toBeInTheDocument()
+    expect(screen.getByText('Aucune autre unité ne correspond.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Retirer Pétion-Ville' }))
+    expect(screen.queryByRole('list', { name: 'Unités choisies' })).not.toBeInTheDocument()
+  })
+
+  it('CA-04 : l’aperçu dit combien d’employés verront le poste et ce qui écarte les autres', async () => {
+    const user = userEvent.setup()
+    previewAudience.mockResolvedValue({
+      base: 48,
+      base_label: 'employés rattachés à Pétion-Ville ou Delmas',
+      steps: [
+        { excluded: 30, reason: 'sans certificat validé en Comptabilité ou Finance' },
+        { excluded: 6, reason: 'grade inférieur à 10' },
+      ],
+      visible: 12,
+    })
+    renderAt('/admin/postes/nouveau')
+    await screen.findByLabelText('Code du poste')
+    await addUnit(user, 'pét', /Pétion-Ville/)
+
+    await waitFor(() =>
+      expect(previewAudience).toHaveBeenLastCalledWith(expect.objectContaining({ unit_codes: ['PV'], domains: [] })),
+    )
+    const preview = screen.getByRole('region', { name: 'Aperçu de l’audience' })
+    expect(await within(preview).findByText('12')).toBeInTheDocument()
+    expect(preview).toHaveTextContent('employés verront ce poste')
+    expect(preview).toHaveTextContent('48 employés rattachés à Pétion-Ville ou Delmas')
+    expect(preview).toHaveTextContent('− 30 sans certificat validé en Comptabilité ou Finance')
+    expect(preview).toHaveTextContent('− 6 grade inférieur à 10')
+  })
+
+  it('CA-05 : personne ne verrait le poste — un avertissement, et l’enregistrement reste possible', async () => {
+    const user = userEvent.setup()
+    previewAudience.mockResolvedValue({ base: 0, base_label: 'employés en activité', steps: [], visible: 0 })
+    createOpening.mockResolvedValue(OPENING)
+    renderAt('/admin/postes/nouveau')
+    await screen.findByLabelText('Code du poste')
+
+    expect(await screen.findByText('Personne ne verra ce poste')).toBeInTheDocument()
+    const save = screen.getByRole('button', { name: 'Enregistrer le brouillon' })
+    expect(save).toBeEnabled()
+  })
+
+  it('modifier un poste : ses unités et ses domaines sont repris', async () => {
+    getOpening.mockResolvedValue({ ...OPENING, criteria: { ...OPENING.criteria, unit_codes: ['AD', 'DM'], domains: ['FINANCE'] } })
+    renderAt('/admin/postes/7/modifier')
+    const chosen = await screen.findByRole('list', { name: 'Unités choisies' })
+    expect(chosen).toHaveTextContent('Agence Démo')
+    expect(chosen).toHaveTextContent('Delmas')
+    expect(screen.getByRole('checkbox', { name: 'Finance' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Gestion' })).not.toBeChecked()
   })
 })
 

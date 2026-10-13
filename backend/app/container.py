@@ -73,6 +73,7 @@ from app.job.application.use_cases import (
     GetOpeningForm,
     ListMyApplications,
     ListMyOpenings,
+    PreviewAudience,
     ListOpeningApplications,
     ListOpenings,
     MoveApplication,
@@ -496,6 +497,9 @@ class Container:
 
     def list_my_openings(self) -> ListMyOpenings:
         return ListMyOpenings(self.openings, self.employee_eligibility(), self.referential, self.clock)
+
+    def preview_audience(self) -> PreviewAudience:
+        return PreviewAudience(self.employee_eligibility(), self.referential, self.clock)
 
     # --- job : candidatures (US-902) -----------------------------------------
 

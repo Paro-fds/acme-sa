@@ -23,6 +23,11 @@ export function updateOpening(id, fiche) {
   return request(`/admin/openings/${encodeURIComponent(id)}`, { method: 'PUT', body: fiche })
 }
 
+/** US-115 : combien d'employés verraient un poste avec ces critères, et ce que chaque critère écarte. */
+export function previewAudience(criteria) {
+  return request('/admin/openings/audience', { method: 'POST', body: criteria })
+}
+
 /** Administrateur seul : `publish`, `close` ou `fill`. */
 export function changeOpeningStatus(id, action) {
   return request(`/admin/openings/${encodeURIComponent(id)}/${action}`, { method: 'POST' })

@@ -204,6 +204,16 @@ S = [
    "Les postes ouverts et les candidatures restent sur la page, à droite sur ordinateur, sous la frise sur téléphone ; les candidatures ne sont pas dans la frise.",
    "« Mon parcours » disparaît du menu, du menu du compte et de Mon dossier ; l'adresse /parcours mène à « Ma carrière »."],
   "Suggestion du directeur rapportée le 2026-10-12 (« une sorte de timeline pour retracer le parcours de l'employé ») et choix de l'utilisateur (maquette « Ma carrière en frise » du canvas) : « enlever Mon parcours, laissons seulement Ma carrière ». Le portail ne connaît que le poste actuel et la date d'embauche : les anciens postes chez ACME viendront quand la source sera connue (à demander au directeur, peut-être les mouvements lus dans les lettres, US-903). Les RH gardent l'affichage actuel du parcours sur la fiche employé. Ajouter des formations ou des expériences depuis le portail reste hors périmètre."),
+ ("115","D3","Choisir qui verra un poste","2","",
+  "Should","EF-803, EF-805","RG-72","",
+  "Agent RH","réserver un poste à une ou plusieurs agences et à un ou plusieurs domaines, en voyant combien d'employés le verront",
+  "publier seul un poste qui touche les bonnes personnes, sans en publier un que personne ne voit",
+  ["« Visible seulement par les employés de… » accepte une ou plusieurs unités du référentiel ; une région ou une direction inclut toutes ses agences ; sans choix, toutes les unités.",
+   "« Domaines acceptés » accepte un ou plusieurs domaines : l'employé doit avoir un certificat validé par les RH dans l'un d'eux (au niveau minimum, s'il est demandé).",
+   "Un employé ne voit le poste que s'il remplit tous les critères ; les postes déjà enregistrés gardent leur unité et leur domaine.",
+   "L'aperçu de l'audience affiche, à chaque changement de critère, combien d'employés verront le poste et combien chaque critère en écarte, sur les seules données validées.",
+   "Si personne ne verrait le poste, un avertissement le dit ; l'enregistrement reste possible."],
+  "Suggestion du directeur rapportée le 2026-10-12 (« affecter telle demande à telle agence », « les postes devraient être aussi par domaine ») et choix de l'utilisateur sur la maquette « Postes ouverts : qui verra le poste » : plusieurs unités, plusieurs domaines, aperçu de l'audience détaillé, simple avertissement si personne ne voit le poste. Le domaine reste celui d'un certificat validé, pas une compétence déclarée. Questions ouvertes au directeur : plusieurs agences et plusieurs domaines pour un même poste."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -480,7 +490,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 
