@@ -25,6 +25,7 @@ class OpeningRow(Base):
     min_years_in_institution: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_years_in_position: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_grade: Mapped[str | None] = mapped_column(String, nullable=True)
+    profile_code: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class OpeningDomainRow(Base):
@@ -83,6 +84,7 @@ def _write(row: OpeningRow, opening: JobOpening) -> None:
     row.opens_on = opening.opens_on
     row.closes_on = opening.closes_on
     row.status = opening.status.value
+    row.profile_code = opening.profile_code
     criteria = opening.criteria
     row.min_level = criteria.min_level
     row.min_years_in_institution = criteria.min_years_in_institution
@@ -198,6 +200,7 @@ class SqlOpeningRepository:
                 unit_codes=tuple(units),
             ),
             status=OpeningStatus(row.status),
+            profile_code=row.profile_code,
             history=[
                 StatusChange(OpeningStatus(step.status), step.at, Actor(step.actor_id, step.actor_name)) for step in steps
             ],

@@ -242,6 +242,27 @@ S = [
    "Un certificat archivé (remplacé) garde son fichier consultable : il reste une preuve.",
    "Si le fichier manque dans le stockage, un message clair le dit au lieu d'une erreur serveur."],
   "Demande de l'utilisateur du 2026-10-13 : « quand un employé upload son fichier il puisse aussi le voir ». Jusque-là seul l'espace de gestion lisait le fichier (US-401)."),
+ ("119","D8","Publier un poste à partir du catalogue des postes ACME","2","",
+  "Should","EF-803, EF-804","RG-72","—",
+  "Agent RH","choisir un poste dans le catalogue des descriptions de poste d'ACME et le publier sans réécrire son texte",
+  "publier vite un poste complet et précis, et que l'employé sache exactement ce qu'on attend de lui",
+  ["« Postes ouverts » a deux onglets : « Postes publiés » (l'écran actuel) et « Catalogue des postes ACME », la liste de toutes les descriptions de poste, avec leur domaine et le niveau demandé (« Non précisé » si la fiche n'en donne pas).",
+   "Le catalogue se filtre par mots de l'intitulé et par domaine ; chaque fiche s'ouvre en aperçu (description, missions, qualifications, expérience, conditions d'exercice, qualités attendues) sans quitter la liste.",
+   "« Publier ce poste » (Agent RH ou Administrateur) ouvre le formulaire de saisie pré-rempli : intitulé, mission (la description de la fiche), domaines de diplôme proposés à partir du domaine de la fiche, niveau minimum suggéré par la fiche ; tout reste modifiable et le poste suit le circuit habituel (brouillon, publication par un Administrateur).",
+   "L'unité, les dates, le grade visé et les autres critères se saisissent comme avant ; seuls les employés qui remplissent tous les critères voient le poste (US-801, US-115).",
+   "L'employé qui voit le poste lit la fiche complète, rubrique par rubrique, en plus de la mission et des critères.",
+   "Un poste saisi hors catalogue (« Saisir un poste ») fonctionne comme avant."],
+  "Demande de l'utilisateur du 2026-10-14 (maquette « Postes ouverts : catalogue des postes ACME », écrans A, B et D, validée pour la démonstration au directeur). Source : les 70 descriptions de poste d'ACME transmises par l'utilisateur (dossier postes/) et son tableau poste → domaine ; importées par app/tools/import_job_profiles.py, à remplacer par la base SQLite du directeur quand elle sera fournie. Les vraies fiches entrent dans le dépôt et la démo en ligne (choix de l'utilisateur du 2026-10-14 ; aucune donnée de personne). Domaines de diplôme proposés par domaine de fiche : proposition du développeur, à valider par la DRH. Hors périmètre : la notification aux employés (story suivante), le domaine métier des employés, le nombre d'employés par poste (correspondance avec le fichier RH en cours). Nouveau par rapport au registre : à faire noter par M. Hilaire, comme US-117."),
+ ("120","D7","Être prévenu dans le portail d'un poste ouvert pour moi et du sort de mes certificats","2","",
+  "Should","EF-703, EF-706","RG-26, RG-72","—",
+  "employé","être prévenu dans le portail dès qu'un poste s'ouvre pour moi et dès que les RH ont traité un certificat",
+  "postuler à temps et corriger vite un certificat refusé, sans avoir à surveiller chaque écran",
+  ["Une cloche dans l'en-tête de l'espace employé indique le nombre de notifications non lues ; sur ordinateur elle ouvre la liste, sur téléphone la page Notifications.",
+   "« Nouveau poste ouvert pour vous » : pour chaque poste publié et ouvert dont l'employé remplit tous les critères, y compris s'il devient apte après la publication ; la notification disparaît quand le poste n'est plus ouvert ou que l'employé n'est plus apte. Elle mène à « Ma carrière ».",
+   "« Certificat validé » et « Certificat à corriger » (avec le motif) : à chaque décision des RH sur un certificat de l'employé ; elles mènent à « Mes certificats ».",
+   "Tant qu'un poste ouvert pour lui n'est pas lu, l'accueil le met en avant (« Nouveau pour vous »), avec un bouton pour voir le poste.",
+   "Chaque employé a ses notifications lues et non lues ; « Tout marquer comme lu » les marque toutes ; une notification disparaît 90 jours après l'événement."],
+  "Demande de l'utilisateur du 2026-10-14 (maquette « Postes ouverts : catalogue des postes ACME », écran C) et choix du même jour : tout employé apte, même devenu apte après la publication ; postes ouverts et décisions sur les certificats (pas encore les étapes de candidature) ; cloche et encart sur l'accueil. Comme US-116, les notifications se calculent et seul l'état « lu » est enregistré. Ni WhatsApp ni email : ils viendront quand le prestataire sera choisi (EF-701). Nouveau par rapport au registre (EF-706 prévoyait un résumé périodique au lot 4) : à faire noter par M. Hilaire."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -518,7 +539,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait", "119": "Fait", "120": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

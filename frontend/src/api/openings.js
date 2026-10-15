@@ -82,3 +82,13 @@ export function moveApplication(id, step) {
 export function closeApplication(id, outcome) {
   return request(`/admin/applications/${encodeURIComponent(id)}/close`, { method: 'POST', body: { outcome } })
 }
+
+/** US-119 : catalogue des postes ACME, toutes les fiches par ordre alphabétique. */
+export function listJobProfiles() {
+  return request('/admin/job-profiles')
+}
+
+/** US-119 : une fiche complète, avec les domaines de diplôme et le niveau minimum qu'elle propose. */
+export function getJobProfile(code) {
+  return request(`/admin/job-profiles/${encodeURIComponent(code)}`)
+}

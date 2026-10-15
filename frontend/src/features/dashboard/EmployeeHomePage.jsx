@@ -9,6 +9,7 @@ import { useLoader } from '../../lib/useLoader.js'
 import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
 import { DEPOSIT_PATH } from '../certificates/paths.js'
 import { CONSENT_PATH } from '../dossier/paths.js'
+import NewForYouCard from '../notifications/NewForYouCard.jsx'
 import StillAccurateCard from './StillAccurateCard.jsx'
 
 export const HOME_PATH = '/accueil'
@@ -245,6 +246,7 @@ const help = (
         </p>
       </section>
 
+      <NewForYouCard />
       <StillAccurateCard freshness={data.freshness} />
       {!desktop && progress}
       {missing.length > 0 && <Remaining elements={missing} />}

@@ -18,11 +18,13 @@ from app.certificate.domain.files import SIGNATURE_LENGTH, check_announced_type,
 from app.certificate.domain.ports import CertificateRepository, CertificateStorage, UploadTicket
 from app.employee.domain.repository import EmployeeRepository, get_employee
 from app.job.domain.application import ApplicationStep, CvFile, JobApplication, Outcome
+from app.job.domain.catalogue import JobProfileCatalogue, ProfileSection
 from app.job.domain.eligibility import Audience, Candidate, ValidatedCertificate, audience, full_years, missing
 from app.job.domain.errors import (
     AlreadyApplied,
     ApplicationNotFound,
     NotEligible,
+    InvalidOpeningField,
     OpeningCodeTaken,
     OpeningNotFound,
     OpeningNotOpen,
@@ -98,6 +100,8 @@ class OpeningView:
     status_label: str
     history: list[StepView]
     criteria_changes: list[CriteriaChangeView]
+    profile_code: str | None = None
+    profile_title: str | None = None
 
 
 def _unit_labels(referential: ReferentialRepository) -> dict[str, str]:
@@ -108,7 +112,8 @@ def _step(change: StatusChange) -> StepView:
     return StepView(change.status.value, change.status.label, change.at, change.actor.name)
 
 
-def _view(opening: JobOpening, units: dict[str, str]) -> OpeningView:
+def _view(opening: JobOpening, units: dict[str, str], catalogue: JobProfileCatalogue) -> OpeningView:
+    profile = catalogue.get(opening.profile_code) if opening.profile_code else None
     return OpeningView(
         id=opening.id,
         code=opening.code,
@@ -128,17 +133,33 @@ def _view(opening: JobOpening, units: dict[str, str]) -> OpeningView:
             CriteriaChangeView(change.at, change.actor.name, list(change.before), list(change.after))
             for change in opening.criteria_changes
         ],
+        profile_code=opening.profile_code,
+        profile_title=profile.title if profile else None,
     )
 
 
 class _OpeningCase:
     def __init__(
-        self, openings: OpeningRepository, referential: ReferentialRepository, audit: AuditRepository, clock: Clock
+        self,
+        openings: OpeningRepository,
+        referential: ReferentialRepository,
+        audit: AuditRepository,
+        clock: Clock,
+        catalogue: JobProfileCatalogue,
     ) -> None:
         self._openings = openings
         self._referential = referential
         self._audit = audit
         self._clock = clock
+        self._catalogue = catalogue
+
+    def _view(self, opening: JobOpening, units: dict[str, str]) -> OpeningView:
+        return _view(opening, units, self._catalogue)
+
+    def _check_profile(self, fields: OpeningFields) -> None:
+        """US-119 : un poste issu du catalogue cite une fiche qui existe."""
+        if fields.profile_code and self._catalogue.get(fields.profile_code) is None:
+            raise InvalidOpeningField("Choisissez une fiche du catalogue des postes.", field="profile_code")
 
     def _get(self, opening_id: int) -> JobOpening:
         opening = self._openings.get(opening_id)
@@ -182,12 +203,12 @@ class GetOpeningForm:
 class ListOpenings(_OpeningCase):
     def execute(self) -> list[OpeningView]:
         units = _unit_labels(self._referential)
-        return [_view(opening, units) for opening in self._openings.list_all()]
+        return [self._view(opening, units) for opening in self._openings.list_all()]
 
 
 class GetOpening(_OpeningCase):
     def execute(self, opening_id: int) -> OpeningView:
-        return _view(self._get(opening_id), _unit_labels(self._referential))
+        return self._view(self._get(opening_id), _unit_labels(self._referential))
 
 
 class CreateOpening(_OpeningCase):
@@ -196,12 +217,13 @@ class CreateOpening(_OpeningCase):
     def execute(self, fields: OpeningFields, actor: Actor) -> OpeningView:
         units = _unit_labels(self._referential)
         fields = validate_fields(fields, units)
+        self._check_profile(fields)
         if self._openings.code_taken(fields.code):
             raise OpeningCodeTaken()
         now = self._clock.now()
         opening = self._openings.add(JobOpening.create(fields, actor, now))
         self._trace_status(actor, opening, now)
-        return _view(opening, units)
+        return self._view(opening, units)
 
 
 class UpdateOpening(_OpeningCase):
@@ -211,6 +233,7 @@ class UpdateOpening(_OpeningCase):
         opening = self._get(opening_id)
         units = _unit_labels(self._referential)
         fields = validate_fields(fields, units)
+        self._check_profile(fields)
         if self._openings.code_taken(fields.code, except_id=opening_id):
             raise OpeningCodeTaken()
         now = self._clock.now()
@@ -219,7 +242,7 @@ class UpdateOpening(_OpeningCase):
         self._openings.save(opening)
         if len(opening.criteria_changes) > traced:
             self._trace(actor, opening, f"Critères du poste {opening.code} modifiés après publication", now)
-        return _view(opening, units)
+        return self._view(opening, units)
 
 
 class ChangeOpeningStatus(_OpeningCase):
@@ -235,7 +258,7 @@ class ChangeOpeningStatus(_OpeningCase):
         getattr(opening, action)(actor, now)
         self._openings.save(opening)
         self._trace_status(actor, opening, now)
-        return _view(opening, _unit_labels(self._referential))
+        return self._view(opening, _unit_labels(self._referential))
 
 
 
@@ -259,6 +282,9 @@ class MyOpeningView:
     opens_on: date
     closes_on: date
     criteria_lines: list[str]
+    profile_domain: str | None = None
+    sections: tuple[ProfileSection, ...] = ()
+    """US-119 : la fiche complète du catalogue, rubrique par rubrique (vide pour un poste hors catalogue)."""
 
 
 class EmployeeEligibility:
@@ -341,22 +367,34 @@ class ListMyOpenings:
     sur leurs seules données validées (EF-805, CA-03)."""
 
     def __init__(
-        self, openings: OpeningRepository, eligibility: EmployeeEligibility, referential: ReferentialRepository, clock: Clock
+        self,
+        openings: OpeningRepository,
+        eligibility: EmployeeEligibility,
+        referential: ReferentialRepository,
+        clock: Clock,
+        catalogue: JobProfileCatalogue,
     ) -> None:
         self._openings = openings
         self._eligibility = eligibility
         self._referential = referential
         self._clock = clock
+        self._catalogue = catalogue
+
+    def _my_view(self, o: JobOpening, units: dict[str, str]) -> MyOpeningView:
+        profile = self._catalogue.get(o.profile_code) if o.profile_code else None
+        return MyOpeningView(
+            o.id, o.code, o.title, units.get(o.unit_code, o.unit_code), o.target_grade, o.mission, o.opens_on,
+            o.closes_on, o.criteria.describe(units),
+            profile_domain=profile.domain if profile else None,
+            sections=profile.sections if profile else (),
+        )
 
     def execute(self, employee_id: str) -> list[MyOpeningView]:
         candidate = self._eligibility.candidate(employee_id)
         today = self._clock.now().date()
         units = _unit_labels(self._referential)
         return [
-            MyOpeningView(
-                o.id, o.code, o.title, units.get(o.unit_code, o.unit_code), o.target_grade, o.mission, o.opens_on,
-                o.closes_on, o.criteria.describe(units),
-            )
+            self._my_view(o, units)
             for o in self._openings.list_all()
             if self._eligibility.is_open(o, today) and not missing(o.criteria, candidate, today)
         ]

@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-24 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+26 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -61,6 +61,14 @@ La direction et les RH savent qui est qualifié, où, et où en sont les dossier
 | [US-603](US-603-exporter-une-liste.md) | Exporter une liste | Should | — | Fait |
 | [US-604](US-604-rendre-compte-de-chaque-action.md) | Rendre compte de chaque action | Must | — | Fait |
 
+## D7 Notifications
+
+L'employé est prévenu au bon moment, par le canal qu'il utilise, sans être harcelé.
+
+| Story | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|
+| [US-120](US-120-etre-prevenu-dans-le-portail-d-un-poste-ouvert-pour-moi-et-d.md) | Être prévenu dans le portail d'un poste ouvert pour moi et du sort de mes certificats | Should | — | Fait |
+
 ## D8 Carrière et postes
 
 L'employé voit les postes ouverts auxquels il est éligible et ce qui lui manque.
@@ -68,6 +76,7 @@ L'employé voit les postes ouverts auxquels il est éligible et ce qui lui manqu
 | Story | Titre | Priorité | Complément plus tard | Statut |
 |---|---|---|---|---|
 | [US-117](US-117-creer-un-poste-sans-le-referentiel.md) | Créer un poste sans le référentiel | Must | — | Fait |
+| [US-119](US-119-publier-un-poste-a-partir-du-catalogue-des-postes-acme.md) | Publier un poste à partir du catalogue des postes ACME | Should | — | Fait |
 
 ## D9 Demandes et mouvements de carrière
 

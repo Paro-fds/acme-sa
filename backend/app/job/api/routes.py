@@ -5,13 +5,15 @@ from datetime import date, datetime
 
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel, Field
 
 from app.auth.api.dependencies import container, current_admin_account, current_employee_id
 from app.auth.domain.admin import AdminAccount, AdminRole
 from app.auth.domain.errors import InsufficientRole
-from app.job.application.use_cases import ApplicationView, OpeningView
+from app.job.application.catalogue import JobProfileView
+from app.job.application.use_cases import ApplicationView, MyOpeningView, OpeningView
+from app.job.domain.notifications import reader_id
 from app.job.domain.opening import Actor, Criteria, OpeningFields
 
 router = APIRouter(prefix="/api/admin/openings", tags=["openings"])
@@ -70,6 +72,8 @@ class OpeningIn(BaseModel):
     opens_on: date | None = None
     closes_on: date | None = None
     criteria: CriteriaIn = CriteriaIn()
+    profile_code: str | None = Field(None, max_length=120)
+    """US-119 : fiche du catalogue dont le poste est issu."""
 
     def to_fields(self) -> OpeningFields:
         return OpeningFields(
@@ -81,6 +85,7 @@ class OpeningIn(BaseModel):
             opens_on=self.opens_on,
             closes_on=self.closes_on,
             criteria=self.criteria.to_criteria(),
+            profile_code=self.profile_code,
         )
 
 
@@ -152,6 +157,8 @@ class OpeningOut(BaseModel):
     status_label: str
     history: list[StepOut]
     criteria_changes: list[CriteriaChangeOut]
+    profile_code: str | None
+    profile_title: str | None
 
 
 class OpeningListOut(BaseModel):
@@ -222,6 +229,55 @@ for _action in ("publish", "close", "fill"):
     )
 
 
+# --- US-119 : catalogue des postes ACME ---------------------------------------------------
+
+catalogue_router = APIRouter(prefix="/api/admin/job-profiles", tags=["openings"])
+
+
+class SectionOut(BaseModel):
+    title: str
+    lines: list[str]
+
+
+def _sections(sections) -> list[SectionOut]:
+    return [SectionOut(title=section.title, lines=list(section.lines)) for section in sections]
+
+
+class JobProfileSummaryOut(BaseModel):
+    code: str
+    title: str
+    domain: str | None
+    level_text: str | None
+
+
+class JobProfileListOut(BaseModel):
+    items: list[JobProfileSummaryOut]
+
+
+class JobProfileOut(JobProfileSummaryOut):
+    description: str
+    sections: list[SectionOut]
+    suggested_domains: list[str]
+    suggested_level: str | None
+
+    @classmethod
+    def of(cls, view: JobProfileView) -> "JobProfileOut":
+        return cls(**(view.__dict__ | {"sections": _sections(view.sections)}))
+
+
+@catalogue_router.get("", response_model=JobProfileListOut)
+def list_job_profiles(request: Request, _: Actor = Depends(reader)) -> JobProfileListOut:
+    """Toutes les fiches du catalogue, par ordre alphabétique (tout compte qui consulte les postes)."""
+    views = container(request).list_job_profiles().execute()
+    return JobProfileListOut(items=[JobProfileSummaryOut(**view.__dict__) for view in views])
+
+
+@catalogue_router.get("/{code}", response_model=JobProfileOut)
+def get_job_profile(code: str, request: Request, _: Actor = Depends(reader)) -> JobProfileOut:
+    """La fiche complète et ce qu'elle propose pour le poste à publier (domaines de diplôme, niveau minimum)."""
+    return JobProfileOut.of(container(request).get_job_profile().execute(code))
+
+
 # --- US-801 : espace employé --------------------------------------------------------------
 
 me_router = APIRouter(prefix="/api/me/openings", tags=["openings"])
@@ -237,6 +293,13 @@ class MyOpeningOut(BaseModel):
     opens_on: date
     closes_on: date
     criteria_lines: list[str]
+    profile_domain: str | None
+    sections: list[SectionOut]
+    """US-119 : la fiche complète du catalogue (vide pour un poste hors catalogue)."""
+
+    @classmethod
+    def of(cls, view: MyOpeningView) -> "MyOpeningOut":
+        return cls(**(view.__dict__ | {"sections": _sections(view.sections)}))
 
 
 class MyOpeningListOut(BaseModel):
@@ -247,7 +310,54 @@ class MyOpeningListOut(BaseModel):
 def my_openings(request: Request, employee_id: str = Depends(current_employee_id)) -> MyOpeningListOut:
     """Les postes publiés et ouverts auxquels l'employé est apte (choix du 2026-10-11)."""
     views = container(request).list_my_openings().execute(employee_id)
-    return MyOpeningListOut(items=[MyOpeningOut(**view.__dict__) for view in views])
+    return MyOpeningListOut(items=[MyOpeningOut.of(view) for view in views])
+
+
+# --- US-120 : notifications de l'employé ---------------------------------------------------
+
+my_notifications_router = APIRouter(prefix="/api/me/notifications", tags=["notifications"])
+
+
+class MyNotificationOut(BaseModel):
+    key: str
+    kind: str
+    kind_label: str
+    title: str
+    detail: str
+    at: datetime
+    link: str
+    unread: bool
+
+
+class MyNotificationsOut(BaseModel):
+    items: list[MyNotificationOut]
+    unread_count: int
+    has_more: bool
+
+
+@my_notifications_router.get("", response_model=MyNotificationsOut)
+def my_notifications(
+    request: Request, limit: int = Query(50, ge=1, le=200), employee_id: str = Depends(current_employee_id)
+) -> MyNotificationsOut:
+    """Postes ouverts pour l'employé et décisions sur ses certificats, les plus récentes d'abord."""
+    view = container(request).get_my_notifications().execute(employee_id, limit)
+    return MyNotificationsOut(
+        items=[MyNotificationOut(**item.__dict__) for item in view.items],
+        unread_count=view.unread_count,
+        has_more=view.has_more,
+    )
+
+
+@my_notifications_router.post("/read-all", status_code=204)
+def mark_all_my_notifications_read(request: Request, employee_id: str = Depends(current_employee_id)) -> Response:
+    container(request).mark_all_notifications_read().execute(reader_id(employee_id))
+    return Response(status_code=204)
+
+
+@my_notifications_router.post("/{key}/read", status_code=204)
+def mark_my_notification_read(key: str, request: Request, employee_id: str = Depends(current_employee_id)) -> Response:
+    container(request).mark_notification_read().execute(reader_id(employee_id), key[:100])
+    return Response(status_code=204)
 
 
 # --- US-902 : candidatures ----------------------------------------------------------------

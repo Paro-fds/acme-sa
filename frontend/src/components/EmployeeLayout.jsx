@@ -5,6 +5,7 @@ import logo from '../assets/logo-acme.png'
 import { useIsDesktop } from '../lib/useIsDesktop.js'
 import { useLogout } from '../lib/useLogout.js'
 import AccountMenu from './AccountMenu.jsx'
+import EmployeeNotificationBell from '../features/notifications/EmployeeNotificationBell.jsx'
 import Avatar from './Avatar.jsx'
 import BottomNav from './BottomNav.jsx'
 import { EMPLOYEE_NAV } from './employeeNav.js'
@@ -110,10 +111,12 @@ function Brand() {
 /** Ordinateur : menu à gauche (rubriques, puis nom, poste et « Se déconnecter » en bas). */
 function Sidebar({ identity, nav }) {
   return (
-    <aside className="w-64 shrink-0 border-r border-border bg-surface">
+    // z-20 : la liste de la cloche (US-120) déborde du menu et doit passer au-dessus du contenu.
+    <aside className="relative z-20 w-64 shrink-0 border-r border-border bg-surface">
       <div className="sticky top-0 flex h-dvh flex-col px-4 py-6">
-        <div className="px-2 pb-7">
+        <div className="flex items-center justify-between gap-2 pb-7 pl-2">
           <Brand />
+          {nav && <EmployeeNotificationBell />}
         </div>
         {nav && (
           <nav aria-label="Espace employé">
@@ -191,6 +194,7 @@ function MobileHeader({ identity, nav }) {
             <span className="truncate font-semibold text-heading">Portail Carrière</span>
             <span className="truncate text-sm text-help">Institution de Microfinance — Haïti</span>
           </div>
+          {nav && <EmployeeNotificationBell />}
           <AccountMenu space="employee" />
         </div>
       </header>

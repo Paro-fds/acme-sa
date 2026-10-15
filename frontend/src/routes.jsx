@@ -23,6 +23,7 @@ import DepositPage from './features/certificates/DepositPage.jsx'
 import ThanksPage from './features/certificates/ThanksPage.jsx'
 import EmployeeHomePage from './features/dashboard/EmployeeHomePage.jsx'
 import MyOpeningsPage from './features/openings/MyOpeningsPage.jsx'
+import MyNotificationsPage from './features/notifications/MyNotificationsPage.jsx'
 import CreatePasswordPage from './features/auth/CreatePasswordPage.jsx'
 import LoginPage from './features/auth/LoginPage.jsx'
 import ConsentPage from './features/dossier/ConsentPage.jsx'
@@ -48,6 +49,7 @@ export default function AppRoutes() {
       <Route path="/certificats/deposer" element={<DepositPage />} />
       <Route path="/certificats/merci" element={<ThanksPage />} />
       <Route path="/carriere" element={<MyOpeningsPage />} />
+      <Route path="/notifications" element={<MyNotificationsPage />} />
       {/* US-114 : « Mon parcours » est fondu dans « Ma carrière ». */}
       <Route path="/parcours/*" element={<Navigate to="/carriere" replace />} />
       {/* US-206 : les adresses de l'ancien parcours du MVP ramènent à « Mon dossier ». */}

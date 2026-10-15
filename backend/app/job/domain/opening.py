@@ -101,6 +101,8 @@ class OpeningFields:
     opens_on: date | None
     closes_on: date | None
     criteria: Criteria = Criteria()
+    profile_code: str | None = None
+    """US-119 : fiche du catalogue des postes ACME dont le poste est issu (aucune pour un poste hors catalogue)."""
 
 
 def _required(value: str | None, field_name: str, message: str) -> str:
@@ -179,6 +181,7 @@ def validate_fields(fields: OpeningFields, units: dict[str, str]) -> OpeningFiel
         opens_on=fields.opens_on,
         closes_on=fields.closes_on,
         criteria=_check_criteria(fields.criteria, units),
+        profile_code=(fields.profile_code or "").strip() or None,
     )
 
 
@@ -213,6 +216,7 @@ class JobOpening:
     status: OpeningStatus
     history: list[StatusChange] = field(default_factory=list)
     criteria_changes: list[CriteriaChange] = field(default_factory=list)
+    profile_code: str | None = None
 
     @classmethod
     def create(cls, fields: OpeningFields, actor: Actor, at: datetime) -> "JobOpening":
@@ -226,7 +230,7 @@ class JobOpening:
     def fields(self) -> OpeningFields:
         return OpeningFields(
             self.code, self.title, self.unit_code, self.target_grade, self.mission, self.opens_on, self.closes_on,
-            self.criteria,
+            self.criteria, self.profile_code,
         )
 
     def update(self, fields: OpeningFields, actor: Actor, at: datetime, unit_labels: dict[str, str] | None = None) -> None:
@@ -266,3 +270,4 @@ class JobOpening:
         self.opens_on = fields.opens_on
         self.closes_on = fields.closes_on
         self.criteria = fields.criteria
+        self.profile_code = fields.profile_code

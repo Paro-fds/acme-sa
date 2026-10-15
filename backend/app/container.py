@@ -64,6 +64,8 @@ from app.auth.infrastructure.sql_repositories import (
     SqlSessionRepository,
 )
 from app.career.application.use_cases import GetCareerFields, GetMyCareer
+from app.job.application.catalogue import GetJobProfile, ListJobProfiles
+from app.job.application.notifications import GetMyNotifications
 from app.job.application.use_cases import (
     ApplyToOpening,
     ChangeOpeningStatus,
@@ -83,6 +85,7 @@ from app.job.application.use_cases import (
     UpdateOpening,
     WithdrawApplication,
 )
+from app.job.infrastructure.json_job_profile_catalogue import JsonJobProfileCatalogue
 from app.job.infrastructure.sql_application_repository import SqlApplicationRepository
 from app.job.infrastructure.sql_opening_repository import SqlOpeningRepository
 from app.career.infrastructure.sql_career_repository import SqlCareerRepository
@@ -178,6 +181,7 @@ class Container:
         self.notification_reads = SqlNotificationReadRepository(self.database)
         self.openings = SqlOpeningRepository(self.database)
         self.applications = SqlApplicationRepository(self.database)
+        self.job_profiles = JsonJobProfileCatalogue(settings.job_profiles_path)
         self.certificate_storage = _certificate_storage(settings)
         self.file_storage = _file_storage(settings)
         self.password_hasher = Argon2PasswordHasher()
@@ -344,6 +348,13 @@ class Container:
     def mark_all_notifications_read(self) -> MarkAllNotificationsRead:
         return MarkAllNotificationsRead(self.notification_reads, self.clock)
 
+    def get_my_notifications(self) -> GetMyNotifications:
+        """US-120 : notifications de l'employé ; ses lectures passent par MarkNotificationRead sous « employee:<id> »."""
+        return GetMyNotifications(
+            self.openings, self.employee_eligibility(), self.referential, self.certificates, self.notification_reads,
+            self.clock,
+        )
+
     def get_menu_counts(self) -> GetMenuCounts:
         return GetMenuCounts(self.certificates, self.dossiers, self.referential)
 
@@ -494,7 +505,7 @@ class Container:
         return GetOpeningForm(self.referential)
 
     def _opening_ports(self):
-        return self.openings, self.referential, self.audit_logs, self.clock
+        return self.openings, self.referential, self.audit_logs, self.clock, self.job_profiles
 
     def list_openings(self) -> ListOpenings:
         return ListOpenings(*self._opening_ports())
@@ -511,11 +522,19 @@ class Container:
     def change_opening_status(self) -> ChangeOpeningStatus:
         return ChangeOpeningStatus(*self._opening_ports())
 
+    # --- job : catalogue des postes ACME (US-119) -------------------------------
+
+    def list_job_profiles(self) -> ListJobProfiles:
+        return ListJobProfiles(self.job_profiles)
+
+    def get_job_profile(self) -> GetJobProfile:
+        return GetJobProfile(self.job_profiles)
+
     def employee_eligibility(self) -> EmployeeEligibility:
         return EmployeeEligibility(self.employees, self.certificates, ResolveUnitCodes(self.referential), self.clock)
 
     def list_my_openings(self) -> ListMyOpenings:
-        return ListMyOpenings(self.openings, self.employee_eligibility(), self.referential, self.clock)
+        return ListMyOpenings(self.openings, self.employee_eligibility(), self.referential, self.clock, self.job_profiles)
 
     def preview_audience(self) -> PreviewAudience:
         return PreviewAudience(self.employee_eligibility(), self.referential, self.clock)

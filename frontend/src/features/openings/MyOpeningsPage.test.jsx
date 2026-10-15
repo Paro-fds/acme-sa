@@ -190,6 +190,39 @@ describe('US-801 — postes ouverts pour l’employé apte', () => {
   })
 })
 
+describe('US-119 CA-05 — la fiche complète du poste', () => {
+  it('un poste issu du catalogue montre son domaine et ses rubriques, à ouvrir une à une', async () => {
+    const user = userEvent.setup()
+    listMyOpenings.mockResolvedValue({
+      items: [
+        {
+          ...OPENING,
+          profile_domain: 'Banque et microfinance',
+          sections: [
+            { title: 'Missions', lines: ['Rechercher de nouveaux clients', 'Constituer les dossiers de prêts'] },
+            { title: 'Conditions d’exercice', lines: ['Travail sur le terrain et au bureau'] },
+          ],
+        },
+      ],
+    })
+    renderPage()
+    const card = await screen.findByRole('article', { name: 'Chargé de crédit' })
+    expect(within(card).getByText('Banque et microfinance')).toBeInTheDocument()
+    const missions = within(card).getByText('Missions')
+    expect(within(card).getByText('Rechercher de nouveaux clients')).not.toBeVisible()
+    await user.click(missions)
+    expect(within(card).getByText('Rechercher de nouveaux clients')).toBeVisible()
+    expect(within(card).getByText('Conditions d’exercice')).toBeInTheDocument()
+  })
+
+  it('un poste hors catalogue s’affiche comme avant, sans rubriques', async () => {
+    listMyOpenings.mockResolvedValue({ items: [{ ...OPENING, profile_domain: null, sections: [] }] })
+    renderPage()
+    const card = await screen.findByRole('article', { name: 'Chargé de crédit' })
+    expect(within(card).queryByText('Missions')).not.toBeInTheDocument()
+  })
+})
+
 describe('US-902 — déposer et suivre sa candidature', () => {
   it('postuler avec un message, puis voir l’accusé de réception et le numéro de suivi', async () => {
     const user = userEvent.setup()

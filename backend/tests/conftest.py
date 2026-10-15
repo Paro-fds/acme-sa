@@ -56,6 +56,7 @@ def settings(tmp_path: Path, admin_password_hash: str) -> Settings:
     return Settings(
         _env_file=None,
         acme_csv_path=TEST_CSV,
+        job_profiles_path=FIXTURES_DIR / "job_profiles_test.json",
         acme_data_dir=tmp_path / "acme-data",
         database_url=_empty_postgres(POSTGRES_URL) if POSTGRES_URL else "",
         frontend_dist_dir=tmp_path / "no-frontend",

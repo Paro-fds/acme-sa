@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     """`demo` et `recette` : jeu fictif imposé (US-001 CA-05) ; `local` : poste du développeur et tests."""
     acme_csv_path: Path = PROJECT_DIR / "data" / "vault-employee-list_20261001-1400.csv"
     acme_data_dir: Path = Path("C:/acme-data")
+    job_profiles_path: Path = BACKEND_DIR / "app" / "job" / "infrastructure" / "fiches-de-poste.json"
+    """US-119 : catalogue des postes ACME, produit par `python -m app.tools.import_job_profiles`."""
     database_url: str = ""
     """`DATABASE_URL` : PostgreSQL (Supabase, puis RDS) ; vide = SQLite dans `ACME_DATA_DIR` (poste du développeur, tests)."""
     auto_create_schema: bool = True

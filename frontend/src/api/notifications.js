@@ -15,3 +15,16 @@ export function markNotificationRead(key) {
 export function markAllNotificationsRead() {
   return request('/admin/notifications/read-all', { method: 'POST' })
 }
+
+/** US-120 : notifications de l'employé connecté (postes ouverts pour lui, décisions sur ses certificats). */
+export function getMyNotifications({ limit = 50 } = {}) {
+  return request(`/me/notifications?limit=${limit}`)
+}
+
+export function markMyNotificationRead(key) {
+  return request(`/me/notifications/${encodeURIComponent(key)}/read`, { method: 'POST' })
+}
+
+export function markAllMyNotificationsRead() {
+  return request('/me/notifications/read-all', { method: 'POST' })
+}

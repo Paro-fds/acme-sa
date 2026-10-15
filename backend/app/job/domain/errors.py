@@ -10,6 +10,13 @@ class OpeningNotFound(NotFound):
     message = "Poste introuvable."
 
 
+class JobProfileNotFound(NotFound):
+    """US-119 : fiche absente du catalogue des postes ACME."""
+
+    code = "JOB_PROFILE_NOT_FOUND"
+    message = "Fiche de poste introuvable."
+
+
 class OpeningCodeTaken(Conflict):
     code = "OPENING_CODE_TAKEN"
     message = "Ce code est déjà utilisé par un autre poste."

@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { createOpening, getOpening, getOpeningForm, updateOpening } from '../../../api/openings.js'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { createOpening, getJobProfile, getOpening, getOpeningForm, updateOpening } from '../../../api/openings.js'
 import Alert from '../../../components/Alert.jsx'
 import Button from '../../../components/Button.jsx'
 import Page from '../../../components/Page.jsx'
 import TextField from '../../../components/TextField.jsx'
 import { useIsDesktop } from '../../../lib/useIsDesktop.js'
 import { useLoader, useUnauthorizedRedirect } from '../../../lib/useLoader.js'
+import ProfileSections from '../../openings/ProfileSections.jsx'
 import { AudiencePreview, DomainChecks, UnitPicker, useAudience } from './audienceParts.jsx'
 import { LOGIN_PATH, OPENINGS_PATH, SelectField, TextAreaField } from './openingParts.jsx'
 
@@ -24,6 +25,23 @@ const EMPTY = {
   min_years_in_position: '',
   min_grade: '',
   criteria_unit_codes: [],
+  profile_code: '',
+}
+
+const MISSION_MAX = 2000
+
+/** US-119 : ce que la fiche du catalogue propose ; tout reste modifiable. */
+function fromProfile(profile, form) {
+  const levels = new Set(form.levels.map((level) => level.code))
+  const domains = new Set(form.domains.map((domain) => domain.code))
+  return {
+    ...EMPTY,
+    title: profile.title,
+    mission: profile.description.slice(0, MISSION_MAX),
+    domains: profile.suggested_domains.filter((code) => domains.has(code)),
+    min_level: levels.has(profile.suggested_level) ? profile.suggested_level : '',
+    profile_code: profile.code,
+  }
 }
 
 function toValues(opening) {
@@ -43,6 +61,7 @@ function toValues(opening) {
     min_years_in_position: text(criteria.min_years_in_position),
     min_grade: text(criteria.min_grade),
     criteria_unit_codes: criteria.unit_codes ?? [],
+    profile_code: opening.profile_code ?? '',
   }
 }
 
@@ -70,13 +89,14 @@ function toFiche(values) {
     opens_on: orNull(values.opens_on),
     closes_on: orNull(values.closes_on),
     criteria: toCriteria(values),
+    ...(values.profile_code ? { profile_code: values.profile_code } : {}),
   }
 }
 
-function OpeningForm({ id, form, opening }) {
+function OpeningForm({ id, form, opening, profile }) {
   const navigate = useNavigate()
   const redirect = useUnauthorizedRedirect(LOGIN_PATH)
-  const [values, setValues] = useState(opening ? toValues(opening) : EMPTY)
+  const [values, setValues] = useState(opening ? toValues(opening) : profile ? fromProfile(profile, form) : EMPTY)
   // US-117 : sans référentiel importé, l'unité du poste est un texte libre et la visibilité ne se restreint pas par unité.
   const hasReferential = form.units.length > 0
   const [error, setError] = useState(null)
@@ -106,6 +126,23 @@ function OpeningForm({ id, form, opening }) {
       <div className="flex min-w-0 flex-col gap-6">
       {opening?.status === 'PUBLISHED' && (
         <Alert tone="info">Ce poste est publié. Toute modification des critères est tracée, avec son auteur et sa date.</Alert>
+      )}
+      {profile && (
+        <section aria-label="Fiche du catalogue" className="flex flex-col gap-2 rounded-xl bg-info-bg p-4">
+          <p className="flex items-start gap-2 text-base text-info-text">
+            <span className="material-symbols-outlined shrink-0" aria-hidden="true">menu_book</span>
+            <span>
+              Repris de la fiche « {profile.title} » : intitulé, mission, domaines de diplôme et niveau minimum. Vérifiez,
+              puis indiquez l’unité, le grade et les dates.
+            </span>
+          </p>
+          <details className="rounded-lg bg-surface px-3">
+            <summary className="flex min-h-11 cursor-pointer items-center text-base font-semibold text-primary">
+              Voir la fiche complète
+            </summary>
+            <ProfileSections sections={profile.sections} />
+          </details>
+        </section>
       )}
       {!hasReferential && (
         <Alert tone="info">
@@ -224,20 +261,32 @@ function OpeningForm({ id, form, opening }) {
  */
 export default function OpeningFormPage() {
   const { id } = useParams()
+  const [params] = useSearchParams()
+  // US-119 : « Publier ce poste » depuis le catalogue ouvre la saisie avec `?fiche=<code>`.
+  const fiche = id ? null : params.get('fiche')
   const { data, loading, error } = useLoader(
     async () => {
-      const [form, opening] = await Promise.all([getOpeningForm(), id ? getOpening(id) : null])
-      return { form, opening }
+      const [form, opening, profile] = await Promise.all([
+        getOpeningForm(),
+        id ? getOpening(id) : null,
+        fiche ? getJobProfile(fiche) : null,
+      ])
+      return { form, opening, profile }
     },
-    { loginPath: LOGIN_PATH, key: id },
+    { loginPath: LOGIN_PATH, key: `${id}:${fiche}` },
   )
-  const title = id ? 'Modifier un poste' : 'Saisir un poste'
+  const title = id ? 'Modifier un poste' : fiche ? 'Publier un poste du catalogue' : 'Saisir un poste'
 
   return (
-    <Page account="admin" wide title={title} backTo={id ? `${OPENINGS_PATH}/${id}` : OPENINGS_PATH}>
+    <Page
+      account="admin"
+      wide
+      title={title}
+      backTo={id ? `${OPENINGS_PATH}/${id}` : fiche ? `${OPENINGS_PATH}?onglet=catalogue` : OPENINGS_PATH}
+    >
       {loading && <p role="status">Chargement…</p>}
       {error && <Alert>{error.message}</Alert>}
-      {data && <OpeningForm id={id} form={data.form} opening={data.opening} />}
+      {data && <OpeningForm id={id} form={data.form} opening={data.opening} profile={data.profile} />}
     </Page>
   )
 }

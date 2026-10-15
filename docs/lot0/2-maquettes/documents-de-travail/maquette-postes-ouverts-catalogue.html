@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalogue des postes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  /* Jetons du portail (frontend/src/index.css) */
+  :root {
+    --primary: #1e1e82; --primary-active: #060068; --info-bg: #e7eeff; --canvas: #f9f9ff; --surface: #fff;
+    --section: #f0f3ff; --border: #d8e3fb; --heading: #111c2d; --help: #464652;
+    --done-bg: #dcfce7; --done: #166534; --progress-bg: #fef3c7; --progress: #92400e; --accent-bg: #ffedd5; --accent: #9a3412;
+    --note: #b45309; --note-bg: #fff6dc; --page: #eef1f8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--heading); font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+  .ms { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; display: inline-block; }
+  a { color: inherit; text-decoration: none; }
+  p { margin: 0; }
+  h1, h2, h3 { margin: 0; }
+  ul { margin: 0; padding-left: 20px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 16px 64px; display: flex; flex-direction: column; gap: 32px; }
+  .intro h1 { margin: 0 0 6px; font-size: 26px; color: var(--primary); }
+  .intro p { color: var(--help); max-width: 80ch; }
+  .board-title { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--help); margin: 0 0 10px; }
+  .phones { display: flex; flex-wrap: wrap; gap: 32px; }
+  .phones > section { min-width: 0; max-width: 100%; }
+  .rel { position: relative; }
+  .pin { position: absolute; z-index: 5; width: 26px; height: 26px; border-radius: 50%; background: var(--note); color: #fff;
+         font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #fff; }
+  .muted { color: var(--help); }
+  .small { font-size: 14px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 10px;
+         background: var(--primary); color: #fff; font-weight: 600; font-size: 16px; white-space: nowrap; }
+  .btn .ms { font-size: 20px; }
+  .btn-ghost { background: var(--surface); color: var(--primary); border: 1.5px solid var(--border); }
+  .btn-sm { min-height: 40px; padding: 0 14px; font-size: 14px; }
+  .link { color: var(--primary); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+  .link .ms { font-size: 18px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .chip .ms { font-size: 16px; }
+  .done { background: var(--done-bg); color: var(--done); }
+  .progress { background: var(--progress-bg); color: var(--progress); }
+  .info { background: var(--info-bg); color: var(--primary); }
+  .grey { background: var(--section); color: var(--help); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .panel-head h2 { font-size: 18px; }
+  .page-title { font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
+  .page-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .page-top > div { flex: 1; min-width: 0; }
+
+  /* Onglets, recherche, filtres */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+  .tabs a { padding: 10px 16px; font-weight: 600; color: var(--help); border-bottom: 3px solid transparent; margin-bottom: -1px; display: inline-flex; gap: 8px; align-items: center; }
+  .tabs a.on { color: var(--primary); border-color: var(--primary); }
+  .tools { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .search { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--help); }
+  .select { display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 12px 0 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); font-weight: 600; font-size: 15px; }
+  .select .ms { font-size: 20px; color: var(--help); }
+
+  /* Tableau */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 13px; font-weight: 700; color: var(--help); padding: 0 12px 8px 0; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  tr.sel td { background: var(--section); }
+  tr.sel td:first-child { box-shadow: inset 4px 0 0 var(--primary); padding-left: 12px; }
+  td strong { display: block; }
+
+  /* Fiche (aperçu et lecture) */
+  .fiche h3 { font-size: 15px; margin: 4px 0 2px; color: var(--primary); }
+  .fiche ul { font-size: 14px; color: var(--heading); display: grid; gap: 2px; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fact { background: var(--section); border-radius: 10px; padding: 8px 10px; font-size: 13px; }
+  .fact b { display: block; font-size: 15px; }
+
+  /* Formulaire */
+  .form-sec { display: flex; flex-direction: column; gap: 12px; }
+  .form-sec > h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .step { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .field label { font-size: 14px; font-weight: 700; }
+  .input { min-height: 48px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); padding: 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .input.filled { background: var(--section); }
+  .from { font-size: 12px; font-weight: 700; color: var(--done); display: inline-flex; align-items: center; gap: 3px; }
+  .from .ms { font-size: 15px; }
+  .grid2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; border-radius: 8px; padding: 4px 6px 4px 10px; font-size: 14px; font-weight: 600; background: var(--info-bg); color: var(--primary); }
+  .tag .ms { font-size: 16px; }
+  .collapsed { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
+  .audience { background: var(--primary); color: #fff; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .audience .big { font-size: 48px; font-weight: 800; line-height: 1; }
+  .audience .muted { color: rgba(255,255,255,.8); }
+  .funnel { list-style: none; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+  .funnel li { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid rgba(255,255,255,.2); padding-top: 6px; }
+  .sticky-bar { display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+  /* Téléphone */
+  .phone { width: 390px; max-width: 100%; background: var(--canvas); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; box-shadow: 0 10px 30px rgba(17,28,45,.12); display: flex; flex-direction: column; }
+  .p-head { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--primary); }
+  .logo { width: 34px; height: 34px; border-radius: 8px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .head-icons { display: flex; align-items: center; gap: 4px; color: var(--primary); }
+  .bell { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .bell.open { background: var(--info-bg); }
+  .badge { position: absolute; top: 4px; right: 4px; min-width: 18px; height: 18px; border-radius: 9px; background: #c2410c; color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 0 0 2px #fff; }
+  .p-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+  .hello { font-size: 24px; font-weight: 800; }
+  .today { font-size: 14px; font-weight: 600; color: var(--help); }
+  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--border); }
+  .tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 12px; font-size: 12px; color: var(--help); min-height: 56px; }
+  .tabbar a.on { color: var(--primary); font-weight: 700; }
+  .new-job { background: var(--surface); border: 2px solid var(--primary); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .new-job .kicker { font-size: 13px; font-weight: 800; color: #c2410c; display: inline-flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .new-job .kicker .ms { font-size: 18px; }
+  .dropdown { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 28px rgba(17,28,45,.16); overflow: hidden; }
+  .dropdown .dh { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .notif { display: grid; grid-template-columns: 36px 1fr 10px; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); align-items: start; }
+  .notif:last-child { border-bottom: 0; }
+  .notif .ico { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notif .ico .ms { font-size: 20px; }
+  .notif .dot { width: 10px; height: 10px; border-radius: 50%; background: #c2410c; margin-top: 6px; }
+  .notif.read { background: transparent; }
+  .notif.unread { background: #fbfcff; }
+  .back { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: var(--primary); font-size: 15px; min-height: 44px; }
+  .checks { list-style: none; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li { display: flex; gap: 8px; align-items: flex-start; }
+  .checks .ms { font-size: 20px; color: var(--done); }
+  details { border-top: 1px solid var(--border); padding: 12px 0; }
+  details:last-of-type { border-bottom: 1px solid var(--border); }
+  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; font-weight: 700; cursor: pointer; min-height: 32px; }
+  summary::-webkit-details-marker { display: none; }
+  details ul { font-size: 15px; margin-top: 8px; display: grid; gap: 4px; }
+  .bottom-cta { background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+
+  /* Ordinateur (rendu à 1280 px, réduit) */
+  .desk-frame { width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 30px rgba(17,28,45,.12); background: var(--canvas); }
+  .desk { width: 1280px; transform-origin: top left; display: grid; grid-template-columns: 240px 1fr; }
+  .d-head { grid-column: 1 / -1; background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .d-nav { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .d-nav a { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border-radius: 10px; font-weight: 600; color: var(--heading); }
+  .d-nav a.on { background: var(--primary); color: #fff; }
+  .d-main { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+  .d-row { display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 20px; align-items: start; }
+
+  /* Légende */
+  .legend { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+  .legend h2 { color: var(--primary); font-size: 20px; }
+  .item { display: grid; grid-template-columns: 26px 1fr; gap: 12px; }
+  .item .pin { position: static; box-shadow: none; }
+  .item small { display: block; color: var(--help); font-size: 14px; margin-top: 2px; }
+  .ask { background: var(--note-bg); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; }
+  .map { border-collapse: collapse; font-size: 14px; max-width: 720px; }
+  .map th, .map td { padding: 6px 10px 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>Postes ouverts : catalogue des postes ACME, publication et notification</h1>
+    <p>Les RH partent d'une fiche du catalogue (les 70 descriptions de poste de l'entreprise) au lieu d'une page blanche. La fiche remplit l'intitulé, le domaine et le texte du poste ; les RH choisissent l'unité, les dates et les critères. Seuls les employés de l'unité qui ont un diplôme validé dans le bon domaine voient le poste, et ils sont prévenus dans le portail dès la publication. Les unités, les noms et les chiffres sont fictifs. Les pastilles orange renvoient à la légende.</p>
+  </header>
+
+  <!-- ÉCRAN A : CATALOGUE -->
+  <section>
+    <p class="board-title">A · RH, ordinateur · 1280 px (réduit) · Postes ouverts &gt; Catalogue des postes ACME</p>
+    <div class="desk-frame" data-desk>
+      <div class="desk">
+        <div class="d-head">
+          <a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière · Gestion</a>
+          <span class="ms" style="font-size:32px;color:var(--primary)">account_circle</span>
+        </div>
+        <nav class="d-nav">
+          <a href="#"><span class="ms">dashboard</span>Tableau de bord</a>
+          <a href="#"><span class="ms">fact_check</span>File de validation</a>
+          <a href="#"><span class="ms">group</span>Employés</a>
+          <a class="on" href="#"><span class="ms">work</span>Postes ouverts</a>
+          <a href="#"><span class="ms">flag</span>Signalements</a>
+        </nav>
+        <div class="d-main">
+          <div class="page-top">
+            <div>
+              <h1 class="page-title">Postes ouverts</h1>
+              <p class="muted">Publiez un poste à partir de sa description officielle : le texte est déjà écrit.</p>
+            </div>
+            <a class="btn btn-ghost" href="#"><span class="ms">edit_note</span>Poste hors catalogue</a>
+          </div>
+
+          <div class="tabs rel">
+            <span class="pin" style="left:-30px;top:8px">1</span>
+            <a href="#"><span class="ms" style="font-size:20px">campaign</span>Postes publiés <span class="chip grey num">3</span></a>
+            <a class="on" href="#"><span class="ms" style="font-size:20px">menu_book</span>Catalogue des postes ACME <span class="chip info num">70</span></a>
+          </div>
+
+          <div class="tools rel">
+            <span class="pin" style="left:-30px;top:10px">2</span>
+            <div class="search"><span class="ms">search</span>Rechercher un poste : « comptable », « crédit »…</div>
+            <span class="select">Domaine : tous<span class="ms">expand_more</span></span>
+            <span class="select">Occupé et vacant<span class="ms">expand_more</span></span>
+          </div>
+
+          <div class="d-row">
+            <section class="panel rel" style="padding:8px 18px 4px">
+              <span class="pin" style="left:-14px;top:-10px">3</span>
+              <table>
+                <thead><tr><th>Poste</th><th>Domaine</th><th>Niveau demandé</th><th>Aujourd'hui</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Caissier</strong></td><td><span class="chip info">Finance</span></td><td class="small">Bac + 4</td><td class="small num">14 employés</td><td><a class="link" href="#">Voir</a></td></tr>
+                  <tr><td><strong>Chargé de formation</strong></td><td><span class="chip info">Ressources humaines</span></td><td class="small">Bac + 4</td><td><span class="chip grey">Vacant</span></td><td><a class="link" href="#">Voir</a></td></tr>
+                  <tr class="sel"><td><strong>Comptable junior</strong></td><td><span class="chip info">Comptabilité</span></td><td class="small">Bac + 4</td><td class="small num">3 employés</td><td><a class="link" href="#">Voir</a></td></tr>
+                  <tr><td><strong>Directeur comptable</strong></td><td><span class="chip info">Comptabilité</span></td><td class="small">Bac + 5</td><td class="small num">1 employé</td><td><a class="link" href="#">Voir</a></td></tr>
+                  <tr><td><strong>Directeur de crédit</strong></td><td><span class="chip info">Banque et microfinance</span></td><td class="small">Bac + 5</td><td class="small num">1 employé</td><td><a class="link" href="#">Voir</a></td></tr>
+                  <tr><td><strong>Officier de support SIG</strong></td><td><span class="chip info">Informatique</span></td><td class="small">Bac + 4</td><td><span class="chip grey">Vacant</span></td><td><a class="link" href="#">Voir</a></td></tr>
+                  <tr><td><strong>Secrétaire de direction</strong></td><td><span class="chip info">Administration</span></td><td><span class="chip progress">Non précisé</span></td><td class="small num">4 employés</td><td><a class="link" href="#">Voir</a></td></tr>
+                </tbody>
+              </table>
+              <p class="small muted" style="padding:8px 0">7 postes sur 70 · triés par ordre alphabétique</p>
+            </section>
+
+            <aside class="panel fiche rel">
+              <span class="pin" style="left:-14px;top:-10px">4</span>
+              <div class="panel-head"><h2>Comptable junior</h2><span class="chip info">Comptabilité</span></div>
+              <div class="facts">
+                <div class="fact">Niveau demandé<b>Bac + 4</b></div>
+                <div class="fact">Expérience<b>Non précisée</b></div>
+                <div class="fact">Rattaché à<b>Directeur comptable</b></div>
+                <div class="fact">Déplacements<b>Aucun</b></div>
+              </div>
+              <h3>Description</h3>
+              <p class="small">Assiste le Directeur comptable dans le paiement des frais généraux et administratifs de l'institution.</p>
+              <h3>Missions principales</h3>
+              <ul><li>Préparer et émettre les chèques après vérification des signatures</li><li>Concilier les comptes de gestion</li><li>Vérifier les écritures bancaires dans les livres</li></ul>
+              <a class="link" href="#">Lire la fiche complète (16 missions)<span class="ms">chevron_right</span></a>
+              <a class="btn" href="#"><span class="ms">campaign</span>Publier ce poste</a>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÉCRAN B : FORMULAIRE -->
+  <section>
+    <p class="board-title">B · RH, ordinateur · 1280 px (réduit) · Publier un poste à partir de la fiche</p>
+    <div class="desk-frame" data-desk>
+      <div class="desk">
+        <div class="d-head">
+          <a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière · Gestion</a>
+          <span class="ms" style="font-size:32px;color:var(--primary)">account_circle</span>
+        </div>
+        <nav class="d-nav">
+          <a href="#"><span class="ms">dashboard</span>Tableau de bord</a>
+          <a href="#"><span class="ms">fact_check</span>File de validation</a>
+          <a href="#"><span class="ms">group</span>Employés</a>
+          <a class="on" href="#"><span class="ms">work</span>Postes ouverts</a>
+          <a href="#"><span class="ms">flag</span>Signalements</a>
+        </nav>
+        <div class="d-main">
+          <div>
+            <a class="back" href="#"><span class="ms">arrow_back</span>Catalogue des postes ACME</a>
+            <h1 class="page-title">Publier : Comptable junior</h1>
+            <p class="muted">Le texte vient de la fiche officielle. Il vous reste à dire où, quand et pour qui.</p>
+          </div>
+
+          <div class="d-row">
+            <div class="panel" style="gap:24px">
+              <div class="form-sec rel">
+                <span class="pin" style="left:-32px;top:0">5</span>
+                <h2><span class="step">1</span>Le poste</h2>
+                <div class="grid2">
+                  <div class="field"><label>Intitulé</label><div class="input filled">Comptable junior <span class="from"><span class="ms">check_circle</span>De la fiche</span></div></div>
+                  <div class="field"><label>Code du poste</label><div class="input filled">CPT-JR <span class="from"><span class="ms">check_circle</span>Du référentiel</span></div></div>
+                </div>
+                <div class="collapsed">
+                  <div><strong>Description, missions, qualifications, conditions</strong><p class="small muted">Repris de la fiche : 1 description, 16 missions, 4 qualifications</p></div>
+                  <span style="display:flex;gap:16px"><a class="link" href="#">Aperçu</a><a class="link" href="#">Adapter le texte</a></span>
+                </div>
+              </div>
+
+              <div class="form-sec rel">
+                <span class="pin" style="left:-32px;top:0">6</span>
+                <h2><span class="step">2</span>Qui peut voir et postuler</h2>
+                <div class="field">
+                  <label>Unité du poste <span class="muted" style="font-weight:400">(seuls les employés de cette unité verront le poste)</span></label>
+                  <div class="input"><span class="tags"><span class="tag">Direction Démo Comptable<span class="ms">close</span></span><span class="muted small">Ajouter une unité…</span></span><span class="ms">expand_more</span></div>
+                </div>
+                <div class="field">
+                  <label>Diplôme validé dans l'un de ces domaines</label>
+                  <div class="input"><span class="tags"><span class="tag">Comptabilité<span class="ms">close</span></span><span class="tag">Finance<span class="ms">close</span></span><span class="muted small">Ajouter…</span></span><span class="from"><span class="ms">check_circle</span>Proposé par le domaine « Comptabilité »</span></div>
+                </div>
+                <div class="grid3">
+                  <div class="field"><label>Niveau d'études minimum</label><div class="input filled">Licence (Bac + 4)<span class="ms">expand_more</span></div><span class="from"><span class="ms">check_circle</span>La fiche demande Bac + 4</span></div>
+                  <div class="field"><label>Ancienneté à ACME</label><div class="input"><span class="muted">Aucune</span><span class="ms">expand_more</span></div></div>
+                  <div class="field"><label>Grade minimum</label><div class="input"><span class="muted">Aucun</span><span class="ms">expand_more</span></div></div>
+                </div>
+              </div>
+
+              <div class="form-sec">
+                <h2><span class="step">3</span>Quand</h2>
+                <div class="grid3">
+                  <div class="field"><label>Grade visé</label><div class="input">8<span class="ms">expand_more</span></div></div>
+                  <div class="field"><label>Date d'ouverture</label><div class="input">15/10/2026<span class="ms">calendar_today</span></div></div>
+                  <div class="field"><label>Date limite</label><div class="input">15/11/2026<span class="ms">calendar_today</span></div></div>
+                </div>
+              </div>
+
+              <div class="sticky-bar">
+                <a class="btn btn-ghost" href="#">Enregistrer le brouillon</a>
+                <a class="btn" href="#"><span class="ms">campaign</span>Publier et prévenir 6 employés</a>
+              </div>
+            </div>
+
+            <aside class="audience rel">
+              <span class="pin" style="left:-14px;top:-10px">7</span>
+              <p style="font-weight:700;display:flex;gap:6px;align-items:center"><span class="ms">notifications_active</span>Seront prévenus à la publication</p>
+              <p class="big num">6 <span style="font-size:20px">employés</span></p>
+              <p class="small muted">Ils recevront une notification dans le portail et verront le poste sur leur accueil.</p>
+              <ul class="funnel num">
+                <li><span>Travaillent dans l'unité</span><b>22</b></li>
+                <li><span>Ont un diplôme validé en Comptabilité ou Finance</span><b>9</b></li>
+                <li><span>Au niveau Licence ou plus</span><b>6</b></li>
+              </ul>
+              <p class="small muted">Le compte se met à jour à chaque critère modifié.</p>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TÉLÉPHONES EMPLOYÉ -->
+  <div class="phones">
+    <section>
+      <p class="board-title">C · Employé, téléphone · 390 px · la notification</p>
+      <div class="phone rel">
+        <div class="p-head">
+          <a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a>
+          <span class="head-icons">
+            <span class="bell open rel"><span class="ms">notifications</span><span class="badge num">1</span><span class="pin" style="right:-12px;top:-12px">8</span></span>
+            <span class="ms" style="font-size:30px">account_circle</span>
+          </span>
+        </div>
+        <div class="p-body" style="position:relative">
+          <div class="dropdown">
+            <div class="dh"><strong>Notifications</strong><a class="link" href="#">Tout marquer comme lu</a></div>
+            <a class="notif unread" href="#">
+              <span class="ico info"><span class="ms">work</span></span>
+              <span><strong>Nouveau poste ouvert pour vous</strong><span class="small muted" style="display:block">Comptable junior · Direction Démo Comptable · jusqu'au 15 nov.</span><span class="small muted" style="display:block">Il y a 5 min</span></span>
+              <span class="dot"></span>
+            </a>
+            <a class="notif read" href="#">
+              <span class="ico done"><span class="ms">verified</span></span>
+              <span><strong>Certificat validé</strong><span class="small muted" style="display:block">Licence en comptabilité</span><span class="small muted" style="display:block">3 oct.</span></span>
+              <span></span>
+            </a>
+          </div>
+
+          <div>
+            <p class="today">Jeudi 15 octobre</p>
+            <h1 class="hello">Bonjour Jean</h1>
+          </div>
+          <div class="new-job rel">
+            <span class="pin" style="right:-8px;top:-10px">9</span>
+            <span class="kicker"><span class="ms">fiber_new</span>Nouveau pour vous</span>
+            <strong style="font-size:18px">Comptable junior</strong>
+            <span class="small muted">Direction Démo Comptable · grade 8</span>
+            <span class="small">Votre licence en comptabilité vous ouvre ce poste.</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip done"><span class="ms">check</span>3 critères sur 3</span><span class="chip progress"><span class="ms">schedule</span>31 jours</span></div>
+            <a class="btn" href="#">Voir le poste</a>
+          </div>
+        </div>
+        <nav class="tabbar"><a class="on" href="#"><span class="ms">home</span>Accueil</a><a href="#"><span class="ms">person</span>Mon dossier</a><a href="#"><span class="ms">verified</span>Certificats</a><a href="#"><span class="ms">work</span>Ma carrière</a></nav>
+      </div>
+    </section>
+
+    <section>
+      <p class="board-title">D · Employé, téléphone · 390 px · la fiche du poste</p>
+      <div class="phone">
+        <div class="p-head">
+          <a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a>
+          <span class="head-icons"><span class="bell"><span class="ms">notifications</span></span><span class="ms" style="font-size:30px">account_circle</span></span>
+        </div>
+        <div class="p-body fiche">
+          <a class="back" href="#"><span class="ms">arrow_back</span>Postes ouverts pour vous</a>
+          <div>
+            <h1 class="hello">Comptable junior</h1>
+            <p class="muted small">Direction Démo Comptable · grade 8 · CPT-JR</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="chip info">Comptabilité</span><span class="chip progress"><span class="ms">schedule</span>Jusqu'au 15 nov.</span></div>
+          </div>
+          <section class="panel rel" style="background:var(--done-bg);border:0;gap:8px">
+            <span class="pin" style="right:-8px;top:-10px">10</span>
+            <strong style="color:var(--done)">Vous remplissez les 3 critères</strong>
+            <ul class="checks">
+              <li><span class="ms">check_circle</span>Vous travaillez à la Direction Démo Comptable</li>
+              <li><span class="ms">check_circle</span>Diplôme validé en Comptabilité</li>
+              <li><span class="ms">check_circle</span>Niveau Licence ou plus</li>
+            </ul>
+          </section>
+          <p>Assiste le Directeur comptable dans le paiement des frais généraux et administratifs de l'institution.</p>
+          <div class="rel">
+            <span class="pin" style="right:-8px;top:2px">11</span>
+            <details open><summary>Missions<span class="ms">expand_less</span></summary>
+              <ul><li>Préparer et émettre les chèques après vérification des signatures</li><li>Concilier les comptes de gestion</li><li>Vérifier que les écritures de la banque sont dans les livres</li></ul>
+              <a class="link" href="#" style="margin-top:6px">Voir les 13 autres missions</a>
+            </details>
+            <details><summary>Qualifications<span class="ms">expand_more</span></summary></details>
+            <details><summary>Expérience<span class="ms">expand_more</span></summary></details>
+            <details><summary>Conditions d'exercice<span class="ms">expand_more</span></summary></details>
+            <details><summary>Qualités attendues<span class="ms">expand_more</span></summary></details>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <a class="btn" href="#">Postuler</a>
+          <span class="small muted" style="text-align:center">Une candidature est examinée par les RH ; elle ne vaut pas nomination.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="legend">
+    <h2>Légende</h2>
+    <div class="item"><span class="pin">1</span><p><strong>Deux onglets sous « Postes ouverts »</strong> : les postes publiés (l'écran actuel) et le catalogue des 70 postes d'ACME. Le bouton « Poste hors catalogue » garde la saisie libre d'aujourd'hui (US-117).<small>Krug : un seul endroit pour les postes ; le nom de l'onglet dit ce qu'il contient.</small></p></div>
+    <div class="item"><span class="pin">2</span><p><strong>Recherche et deux filtres</strong> : le domaine, et « occupé / vacant », car un poste vacant se publie aussi.<small>Les mots de la recherche sont ceux des RH (« comptable », « crédit »).</small></p></div>
+    <div class="item"><span class="pin">3</span><p><strong>Le catalogue en tableau</strong> : intitulé, domaine (tiré de la fiche), niveau demandé (tiré de la fiche), nombre d'employés qui occupent le poste aujourd'hui (d'après le fichier RH) ou « Vacant ». Une fiche sans niveau affiche « Non précisé » en orange.<small>Le nombre d'employés est un compte, jamais une liste de noms.</small></p></div>
+    <div class="item"><span class="pin">4</span><p><strong>Aperçu de la fiche à droite</strong>, sans quitter la liste : les quatre repères, la description, les premières missions, puis « Publier ce poste ».<small>Krug : on vérifie que c'est le bon poste avant de s'engager.</small></p></div>
+    <div class="item"><span class="pin">5</span><p><strong>Ce qui vient de la fiche est déjà rempli</strong>, en fond bleu clair avec la mention verte « De la fiche ». Le texte du poste est replié : les RH peuvent l'adapter pour cette offre sans toucher la fiche du catalogue.</p></div>
+    <div class="item"><span class="pin">6</span><p><strong>Qui peut voir et postuler</strong> : l'unité (obligatoire dans cette maquette) <strong>et</strong> un diplôme validé dans l'un des domaines proposés à partir du domaine de la fiche. Le niveau est suggéré par la fiche (« Bac + 4 » → Licence). Les RH ajustent tout.<small>Règle actuelle d'éligibilité (US-801, US-115) : tous les critères doivent être remplis.</small></p></div>
+    <div class="item"><span class="pin">7</span><p><strong>Le nombre d'employés prévenus, en direct</strong>, avec ce qui écarte les autres à chaque critère. Le bouton dit ce qui va se passer : « Publier et prévenir 6 employés ».<small>Repris du compteur d'audience existant (US-115) ; aucun nom n'est affiché.</small></p></div>
+    <div class="item"><span class="pin">8</span><p><strong>Une cloche dans l'en-tête, avec un compteur</strong>, sur tous les écrans employé. Elle ouvre la liste des notifications ; un point orange marque les non lues.<small>Krug : la convention de toutes les applications ; rien à apprendre.</small></p></div>
+    <div class="item"><span class="pin">9</span><p><strong>Le poste apparaît aussi en tête de l'accueil</strong> (« Nouveau pour vous ») tant que l'employé ne l'a pas ouvert, avec la raison concrète : « Votre licence en comptabilité vous ouvre ce poste. »</p></div>
+    <div class="item"><span class="pin">10</span><p><strong>La fiche commence par ses critères à lui</strong>, cochés, avant le texte du poste.<small>Il sait tout de suite qu'il peut postuler, et pourquoi.</small></p></div>
+    <div class="item"><span class="pin">11</span><p><strong>Les rubriques de la fiche en accordéons</strong>, dans un modèle unique pour les 70 postes (Missions, Qualifications, Expérience, Conditions d'exercice, Qualités attendues). « Postuler » reste collé en bas.<small>Krug : survoler d'abord, lire le détail si on le veut.</small></p></div>
+
+    <div class="ask">
+      <p><strong>À trancher</strong></p>
+      <p>• <strong>Du domaine de la fiche aux domaines de diplôme.</strong> Le domaine de la fiche (métier) doit proposer des domaines de diplôme pour la visibilité. Proposition à valider par la DRH :</p>
+      <table class="map">
+        <tr><th>Domaine de la fiche</th><th>Diplômes proposés</th></tr>
+        <tr><td>Comptabilité</td><td>Comptabilité, Finance</td></tr>
+        <tr><td>Finance</td><td>Finance, Comptabilité, Économie</td></tr>
+        <tr><td>Banque et microfinance</td><td>Banque et microfinance, Finance, Gestion</td></tr>
+        <tr><td>Informatique</td><td>Informatique</td></tr>
+        <tr><td>Ressources humaines</td><td>Ressources humaines, Gestion</td></tr>
+        <tr><td>Management, Sécurité, Transport, Services généraux…</td><td>Aucun proposé : les RH choisissent, ou ne mettent pas de critère de domaine</td></tr>
+      </table>
+      <p>• <strong>L'unité est-elle obligatoire ?</strong> Sinon, un poste « toute l'institution » est vu par tous ceux qui ont le diplôme.</p>
+      <p>• <strong>Notification :</strong> une seule, à la publication. Faut-il aussi prévenir un employé qui devient éligible plus tard (diplôme validé pendant que le poste est ouvert) ? Rien n'est envoyé quand un poste est modifié ou clôturé.</p>
+      <p>• <strong>WhatsApp et email plus tard</strong> (EF-701, prestataire non choisi) : la notification du portail est conçue pour être doublée par ces canaux sans changer l'écran.</p>
+      <p>• <strong>Le catalogue</strong> : il faut un code par fiche pour le relier au fichier RH (fichier de correspondance en cours) ; la fiche « Directeur administratif » manque ; 13 fiches n'ont pas de niveau. Certaines fiches contiennent « Aucune expérience spécifique mentionnée dans le document original » : à reformuler.</p>
+      <p>• Nouveau par rapport au registre (qui ne prévoit qu'un résumé périodique, EF-706, au lot 4) : exception à faire noter par M. Hilaire, comme US-117.</p>
+    </div>
+  </section>
+</div>
+<script>
+  // Réduit les maquettes ordinateur (1280 px) à la largeur disponible.
+  (function () {
+    var frames = document.querySelectorAll('[data-desk]');
+    function fit() {
+      frames.forEach(function (frame) {
+        var desk = frame.firstElementChild, s = Math.min(1, frame.clientWidth / 1280);
+        desk.style.transform = 'scale(' + s + ')';
+        frame.style.height = desk.offsetHeight * s + 'px';
+      });
+    }
+    window.addEventListener('resize', fit); window.addEventListener('load', fit); fit();
+  })();
+</script>
+</body>
+</html>
