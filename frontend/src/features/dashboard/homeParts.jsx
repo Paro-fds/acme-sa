@@ -35,17 +35,17 @@ export function yearsSince(iso, today) {
 
 function Go({ children }) {
   return (
-    <span className="mt-auto flex items-center gap-0.5 pt-1 text-sm font-semibold">
+    <span className="mt-auto flex items-center gap-0.5 pt-1 text-base font-semibold">
       {children}
-      <span className="material-symbols-outlined text-lg" aria-hidden="true">chevron_right</span>
+      <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">chevron_right</span>
     </span>
   )
 }
 
 function Label({ icon, children, tone = 'text-primary' }) {
   return (
-    <span className={`flex items-center gap-1.5 text-sm font-semibold ${tone}`}>
-      <span className="material-symbols-outlined text-lg" aria-hidden="true">{icon}</span>
+    <span className={`flex items-center gap-1.5 text-base font-semibold ${tone}`}>
+      <span className="material-symbols-outlined shrink-0 hidden text-lg sm:inline" aria-hidden="true">{icon}</span>
       {children}
     </span>
   )
@@ -53,9 +53,9 @@ function Label({ icon, children, tone = 'text-primary' }) {
 
 const TILE = 'flex min-h-40 min-w-0 flex-col gap-1.5 rounded-xl p-4 shadow-card'
 
-function Tile({ to, solid = false, children }) {
+function Tile({ to, solid = false, wide = false, children }) {
   return (
-    <li className="flex">
+    <li className={`flex ${wide ? 'col-span-2 lg:col-span-1' : ''}`}>
       <Link
         to={to}
         className={`${TILE} w-full ${solid ? 'bg-primary text-white hover:bg-primary-active' : 'bg-surface text-heading hover:bg-section'}`}
@@ -72,8 +72,8 @@ function LockedTile({ icon, label }) {
     <li className="flex">
       <div className={`${TILE} w-full bg-section/70 text-help shadow-none`}>
         <Label icon={icon} tone="text-help">{label}</Label>
-        <span className="text-3xl font-bold tabular-nums">–</span>
-        <span className="text-sm">Après le dossier</span>
+        <span className="text-[32px] leading-none font-bold tabular-nums">–</span>
+        <span className="text-base">Après le dossier</span>
       </div>
     </li>
   )
@@ -81,12 +81,12 @@ function LockedTile({ icon, label }) {
 
 function Value({ value, unit }) {
   return (
-    <span className="text-[34px] leading-none font-bold tabular-nums">
-      {value}
+    <span className="flex flex-wrap items-baseline gap-x-1.5">
+      <span className="text-[32px] leading-none font-bold tabular-nums">{value}</span>
       {unit && (
         <>
           {' '}
-          <small className="text-sm font-semibold">{unit}</small>
+          <span className="text-base font-semibold whitespace-nowrap">{unit}</span>
         </>
       )}
     </span>
@@ -107,12 +107,13 @@ function Bar({ parts }) {
 export function Tiles({ completion, missing, openings, certificates, application }) {
   const titleId = useId()
   const complete = completion.is_complete
+  // Sur téléphone, le dossier prend toute la largeur quand il serait seul sur sa ligne (3 tuiles) ou passe en premier.
   const dossier = (
-    <Tile key="dossier" to={PROFILE_PATH}>
+    <Tile key="dossier" to={PROFILE_PATH} wide={!completion.is_complete || !application}>
       <Label icon="person">Mon dossier</Label>
       {complete ? <Value value={completion.percent} unit="%" /> : <Value value={completion.complete} unit={`sur ${completion.total}`} />}
       <Bar parts={[{ ratio: completion.percent / 100, className: complete ? 'bg-status-done-dot' : 'bg-primary' }]} />
-      <span className="text-sm text-help">
+      <span className="text-base text-help">
         {complete
           ? 'À jour : les RH voient votre vrai profil.'
           : `Il manque : ${missing.map((element) => element.label.toLowerCase()).join(', ')}.`}
@@ -128,7 +129,7 @@ export function Tiles({ completion, missing, openings, certificates, application
         <ul className="grid grid-cols-2 gap-3 lg:grid-cols-3">
           {dossier}
           <LockedTile icon="verified" label="Mes certificats" />
-          <LockedTile icon="work" label="Postes ouverts pour vous" />
+          <LockedTile icon="work" label="Postes pour vous" />
         </ul>
       </section>
     )
@@ -143,9 +144,9 @@ export function Tiles({ completion, missing, openings, certificates, application
       <h2 id={titleId} className="sr-only">Vos chiffres</h2>
       <ul className={`grid grid-cols-2 gap-3 ${application ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
         <Tile to={CAREER_PATH} solid>
-          <Label icon="work" tone="text-white">Postes ouverts pour vous</Label>
+          <Label icon="work" tone="text-white">Postes pour vous</Label>
           <Value value={count} />
-          <span className="text-sm text-white/85">
+          <span className="text-base text-white/85">
             {count > 0 ? 'Vous remplissez tous les critères : il ne reste qu’à postuler.' : 'Chaque diplôme validé peut vous en ouvrir.'}
           </span>
           <Go>Voir les postes</Go>
@@ -159,7 +160,7 @@ export function Tiles({ completion, missing, openings, certificates, application
               { ratio: total ? inReview / total : 0, className: 'bg-status-progress-dot' },
             ]}
           />
-          <span className="text-sm text-help">
+          <span className="text-base text-help">
             {total ? 'Chaque diplôme validé peut vous ouvrir un poste.' : 'Déposez un diplôme pour le faire valider par les RH.'}
             {inReview > 0 && ` ${inReview} en examen.`}
           </span>
@@ -174,7 +175,7 @@ export function Tiles({ completion, missing, openings, certificates, application
                 <i key={index} className={`h-1.5 flex-1 rounded-full ${index < application.step_number ? 'bg-accent-icon' : 'bg-section'}`} />
               ))}
             </span>
-            <span className="text-sm break-words text-help">
+            <span className="text-base break-words text-help">
               {application.opening_title} · {application.step_label}
             </span>
             <Go>Suivre</Go>
@@ -196,7 +197,7 @@ function Panel({ title, link, sub, children }) {
         </h2>
         {link}
       </div>
-      {sub && <p className="text-sm text-help">{sub}</p>}
+      {sub && <p className="text-base text-help">{sub}</p>}
       {children}
     </section>
   )
@@ -204,9 +205,9 @@ function Panel({ title, link, sub, children }) {
 
 function PanelLink({ to, children }) {
   return (
-    <Link to={to} className="flex min-h-11 items-center gap-0.5 text-sm font-semibold text-primary hover:underline">
+    <Link to={to} className="flex min-h-11 items-center gap-0.5 text-base font-semibold text-primary hover:underline">
       {children}
-      <span className="material-symbols-outlined text-lg" aria-hidden="true">chevron_right</span>
+      <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">chevron_right</span>
     </Link>
   )
 }
@@ -214,8 +215,8 @@ function PanelLink({ to, children }) {
 function Criteria({ lines }) {
   const n = lines.length
   return (
-    <span className="flex items-center gap-1 text-sm text-status-done-text">
-      <span className="material-symbols-outlined text-lg" aria-hidden="true">check</span>
+    <span className="flex items-center gap-1 text-base text-status-done-text">
+      <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">check</span>
       {n > 0 ? `${n} ${plural(n, 'critère')} sur ${n}` : 'Ouvert à tous'}
     </span>
   )
@@ -227,12 +228,12 @@ function Remaining({ opening, today }) {
   const span = Math.max(daysUntil(opening.closes_on, dateOf(opening.opens_on)), 1)
   const elapsed = Math.min(Math.max(1 - days / span, 0), 1)
   return (
-    <span className="flex min-w-28 flex-col gap-1 text-sm">
+    <span className="flex min-w-28 flex-col gap-1 text-base">
       <span>
         <strong className="text-heading">
           {days} {plural(days, 'jour')}
         </strong>
-        <span className="text-help"> · {dayMonth(opening.closes_on)}</span>
+        <span className="text-sm text-help"> · {dayMonth(opening.closes_on)}</span>
       </span>
       <Bar parts={[{ ratio: elapsed, className: 'bg-status-progress-dot' }]} />
     </span>
@@ -269,7 +270,7 @@ export function OpeningsPanel({ openings, today }) {
                 <td className="py-3 pr-3">
                   <span className="flex flex-col">
                     <strong className="break-words text-heading">{opening.title}</strong>
-                    <span className="text-sm text-help">{opening.unit_label}</span>
+                    <span className="text-base text-help">{opening.unit_label}</span>
                   </span>
                 </td>
                 <td className="py-3 pr-3"><Criteria lines={opening.criteria_lines} /></td>
@@ -277,7 +278,7 @@ export function OpeningsPanel({ openings, today }) {
                 <td className="py-3 text-right">
                   <Link
                     to={CAREER_PATH}
-                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold whitespace-nowrap text-primary hover:bg-info-bg"
+                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-base font-semibold whitespace-nowrap text-primary hover:bg-info-bg"
                   >
                     Voir et postuler<span className="sr-only"> : {opening.title}</span>
                   </Link>
@@ -294,9 +295,9 @@ export function OpeningsPanel({ openings, today }) {
                 <span className="flex items-start justify-between gap-2">
                   <span className="flex min-w-0 flex-col">
                     <strong className="break-words text-heading">{opening.title}</strong>
-                    <span className="text-sm text-help">{opening.unit_label}</span>
+                    <span className="text-base text-help">{opening.unit_label}</span>
                   </span>
-                  <span className="material-symbols-outlined text-primary" aria-hidden="true">chevron_right</span>
+                  <span className="material-symbols-outlined shrink-0 text-primary" aria-hidden="true">chevron_right</span>
                 </span>
                 <span className="flex flex-wrap items-end justify-between gap-3">
                   <Criteria lines={opening.criteria_lines} />
@@ -325,15 +326,15 @@ export function DatesPanel({ openings, freshness, today }) {
         {upcoming.map((date) => (
           <li key={date.key} className="grid grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-3 border-b border-border py-3 last:border-0">
             <span className="flex flex-col items-center rounded-lg border border-border bg-canvas py-1 leading-tight">
-              <span className="text-xs text-help uppercase">{shortMonth(date.on)}</span>
-              <span className="text-xl font-bold text-heading tabular-nums">{dateOf(date.on).getDate()}</span>
+              <span className="text-sm text-help uppercase">{shortMonth(date.on)}</span>
+              <span className="text-lg font-bold text-heading tabular-nums">{dateOf(date.on).getDate()}</span>
               {dateOf(date.on).getFullYear() !== today.getFullYear() && (
-                <span className="text-xs text-help tabular-nums">{dateOf(date.on).getFullYear()}</span>
+                <span className="text-sm text-help tabular-nums">{dateOf(date.on).getFullYear()}</span>
               )}
             </span>
             <span className="flex min-w-0 flex-col">
               <strong className="text-base text-heading">{date.title}</strong>
-              <span className="text-sm break-words text-help">{date.detail}</span>
+              <span className="text-base break-words text-help">{date.detail}</span>
             </span>
           </li>
         ))}
@@ -348,7 +349,7 @@ export function DiplomasCard() {
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-2 rounded-xl bg-info-bg p-4">
       <h2 id={titleId} className="flex items-center gap-2 text-lg font-bold text-info-text">
-        <span className="material-symbols-outlined" aria-hidden="true">school</span>
+        <span className="material-symbols-outlined shrink-0" aria-hidden="true">school</span>
         Vos diplômes travaillent pour vous
       </h2>
       <p className="text-base text-info-text">
@@ -359,7 +360,7 @@ export function DiplomasCard() {
         to={DEPOSIT_PATH}
         className="flex min-h-11 w-fit items-center gap-1 rounded-lg bg-surface px-4 text-base font-semibold text-primary shadow-card hover:bg-section"
       >
-        <span className="material-symbols-outlined" aria-hidden="true">add</span>
+        <span className="material-symbols-outlined shrink-0" aria-hidden="true">add</span>
         Ajouter un diplôme
       </Link>
     </section>
@@ -383,8 +384,8 @@ export function CareerFigures({ years, highestDiploma, entries }) {
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {facts.map((fact) => (
           <div key={fact.label} className="flex flex-col rounded-lg bg-section p-3">
-            <dt className="order-2 text-sm text-help">{fact.label}</dt>
-            <dd className="order-1 text-2xl font-bold text-heading">{fact.value}</dd>
+            <dt className="order-2 text-base text-help">{fact.label}</dt>
+            <dd className="order-1 text-[32px] leading-tight font-bold text-heading">{fact.value}</dd>
           </div>
         ))}
       </dl>

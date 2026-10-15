@@ -140,7 +140,7 @@ describe('US-123 CA-02 — quatre tuiles chiffrées', () => {
   it('postes, certificats, candidature et dossier, chacun avec son lien', async () => {
     renderPage()
     const tiles = await screen.findByRole('region', { name: 'Vos chiffres' })
-    const openings = within(tiles).getByRole('link', { name: /Postes ouverts pour vous/ })
+    const openings = within(tiles).getByRole('link', { name: /Postes pour vous/ })
     expect(openings).toHaveAttribute('href', '/carriere')
     expect(openings).toHaveTextContent('2')
     const certificates = within(tiles).getByRole('link', { name: /Mes certificats/ })

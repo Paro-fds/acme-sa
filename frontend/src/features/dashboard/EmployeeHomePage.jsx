@@ -85,7 +85,7 @@ function Remaining({ elements }) {
         <h3 id={titleId} className="text-lg font-bold">
           Il reste {n} information{n > 1 ? 's' : ''} à compléter
         </h3>
-        <p className="text-sm text-help">Indispensables avant de déposer votre certificat.</p>
+        <p className="text-base text-help">Indispensables avant de déposer votre certificat.</p>
       </div>
       <ul className="mt-2 flex flex-col gap-2">
         {elements.map((element) => {
@@ -103,10 +103,10 @@ function Remaining({ elements }) {
                   <span className="material-symbols-outlined text-xl">{item.icon}</span>
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-sm font-semibold text-heading">{item.title}</span>
-                  <span className="truncate text-sm text-help">{item.text}</span>
+                  <span className="truncate text-base font-semibold text-heading">{item.title}</span>
+                  <span className="truncate text-base text-help">{item.text}</span>
                 </span>
-                <span className="flex min-h-11 min-w-24 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-card">
+                <span className="flex min-h-11 min-w-24 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-base font-semibold text-white shadow-card">
                   {item.button}
                 </span>
               </Link>
@@ -167,12 +167,12 @@ export default function EmployeeHomePage() {
     <>
       <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-sm text-help">{todayText(today)}</p>
+          <p className="text-base text-help">{todayText(today)}</p>
           <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-balance text-primary-active lg:text-[30px] lg:leading-[38px]">
             Bonjour {profile.first_name}
           </h2>
-          <p className="text-base font-semibold text-heading">{lead}</p>
-          <p className="text-sm text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
+          <p className="text-base text-body">{lead}</p>
+          <p className="text-base text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
         </div>
         {complete && (
           <Link
