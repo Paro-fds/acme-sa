@@ -6,6 +6,9 @@ import { CERTIFICATES_PATH, DEPOSIT_PATH } from '../certificates/paths.js'
 /** US-123 : l'accueil « tableau de bord » (maquette validée le 2026-10-15), présentation seule. */
 
 export const CAREER_PATH = '/carriere'
+/** Directement sur la section, sans avoir à descendre (ancres de « Ma carrière »). */
+const OPENINGS_LINK = `${CAREER_PATH}#postes-ouverts`
+const APPLICATIONS_LINK = `${CAREER_PATH}#mes-candidatures`
 export const PROFILE_PATH = '/profil'
 const STEP_COUNT = 7
 const DAY = 24 * 60 * 60 * 1000
@@ -143,7 +146,7 @@ export function Tiles({ completion, missing, openings, certificates, application
     <section aria-labelledby={titleId}>
       <h2 id={titleId} className="sr-only">Vos chiffres</h2>
       <ul className={`grid grid-cols-2 gap-3 ${application ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
-        <Tile to={CAREER_PATH} solid>
+        <Tile to={OPENINGS_LINK} solid>
           <Label icon="work" tone="text-white">Postes pour vous</Label>
           <Value value={count} />
           <span className="text-base text-white/85">
@@ -167,7 +170,7 @@ export function Tiles({ completion, missing, openings, certificates, application
           <Go>Voir le suivi</Go>
         </Tile>
         {application && (
-          <Tile to={CAREER_PATH}>
+          <Tile to={APPLICATIONS_LINK}>
             <Label icon="send" tone="text-accent-text">Ma candidature</Label>
             <Value value={application.step_number} unit={`étape sur ${STEP_COUNT}`} />
             <span className="flex gap-1" aria-hidden="true">
@@ -247,7 +250,7 @@ export function OpeningsPanel({ openings, today }) {
   return (
     <Panel
       title={title}
-      link={<PanelLink to={CAREER_PATH}>Tous les postes</PanelLink>}
+      link={<PanelLink to={OPENINGS_LINK}>Tous les postes</PanelLink>}
       sub={openings.length > 0 ? 'Vous cochez déjà tous les critères. Ne laissez pas passer la date limite.' : null}
     >
       {openings.length === 0 ? (
@@ -277,7 +280,7 @@ export function OpeningsPanel({ openings, today }) {
                 <td className="py-3 pr-3"><Remaining opening={opening} today={today} /></td>
                 <td className="py-3 text-right">
                   <Link
-                    to={CAREER_PATH}
+                    to={OPENINGS_LINK}
                     className="inline-flex min-h-11 items-center rounded-lg px-3 text-base font-semibold whitespace-nowrap text-primary hover:bg-info-bg"
                   >
                     Voir et postuler<span className="sr-only"> : {opening.title}</span>
@@ -291,7 +294,7 @@ export function OpeningsPanel({ openings, today }) {
         <ul aria-label={title} className="flex flex-col gap-2">
           {openings.map((opening) => (
             <li key={opening.id}>
-              <Link to={CAREER_PATH} className="flex flex-col gap-2 rounded-lg border border-border p-3 hover:bg-section">
+              <Link to={OPENINGS_LINK} className="flex flex-col gap-2 rounded-lg border border-border p-3 hover:bg-section">
                 <span className="flex items-start justify-between gap-2">
                   <span className="flex min-w-0 flex-col">
                     <strong className="break-words text-heading">{opening.title}</strong>

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -82,9 +82,9 @@ const APPLICATION = {
   ],
 }
 
-function renderPage() {
+function renderPage(path = '/carriere') {
   return render(
-    <MemoryRouter initialEntries={['/carriere']}>
+    <MemoryRouter initialEntries={[path]}>
       <MyOpeningsPage />
     </MemoryRouter>,
   )
@@ -306,5 +306,26 @@ describe('US-902 — déposer et suivre sa candidature', () => {
     await user.click(screen.getByRole('button', { name: 'Oui, retirer' }))
     expect(withdrawApplication).toHaveBeenCalledWith(3)
     expect(await screen.findByText(/Clôturée · Retirée/)).toBeInTheDocument()
+  })
+})
+
+describe('US-123 — arriver directement sur la bonne section', () => {
+  it('« #mes-candidatures » descend jusqu’à « Mes candidatures » et y place le focus', async () => {
+    const scrollIntoView = vi.fn()
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView
+    listMyOpenings.mockResolvedValue({ items: [OPENING] })
+    listMyApplications.mockResolvedValue({ items: [APPLICATION] })
+    renderPage('/carriere#mes-candidatures')
+    const heading = await screen.findByRole('heading', { name: 'Mes candidatures' })
+    await waitFor(() => expect(heading).toHaveFocus())
+    expect(scrollIntoView).toHaveBeenCalled()
+    delete window.HTMLElement.prototype.scrollIntoView
+  })
+
+  it('« #postes-ouverts » place le focus sur « Postes ouverts pour vous »', async () => {
+    listMyOpenings.mockResolvedValue({ items: [OPENING] })
+    renderPage('/carriere#postes-ouverts')
+    const heading = await screen.findByRole('heading', { name: 'Postes ouverts pour vous' })
+    await waitFor(() => expect(heading).toHaveFocus())
   })
 })

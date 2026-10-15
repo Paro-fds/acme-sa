@@ -57,7 +57,7 @@ def test_ca02_l_employe_apte_est_prevenu_du_poste_publie(admin_client, employee_
     assert item["kind"] == "OPENING"
     assert item["title"] == "Nouveau poste ouvert pour vous"
     assert item["detail"] == "Comptable fictif · Direction Démo Comptable · jusqu'au 15/11/2026"
-    assert item["link"] == "/carriere"
+    assert item["link"] == "/carriere#postes-ouverts"  # US-123 : directement sur la section des postes
     assert item["unread"] is True
 
 

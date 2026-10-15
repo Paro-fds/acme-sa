@@ -60,7 +60,8 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
   await page.screenshot({ path: `${CAPTURES}/us120-cloche-1280.png` })
 
   await page.getByRole('dialog', { name: 'Notifications' }).getByText('Nouveau poste ouvert pour vous').click()
-  await expect(page).toHaveURL(/\/carriere$/)
+  await expect(page).toHaveURL(/\/carriere#postes-ouverts$/)
+  await expect(page.getByRole('heading', { name: 'Postes ouverts pour vous' })).toBeFocused()
   await page.goto('/accueil')
   await expect(page.getByRole('heading', { name: /Bonjour/ })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Nouveau pour vous' })).toHaveCount(0)

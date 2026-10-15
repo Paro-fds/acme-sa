@@ -83,7 +83,14 @@ test('candidature : postuler, accusé de réception, étape suivante côté RH, 
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.screenshot({ path: `${CAPTURES}/us902-fiche-rh-1280.png`, fullPage: true })
 
-  await employeePage.reload()
+  // US-123 : la tuile « Ma candidature » de l'accueil mène directement à la section, même en bas de page sur téléphone.
+  await employeePage.goto('/accueil')
+  await expect(employeePage.getByRole('heading', { name: /Bonjour/ })).toBeVisible()
+  await employeePage.goto('/carriere#mes-candidatures')
+  const heading = employeePage.getByRole('heading', { name: 'Mes candidatures' })
+  await expect(heading).toBeFocused()
+  await expect(heading).toBeInViewport()
+  await employeePage.screenshot({ path: `${CAPTURES}/us123-ancre-candidatures-390.png` })
   await expect(employeePage.getByRole('list', { name: 'Mes candidatures' })).toContainText('Étape 2 sur 7 : Étude par la DRH')
   await employeePage.setViewportSize({ width: 1280, height: 900 })
   await employeePage.screenshot({ path: `${CAPTURES}/us902-suivi-1280.png`, fullPage: true })

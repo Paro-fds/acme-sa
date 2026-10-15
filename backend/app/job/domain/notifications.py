@@ -13,7 +13,8 @@ from enum import StrEnum
 from app.certificate.domain.certificate import Certificate, CertificateStatus
 from app.job.domain.opening import JobOpening, OpeningStatus
 
-CAREER_LINK = "/carriere"
+CAREER_LINK = "/carriere#postes-ouverts"
+"""US-123 : directement sur la section « Postes ouverts pour vous » de « Ma carrière »."""
 CERTIFICATES_LINK = "/certificats"
 READER_PREFIX = "employee:"
 """Les lectures des employés partagent le registre des lectures des RH (US-116), sous « employee:<id> »."""

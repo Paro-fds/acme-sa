@@ -1,5 +1,5 @@
-import { useId, useState } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useId, useState } from 'react'
+import { Link, useLocation } from 'react-router'
 import { applyToOpening, listMyApplications, listMyOpenings, sendCv, withdrawApplication } from '../../api/openings.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
@@ -13,6 +13,23 @@ import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 
 const STEP_COUNT = 7
+
+/** US-123 : ancres des sections, pour arriver de l'accueil directement sur les postes ou les candidatures. */
+export const OPENINGS_ANCHOR = 'postes-ouverts'
+export const APPLICATIONS_ANCHOR = 'mes-candidatures'
+const ANCHORED_HEADING = 'scroll-mt-24 text-xl font-bold text-primary-active outline-none'
+
+/** Une fois la page chargée, descend jusqu'à la section de l'adresse (#…) et y place le focus (lecteur d'écran). */
+function useScrollToHash(ready) {
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (!ready || !hash) return
+    const target = document.getElementById(decodeURIComponent(hash.slice(1)))
+    if (!target) return
+    target.scrollIntoView?.()
+    target.focus({ preventScroll: true })
+  }, [ready, hash])
+}
 
 async function load() {
   const [openings, applications] = await Promise.all([listMyOpenings(), listMyApplications()])
@@ -219,6 +236,7 @@ export default function MyOpeningsPage() {
   const { data, loading, error, reload } = useLoader(load)
   const [received, setReceived] = useState(null)
   const desktop = useIsDesktop()
+  useScrollToHash(Boolean(data))
   const active = (openingId) =>
     data?.applications.find((application) => application.opening_id === openingId && application.step !== 'CLOSED')
 
@@ -240,7 +258,9 @@ export default function MyOpeningsPage() {
   const opportunities = (
     <>
       <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-bold text-primary-active">Postes ouverts pour vous</h2>
+        <h2 id={OPENINGS_ANCHOR} tabIndex={-1} className={ANCHORED_HEADING}>
+          Postes ouverts pour vous
+        </h2>
         <p className="text-sm text-help">
           Les postes publiés par les RH dont vous remplissez les critères, d’après vos certificats validés, votre
           ancienneté, votre grade et votre unité.
@@ -270,7 +290,9 @@ export default function MyOpeningsPage() {
       )}
       {data && data.applications.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-bold text-primary-active">Mes candidatures</h2>
+          <h2 id={APPLICATIONS_ANCHOR} tabIndex={-1} className={ANCHORED_HEADING}>
+            Mes candidatures
+          </h2>
           <ul aria-label="Mes candidatures" className="flex flex-col gap-4">
             {data.applications.map((application) => (
               <ApplicationItem key={application.id} application={application} onWithdrawn={reload} />
