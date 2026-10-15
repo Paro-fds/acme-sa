@@ -1,0 +1,39 @@
+{
+  "source": "Fiches fictives des tests (US-119)",
+  "profiles": [
+    {
+      "code": "agent-fictif-credit",
+      "title": "Agent fictif de crédit",
+      "domain": "Banque et microfinance",
+      "level_text": "Bac + 4",
+      "description": "L'agent fictif de crédit suit un portefeuille de prêts fictifs.",
+      "sections": [
+        {"title": "Missions", "lines": ["Rechercher de nouveaux clients fictifs", "Constituer les dossiers de prêts"]},
+        {"title": "Qualifications", "lines": ["Diplôme Bac + 4"]},
+        {"title": "Expérience", "lines": ["Aucune expérience antérieure n'est exigée"]},
+        {"title": "Conditions d'exercice", "lines": ["Travail sur le terrain et au bureau"]}
+      ]
+    },
+    {
+      "code": "comptable-fictif",
+      "title": "Comptable fictif",
+      "domain": "Comptabilité",
+      "level_text": "Bac + 5",
+      "description": "Le comptable fictif tient les livres de l'institution fictive.",
+      "sections": [
+        {"title": "Missions", "lines": ["Concilier les comptes fictifs"]},
+        {"title": "Qualités attendues", "lines": ["Être rigoureux"]}
+      ]
+    },
+    {
+      "code": "gardien-fictif",
+      "title": "Gardien fictif",
+      "domain": "Sécurité",
+      "level_text": null,
+      "description": "Le gardien fictif surveille les locaux.",
+      "sections": [
+        {"title": "Missions", "lines": ["Surveiller l'entrée"]}
+      ]
+    }
+  ]
+}

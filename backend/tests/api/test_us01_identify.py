@@ -1,63 +1,67 @@
-"""US-01 — Vérifier son identité."""
+"""US-01 → US-101 (refonte) — Reconnaître l'employé à la connexion.
+
+Depuis US-101, il n'y a plus d'étape d'identification séparée : l'identité est vérifiée
+par `POST /api/auth/login`, sur un seul écran, et l'ancienne route `/api/auth/identify`
+(qui disait si une personne existait et avait un mot de passe) est supprimée.
+"""
 
 import pytest
 
 from tests.employees import EMP_A, EMP_D1, EMP_E, EMP_H1, EMP_H2, EMP_I
 
-URL = "/api/auth/identify"
+URL = "/api/auth/login"
+PASSWORD = "Bonjour-2026"
+GENERIC = {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Ces informations ne correspondent pas. Vérifiez votre nom, votre date de naissance et votre mot de passe.",
+}
 
 
-def test_ca01_recognized_employee_without_password_must_create_one(client):
-    response = client.post(URL, json=EMP_A.identity())
-
-    assert response.status_code == 200
-    assert response.json() == {"next_step": "CREATE_PASSWORD"}
+def _login(client, employee=EMP_A, password=PASSWORD, **identity):
+    return client.post(URL, json=employee.identity(password=password, **identity))
 
 
-def test_ca02_recognized_employee_with_password_must_enter_it(client, account):
+def test_identify_route_no_longer_exists(client):
+    response = client.post("/api/auth/identify", json=EMP_A.identity())
+
+    assert response.status_code in (404, 405)
+
+
+def test_ca03_case_accents_and_spaces_are_ignored(client, account):
+    account(EMP_E)
+
+    response = _login(client, employee=EMP_E, last_name="etienne", first_name="  rose  ")
+
+    assert response.status_code == 204
+
+
+def test_ca04_unknown_identity_gets_the_generic_answer(client, account):
     account(EMP_A)
 
-    response = client.post(URL, json=EMP_A.identity())
-
-    assert response.json() == {"next_step": "ENTER_PASSWORD"}
-
-
-def test_ca03_case_accents_and_spaces_are_ignored(client):
-    response = client.post(URL, json=EMP_E.identity(last_name="etienne", first_name="  rose  "))
-
-    assert response.status_code == 200
-    assert response.json() == {"next_step": "CREATE_PASSWORD"}
-
-
-def test_ca04_unknown_identity_is_rejected(client):
-    response = client.post(URL, json=EMP_A.identity(birth_date="1996-03-16"))
+    response = _login(client, birth_date="1996-03-16")
 
     assert response.status_code == 401
-    assert response.json() == {
-        "error": {"code": "IDENTITY_NOT_RECOGNIZED", "message": "Informations non reconnues. Vérifiez votre saisie."}
-    }
+    assert response.json() == {"error": GENERIC}
 
 
 def test_ca05_inactive_employee_gets_the_same_answer_as_unknown(client):
-    unknown = client.post(URL, json=EMP_A.identity(last_name="INCONNU"))
-    inactive = client.post(URL, json=EMP_I.identity())
+    unknown = _login(client, last_name="INCONNU")
+    inactive = _login(client, employee=EMP_I)
 
     assert inactive.status_code == unknown.status_code == 401
-    assert inactive.json() == unknown.json()
+    assert inactive.json() == unknown.json() == {"error": GENERIC}
 
 
 def test_ca06_homonyms_are_told_apart_by_birth_date(client, account):
-    account(EMP_H2)
+    account(EMP_H1, "Premier-2026")
+    account(EMP_H2, "Second-2026")
 
-    first = client.post(URL, json=EMP_H1.identity())
-    second = client.post(URL, json=EMP_H2.identity())
-
-    assert first.json() == {"next_step": "CREATE_PASSWORD"}
-    assert second.json() == {"next_step": "ENTER_PASSWORD"}
+    assert _login(client, employee=EMP_H1, password="Premier-2026").status_code == 204
+    assert _login(client, employee=EMP_H2, password="Second-2026").status_code == 204
 
 
 def test_ca07_full_duplicate_opens_no_file(client):
-    response = client.post(URL, json=EMP_D1.identity())
+    response = _login(client, employee=EMP_D1)
 
     assert response.status_code == 409
     assert response.json()["error"] == {
@@ -67,27 +71,26 @@ def test_ca07_full_duplicate_opens_no_file(client):
     assert "set-cookie" not in response.headers
 
 
-def test_ca08_submitted_new_name_and_old_name_are_both_recognized(client, submitted):
+def test_ca08_submitted_new_name_and_old_name_are_both_recognized(client, account, submitted):
+    account(EMP_A)
     submitted(EMP_A, {"last_name": "JOSEPH-PAUL"})
 
-    with_new_name = client.post(URL, json=EMP_A.identity(last_name="Joseph-Paul"))
-    with_old_name = client.post(URL, json=EMP_A.identity(last_name="JOSEPH"))
-
-    assert with_new_name.status_code == 200
-    assert with_old_name.status_code == 200
+    assert _login(client, last_name="Joseph-Paul").status_code == 204
+    assert _login(client, last_name="JOSEPH").status_code == 204
 
 
-def test_ca08_draft_name_is_not_used_for_identification(client, draft):
+def test_ca08_draft_name_is_not_used_for_identification(client, account, draft):
+    account(EMP_A)
     draft(EMP_A, {"last_name": "JOSEPH-PAUL"})
 
-    response = client.post(URL, json=EMP_A.identity(last_name="Joseph-Paul"))
+    response = _login(client, last_name="Joseph-Paul")
 
     assert response.status_code == 401
 
 
-@pytest.mark.parametrize("missing", ["last_name", "first_name", "birth_date"])
+@pytest.mark.parametrize("missing", ["last_name", "first_name", "birth_date", "password"])
 def test_ca09_every_field_is_required(client, missing):
-    payload = EMP_A.identity()
+    payload = EMP_A.identity(password=PASSWORD)
     del payload[missing]
 
     response = client.post(URL, json=payload)
@@ -97,13 +100,6 @@ def test_ca09_every_field_is_required(client, missing):
 
 @pytest.mark.parametrize("blank", ["last_name", "first_name"])
 def test_ca09_blank_name_is_rejected(client, blank):
-    response = client.post(URL, json=EMP_A.identity(**{blank: "   "}))
+    response = _login(client, **{blank: "   "})
 
     assert response.status_code == 422
-
-
-def test_ca10_success_exposes_no_employee_data(client):
-    response = client.post(URL, json=EMP_A.identity())
-
-    assert response.json() == {"next_step": "CREATE_PASSWORD"}
-    assert "set-cookie" not in response.headers

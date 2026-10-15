@@ -8,7 +8,7 @@ import pytest
 
 from app.config import Settings
 from app.main import create_app
-from tests.conftest import TEST_CSV
+from tests.conftest import TEST_CSV, rh_login
 from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A
 
 LOGIN_URL = "/api/admin/auth/login"
@@ -18,7 +18,8 @@ BAD_PASSWORD = {"username": ADMIN_USERNAME, "password": "mauvais"}
 
 
 def _login(client, credentials=GOOD):
-    return client.post(LOGIN_URL, json=credentials)
+    """Connexion complète, double authentification comprise (US-102)."""
+    return rh_login(client, credentials["username"], credentials["password"])
 
 
 def _fail(client, times):
@@ -238,4 +239,4 @@ def test_ca04_every_admin_route_refuses_an_employee_session(employee_client, met
 
 def test_ca04_admin_session_cannot_reach_employee_routes(admin_client):
     assert admin_client.get("/api/me/profile").status_code == 401
-    assert admin_client.get("/api/me/update").status_code == 401
+    assert admin_client.get("/api/me/dossier").status_code == 401

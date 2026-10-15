@@ -1,0 +1,344 @@
+<!DOCTYPE html><html lang="fr" class="h-full bg-slate-100"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>A6 — Employés · Portail RH ACME SA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-100 text-slate-800 antialiased" style="width: 1440px; margin: 0 auto;">
+
+  <!-- EN-TÊTE CADRE COMMUN RH -->
+  <header class="bg-[#1E1E82] text-white px-8 py-3.5 flex items-center justify-between shrink-0 shadow-sm">
+    <div class="flex items-center space-x-3">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfLVYlm6vVo5oegs8MZUzyhiJEz0kl5nO5DtJEUfFow4czxeh0rnOAvJQil5tUHNLnEjRgs-J3gnK3QuvYg7I9xp9ci635NUA4vuJf87ssXoiSb1x5wT4DFJS9Z-tucxdIU4a2lQLt4ml1OYkJMmojI5QRjgT-nllPwQFhhPVy0MqyTLsv99yiSnvpXN8NAeiW0XXfwFij5A8hM44gFlqTL8-wnqtY77beyWTnSX39ZjYeO5F-W2iL" alt="ACME SA" class="h-8 object-contain bg-white rounded p-0.5">
+      <span class="text-slate-400 text-sm font-light">|</span>
+      <span class="text-white text-sm font-medium tracking-wide">Portail RH</span>
+    </div>
+    <div class="flex items-center space-x-4 text-xs font-normal text-slate-200">
+      <span class="">Administrateur Démo · Administrateur</span>
+      <span class="text-slate-400">·</span>
+      <a href="#" class="text-slate-200 hover:text-white underline-offset-2 hover:underline transition-colors">Se déconnecter</a>
+    </div>
+  </header>
+
+  <!-- CONTENEUR PRINCIPAL (MENU LATÉRAL + CONTENU) -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- MENU LATÉRAL GAUCHE (CADRE IDENTIQUE) -->
+    <aside class="w-64 bg-white border-r border-slate-200 shrink-0 flex flex-col py-6">
+      <nav class="space-y-1 px-3 text-sm font-medium">
+        <!-- Tableau de bord -->
+        <a href="#" class="flex items-center px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+          <span class="">Tableau de bord</span>
+        </a>
+        <!-- File de validation (27) -->
+        <a href="#" class="flex items-center justify-between px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+          <span class="">File de validation</span>
+          <span class="bg-slate-200 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded-full">27</span>
+        </a>
+        <!-- Employés (ACTIF) -->
+        <a href="#" class="flex items-center px-4 py-2.5 rounded-lg bg-[#1E1E82] text-white transition-colors">
+          <span class="">Employés</span>
+        </a>
+        <!-- Signalements (9) -->
+        <a href="#" class="flex items-center justify-between px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+          <span class="">Signalements</span>
+          <span class="bg-amber-100 text-[#B45309] text-xs font-semibold px-2 py-0.5 rounded-full">9</span>
+        </a>
+        <!-- À rattacher (2) -->
+        <a href="#" class="flex items-center justify-between px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+          <span class="">À rattacher</span>
+          <span class="bg-amber-100 text-[#B45309] text-xs font-semibold px-2 py-0.5 rounded-full">2</span>
+        </a>
+        <!-- Comptes et rôles -->
+        <a href="#" class="flex items-center px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+          <span class="">Comptes et rôles</span>
+        </a>
+        <!-- Journal d'audit -->
+        <a href="#" class="flex items-center px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+          <span class="">Journal d'audit</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ZONE DE CONTENU PRINCIPALE : A6 — Employés -->
+    <main class="flex-1 p-8 overflow-y-auto">
+
+      <!-- EN-TÊTE DE LA PAGE -->
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-[#1E1E82]">Employés</h1>
+          <p class="text-sm text-slate-600 mt-0.5">364 employés actifs</p>
+        </div>
+        <div class="text-right">
+          <div class="inline-flex rounded-md shadow-sm">
+            <button type="button" class="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none">
+              <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              Exporter (Excel, CSV)
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 mt-1.5">Chaque export est enregistré dans le journal d'audit.</p>
+        </div>
+      </div>
+
+      <!-- CARTE CONTENANT LES FILTRES ET LE TABLEAU -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
+
+        <!-- LIGNE DE RECHERCHE -->
+        <div class="mb-5">
+          <div class="relative max-w-lg">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input type="text" placeholder="Rechercher par nom ou matricule" class="block w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#1E1E82] focus:border-[#1E1E82] bg-white">
+          </div>
+        </div>
+
+        <!-- FILTRES SUR UNE LIGNE -->
+        <div class="grid grid-cols-6 gap-3 mb-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Agence</label>
+            <select class="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none">
+              <option>Toutes</option>
+              <option>Agence Démo Nord</option>
+              <option>Agence Démo Sud</option>
+              <option>Agence Démo Centre</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Région</label>
+            <select class="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none">
+              <option>Toutes</option>
+              <option>Région Démo 1</option>
+              <option>Région Démo 2</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Direction</label>
+            <select class="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none">
+              <option>Toutes</option>
+              <option>Direction Démo des Opérations</option>
+              <option>Direction Démo du Crédit</option>
+              <option>Direction Démo du Recouvrement</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Statut du dossier</label>
+            <select class="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none">
+              <option>Tous</option>
+              <option>Profil incomplet</option>
+              <option>Profil complet</option>
+              <option>Dossier complet</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Niveau validé</label>
+            <select class="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none font-medium text-[#1E1E82]">
+              <option>Tous</option>
+              <option selected="">au moins Licence</option>
+              <option>au moins Master</option>
+              <option>au moins Baccalauréat</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Domaine</label>
+            <select class="w-full text-xs border border-slate-300 rounded-md py-1.5 px-2 bg-white text-slate-700 focus:outline-none font-medium text-[#1E1E82]">
+              <option>Tous</option>
+              <option selected="">Comptabilité</option>
+              <option>Gestion</option>
+              <option>Finance</option>
+              <option>Économie</option>
+              <option>Informatique</option>
+              <option>Droit</option>
+              <option>Agronomie</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- FILTRES ACTIFS & RÉSULTAT -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-500 font-medium">Filtres actifs :</span>
+            <!-- Étiquette 1 -->
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+              Niveau validé : au moins Licence
+              <button type="button" class="ml-1.5 inline-flex text-slate-400 hover:text-slate-600">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </span>
+            <!-- Étiquette 2 -->
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+              Domaine : Comptabilité
+              <button type="button" class="ml-1.5 inline-flex text-slate-400 hover:text-slate-600">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </span>
+            <!-- Lien Tout effacer -->
+            <a href="#" class="text-xs text-[#1E1E82] hover:underline font-medium ml-2">Tout effacer</a>
+          </div>
+          <div>
+            <span class="text-xs font-semibold text-slate-700">12 employés</span>
+          </div>
+        </div>
+
+        <!-- TABLEAU DES EMPLOYÉS -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold text-slate-600">
+                <th class="py-3 px-4">Nom</th>
+                <th class="py-3 px-4">Matricule</th>
+                <th class="py-3 px-4">Agence</th>
+                <th class="py-3 px-4">Poste</th>
+                <th class="py-3 px-4">Statut du dossier</th>
+                <th class="py-3 px-4">Niveau validé</th>
+                <th class="py-3 px-4">Domaine</th>
+                <th class="py-3 px-4">Dernière mise à jour</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <!-- Ligne 1 : Paul Démo -->
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  <a href="#" class="text-[#1E1E82] hover:underline">Paul Démo</a>
+                </td>
+                <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">EMP-0204</td>
+                <td class="py-3.5 px-4">Agence Démo Sud</td>
+                <td class="py-3.5 px-4">Analyste crédit</td>
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-[#15803D] border border-green-200">
+                    <svg class="w-3 h-3 mr-1 text-[#15803D]" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    Dossier complet
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">Licence</td>
+                <td class="py-3.5 px-4">Comptabilité</td>
+                <td class="py-3.5 px-4 text-slate-500 text-xs">02/10/2026</td>
+              </tr>
+
+              <!-- Ligne 2 : Nadia Test -->
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  <a href="#" class="text-[#1E1E82] hover:underline">Nadia Test</a>
+                </td>
+                <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">EMP-0311</td>
+                <td class="py-3.5 px-4">Agence Démo Centre</td>
+                <td class="py-3.5 px-4">Comptable</td>
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-[#15803D] border border-green-200">
+                    <svg class="w-3 h-3 mr-1 text-[#15803D]" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    Dossier complet
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">Master</td>
+                <td class="py-3.5 px-4">Comptabilité</td>
+                <td class="py-3.5 px-4 text-slate-500 text-xs">30/09/2026</td>
+              </tr>
+
+              <!-- Ligne 3 : Rose Exemple -->
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  <a href="#" class="text-[#1E1E82] hover:underline">Rose Exemple</a>
+                </td>
+                <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">EMP-0233</td>
+                <td class="py-3.5 px-4">Agence Démo Nord</td>
+                <td class="py-3.5 px-4">Chargée de crédit</td>
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-[#15803D] border border-green-200">
+                    <svg class="w-3 h-3 mr-1 text-[#15803D]" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    Dossier complet
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">Licence</td>
+                <td class="py-3.5 px-4">Comptabilité</td>
+                <td class="py-3.5 px-4 text-slate-500 text-xs">29/09/2026</td>
+              </tr>
+
+              <!-- Ligne 4 : Marc Démo -->
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  <a href="#" class="text-[#1E1E82] hover:underline">Marc Démo</a>
+                </td>
+                <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">EMP-0127</td>
+                <td class="py-3.5 px-4">Agence Démo Nord</td>
+                <td class="py-3.5 px-4">Contrôleur interne</td>
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    <svg class="w-3 h-3 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    Profil complet
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">Licence</td>
+                <td class="py-3.5 px-4">Comptabilité</td>
+                <td class="py-3.5 px-4 text-slate-500 text-xs">25/09/2026</td>
+              </tr>
+
+              <!-- Ligne 5 : Sophie Test -->
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  <a href="#" class="text-[#1E1E82] hover:underline">Sophie Test</a>
+                </td>
+                <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">EMP-0562</td>
+                <td class="py-3.5 px-4">Agence Démo Sud</td>
+                <td class="py-3.5 px-4">Caissière</td>
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-[#B45309] border border-amber-200">
+                    <svg class="w-3 h-3 mr-1 text-[#B45309]" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Profil incomplet
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">Licence</td>
+                <td class="py-3.5 px-4">Comptabilité</td>
+                <td class="py-3.5 px-4 text-slate-500 text-xs">18/09/2026</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SOUS LE TABLEAU : PAGINATION & COMPTEUR -->
+        <div class="flex items-center justify-between pt-4 mt-2 border-t border-slate-100 text-xs text-slate-500">
+          <div>
+            <span class="">1 à 5 sur 12</span>
+          </div>
+          <div class="flex items-center space-x-1">
+            <button class="px-2.5 py-1 rounded border border-slate-200 text-slate-400 bg-slate-50 cursor-not-allowed" disabled="">Précédent</button>
+            <button class="px-2.5 py-1 rounded border border-[#1E1E82] bg-[#1E1E82] text-white font-medium">1</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-50 text-slate-700">2</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-50 text-slate-700">3</button>
+            <button class="px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-50 text-slate-700">Suivant</button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+
+
+
+</body></html>

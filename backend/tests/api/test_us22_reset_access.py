@@ -29,13 +29,16 @@ def test_ca01_password_is_erased(admin_client, account, container):
     assert admin_client.get(f"/api/admin/employees/{EMP_A.id}").json()["account_activated"] is False
 
 
-def test_ca02_identify_then_asks_to_create_a_password(admin_client, account, client):
+def test_ca02_a_new_password_can_be_created_after_the_reset(admin_client, account, client):
     account(EMP_A)
     admin_client.post(url(EMP_A.id))
 
-    response = client.post("/api/auth/identify", json=EMP_A.identity())
+    response = client.post(
+        "/api/auth/register",
+        json=EMP_A.identity(password="Nouveau-2026", password_confirmation="Nouveau-2026"),
+    )
 
-    assert response.json()["next_step"] == "CREATE_PASSWORD"
+    assert response.status_code == 204
 
 
 def test_ca02_old_password_no_longer_works_and_a_new_one_can_be_created(admin_client, account, client):
@@ -119,7 +122,6 @@ def test_ca05_locked_account_can_immediately_create_a_new_password(admin_client,
 
     admin_client.post(url(EMP_A.id))
 
-    assert client.post("/api/auth/identify", json=EMP_A.identity()).json()["next_step"] == "CREATE_PASSWORD"
     created = client.post(
         "/api/auth/register",
         json=EMP_A.identity(password="Nouveau-2026", password_confirmation="Nouveau-2026"),

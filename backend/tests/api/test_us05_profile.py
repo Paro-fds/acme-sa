@@ -14,11 +14,10 @@ def test_ca01_profile_contains_the_employee_information(employee_client):
     assert profile["last_name"] == "JOSEPH"
     assert profile["first_name"] == "Jean"
     assert profile["birth_date"] == "1996-03-15"
-    assert profile["agency_code"] == "PV"
+    assert set(profile["affectation"]) == {"agency", "region", "direction"}  # US-201 : libellés, jamais le code brut
     assert profile["position"] == "Agent de crédit"
     assert profile["telephone_number"] == "+50937221111"
     assert profile["gender"] == "M"
-    assert profile["department"]
     assert profile["grade"] == "12"
     assert profile["level"] == "2"
     assert profile["contract_nature"] == "CDI"
@@ -28,9 +27,8 @@ def test_ca01_profile_contains_the_employee_information(employee_client):
 def test_ca01_editable_fields_are_listed(employee_client):
     profile = employee_client(EMP_A).get(URL).json()
 
+    # US-206 : l'employé ne modifie plus que ses coordonnées (section 1 / 3 du profil).
     assert profile["editable_fields"] == [
-        "last_name",
-        "first_name",
         "telephone_number",
         "email_address",
         "address_line_1",

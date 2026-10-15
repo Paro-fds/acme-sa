@@ -3,15 +3,24 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import AdminAccountsPage from './AdminAccountsPage.jsx'
-import { addAdmin, deleteAdmin, listAdmins } from '../../api/admin.js'
+import { addAdmin, changeAdminRole, deleteAdmin, listAdmins } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
+import { getMfaOptions, resetAdminMfa } from '../../api/mfa.js'
 
-vi.mock('../../api/admin.js', () => ({ addAdmin: vi.fn(), deleteAdmin: vi.fn(), listAdmins: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({
+  addAdmin: vi.fn(),
+  changeAdminRole: vi.fn(),
+  deleteAdmin: vi.fn(),
+  listAdmins: vi.fn(),
+}))
 vi.mock('../../api/auth.js', () => ({ adminLogout: vi.fn(), logout: vi.fn() }))
+vi.mock('../../api/mfa.js', () => ({ resetAdminMfa: vi.fn(), getMfaOptions: vi.fn() }))
 
 const ME = {
   id: 'a1',
   username: 'admin',
+  role: 'ADMIN',
+  role_label: 'Administrateur',
   created_at: '2026-10-01T08:00:00Z',
   created_by: null,
   last_login_at: '2026-10-05T09:15:00Z',
@@ -21,6 +30,8 @@ const ME = {
 const MARIE = {
   id: 'a2',
   username: 'marie.pierre',
+  role: 'AGENT_RH',
+  role_label: 'Agent RH',
   created_at: '2026-10-05T10:00:00Z',
   created_by: 'admin',
   last_login_at: null,
@@ -56,7 +67,8 @@ describe('AdminAccountsPage (US-23)', () => {
     expect(within(me).getByText('admin')).toBeInTheDocument()
     expect(within(me).getByText('Vous')).toBeInTheDocument()
     expect(within(me).getByText('Ajouté le 01/10/2026')).toBeInTheDocument()
-    expect(within(me).getByText(/^Dernière connexion le 05\/10\/2026 à \d\d:\d\d$/)).toBeInTheDocument()
+    // US-108 (A10) : colonne « Dernière connexion »
+    expect(within(me).getByText(/^05\/10\/2026 à \d\d:\d\d$/)).toBeInTheDocument()
     expect(within(marie).getByText('Ajouté le 05/10/2026 par admin')).toBeInTheDocument()
     expect(within(marie).getByText('Jamais connecté')).toBeInTheDocument()
     expect(within(marie).getByText('Mot de passe provisoire')).toBeInTheDocument()
@@ -84,15 +96,15 @@ describe('AdminAccountsPage (US-23)', () => {
     const user = userEvent.setup()
     renderPage()
     await items()
-    const submit = screen.getByRole('button', { name: "Ajouter l'administrateur" })
+    const submit = screen.getByRole('button', { name: 'Créer le compte' })
     expect(submit).toBeDisabled()
 
     await user.type(screen.getByLabelText('Identifiant'), ' marie.pierre ')
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
     await user.click(submit)
 
-    expect(addAdmin).toHaveBeenCalledWith('marie.pierre', 'Provisoire-2026!')
-    expect(await screen.findByText(/Administrateur « marie\.pierre » ajouté/)).toBeInTheDocument()
+    expect(addAdmin).toHaveBeenCalledWith('marie.pierre', 'Provisoire-2026!', 'AGENT_RH')
+    expect(await screen.findByText(/(?:Administrateur|Compte) « marie\.pierre » ajouté/)).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: '2 comptes' })).toBeInTheDocument()
     expect(screen.getByLabelText('Identifiant')).toHaveValue('')
     expect(screen.getByLabelText('Mot de passe provisoire')).toHaveValue('')
@@ -106,7 +118,7 @@ describe('AdminAccountsPage (US-23)', () => {
 
     await user.type(screen.getByLabelText('Identifiant'), 'Admin')
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
-    await user.click(screen.getByRole('button', { name: "Ajouter l'administrateur" }))
+    await user.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     const field = screen.getByLabelText('Identifiant')
     expect(await screen.findByText('Cet identifiant est déjà utilisé.')).toBeInTheDocument()
@@ -123,7 +135,7 @@ describe('AdminAccountsPage (US-23)', () => {
 
     await user.type(screen.getByLabelText('Identifiant'), 'marie.pierre')
     await user.type(screen.getByLabelText('Mot de passe provisoire'), 'court')
-    await user.click(screen.getByRole('button', { name: "Ajouter l'administrateur" }))
+    await user.click(screen.getByRole('button', { name: 'Créer le compte' }))
 
     expect(await screen.findByText('Le mot de passe doit contenir au moins 12 caractères.')).toBeInTheDocument()
     expect(screen.getByLabelText('Mot de passe provisoire')).toHaveAttribute('aria-invalid', 'true')
@@ -152,7 +164,7 @@ describe('AdminAccountsPage (US-23)', () => {
     const [, marie] = await items()
 
     await user.click(within(marie).getByRole('button', { name: 'Supprimer marie.pierre' }))
-    await user.click(screen.getByRole('button', { name: 'Annuler' }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Annuler' }))
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(deleteAdmin).not.toHaveBeenCalled()
@@ -173,3 +185,114 @@ describe('AdminAccountsPage (US-23)', () => {
     expect(await screen.findByText('Écran connexion admin')).toBeInTheDocument()
   })
 })
+
+describe('AdminAccountsPage — double authentification (US-102 CA-05)', () => {
+  const PAUL = { ...MARIE, id: 'a3', username: 'paul.louis', must_change_password: false, mfa_method: 'WHATSAPP' }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    listAdmins.mockResolvedValue([{ ...ME, mfa_method: 'TOTP' }, MARIE, PAUL])
+    getMfaOptions.mockResolvedValue({ mfa_required: true })
+  })
+
+  it('chaque compte indique sa méthode, ou qu’elle reste à choisir', async () => {
+    renderPage()
+
+    const [me, marie, paul] = await items()
+    expect(within(me).getByText(/Application d'authentification/)).toBeInTheDocument()
+    expect(within(marie).getByText(/à choisir à la prochaine connexion/i)).toBeInTheDocument()
+    expect(within(paul).getByText(/WhatsApp/)).toBeInTheDocument()
+    expect(within(me).queryByRole('button', { name: /Réinitialiser/ })).not.toBeInTheDocument()
+    expect(within(marie).queryByRole('button', { name: /Réinitialiser/ })).not.toBeInTheDocument()
+  })
+
+  it('téléphone perdu : un autre compte RH réinitialise, après confirmation', async () => {
+    resetAdminMfa.mockResolvedValue(null)
+    const user = userEvent.setup()
+    renderPage()
+
+    const paul = (await items())[2]
+    await user.click(within(paul).getByRole('button', { name: 'Réinitialiser la double authentification de paul.louis' }))
+    expect(within(paul).getByRole('alertdialog')).toHaveTextContent('il choisira une nouvelle méthode')
+    await user.click(within(paul).getByRole('button', { name: 'Réinitialiser' }))
+
+    expect(resetAdminMfa).toHaveBeenCalledWith('a3')
+    expect(await screen.findByText('Double authentification de « paul.louis » réinitialisée.')).toBeInTheDocument()
+  })
+
+  it('US-112 : double authentification coupée, ni méthode ni réinitialisation', async () => {
+    getMfaOptions.mockResolvedValue({ mfa_required: false })
+    renderPage()
+
+    const paul = (await items())[2]
+    expect(within(paul).queryByText(/WhatsApp/)).not.toBeInTheDocument()
+    expect(screen.queryByText('Double authentification')).not.toBeInTheDocument()
+    expect(within(paul).queryByRole('button', { name: /Réinitialiser la double/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('AdminAccountsPage — rôles des comptes RH (US-103)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    listAdmins.mockResolvedValue([ME, MARIE])
+  })
+
+  it('affiche le rôle de chaque compte', async () => {
+    renderPage()
+
+    const [me, marie] = await items()
+    expect(within(me).getByText('Administrateur', { selector: 'dd' })).toBeInTheDocument()
+    expect(within(marie).getByText('Agent RH', { selector: 'dd' })).toBeInTheDocument()
+  })
+
+  it('un administrateur peut modifier le rôle d’un compte', async () => {
+    changeAdminRole.mockResolvedValue({ ...MARIE, role: 'READONLY', role_label: 'Lecture seule' })
+    const user = userEvent.setup()
+    renderPage()
+
+    const [, marie] = await items()
+    const select = within(marie).getByLabelText(/Rôle de marie.pierre/)
+    expect(select).toHaveValue('AGENT_RH')
+
+    await user.selectOptions(select, 'READONLY')
+    expect(changeAdminRole).toHaveBeenCalledWith('a2', 'READONLY')
+    expect(await screen.findByText(/Rôle de « marie.pierre » modifié en « Lecture seule »/)).toBeInTheDocument()
+  })
+
+  it('le formulaire d’ajout permet de choisir le rôle', async () => {
+    addAdmin.mockResolvedValue({
+      id: 'a3',
+      username: 'lucie.audit',
+      role: 'READONLY',
+      role_label: 'Lecture seule',
+      created_at: '2026-10-09T12:00:00Z',
+      created_by: 'admin',
+      last_login_at: null,
+      must_change_password: true,
+      is_me: false,
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await items()
+
+    await user.type(screen.getByLabelText('Identifiant'), 'lucie.audit')
+    await user.type(screen.getByLabelText('Mot de passe provisoire'), 'Provisoire-2026!')
+    await user.selectOptions(screen.getByLabelText('Rôle initial'), 'READONLY')
+
+    await user.click(screen.getByRole('button', { name: 'Créer le compte' }))
+
+    expect(addAdmin).toHaveBeenCalledWith('lucie.audit', 'Provisoire-2026!', 'READONLY')
+  })
+
+  it('un compte en Lecture seule ne voit pas le formulaire de création de compte', async () => {
+    const READONLY_ME = { ...ME, role: 'READONLY', role_label: 'Lecture seule' }
+    listAdmins.mockResolvedValue([READONLY_ME, MARIE])
+
+    renderPage()
+
+    expect(await screen.findByText('2 comptes')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Créer un compte' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Créer le compte' })).not.toBeInTheDocument()
+  })
+})
+

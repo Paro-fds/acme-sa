@@ -64,7 +64,8 @@ describe('AdminPasswordPage (US-23)', () => {
     const user = userEvent.setup()
     renderPage()
     expect(await screen.findByRole('heading', { name: 'Changer mon mot de passe' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Retour' })).toBeInTheDocument()
+    // US-108 : le menu latéral de l'espace RH remplace le bouton « Retour ».
+    expect(screen.getByRole('navigation', { name: 'Menu principal RH' })).toBeInTheDocument()
 
     await fill(user, 'Admin-Test-2026', 'Mon-propre-mot-2026')
 

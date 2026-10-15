@@ -1,4 +1,4 @@
-"""Accès SQLite via SQLAlchemy : base déclarative, type date UTC, moteur et sessions."""
+"""Accès à la base via SQLAlchemy : SQLite (poste du développeur, tests) ou PostgreSQL (démonstrateur, AWS)."""
 
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
 
 
 class UtcDateTime(TypeDecorator):
-    """SQLite ne conserve pas le fuseau : on stocke en UTC sans fuseau et on le restitue à la lecture."""
+    """Dates stockées en UTC sans fuseau (SQLite ne le conserve pas) et restituées en UTC à la lecture."""
 
     impl = DateTime
     cache_ok = True
@@ -31,7 +31,12 @@ class UtcDateTime(TypeDecorator):
         return value.replace(tzinfo=UTC)
 
 
-def create_sqlite_engine(database_url: str) -> Engine:
+def create_database_engine(database_url: str) -> Engine:
+    if not database_url.startswith("sqlite"):
+        # PostgreSQL : connexions vérifiées avant usage (la base gratuite se met en veille) ; pas de requêtes
+        # préparées côté serveur, refusées par le pooler de Supabase en mode transaction.
+        return create_engine(database_url, pool_pre_ping=True, pool_size=5, connect_args={"prepare_threshold": None})
+
     engine = create_engine(database_url, connect_args={"check_same_thread": False})
 
     @event.listens_for(engine, "connect")
@@ -45,7 +50,7 @@ def create_sqlite_engine(database_url: str) -> Engine:
 
 class Database:
     def __init__(self, database_url: str) -> None:
-        self.engine = create_sqlite_engine(database_url)
+        self.engine = create_database_engine(database_url)
         self._session_factory = sessionmaker(bind=self.engine, expire_on_commit=False)
 
     def create_schema(self) -> None:

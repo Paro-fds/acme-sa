@@ -1,10 +1,20 @@
-"""US-02 — Créer son mot de passe."""
+"""US-02 → US-101 (refonte) — Créer son mot de passe.
+
+US-101 : on ne peut pas deviner qui est employé ; « personne inconnue » et « mot de passe déjà créé »
+reçoivent la même réponse, et les règles du mot de passe sont vérifiées avant l'identité."""
 
 import pytest
 
 from tests.employees import EMP_A, EMP_D1, EMP_I
 
 URL = "/api/auth/register"
+REFUSED = {
+    "code": "REGISTRATION_REFUSED",
+    "message": (
+        "Impossible de créer un mot de passe avec ces informations. Vérifiez votre nom et votre date de naissance ; "
+        "si vous avez déjà un mot de passe, connectez-vous."
+    ),
+}
 
 
 def _register(client, employee=EMP_A, password="Bonjour-2026", confirmation=None, **identity):
@@ -59,7 +69,7 @@ def test_ca04_existing_password_cannot_be_replaced(client, account, container):
     response = _register(client, password="Nouveau-2026")
 
     assert response.status_code == 409
-    assert response.json()["error"]["code"] == "ACCOUNT_ALREADY_EXISTS"
+    assert response.json()["error"] == REFUSED
     stored = container.accounts.get(EMP_A.id).password_hash
     assert container.password_hasher.verify(stored, "Ancien-2026")
     assert "set-cookie" not in response.headers
@@ -68,8 +78,8 @@ def test_ca04_existing_password_cannot_be_replaced(client, account, container):
 @pytest.mark.parametrize(
     ("employee", "overrides", "status"),
     [
-        (EMP_A, {"last_name": "INCONNU"}, 401),
-        (EMP_I, {}, 401),
+        (EMP_A, {"last_name": "INCONNU"}, 409),
+        (EMP_I, {}, 409),
         (EMP_D1, {}, 409),
     ],
     ids=["inconnu", "inactif", "doublon"],
@@ -88,3 +98,20 @@ def test_ca06_password_is_stored_as_argon2_hash(client, container):
     stored = container.accounts.get(EMP_A.id).password_hash
     assert stored != "Bonjour-2026"
     assert stored.startswith("$argon2")
+
+
+def test_us101_ca03_unknown_and_existing_accounts_get_the_same_answer(client, account):
+    account(EMP_A, "Ancien-2026")
+
+    existing = _register(client)
+    unknown = _register(client, last_name="INCONNU")
+
+    assert existing.status_code == unknown.status_code == 409
+    assert existing.json() == unknown.json() == {"error": REFUSED}
+
+
+def test_us101_ca03_password_rules_are_checked_before_the_identity(client):
+    response = _register(client, password="Court12", last_name="INCONNU")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "PASSWORD_TOO_SHORT"

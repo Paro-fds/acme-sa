@@ -2,12 +2,14 @@
 // compte admin de test (admin / Admin-Test-2026).
 //
 // Tous les tests E2E partagent cette base : chaque test utilise son propre employé fictif.
-//   walking-skeleton → EMP-A (soumet)        us02 → EMP-H1           us03 → EMP-B
-//   us04 → EMP-E (ne soumet jamais)          us10 → EMP-H2 (brouillon)
-//   us12 → EMP-B (soumet ; mot de passe créé ou déjà créé par us03)
-//   us13 → EMP-E (documents, ne soumet pas)
+//   us02 → EMP-H1           us03 → EMP-B            us04 → EMP-E (ne soumet jamais)
 //   us23 → compte admin e2e.marie (créé par le test)
-//   us24 → EMP-B (modifie à nouveau après us12)
+//   us206 → EMP-B (anciennes adresses du MVP)
+//   lot1-parcours-certificat → EMP-A (profil complet, dépôt d’un certificat)
+//   us201 → EMP-H1 (lit son dossier)        us202 → EMP-E (dossier : consentement, coordonnées, contact, études)
+//   us113 → EMP-H2 (parcourt les écrans employé sur ordinateur et téléphone, sans rien enregistrer)
+//   us114 → EMP-H2 (lit la frise de « Ma carrière », sans rien enregistrer)
+//   us116 → EMP-H2 (signale une erreur sur sa date d’embauche ; l’admin la voit dans ses notifications)
 import { execFileSync, spawn } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -35,6 +37,7 @@ const server = spawn(
       ACME_DATA_DIR: dataDir,
       ADMIN_USERNAME: 'admin',
       ADMIN_PASSWORD_HASH: adminPasswordHash,
+      ADMIN_MFA_REQUIRED: 'false', // US-112 : réglage par défaut, quel que soit backend/.env
     },
   },
 )
