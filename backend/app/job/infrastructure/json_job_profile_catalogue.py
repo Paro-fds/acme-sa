@@ -1,4 +1,4 @@
-"""US-119 : catalogue des postes ACME lu depuis le fichier JSON produit par `app.tools.import_job_profiles`.
+"""US-119, US-121 : catalogue des postes ACME lu depuis le fichier JSON produit par `app.tools.import_job_profiles`.
 
 Le fichier est en lecture seule et chargé une fois ; absent, le catalogue est vide (la saisie hors catalogue reste possible).
 """
@@ -13,10 +13,13 @@ def _profile(data: dict) -> JobProfile:
     return JobProfile(
         code=data["code"],
         title=data["title"],
-        domain=data.get("domain"),
+        department=data.get("department"),
         level_text=data.get("level_text"),
         description=data.get("description", ""),
         sections=tuple(ProfileSection(s["title"], tuple(s["lines"])) for s in data.get("sections", [])),
+        position_code=data.get("position_code", ""),
+        service=data.get("service"),
+        competences=tuple(data.get("competences", [])),
     )
 
 

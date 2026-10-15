@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-26 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+28 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -77,6 +77,8 @@ L'employé voit les postes ouverts auxquels il est éligible et ce qui lui manqu
 |---|---|---|---|---|
 | [US-117](US-117-creer-un-poste-sans-le-referentiel.md) | Créer un poste sans le référentiel | Must | — | Fait |
 | [US-119](US-119-publier-un-poste-a-partir-du-catalogue-des-postes-acme.md) | Publier un poste à partir du catalogue des postes ACME | Should | — | Fait |
+| [US-121](US-121-publier-un-poste-a-partir-de-la-matrice-des-postes-du-direct.md) | Publier un poste à partir de la matrice des postes du directeur | Should | — | Fait |
+| [US-122](US-122-saisir-un-poste-sans-grade.md) | Saisir un poste sans grade | Should | — | Fait |
 
 ## D9 Demandes et mouvements de carrière
 

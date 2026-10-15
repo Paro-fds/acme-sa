@@ -51,7 +51,7 @@ def test_ca01_le_code_est_mis_en_majuscules_et_les_espaces_retires():
         ({"title": " "}, "title"),
         ({"unit_code": ""}, "unit_code"),
         ({"unit_code": "INCONNUE"}, "unit_code"),
-        ({"target_grade": ""}, "target_grade"),
+        # US-122 : le grade visé n'est plus obligatoire (test_us122_poste_sans_grade.py).
         ({"target_grade": "dix"}, "target_grade"),
         ({"mission": ""}, "mission"),
         ({"opens_on": None}, "opens_on"),

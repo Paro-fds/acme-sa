@@ -1,7 +1,9 @@
-"""US-119 — Publier un poste à partir du catalogue des postes ACME (fiches fictives : fixtures/job_profiles_test.json).
+"""US-119 — Publier un poste à partir du catalogue des postes ACME (postes fictifs : fixtures/job_profiles_test.json).
+
+US-121 : le catalogue vient de la matrice du directeur (codes de la matrice) et le département remplace le domaine.
 
 Critères d'acceptation :
-- CA-01 : le catalogue liste toutes les fiches, avec leur domaine et le niveau demandé.
+- CA-01 : le catalogue liste toutes les fiches, avec leur département et le niveau demandé.
 - CA-02 : chaque fiche s'ouvre avec ses rubriques.
 - CA-03 : la fiche propose l'intitulé, la mission, les domaines de diplôme et le niveau minimum du poste à publier.
 - CA-04 : le poste publié depuis une fiche suit le circuit habituel et garde le lien vers sa fiche.
@@ -25,8 +27,8 @@ FICHE = {
     "mission": "Le comptable fictif tient les livres de l'institution fictive.",
     "opens_on": "2026-10-01",
     "closes_on": "2026-11-15",
-    "criteria": {"domains": ["COMPTABILITE", "FINANCE"], "min_level": "MASTER"},
-    "profile_code": "comptable-fictif",
+    "criteria": {"domains": ["FINANCE", "COMPTABILITE", "ECONOMIE"], "min_level": "MASTER"},
+    "profile_code": "CF02",
 }
 
 
@@ -34,24 +36,26 @@ def test_ca01_le_catalogue_liste_toutes_les_fiches_par_ordre_alphabetique(admin_
     response = admin_client.get(PROFILES)
     assert response.status_code == 200, response.text
     items = response.json()["items"]
-    assert [item["code"] for item in items] == ["agent-fictif-credit", "comptable-fictif", "gardien-fictif"]
+    assert [item["code"] for item in items] == ["AF01", "charge-de-mission-fictif", "CF02"]
     assert items[0] == {
-        "code": "agent-fictif-credit",
+        "code": "AF01",
+        "position_code": "AF01",
         "title": "Agent fictif de crédit",
-        "domain": "Banque et microfinance",
+        "department": "Crédit",
+        "service": "Réseau d'agences fictif",
         "level_text": "Bac + 4",
     }
-    assert items[2]["level_text"] is None
+    assert items[1]["level_text"] is None
 
 
 def test_ca01_un_compte_en_lecture_seule_consulte_le_catalogue(app, container):
     with _rh_client(app, container, AdminRole.READONLY, "lecteur.catalogue") as client:
         assert client.get(PROFILES).status_code == 200
-        assert client.get(f"{PROFILES}/comptable-fictif").status_code == 200
+        assert client.get(f"{PROFILES}/CF02").status_code == 200
 
 
 def test_ca02_ca03_la_fiche_s_ouvre_avec_ses_rubriques_et_ses_propositions(admin_client):
-    response = admin_client.get(f"{PROFILES}/comptable-fictif")
+    response = admin_client.get(f"{PROFILES}/CF02")
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["title"] == "Comptable fictif"
@@ -60,12 +64,12 @@ def test_ca02_ca03_la_fiche_s_ouvre_avec_ses_rubriques_et_ses_propositions(admin
         {"title": "Missions", "lines": ["Concilier les comptes fictifs"]},
         {"title": "Qualités attendues", "lines": ["Être rigoureux"]},
     ]
-    assert body["suggested_domains"] == ["COMPTABILITE", "FINANCE"]
+    assert body["suggested_domains"] == ["FINANCE", "COMPTABILITE", "ECONOMIE"]
     assert body["suggested_level"] == "MASTER"
 
 
 def test_ca03_une_fiche_sans_domaine_de_diplome_ni_niveau_ne_propose_rien(admin_client):
-    body = admin_client.get(f"{PROFILES}/gardien-fictif").json()
+    body = admin_client.get(f"{PROFILES}/charge-de-mission-fictif").json()
     assert body["suggested_domains"] == []
     assert body["suggested_level"] is None
 
@@ -81,9 +85,9 @@ def test_ca04_le_poste_publie_depuis_une_fiche_garde_le_lien_vers_elle(admin_cli
     assert response.status_code == 201, response.text
     body = response.json()
     assert body["status"] == "DRAFT"
-    assert body["profile_code"] == "comptable-fictif"
+    assert body["profile_code"] == "CF02"
     assert body["profile_title"] == "Comptable fictif"
-    assert admin_client.get(f"{OPENINGS}/{body['id']}").json()["profile_code"] == "comptable-fictif"
+    assert admin_client.get(f"{OPENINGS}/{body['id']}").json()["profile_code"] == "CF02"
 
 
 def test_ca04_une_fiche_inconnue_est_refusee_a_la_saisie(admin_client):
@@ -100,7 +104,7 @@ def test_ca05_l_employe_apte_lit_la_fiche_complete(admin_client, employee_client
 
     [item] = employee_client(EMP_A).get("/api/me/openings").json()["items"]
 
-    assert item["profile_domain"] == "Comptabilité"
+    assert item["profile_department"] == "Finance"
     assert item["sections"] == [
         {"title": "Missions", "lines": ["Concilier les comptes fictifs"]},
         {"title": "Qualités attendues", "lines": ["Être rigoureux"]},
@@ -117,4 +121,4 @@ def test_ca06_un_poste_hors_catalogue_fonctionne_comme_avant(admin_client, emplo
 
     [item] = employee_client(EMP_A).get("/api/me/openings").json()["items"]
     assert item["sections"] == []
-    assert item["profile_domain"] is None
+    assert item["profile_department"] is None

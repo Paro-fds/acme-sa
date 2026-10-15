@@ -1,17 +1,18 @@
 """US-119 — Catalogue des postes ACME : règles des fiches et import des descriptions de poste.
 
 - Le niveau demandé par la fiche se résume (« Bac + 4 ») et suggère un niveau de l'échelle (CA-01, CA-03).
-- Le domaine de la fiche propose des domaines de diplôme (proposition à valider par la DRH, CA-03).
 - L'import ramène les deux modèles de fiche à un seul jeu de rubriques (CA-02).
+
+US-121 : le catalogue vient désormais de la matrice du directeur ; les descriptions HTML complètent les postes de même
+intitulé et le département remplace le domaine (voir test_us121_matrice_postes.py).
 """
 
 from pathlib import Path
 
 import pytest
 
-from app.certificate.domain.certificate import DOMAIN_LABELS
-from app.job.domain.catalogue import DIPLOMA_DOMAINS, SECTION_TITLES, describe_level, diploma_domains, suggest_level
-from app.tools.import_job_profiles import build_catalogue
+from app.job.domain.catalogue import SECTION_TITLES, describe_level, suggest_level
+from app.tools.import_job_profiles import read_fiches
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "postes"
 
@@ -57,21 +58,8 @@ def test_ca03_le_niveau_de_la_fiche_suggere_un_niveau_de_l_echelle(level_text, e
     assert suggest_level(level_text) == expected
 
 
-def test_ca03_le_domaine_de_la_fiche_propose_des_domaines_de_diplome():
-    assert diploma_domains("Comptabilité") == ("COMPTABILITE", "FINANCE")
-    assert diploma_domains("Informatique") == ("INFORMATIQUE",)
-    assert diploma_domains("Management") == ()
-    assert diploma_domains("Domaine inconnu") == ()
-    assert diploma_domains(None) == ()
-
-
-def test_ca03_les_domaines_proposes_existent_dans_la_liste_des_diplomes():
-    for codes in DIPLOMA_DOMAINS.values():
-        assert all(code in DOMAIN_LABELS for code in codes)
-
-
 def _profiles():
-    return {profile["code"]: profile for profile in build_catalogue(FIXTURES / "postes", FIXTURES / "postes_et_domaines.md")["profiles"]}
+    return read_fiches(FIXTURES / "postes")
 
 
 def test_ca02_l_import_lit_chaque_fiche_une_seule_fois():
@@ -79,15 +67,9 @@ def test_ca02_l_import_lit_chaque_fiche_une_seule_fois():
     assert sorted(_profiles()) == ["agent-fictif-credit", "caissier-fictif", "gardien-fictif"]
 
 
-def test_ca02_le_titre_et_le_domaine_viennent_du_tableau_sans_tenir_compte_des_accents():
-    profile = _profiles()["agent-fictif-credit"]
-    assert profile["title"] == "Agent fictif de Crédit"
-    assert profile["domain"] == "Banque et microfinance"
-    # Le titre de la page diffère du tableau par des mots de liaison et des pluriels : la fiche est reconnue.
-    assert _profiles()["caissier-fictif"]["domain"] == "Finance"
-    unknown = _profiles()["gardien-fictif"]
-    assert unknown["title"] == "Gardien Fictif"
-    assert unknown["domain"] is None
+def test_ca02_le_titre_vient_de_la_page():
+    assert _profiles()["agent-fictif-credit"]["title"] == "Agent Fictif de Credit"
+    assert _profiles()["gardien-fictif"]["title"] == "Gardien Fictif"
 
 
 def test_ca02_les_deux_modeles_de_fiche_donnent_les_memes_rubriques():

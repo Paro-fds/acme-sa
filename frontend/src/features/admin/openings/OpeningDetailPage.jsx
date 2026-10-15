@@ -135,7 +135,6 @@ function OpeningDetail({ id, initial, me, applications }) {
       <Section title="Fiche du poste">
         <dl className="grid gap-4 sm:grid-cols-2">
           <Fact label="Unité">{opening.unit_label}</Fact>
-          <Fact label="Grade visé">{opening.target_grade}</Fact>
           <Fact label="Date d'ouverture">{formatDate(opening.opens_on)}</Fact>
           <Fact label="Date limite">{formatDate(opening.closes_on)}</Fact>
         </dl>

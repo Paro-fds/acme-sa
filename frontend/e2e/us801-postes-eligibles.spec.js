@@ -24,7 +24,6 @@ test('postes ouverts : seul l’employé apte voit le poste publié', async ({ p
   await page.getByLabel('Code du poste').fill('E2E-801')
   await page.getByLabel('Intitulé').fill(TITLE)
   await page.getByLabel('Unité du poste').selectOption({ label: 'Agence Démo Nord (Agence)' })
-  await page.getByLabel('Grade visé').fill('14')
   await page.getByLabel("Date d'ouverture").fill(today)
   await page.getByLabel('Date limite').fill('2099-12-31')
   await page.getByLabel('Mission').fill("Seconder le chef d'agence (poste fictif).")

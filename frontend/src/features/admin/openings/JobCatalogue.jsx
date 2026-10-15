@@ -4,6 +4,7 @@ import { getJobProfile, listJobProfiles } from '../../../api/openings.js'
 import Alert from '../../../components/Alert.jsx'
 import { useIsDesktop } from '../../../lib/useIsDesktop.js'
 import { useLoader } from '../../../lib/useLoader.js'
+import ProfileCompetences from '../../openings/ProfileCompetences.jsx'
 import ProfileSections from '../../openings/ProfileSections.jsx'
 import { canEdit, LOGIN_PATH, OPENINGS_PATH } from './openingParts.jsx'
 
@@ -15,10 +16,13 @@ const plain = (text) =>
 
 const ALL = ''
 
-function DomainChip({ domain }) {
-  if (!domain) return null
-  return <span className="w-fit rounded-full bg-info-bg px-2.5 py-0.5 text-sm font-semibold text-info-text">{domain}</span>
+function DepartmentChip({ department }) {
+  if (!department) return null
+  return <span className="w-fit rounded-full bg-info-bg px-2.5 py-0.5 text-sm font-semibold text-info-text">{department}</span>
 }
+
+/** US-121 : le code de la matrice du directeur, ou « Sans code ». */
+const codeText = (profile) => (profile.position_code ? profile.position_code : 'Sans code')
 
 function Level({ text }) {
   return text ? (
@@ -39,13 +43,20 @@ function ProfilePreview({ code, me }) {
     <section aria-label={profile.title} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <div className="flex flex-col gap-1.5">
         <h3 className="text-lg font-bold break-words text-primary-active">{profile.title}</h3>
+        <p className="text-sm break-words text-help">
+          <span className="font-semibold text-heading">
+            {profile.position_code ? `Code ${profile.position_code}` : 'Sans code'}
+          </span>
+          {' · '}
+          {[profile.department, profile.service].filter(Boolean).join(' · ')}
+        </p>
         <div className="flex flex-wrap items-center gap-2">
-          <DomainChip domain={profile.domain} />
           <span className="text-sm text-help">Niveau demandé :</span>
           <Level text={profile.level_text} />
         </div>
       </div>
       {profile.description && <p className="text-base whitespace-pre-line text-body">{profile.description}</p>}
+      <ProfileCompetences competences={profile.competences} />
       <ProfileSections sections={profile.sections} open />
       {canEdit(me) && (
         <Link
@@ -68,8 +79,12 @@ function ProfileItem({ profile, selected, onSelect, children }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-base font-semibold break-words text-heading">{profile.title}</p>
+          <p className="text-sm break-words text-help">
+            {codeText(profile)}
+            {profile.service && ` · ${profile.service}`}
+          </p>
           <div className="flex flex-wrap items-center gap-2">
-            <DomainChip domain={profile.domain} />
+            <DepartmentChip department={profile.department} />
             <Level text={profile.level_text} />
           </div>
         </div>
@@ -89,23 +104,27 @@ function ProfileItem({ profile, selected, onSelect, children }) {
 }
 
 /**
- * US-119 CA-01, CA-02 : le catalogue des postes ACME, filtré par mots de l'intitulé (sans accents) et par domaine.
+ * US-119 CA-01, CA-02 : le catalogue des postes ACME, filtré par mots de l'intitulé (sans accents) et par département.
+ * US-121 : les postes de la matrice du directeur (code, département, service, compétences).
  * Sur ordinateur, la fiche choisie s'ouvre à droite ; sur téléphone, sous la ligne choisie.
  */
 export default function JobCatalogue({ me }) {
   const { data, loading, error } = useLoader(listJobProfiles, { loginPath: LOGIN_PATH })
   const [search, setSearch] = useState('')
-  const [domain, setDomain] = useState(ALL)
+  const [department, setDepartment] = useState(ALL)
   const [selected, setSelected] = useState(null)
   const desktop = useIsDesktop()
   const searchId = useId()
-  const domainId = useId()
+  const departmentId = useId()
 
   const profiles = useMemo(() => data?.items ?? [], [data])
-  const domains = useMemo(() => [...new Set(profiles.map((p) => p.domain).filter(Boolean))].sort(), [profiles])
+  const departments = useMemo(
+    () => [...new Set(profiles.map((p) => p.department).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr')),
+    [profiles],
+  )
   const words = plain(search).split(/\s+/).filter(Boolean)
   const shown = profiles.filter(
-    (p) => (domain === ALL || p.domain === domain) && words.every((word) => plain(p.title).includes(word)),
+    (p) => (department === ALL || p.department === department) && words.every((word) => plain(p.title).includes(word)),
   )
   const toggle = (code) => setSelected((current) => (current === code ? null : code))
 
@@ -115,7 +134,7 @@ export default function JobCatalogue({ me }) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-help">
-        Les descriptions de poste d’ACME : choisissez une fiche pour la publier sans réécrire son texte.
+        Les postes d’ACME, avec leur code et leurs compétences : choisissez-en un pour le publier sans réécrire son texte.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex flex-1 flex-col gap-1.5">
@@ -132,17 +151,17 @@ export default function JobCatalogue({ me }) {
           />
         </div>
         <div className="flex flex-col gap-1.5 sm:w-64">
-          <label htmlFor={domainId} className="text-base font-semibold text-heading">
-            Domaine
+          <label htmlFor={departmentId} className="text-base font-semibold text-heading">
+            Département
           </label>
           <select
-            id={domainId}
-            value={domain}
-            onChange={(event) => setDomain(event.target.value)}
+            id={departmentId}
+            value={department}
+            onChange={(event) => setDepartment(event.target.value)}
             className="min-h-12 w-full rounded-lg border border-border-input bg-surface px-4 text-base text-heading shadow-card outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
           >
-            <option value={ALL}>Tous les domaines</option>
-            {domains.map((label) => (
+            <option value={ALL}>Tous les départements</option>
+            {departments.map((label) => (
               <option key={label} value={label}>
                 {label}
               </option>
@@ -151,7 +170,7 @@ export default function JobCatalogue({ me }) {
         </div>
       </div>
       <p className="text-sm text-help" aria-live="polite">
-        {shown.length} fiche{shown.length > 1 ? 's' : ''} sur {profiles.length}
+        {shown.length} poste{shown.length > 1 ? 's' : ''} sur {profiles.length}
       </p>
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
         {shown.length === 0 ? (

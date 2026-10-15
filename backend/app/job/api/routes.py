@@ -245,8 +245,10 @@ def _sections(sections) -> list[SectionOut]:
 
 class JobProfileSummaryOut(BaseModel):
     code: str
+    position_code: str
     title: str
-    domain: str | None
+    department: str | None
+    service: str | None
     level_text: str | None
 
 
@@ -255,6 +257,7 @@ class JobProfileListOut(BaseModel):
 
 
 class JobProfileOut(JobProfileSummaryOut):
+    competences: list[str]
     description: str
     sections: list[SectionOut]
     suggested_domains: list[str]
@@ -293,7 +296,8 @@ class MyOpeningOut(BaseModel):
     opens_on: date
     closes_on: date
     criteria_lines: list[str]
-    profile_domain: str | None
+    profile_department: str | None
+    competences: list[str]
     sections: list[SectionOut]
     """US-119 : la fiche complète du catalogue (vide pour un poste hors catalogue)."""
 

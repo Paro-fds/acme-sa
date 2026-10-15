@@ -6,6 +6,7 @@ import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import Tip from '../../components/Tip.jsx'
 import CareerTimeline from '../career/CareerTimeline.jsx'
+import ProfileCompetences from './ProfileCompetences.jsx'
 import ProfileSections from './ProfileSections.jsx'
 import { formatDate, formatLocalDate } from '../../lib/format.js'
 import { useIsDesktop } from '../../lib/useIsDesktop.js'
@@ -99,11 +100,11 @@ function OpeningCard({ opening, application, onApplied }) {
             {opening.title}
           </h3>
           <p className="text-sm text-help">
-            {opening.unit_label} · grade {opening.target_grade}
+            {opening.unit_label}
           </p>
-          {opening.profile_domain && (
+          {opening.profile_department && (
             <span className="w-fit rounded-full bg-info-bg px-2.5 py-0.5 text-sm font-semibold text-info-text">
-              {opening.profile_domain}
+              {opening.profile_department}
             </span>
           )}
           <p className="flex items-center gap-1.5 text-sm font-semibold text-heading">
@@ -112,6 +113,7 @@ function OpeningCard({ opening, application, onApplied }) {
           </p>
         </div>
         <p className="text-base whitespace-pre-line text-body">{opening.mission}</p>
+        <ProfileCompetences competences={opening.competences} />
         <ProfileSections sections={opening.sections} />
         {opening.criteria_lines.length > 0 && (
           <div className="flex flex-col gap-1 rounded-lg bg-section p-3">

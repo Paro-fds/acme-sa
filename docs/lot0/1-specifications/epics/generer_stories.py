@@ -263,6 +263,26 @@ S = [
    "Tant qu'un poste ouvert pour lui n'est pas lu, l'accueil le met en avant (« Nouveau pour vous »), avec un bouton pour voir le poste.",
    "Chaque employé a ses notifications lues et non lues ; « Tout marquer comme lu » les marque toutes ; une notification disparaît 90 jours après l'événement."],
   "Demande de l'utilisateur du 2026-10-14 (maquette « Postes ouverts : catalogue des postes ACME », écran C) et choix du même jour : tout employé apte, même devenu apte après la publication ; postes ouverts et décisions sur les certificats (pas encore les étapes de candidature) ; cloche et encart sur l'accueil. Comme US-116, les notifications se calculent et seul l'état « lu » est enregistré. Ni WhatsApp ni email : ils viendront quand le prestataire sera choisi (EF-701). Nouveau par rapport au registre (EF-706 prévoyait un résumé périodique au lot 4) : à faire noter par M. Hilaire."),
+ ("121","D8","Publier un poste à partir de la matrice des postes du directeur","2","",
+  "Should","EF-803, EF-804","RG-72","—",
+  "Agent RH","choisir un poste dans la liste officielle des postes d'ACME, avec son code, son département, son service et ses compétences",
+  "publier un poste qui porte le vrai code ACME et que l'employé sache quelles compétences on attend de lui",
+  ["Le catalogue des postes ACME est la matrice des postes du directeur (84 postes) : chaque poste montre son code (vide s'il n'en a pas), son intitulé, son département, son service et ses compétences.",
+   "Le département remplace le domaine partout où celui-ci servait : il s'affiche sur le poste, filtre le catalogue et propose les domaines de diplôme à cocher.",
+   "Quand une description de poste détaillée porte le même intitulé, l'aperçu montre aussi ses rubriques (missions, qualifications…) et son niveau demandé ; sinon le niveau est « Non précisé ».",
+   "« Publier ce poste » pré-remplit en plus le code du poste avec le code de la matrice ; tout reste modifiable.",
+   "L'employé qui voit le poste lit son département et ses compétences, puis les rubriques de la description quand elle existe.",
+   "Les descriptions de poste sans poste dans la matrice ne sont plus proposées ; un poste déjà publié à partir d'une ancienne fiche reste affiché tel qu'il a été saisi."],
+  "Choix de l'utilisateur du 2026-10-15 : la codification de la matrice du directeur fait foi, sa base SQLite (matrice_competences.sqlite, sans donnée de personne) est la source de vérité pour publier un poste ; les descriptions HTML complètent les postes de même intitulé ; « le département a le même sens que le domaine » ; compétences dans le catalogue RH et sur la fiche employé ; la base entre dans le dépôt et la démo en ligne. Domaines de diplôme proposés par département : proposition du développeur, à valider par la DRH. Remplace la source d'US-119 (fiches et tableau poste → domaine). Hors périmètre : le lien avec les codes de poste de l'export RH (aucun code commun) et les compétences comme critère de visibilité. Nouveau par rapport au registre : à faire noter par M. Hilaire."),
+ ("122","D8","Saisir un poste sans grade","2","",
+  "Should","EF-803","RG-72","—",
+  "Agent RH","saisir un poste sans indiquer de grade",
+  "publier vite un poste sans une information que personne ne sait encore remplir",
+  ["Le formulaire du poste n'a plus ni « Grade visé » ni le critère « Grade minimum » ; un poste s'enregistre et se publie sans grade.",
+   "Le grade visé ne s'affiche plus : ni dans la liste des postes publiés, ni sur la fiche du poste côté RH, ni dans « Ma carrière » de l'employé.",
+   "La visibilité d'un nouveau poste ne dépend plus du grade ; les autres critères (unités, domaines, niveau, ancienneté) fonctionnent comme avant.",
+   "Les postes déjà saisis gardent leur valeur en base, sans l'afficher."],
+  "Demande de l'utilisateur du 2026-10-15 (« ce n'est pas la peine de remplir le champ grade visé ») et choix du même jour : retirer les deux champs de grade et l'affichage du grade visé. ❓ Tous les employés ont un grade, mais sa gestion n'est pas connue (utilisateur) : à demander à la DRH avant de réintroduire un critère de grade. Écart avec US-802 (grade visé obligatoire) : à faire noter par M. Hilaire."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -539,7 +559,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait", "119": "Fait", "120": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait", "119": "Fait", "120": "Fait", "121": "Fait", "122": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

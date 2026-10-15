@@ -67,7 +67,7 @@ Le fichier des agences compte **35 agences** réparties dans **8 régions** (Mé
 | | | | | | | PR | 2 |
 | | | | | | | AM | 1 |
 
-**Agences du fichier sans aucun actif dans l'export :** CM Cameau, CR Croix-des-Bouquets, FM Fontamara, LN Laville Nord, LS Laville Sud. ❓ Fermées, récentes, ou employés codés ailleurs ?
+**Agences du fichier sans aucun actif dans l'export :** CM Cameau, CR Croix-des-Bouquets, FM Fontamara, LN Laville Nord, LS Laville Sud. **Ces 5 agences sont fermées** (réponse de l'utilisateur, 2026-10-15) : elles n'entreront pas dans le référentiel des unités ouvertes.
 
 ### Les deux codes inconnus
 
@@ -99,7 +99,7 @@ Le fichier des agences ne contient **aucune direction ni aucun service**. L'expo
 | Crédit | 1 | Doublon probable de « Direction Crédit » |
 | Administration | 1 | Doublon probable de « Service Administration » |
 
-❓ Libellés officiels, sigles (DRHIT, MSCRD, FA) et rattachement des services aux directions : à obtenir de Mme Nérius et Mme Jean.
+**Libellés :** les unités sont celles de la colonne « Libellé officiel proposé » du tableau de correspondance (réponse de l'utilisateur, 2026-10-15) ; les doublons probables sont donc regroupés sous « Direction Crédit », « Service Administration » et « Service Recouvrement ». ❓ Sigles (DRHIT, MSCRD, FA) et rattachement des services aux directions : à obtenir de Mme Nérius et Mme Jean.
 
 ## 5. Écarts entre le fichier des agences et le registre (Q4 §3)
 
@@ -112,14 +112,14 @@ Le fichier des agences ne contient **aucune direction ni aucun service**. L'expo
 | R-05 | Deux libellés par agence (`BRANCH` « Branch Belladère », `AGENCES` « BELLADERE ») ; caractère parasite dans « L\`ESTERE » | ❓ Lequel est officiel ? Les accents sont absents de `AGENCES` |
 | R-06 | Directeur d'agence non renseigné pour 7 agences | Postes vacants ou oubli ❓ |
 | R-07 | Numéros de compte en notation scientifique (`1.23E+12`) | Excel a probablement perdu des chiffres. Sans effet sur le portail, qui ne lit pas ces colonnes |
-| R-09 | Le fichier compte **35 agences** ; le registre en annonce **28** (Q4 §3) | ❓ Agences récemment ouvertes, agence mobile, points de service ? Le registre prévoyait ce point « à confirmer » |
+| R-09 | Le fichier compte **35 agences** ; le registre en annonce **28** (Q4 §3) | 5 agences sont fermées (2026-10-15) : il en reste **30 ouvertes**, dont l'Agence Mobile 1. ❓ Écart restant avec 28 : agences récemment ouvertes, agence mobile, points de service ? Le registre prévoyait ce point « à confirmer » |
 | R-08 | Le fichier donne le responsable de chaque agence (DA) et de chaque région (DR) | Information nouvelle, liée à P-10 et au « responsable hiérarchique » du §4.2 du cahier des charges |
 
 ## 6. Questions pour Mme Nérius et Mme Jean
 
 1. Que désignent les codes `PB` et `RC` ?
-2. Les 5 agences sans actif sont-elles ouvertes ?
-3. Quel libellé est officiel, `BRANCH` ou `AGENCES` ? Avec ou sans accents ?
+2. ~~Les 5 agences sans actif sont-elles ouvertes ?~~ Réglé le 2026-10-15 : elles sont fermées.
+3. ~~Quel libellé est officiel, `BRANCH` ou `AGENCES` ? Avec ou sans accents ?~~ Réglé le 2026-10-15 : le « Libellé officiel proposé » du tableau de correspondance (avec accents).
 4. Cap-Haïtien est-il bien au Haut Plateau, et rural ?
 5. Quelle est la liste officielle des directions et des services, et leur rattachement ?
 6. Depuis quand chaque agence est-elle dans sa région ?
@@ -129,3 +129,17 @@ Le fichier des agences ne contient **aucune direction ni aucun service**. L'expo
 
 - Effectifs actifs par région et par type d'agence (outil hors ligne lancé sur le poste du développeur).
 - Listes nominatives des doublons et des actifs sans email, remises à Mme Nérius seule.
+
+## 8. Référentiel provisoire importé sur le poste du développeur (2026-10-15)
+
+Choix de l'utilisateur du 2026-10-15 : importer dès maintenant un référentiel **provisoire**, pour que « Unité du poste » se choisisse dans une liste (US-117 CA-04). Il revient sur l'option B du 2026-10-13. Exception à faire noter par M. Hilaire.
+
+| Élément | Contenu |
+|---|---|
+| Fichier | `C:\acme-data-v2\referentiel\referentiel-provisoire-2026-10-15.xlsx`, hors du dépôt, construit à partir du tableau de correspondance seulement (codes, libellés officiels proposés, régions, types ; rien sur les DA et DR) |
+| Unités | 53 : 8 régions, 30 agences ouvertes (les 5 agences fermées sont exclues), 9 directions, 5 services, 1 siège |
+| Correspondances | 48 : 32 codes d'agence et 16 valeurs de direction ou service ; les doublons probables vont à la même unité ; aucune valeur « À rattacher » |
+| Provisoire, à confirmer | `PB` = « Siège » ; `RC` = « Recouvrement central » (service) ; codes des régions, directions et services créés pour l'occasion (`REG-METROPOLE-1`, `DIR-CREDIT`, `SVC-ADMINISTRATION`…) ; services sans direction de rattachement ; agences rattachées à leur région depuis le 01/01/2026 (R-02) |
+| Où | Base locale `C:\acme-data-v2` seulement. Le démonstrateur en ligne garde le référentiel fictif. L'ancienne base locale, trop ancienne pour le code actuel, est conservée sous `portail-avant-2026-10-15.db` |
+
+Les employés fictifs de l'agence `AD` (« Agence Démo ») ne sont rattachés à aucune agence avec ce référentiel : c'est attendu, ce code n'existe pas chez ACME.

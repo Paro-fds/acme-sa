@@ -39,7 +39,6 @@ test('candidature : postuler, accusé de réception, étape suivante côté RH, 
   await page.getByLabel('Code du poste').fill('E2E-902')
   await page.getByLabel('Intitulé').fill(TITLE)
   await page.getByLabel('Unité du poste').selectOption({ label: 'Agence Démo Nord (Agence)' })
-  await page.getByLabel('Grade visé').fill('10')
   await page.getByLabel("Date d'ouverture").fill(today)
   await page.getByLabel('Date limite').fill('2099-12-31')
   await page.getByLabel('Mission').fill('Suivre un portefeuille de clients (poste fictif).')

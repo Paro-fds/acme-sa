@@ -1,10 +1,13 @@
 {
-  "source": "Fiches fictives des tests (US-119)",
+  "source": "Postes fictifs des tests (US-119, US-121)",
   "profiles": [
     {
-      "code": "agent-fictif-credit",
+      "code": "AF01",
+      "position_code": "AF01",
       "title": "Agent fictif de crédit",
-      "domain": "Banque et microfinance",
+      "department": "Crédit",
+      "service": "Réseau d'agences fictif",
+      "competences": ["Analyse des dossiers de prêt fictifs", "Suivi du portefeuille"],
       "level_text": "Bac + 4",
       "description": "L'agent fictif de crédit suit un portefeuille de prêts fictifs.",
       "sections": [
@@ -15,9 +18,12 @@
       ]
     },
     {
-      "code": "comptable-fictif",
+      "code": "CF02",
+      "position_code": "CF02",
       "title": "Comptable fictif",
-      "domain": "Comptabilité",
+      "department": "Finance",
+      "service": "Comptabilité",
+      "competences": ["Respect des normes comptables", "Clôture mensuelle fictive"],
       "level_text": "Bac + 5",
       "description": "Le comptable fictif tient les livres de l'institution fictive.",
       "sections": [
@@ -26,14 +32,15 @@
       ]
     },
     {
-      "code": "gardien-fictif",
-      "title": "Gardien fictif",
-      "domain": "Sécurité",
+      "code": "charge-de-mission-fictif",
+      "position_code": "",
+      "title": "Chargé de mission fictif",
+      "department": "Direction générale",
+      "service": "Direction générale",
+      "competences": ["Suivi des projets fictifs"],
       "level_text": null,
-      "description": "Le gardien fictif surveille les locaux.",
-      "sections": [
-        {"title": "Missions", "lines": ["Surveiller l'entrée"]}
-      ]
+      "description": "",
+      "sections": []
     }
   ]
 }

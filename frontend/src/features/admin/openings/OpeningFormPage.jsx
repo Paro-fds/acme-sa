@@ -7,6 +7,7 @@ import Page from '../../../components/Page.jsx'
 import TextField from '../../../components/TextField.jsx'
 import { useIsDesktop } from '../../../lib/useIsDesktop.js'
 import { useLoader, useUnauthorizedRedirect } from '../../../lib/useLoader.js'
+import ProfileCompetences from '../../openings/ProfileCompetences.jsx'
 import ProfileSections from '../../openings/ProfileSections.jsx'
 import { AudiencePreview, DomainChecks, UnitPicker, useAudience } from './audienceParts.jsx'
 import { LOGIN_PATH, OPENINGS_PATH, SelectField, TextAreaField } from './openingParts.jsx'
@@ -23,21 +24,28 @@ const EMPTY = {
   domains: [],
   min_years_in_institution: '',
   min_years_in_position: '',
-  min_grade: '',
   criteria_unit_codes: [],
   profile_code: '',
 }
 
 const MISSION_MAX = 2000
 
-/** US-119 : ce que la fiche du catalogue propose ; tout reste modifiable. */
+/** US-121 : sans description détaillée, la mission reprend les compétences du poste. */
+function missionOf(profile) {
+  if (profile.description) return profile.description
+  if (!profile.competences?.length) return ''
+  return ['Compétences attendues :', ...profile.competences.map((competence) => `- ${competence}`)].join('\n')
+}
+
+/** US-119, US-121 : ce que le poste du catalogue propose (code de la matrice compris) ; tout reste modifiable. */
 function fromProfile(profile, form) {
   const levels = new Set(form.levels.map((level) => level.code))
   const domains = new Set(form.domains.map((domain) => domain.code))
   return {
     ...EMPTY,
+    code: profile.position_code ?? '',
     title: profile.title,
-    mission: profile.description.slice(0, MISSION_MAX),
+    mission: missionOf(profile).slice(0, MISSION_MAX),
     domains: profile.suggested_domains.filter((code) => domains.has(code)),
     min_level: levels.has(profile.suggested_level) ? profile.suggested_level : '',
     profile_code: profile.code,
@@ -59,7 +67,6 @@ function toValues(opening) {
     domains: criteria.domains ?? [],
     min_years_in_institution: text(criteria.min_years_in_institution),
     min_years_in_position: text(criteria.min_years_in_position),
-    min_grade: text(criteria.min_grade),
     criteria_unit_codes: criteria.unit_codes ?? [],
     profile_code: opening.profile_code ?? '',
   }
@@ -74,7 +81,8 @@ function toCriteria(values) {
     domains: values.domains,
     min_years_in_institution: yearsOrNull(values.min_years_in_institution),
     min_years_in_position: yearsOrNull(values.min_years_in_position),
-    min_grade: orNull(values.min_grade),
+    // US-122 : plus de critère de grade ; un poste modifié perd l'ancien critère.
+    min_grade: null,
     unit_codes: values.criteria_unit_codes,
   }
 }
@@ -84,6 +92,7 @@ function toFiche(values) {
     code: values.code,
     title: values.title,
     unit_code: values.unit_code,
+    // US-122 : plus demandé ; un poste déjà saisi garde son grade, sans l'afficher.
     target_grade: values.target_grade,
     mission: values.mission,
     opens_on: orNull(values.opens_on),
@@ -132,15 +141,18 @@ function OpeningForm({ id, form, opening, profile }) {
           <p className="flex items-start gap-2 text-base text-info-text">
             <span className="material-symbols-outlined shrink-0" aria-hidden="true">menu_book</span>
             <span>
-              Repris de la fiche « {profile.title} » : intitulé, mission, domaines de diplôme et niveau minimum. Vérifiez,
-              puis indiquez l’unité, le grade et les dates.
+              Repris de la fiche « {profile.title} » : code, intitulé, mission, domaines de diplôme et niveau minimum. Vérifiez,
+              puis indiquez l’unité et les dates.
             </span>
           </p>
           <details className="rounded-lg bg-surface px-3">
             <summary className="flex min-h-11 cursor-pointer items-center text-base font-semibold text-primary">
               Voir la fiche complète
             </summary>
-            <ProfileSections sections={profile.sections} />
+            <div className="flex flex-col gap-3 pb-3">
+              <ProfileCompetences competences={profile.competences} />
+              <ProfileSections sections={profile.sections} />
+            </div>
           </details>
         </section>
       )}
@@ -173,14 +185,6 @@ function OpeningForm({ id, form, opening, profile }) {
               error={fieldError('unit_code')}
             />
           )}
-          <TextField
-            label="Grade visé"
-            required
-            inputMode="numeric"
-            value={values.target_grade}
-            onChange={set('target_grade')}
-            error={fieldError('target_grade')}
-          />
           <TextField label="Date d'ouverture" required type="date" value={values.opens_on} onChange={set('opens_on')} error={fieldError('opens_on')} />
           <TextField label="Date limite" required type="date" value={values.closes_on} onChange={set('closes_on')} error={fieldError('closes_on')} />
         </div>
@@ -234,7 +238,6 @@ function OpeningForm({ id, form, opening, profile }) {
             onChange={set('min_years_in_position')}
             error={fieldError('min_years_in_position')}
           />
-          <TextField label="Grade minimum" inputMode="numeric" value={values.min_grade} onChange={set('min_grade')} error={fieldError('min_grade')} />
         </div>
       </section>
 

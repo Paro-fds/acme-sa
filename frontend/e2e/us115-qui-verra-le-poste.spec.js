@@ -38,7 +38,6 @@ test('nouveau poste : plusieurs unités, plusieurs domaines, aperçu de l’audi
   await page.getByLabel('Code du poste').fill('E2E-115')
   await page.getByLabel('Intitulé').fill('Chargé de crédit (fictif)')
   await page.getByLabel('Unité du poste').selectOption({ index: 1 })
-  await page.getByLabel('Grade visé').fill('10')
   await page.getByLabel("Date d'ouverture").fill('2026-10-15')
   await page.getByLabel('Date limite').fill('2026-11-15')
   await page.getByLabel('Mission').fill("Instruire les demandes de crédit de l'agence.")

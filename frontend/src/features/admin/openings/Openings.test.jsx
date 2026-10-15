@@ -148,7 +148,6 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     await user.type(await screen.findByLabelText('Code du poste'), 'cc-2026-01')
     await user.type(screen.getByLabelText('Intitulé'), 'Chargé de crédit')
     await user.selectOptions(screen.getByLabelText('Unité du poste'), 'AD')
-    await user.type(screen.getByLabelText('Grade visé'), '10')
     await user.type(screen.getByLabelText('Mission'), 'Instruire les demandes.')
     await user.type(screen.getByLabelText("Date d'ouverture"), '2026-10-15')
     await user.type(screen.getByLabelText('Date limite'), '2026-11-15')
@@ -167,7 +166,7 @@ describe('US-802 CA-01 — saisir la fiche', () => {
       code: 'cc-2026-01',
       title: 'Chargé de crédit',
       unit_code: 'AD',
-      target_grade: '10',
+      target_grade: '',
       mission: 'Instruire les demandes.',
       opens_on: '2026-10-15',
       closes_on: '2026-11-15',
@@ -196,7 +195,6 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     await user.type(unit, 'Agence de Pétion-Ville')
     await user.type(screen.getByLabelText('Code du poste'), 'cc-2026-01')
     await user.type(screen.getByLabelText('Intitulé'), 'Chargé de crédit')
-    await user.type(screen.getByLabelText('Grade visé'), '10')
     await user.type(screen.getByLabelText('Mission'), 'Instruire les demandes.')
     await user.type(screen.getByLabelText("Date d'ouverture"), '2026-10-15')
     await user.type(screen.getByLabelText('Date limite'), '2026-11-15')
@@ -471,5 +469,21 @@ describe('US-902 — candidatures sur la fiche du poste', () => {
     renderAt('/admin/postes/7')
     const section = await screen.findByRole('region', { name: 'Candidatures (0)' })
     expect(section).toHaveTextContent('Aucune candidature pour le moment.')
+  })
+})
+
+describe('US-122 — saisir un poste sans grade', () => {
+  it('le formulaire ne demande ni grade visé ni grade minimum', async () => {
+    renderAt('/admin/postes/nouveau')
+    await screen.findByLabelText('Code du poste')
+    expect(screen.queryByLabelText('Grade visé')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Grade minimum')).not.toBeInTheDocument()
+  })
+
+  it('la liste des postes n’affiche plus le grade visé', async () => {
+    listOpenings.mockResolvedValue({ items: [OPENING] })
+    renderAt('/admin/postes')
+    expect(await screen.findByText('Chargé de crédit')).toBeInTheDocument()
+    expect(screen.queryByText(/grade 10/)).not.toBeInTheDocument()
   })
 })

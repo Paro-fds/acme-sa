@@ -18,9 +18,8 @@ test('postes ouverts : saisir une fiche, la publier, voir son historique', async
   await page.goto('/admin/postes')
   await page.getByRole('link', { name: 'Saisir un poste' }).click()
   await page.getByLabel('Code du poste').fill('E2E-802')
-  await page.getByLabel('Intitulé').fill('Chargé de crédit (fictif)')
+  await page.getByLabel('Intitulé').fill('Chargé de crédit (fictif, US-802)')
   await page.getByLabel('Unité du poste').selectOption({ label: 'Agence Démo Nord (Agence)' })
-  await page.getByLabel('Grade visé').fill('10')
   await page.getByLabel("Date d'ouverture").fill('2026-10-15')
   await page.getByLabel('Date limite').fill('2026-11-15')
   await page.getByLabel('Mission').fill("Instruire les demandes de crédit de l'agence.")
@@ -30,7 +29,7 @@ test('postes ouverts : saisir une fiche, la publier, voir son historique', async
   await page.screenshot({ path: `${CAPTURES}/us802-saisie-390.png`, fullPage: true })
   await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click()
 
-  await expect(page.getByRole('heading', { name: 'Chargé de crédit (fictif)' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Chargé de crédit (fictif, US-802)' })).toBeVisible()
   await page.getByRole('button', { name: 'Publier' }).click()
   await expect(page.getByText('Poste publié.')).toBeVisible()
   const history = page.getByRole('list', { name: 'Historique du statut' })
@@ -41,7 +40,7 @@ test('postes ouverts : saisir une fiche, la publier, voir son historique', async
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('/admin/postes')
-  await expect(page.getByRole('list', { name: 'Postes' }).getByText('Chargé de crédit (fictif)')).toBeVisible()
+  await expect(page.getByRole('list', { name: 'Postes' }).getByText('Chargé de crédit (fictif, US-802)')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280)
   await page.screenshot({ path: `${CAPTURES}/us802-liste-1280.png`, fullPage: true })
 })

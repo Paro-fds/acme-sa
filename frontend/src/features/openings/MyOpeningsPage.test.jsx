@@ -191,13 +191,14 @@ describe('US-801 — postes ouverts pour l’employé apte', () => {
 })
 
 describe('US-119 CA-05 — la fiche complète du poste', () => {
-  it('un poste issu du catalogue montre son domaine et ses rubriques, à ouvrir une à une', async () => {
+  it('un poste issu du catalogue montre son département, ses compétences et ses rubriques, à ouvrir une à une', async () => {
     const user = userEvent.setup()
     listMyOpenings.mockResolvedValue({
       items: [
         {
           ...OPENING,
-          profile_domain: 'Banque et microfinance',
+          profile_department: 'Crédit',
+          competences: ['Analyse des dossiers de prêt', 'Suivi du portefeuille'],
           sections: [
             { title: 'Missions', lines: ['Rechercher de nouveaux clients', 'Constituer les dossiers de prêts'] },
             { title: 'Conditions d’exercice', lines: ['Travail sur le terrain et au bureau'] },
@@ -207,7 +208,10 @@ describe('US-119 CA-05 — la fiche complète du poste', () => {
     })
     renderPage()
     const card = await screen.findByRole('article', { name: 'Chargé de crédit' })
-    expect(within(card).getByText('Banque et microfinance')).toBeInTheDocument()
+    expect(within(card).getByText('Crédit')).toBeInTheDocument()
+    // US-121 : les compétences attendues, toujours visibles.
+    const competences = within(card).getByRole('list', { name: 'Compétences' })
+    expect(within(competences).getByText('Analyse des dossiers de prêt')).toBeVisible()
     const missions = within(card).getByText('Missions')
     expect(within(card).getByText('Rechercher de nouveaux clients')).not.toBeVisible()
     await user.click(missions)
@@ -216,10 +220,20 @@ describe('US-119 CA-05 — la fiche complète du poste', () => {
   })
 
   it('un poste hors catalogue s’affiche comme avant, sans rubriques', async () => {
-    listMyOpenings.mockResolvedValue({ items: [{ ...OPENING, profile_domain: null, sections: [] }] })
+    listMyOpenings.mockResolvedValue({ items: [{ ...OPENING, profile_department: null, competences: [], sections: [] }] })
     renderPage()
     const card = await screen.findByRole('article', { name: 'Chargé de crédit' })
     expect(within(card).queryByText('Missions')).not.toBeInTheDocument()
+    expect(within(card).queryByRole('list', { name: 'Compétences' })).not.toBeInTheDocument()
+  })
+})
+
+describe('US-122 — sans grade', () => {
+  it('le poste n’affiche plus le grade visé', async () => {
+    listMyOpenings.mockResolvedValue({ items: [OPENING] })
+    renderPage()
+    const card = await screen.findByRole('article', { name: 'Chargé de crédit' })
+    expect(card).not.toHaveTextContent(/grade 12/)
   })
 })
 

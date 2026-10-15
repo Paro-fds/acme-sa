@@ -7,37 +7,45 @@ const CAPTURES =
 const noHorizontalScroll = async (page, width) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
 
-/** US-119 : le catalogue des postes ACME (vraies fiches), l'aperçu d'une fiche, puis la saisie pré-remplie. */
+/**
+ * US-119, US-121 : le catalogue des postes ACME (matrice du directeur, complétée par les descriptions de poste),
+ * l'aperçu d'un poste (code, département, compétences, rubriques), puis la saisie pré-remplie.
+ */
 test('catalogue des postes : chercher une fiche, la lire, la publier pré-remplie', async ({ page }) => {
   await adminLogin(page)
   await page.goto('/admin/postes')
   await page.getByRole('tab', { name: /Catalogue des postes ACME/ }).click()
-  await expect(page.getByRole('list', { name: 'Fiches de poste' }).getByRole('listitem')).toHaveCount(69)
+  await expect(page.getByRole('list', { name: 'Fiches de poste' }).getByRole('listitem')).toHaveCount(84)
 
   await page.getByLabel('Rechercher un poste').fill('comptable junior')
   const list = page.getByRole('list', { name: 'Fiches de poste' })
   await expect(list.getByRole('listitem')).toHaveCount(1)
   await list.getByRole('button', { name: /Voir/ }).click()
-  const preview = page.getByRole('region', { name: 'Comptable Junior' })
+  const preview = page.getByRole('region', { name: 'Comptable junior' })
+  await expect(preview).toContainText('Code CO25')
+  await expect(preview).toContainText('Finance · Comptabilité')
+  await expect(preview.getByRole('list', { name: 'Compétences' }).getByRole('listitem')).toHaveCount(4)
   await expect(preview.getByText('Missions')).toBeVisible()
   await noHorizontalScroll(page, 390)
-  await page.screenshot({ path: `${CAPTURES}/us119-catalogue-390.png`, fullPage: true })
+  await page.screenshot({ path: `${CAPTURES}/us121-catalogue-390.png`, fullPage: true })
 
   await page.setViewportSize({ width: 1280, height: 900 })
-  await expect(page.getByRole('region', { name: 'Comptable Junior' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Comptable junior' })).toBeVisible()
   await noHorizontalScroll(page, 1280)
-  await page.screenshot({ path: `${CAPTURES}/us119-catalogue-1280.png`, fullPage: true })
+  await page.screenshot({ path: `${CAPTURES}/us121-catalogue-1280.png`, fullPage: true })
 
   await page.getByRole('link', { name: /Publier ce poste/ }).click()
-  await expect(page.getByText(/Repris de la fiche « Comptable Junior »/)).toBeVisible()
-  await expect(page.getByLabel('Intitulé')).toHaveValue('Comptable Junior')
+  await expect(page.getByText(/Repris de la fiche « Comptable junior »/)).toBeVisible()
+  await expect(page.getByLabel('Code du poste')).toHaveValue('CO25')
+  await expect(page.getByLabel('Intitulé')).toHaveValue('Comptable junior')
   await expect(page.getByRole('checkbox', { name: 'Comptabilité' })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Finance', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Économie' })).toBeChecked()
   await expect(page.getByLabel("Niveau d'études minimum")).toHaveValue('LICENCE')
   await noHorizontalScroll(page, 1280)
-  await page.screenshot({ path: `${CAPTURES}/us119-publier-1280.png`, fullPage: true })
+  await page.screenshot({ path: `${CAPTURES}/us121-publier-1280.png`, fullPage: true })
 
   await page.setViewportSize({ width: 390, height: 844 })
   await noHorizontalScroll(page, 390)
-  await page.screenshot({ path: `${CAPTURES}/us119-publier-390.png`, fullPage: true })
+  await page.screenshot({ path: `${CAPTURES}/us121-publier-390.png`, fullPage: true })
 })

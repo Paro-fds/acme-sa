@@ -1,9 +1,12 @@
-"""US-119 : catalogue des postes ACME, une fiche par description de poste de l'entreprise.
+"""US-119, US-121 : catalogue des postes ACME.
 
-- Une fiche : code, intitulé, domaine (tableau poste → domaine de l'utilisateur), niveau demandé, description et
-  rubriques dans un modèle unique (SECTION_TITLES), quelle que soit la mise en page d'origine.
+- US-121 : un poste par ligne de la matrice des postes du directeur (base SQLite, source de vérité) : code de la matrice
+  (vide pour un poste qui n'en a pas), intitulé, département, service, compétences.
+- Une description de poste de même intitulé (US-119) complète le poste : description et rubriques dans un modèle unique
+  (SECTION_TITLES), niveau demandé.
 - Le niveau demandé se résume (« Bac + 4 ») et suggère le niveau minimum du poste à publier ; les RH ajustent.
-- Le domaine de la fiche propose des domaines de diplôme pour la visibilité du poste (DIPLOMA_DOMAINS).
+- Le département du poste propose des domaines de diplôme pour la visibilité du poste (DIPLOMA_DOMAINS) : « le
+  département a le même sens que le domaine » (utilisateur, 2026-10-15).
 """
 
 import re
@@ -14,36 +17,30 @@ from typing import Protocol
 SECTION_TITLES = ("Missions", "Qualifications", "Expérience", "Conditions d'exercice", "Qualités attendues")
 
 DIPLOMA_DOMAINS: dict[str, tuple[str, ...]] = {
-    "Comptabilité": ("COMPTABILITE", "FINANCE"),
-    "Finance": ("FINANCE", "COMPTABILITE", "ECONOMIE"),
-    "Banque et microfinance": ("BANQUE_MICROFINANCE", "FINANCE", "GESTION"),
-    "Recouvrement": ("BANQUE_MICROFINANCE", "GESTION"),
-    "Gestion des risques": ("FINANCE", "BANQUE_MICROFINANCE", "STATISTIQUES"),
-    "Audit": ("COMPTABILITE", "FINANCE", "GESTION"),
-    "Audit et contrôle": ("COMPTABILITE", "FINANCE", "GESTION"),
-    "Informatique": ("INFORMATIQUE",),
-    "Ressources humaines": ("RESSOURCES_HUMAINES", "GESTION"),
-    "Droit": ("DROIT",),
-    "Droit et conformité": ("DROIT",),
-    "Économie et statistiques": ("ECONOMIE", "STATISTIQUES"),
-    "Marketing": ("MARKETING_COMMERCE",),
-    "Communication": ("MARKETING_COMMERCE",),
-    "Relation client": ("MARKETING_COMMERCE",),
     "Administration": ("GESTION",),
+    "Audit interne": ("COMPTABILITE", "FINANCE", "GESTION"),
+    "Crédit": ("BANQUE_MICROFINANCE", "FINANCE", "GESTION"),
+    "Finance": ("FINANCE", "COMPTABILITE", "ECONOMIE"),
+    "Informatique": ("INFORMATIQUE",),
+    "Juridique": ("DROIT",),
+    "Marketing": ("MARKETING_COMMERCE",),
+    "Opérations": ("BANQUE_MICROFINANCE", "COMPTABILITE", "GESTION"),
+    "Recouvrement": ("BANQUE_MICROFINANCE", "GESTION"),
+    "Ressources humaines": ("RESSOURCES_HUMAINES", "GESTION"),
+    "Risques et conformité": ("FINANCE", "BANQUE_MICROFINANCE", "DROIT", "STATISTIQUES"),
 }
-"""❓ Proposition du développeur (2026-10-14), à valider par la DRH. Les autres domaines (Management, Sécurité,
-Transport, Logistique, Services généraux, Archivistique) ne proposent rien : les RH choisissent."""
-
+"""Départements de la matrice → domaines de diplôme. ❓ Proposition du développeur (2026-10-15), à valider par la DRH.
+« Direction générale » ne propose rien : les RH choisissent."""
 
 def _plain(text: str) -> str:
     return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
 
 
-def diploma_domains(domain: str | None) -> tuple[str, ...]:
-    """Domaines de diplôme proposés pour une fiche de ce domaine (sans tenir compte des accents ni des majuscules)."""
-    if not domain:
+def diploma_domains(department: str | None) -> tuple[str, ...]:
+    """Domaines de diplôme proposés pour un poste de ce département (sans tenir compte des accents ni des majuscules)."""
+    if not department:
         return ()
-    wanted = _plain(domain)
+    wanted = _plain(department)
     return next((codes for label, codes in DIPLOMA_DOMAINS.items() if _plain(label) == wanted), ())
 
 
@@ -101,11 +98,16 @@ class ProfileSection:
 @dataclass(frozen=True)
 class JobProfile:
     code: str
+    """Clé du poste dans le catalogue : le code de la matrice, ou l'intitulé simplifié pour un poste sans code."""
     title: str
-    domain: str | None
+    department: str | None
     level_text: str | None
     description: str
     sections: tuple[ProfileSection, ...]
+    position_code: str = ""
+    """US-121 : code du poste dans la matrice du directeur (vide s'il n'en a pas)."""
+    service: str | None = None
+    competences: tuple[str, ...] = ()
 
 
 class JobProfileCatalogue(Protocol):

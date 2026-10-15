@@ -27,7 +27,7 @@ function OpeningItem({ opening }) {
           <span className="font-normal text-help"> · {opening.code}</span>
         </Link>
         <p className="text-sm text-help">
-          {opening.unit_label} · grade {opening.target_grade} · du {formatDate(opening.opens_on)} au {formatDate(opening.closes_on)}
+          {opening.unit_label} · du {formatDate(opening.opens_on)} au {formatDate(opening.closes_on)}
         </p>
       </div>
       <OpeningStatusBadge opening={opening} />

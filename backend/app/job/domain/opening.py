@@ -160,8 +160,9 @@ def validate_fields(fields: OpeningFields, units: dict[str, str]) -> OpeningFiel
             raise InvalidOpeningField(f"L'unité tient en {TITLE_MAX} caractères au plus.", field="unit_code")
     elif unit_code not in units:
         raise InvalidOpeningField("Choisissez une unité du référentiel.", field="unit_code")
-    target_grade = _required(fields.target_grade, "target_grade", "Indiquez le grade visé.")
-    if not _NUMBER.match(target_grade):
+    # US-122 : le grade visé est facultatif (le formulaire ne le demande plus) ; un grade saisi reste un nombre.
+    target_grade = (fields.target_grade or "").strip()
+    if target_grade and not _NUMBER.match(target_grade):
         raise InvalidOpeningField("Le grade est un nombre, par exemple 10.", field="target_grade")
     mission = _required(fields.mission, "mission", "Décrivez la mission du poste.")
     if len(mission) > MISSION_MAX:

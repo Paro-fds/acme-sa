@@ -282,7 +282,9 @@ class MyOpeningView:
     opens_on: date
     closes_on: date
     criteria_lines: list[str]
-    profile_domain: str | None = None
+    profile_department: str | None = None
+    competences: tuple[str, ...] = ()
+    """US-121 : le département et les compétences du poste du catalogue."""
     sections: tuple[ProfileSection, ...] = ()
     """US-119 : la fiche complète du catalogue, rubrique par rubrique (vide pour un poste hors catalogue)."""
 
@@ -385,7 +387,8 @@ class ListMyOpenings:
         return MyOpeningView(
             o.id, o.code, o.title, units.get(o.unit_code, o.unit_code), o.target_grade, o.mission, o.opens_on,
             o.closes_on, o.criteria.describe(units),
-            profile_domain=profile.domain if profile else None,
+            profile_department=profile.department if profile else None,
+            competences=profile.competences if profile else (),
             sections=profile.sections if profile else (),
         )
 

@@ -4,23 +4,23 @@ Agence;agency_code;AQ;6;AQ;Aquin;Grand Sud 2;Rural;À valider;
 Agence;agency_code;BM;8;BM;Beaumont;Grand Sud 2;Rural;À valider;
 Agence;agency_code;BD;14;BD;Belladère;Bas Plateau;Rural;À valider;
 Agence;agency_code;CB;4;CB;Cabaret;Bas Artibonite;Rural;À valider;
-Agence;agency_code;CM;0;CM;Cameau;Métropole 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;CM;0;CM;Cameau;Métropole 1;Urbain;Fermée;Aucun actif dans l'export ; agence fermée (utilisateur, 2026-10-15)
 Agence;agency_code;CP;9;CP;Camp-Perrin;Grand Sud 2;Rural;À valider;
 Agence;agency_code;CH;13;CH;Cap-Haïtien;Haut Plateau;Rural;À vérifier;Région et type surprenants ; écrit « Cap-Haiten » dans le fichier
 Agence;agency_code;CY;12;CY;Cayes;Grand Sud 2;Urbain;À valider;
 Agence;agency_code;CL;13;CL;Clercine;Métropole 2;Urbain;À valider;
-Agence;agency_code;CR;0;CR;Croix-des-Bouquets;Métropole 2;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;CR;0;CR;Croix-des-Bouquets;Métropole 2;Urbain;Fermée;Aucun actif dans l'export ; agence fermée (utilisateur, 2026-10-15)
 Agence;agency_code;DM;16;DM;Delmas;Métropole 2;Urbain;À valider;
 Agence;agency_code;FN;8;FN;Fond-des-Nègres;Grand Sud 1;Rural;À valider;
-Agence;agency_code;FM;0;FM;Fontamara;Grand Sud 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;FM;0;FM;Fontamara;Grand Sud 1;Urbain;Fermée;Aucun actif dans l'export ; agence fermée (utilisateur, 2026-10-15)
 Agence;agency_code;GN;14;GN;Gonaïves;Haut Artibonite;Urbain;À valider;
 Agence;agency_code;GM;7;GM;Gros-Morne;Haut Artibonite;Rural;À valider;
 Agence;agency_code;HC;18;HC;Hinche;Haut Plateau;Urbain;À valider;
 Agence;agency_code;LB;5;LB;Laboule;Métropole 1;Rural;À valider;
 Agence;agency_code;LL;9;LL;Lalue;Métropole 1;Urbain;À valider;
 Agence;agency_code;LC;12;LC;Lascahobas;Bas Plateau;Rural;À valider;
-Agence;agency_code;LN;0;LN;Laville Nord;Métropole 1;Urbain;À valider;Aucun actif dans l'export
-Agence;agency_code;LS;0;LS;Laville Sud;Métropole 1;Urbain;À valider;Aucun actif dans l'export
+Agence;agency_code;LN;0;LN;Laville Nord;Métropole 1;Urbain;Fermée;Aucun actif dans l'export ; agence fermée (utilisateur, 2026-10-15)
+Agence;agency_code;LS;0;LS;Laville Sud;Métropole 1;Urbain;Fermée;Aucun actif dans l'export ; agence fermée (utilisateur, 2026-10-15)
 Agence;agency_code;LE;8;LE;Léogâne;Grand Sud 1;Rural;À valider;
 Agence;agency_code;LT;7;LT;L'Estère;Haut Artibonite;Rural;À valider;Caractère parasite dans le fichier (« L`ESTERE »)
 Agence;agency_code;MH;9;MH;Mahotière;Grand Sud 1;Urbain;À valider;

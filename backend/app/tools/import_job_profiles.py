@@ -1,19 +1,23 @@
-"""US-119 : importe les descriptions de poste d'ACME dans le catalogue des postes (fichier JSON en lecture seule).
+"""US-119, US-121 : construit le catalogue des postes (fichier JSON en lecture seule).
 
 Usage (depuis backend/) :
-    .venv\\Scripts\\python -m app.tools.import_job_profiles                      # ../postes → fichier des réglages
-    .venv\\Scripts\\python -m app.tools.import_job_profiles dossier tableau.md sortie.json
+    .venv\\Scripts\\python -m app.tools.import_job_profiles                         # réglages par défaut
+    .venv\\Scripts\\python -m app.tools.import_job_profiles matrice.sqlite dossier sortie.json
 
-- Source : une page HTML par poste (dossier `postes/postes`) et le tableau poste → domaine (`postes_et_domaines.md`),
-  transmis par l'utilisateur le 2026-10-14. À remplacer par la base SQLite du directeur quand elle sera fournie.
-- Les deux mises en page des fiches sont ramenées aux rubriques de SECTION_TITLES ; le paragraphe de conclusion qui
-  suit une liste rejoint la description ; le lien « Retour à l'accueil » est ignoré.
+- Source de vérité (US-121) : la matrice des postes du directeur, base SQLite `matrice_competences.sqlite` (tables
+  `poste` et `competence_poste`), lue sans être modifiée. Un poste par ligne : code, intitulé, département, service,
+  compétences.
+- Complément (US-119) : une page HTML par description de poste (dossier `postes/postes`). Une description complète le
+  poste de même intitulé (sans accents, mots de liaison ni pluriel) ; une description sans poste n'entre pas.
+- Les deux mises en page des descriptions sont ramenées aux rubriques de SECTION_TITLES ; le paragraphe de conclusion
+  qui suit une liste rejoint la description ; le lien « Retour à l'accueil » est ignoré.
 - Une page « …-html.html » qui double une page du même nom est ignorée ; seule, elle est lue sous le nom sans « -html ».
-- Le rapport ne donne que des comptes : fiches lues, fiches sans domaine, fiches sans niveau.
+- Le rapport ne donne que des comptes.
 """
 
 import json
 import re
+import sqlite3
 import sys
 import unicodedata
 from html.parser import HTMLParser
@@ -22,7 +26,10 @@ from pathlib import Path
 from app.config import PROJECT_DIR, Settings
 from app.job.domain.catalogue import SECTION_TITLES, describe_level
 
-SOURCE = "Descriptions de poste ACME et tableau poste → domaine, transmis par l'utilisateur le 2026-10-14 (US-119)"
+SOURCE = (
+    "Matrice des postes du directeur (matrice_competences.sqlite, 2026-10-15, US-121), complétée par les descriptions "
+    "de poste ACME transmises par l'utilisateur le 2026-10-14 (US-119)"
+)
 
 _HEADINGS = {
     "description du poste": "description",
@@ -108,18 +115,6 @@ def parse_fiche(html: str) -> dict:
     }
 
 
-def read_domains(table: Path) -> dict[str, tuple[str, str]]:
-    """Tableau Markdown « | Poste | Domaine | » → clé du titre : (titre, domaine) ; « & » devient « et »."""
-    rows = {}
-    for line in table.read_text(encoding="utf-8").splitlines():
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if len(cells) != 2 or cells[0] in ("Poste", "") or set(cells[0]) <= set(":- "):
-            continue
-        domain = re.sub(r"\s*&\s*", " et ", cells[1])
-        rows[_key(cells[0])] = (cells[0], domain[:1].upper() + domain[1:].lower())
-    return rows
-
-
 def _pages(folder: Path) -> dict[str, Path]:
     """Code de la fiche → page ; la version « -html » ne sert que si elle est seule."""
     pages = {}
@@ -130,35 +125,67 @@ def _pages(folder: Path) -> dict[str, Path]:
     return pages
 
 
-def build_catalogue(folder: Path, table: Path) -> dict:
-    domains = read_domains(table)
-    profiles = []
-    for code, path in _pages(folder).items():
+def read_fiches(folder: Path) -> dict[str, dict]:
+    """Code de la page → description de poste (intitulé, description, rubriques, niveau demandé)."""
+    fiches = {}
+    for code, path in _pages(folder).items() if folder.is_dir() else ():
         fiche = parse_fiche(path.read_text(encoding="utf-8"))
-        title, domain = domains.get(_key(fiche["title"]), (fiche["title"], None))
         qualifications = next((s["lines"] for s in fiche["sections"] if s["title"] == "Qualifications"), [])
+        fiches[code] = fiche | {"level_text": describe_level(qualifications)}
+    return fiches
+
+
+def _slug(title: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", _plain(title)).strip("-")
+
+
+def read_matrix(database: Path) -> list[dict]:
+    """Postes de la matrice du directeur, dans l'ordre de la base, avec leurs compétences (base ouverte en lecture seule)."""
+    with sqlite3.connect(f"file:{database.as_posix()}?mode=ro", uri=True) as db:
+        competences: dict[int, list[str]] = {}
+        for poste_id, label in db.execute("SELECT poste_id, libelle FROM competence_poste ORDER BY id"):
+            if label.strip():
+                competences.setdefault(poste_id, []).append(label.strip())
+        rows = db.execute("SELECT id, code, intitule, departement, service FROM poste ORDER BY id").fetchall()
+    return [
+        {
+            "code": code.strip() or _slug(title),
+            "position_code": code.strip(),
+            "title": title.strip(),
+            "department": department.strip() or None,
+            "service": service.strip() or None,
+            "competences": competences.get(poste_id, []),
+        }
+        for poste_id, code, title, department, service in rows
+    ]
+
+
+def build_catalogue(database: Path, folder: Path) -> dict:
+    fiches = {_key(fiche["title"]): fiche for fiche in read_fiches(folder).values()}
+    profiles = []
+    for poste in read_matrix(database):
+        fiche = fiches.get(_key(poste["title"]), {})
         profiles.append(
-            {
-                "code": code,
-                "title": title,
-                "domain": domain,
-                "level_text": describe_level(qualifications),
-                "description": fiche["description"],
-                "sections": fiche["sections"],
+            poste
+            | {
+                "level_text": fiche.get("level_text"),
+                "description": fiche.get("description", ""),
+                "sections": fiche.get("sections", []),
             }
         )
     return {"source": SOURCE, "profiles": profiles}
 
 
 def main(argv: list[str]) -> int:
-    folder = Path(argv[0]) if argv else PROJECT_DIR / "postes" / "postes"
-    table = Path(argv[1]) if len(argv) > 1 else folder.parent / "postes_et_domaines.md"
+    database = Path(argv[0]) if argv else PROJECT_DIR / "matrice_competences.sqlite"
+    folder = Path(argv[1]) if len(argv) > 1 else PROJECT_DIR / "postes" / "postes"
     output = Path(argv[2]) if len(argv) > 2 else Settings().job_profiles_path
-    catalogue = build_catalogue(folder, table)
+    catalogue = build_catalogue(database, folder)
     output.write_text(json.dumps(catalogue, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     profiles = catalogue["profiles"]
-    print(f"{len(profiles)} fiches écrites dans {output}")
-    print(f"  sans domaine : {sum(1 for p in profiles if not p['domain'])}")
+    print(f"{len(profiles)} postes écrits dans {output}")
+    print(f"  sans code : {sum(1 for p in profiles if not p['position_code'])}")
+    print(f"  avec une description détaillée : {sum(1 for p in profiles if p['sections'])}")
     print(f"  sans niveau demandé : {sum(1 for p in profiles if not p['level_text'])}")
     return 0
 
