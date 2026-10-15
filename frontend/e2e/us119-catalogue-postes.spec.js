@@ -31,6 +31,16 @@ test('catalogue des postes : chercher une fiche, la lire, la publier pré-rempli
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await expect(page.getByRole('region', { name: 'Comptable junior' })).toBeVisible()
+  // L'aperçu défile seul : la fenêtre ne bouge pas et « Publier ce poste » se laisse atteindre.
+  const aside = page.getByRole('complementary', { name: 'Aperçu du poste' })
+  expect(await aside.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true)
+  await aside.hover()
+  const before = await page.evaluate(() => window.scrollY)
+  await page.mouse.wheel(0, 5000)
+  await expect(page.getByRole('link', { name: /Publier ce poste/ })).toBeInViewport()
+  expect(await page.evaluate(() => window.scrollY)).toBe(before)
+  expect(await aside.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
+  await page.screenshot({ path: `${CAPTURES}/us121-apercu-defile-1280.png` })
   await noHorizontalScroll(page, 1280)
   await page.screenshot({ path: `${CAPTURES}/us121-catalogue-1280.png`, fullPage: true })
 

@@ -192,7 +192,12 @@ export default function JobCatalogue({ me }) {
           </ul>
         )}
         {desktop && (
-          <aside className="flex flex-col gap-4 lg:sticky lg:top-22">
+          // L'aperçu défile seul, sans emporter la liste : une longue fiche reste lisible jusqu'à « Publier ce poste ».
+          <aside
+            aria-label="Aperçu du poste"
+            tabIndex={0}
+            className="flex flex-col gap-4 rounded-xl lg:sticky lg:top-22 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain"
+          >
             {selected ? (
               <ProfilePreview key={selected} code={selected} me={me} />
             ) : (
