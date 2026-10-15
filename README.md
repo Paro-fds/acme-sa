@@ -38,7 +38,7 @@ Un compte créé reste en place entre deux redéploiements (base Supabase). Pour
 
 ### Référentiel des unités
 
-Dans l'espace RH : menu du compte → **Référentiel** → importer [backend/demo/referentiel-fictif.xlsx](backend/demo/referentiel-fictif.xlsx). Les codes PB et RC restent « À rattacher », comme dans l'export réel.
+Dans l'espace RH, à l'adresse `/admin/referentiel` : importer le référentiel provisoire d'ACME (`C:cme-data-v2eferentieleferentiel-provisoire-2026-10-15.xlsx`, hors dépôt, choix du 2026-10-15) ou le référentiel fictif [backend/demo/referentiel-fictif.xlsx](backend/demo/referentiel-fictif.xlsx).
 
 ### Parcours conseillé (5 minutes)
 

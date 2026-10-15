@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { acceptConsent, EMP_A, signIn } from './auth.js'
 
-const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/714b2012-8130-4f37-90c0-b587e71ccc7a/scratchpad/captures'
+const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/a3ac3411-0311-4109-b6a8-9aa1d82a8e84/scratchpad/captures'
 const PDF = { name: 'licence.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.7\n' + '0'.repeat(2000)) }
 
 /**
@@ -51,10 +51,19 @@ test('compléter son profil puis déposer un certificat', async ({ page }) => {
   await page.screenshot({ path: `${CAPTURES}/lot1-informations-rh-390.png`, fullPage: true })
   await page.getByRole('button', { name: /Valider et terminer mon profil/ }).click()
   await expect(page).toHaveURL(/\/accueil$/)
-  await expect(page.getByRole('heading', { name: 'Votre dossier est complet à 100 %' })).toBeVisible()
+  // US-123 : l'accueil « tableau de bord » montre le dossier à 100 %.
+  const tiles = page.getByRole('region', { name: 'Vos chiffres' })
+  await expect(tiles.getByRole('link', { name: /Mon dossier/ })).toContainText('100 %')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+  await page.screenshot({ path: `${CAPTURES}/us123-accueil-complet-390.png`, fullPage: true })
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await expect(page.getByRole('complementary', { name: 'Dates et diplômes' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280)
+  await page.screenshot({ path: `${CAPTURES}/us123-accueil-complet-1280.png`, fullPage: true })
+  await page.setViewportSize({ width: 390, height: 844 })
 
   // US-301 : le dépôt s'ouvre, depuis l'accueil.
-  await page.getByRole('region', { name: 'Dépôt de certificats' }).getByRole('link', { name: /Déposer un certificat/ }).click()
+  await page.getByRole('link', { name: /Déposer un certificat/ }).click()
   await page.getByLabel('Choisir un fichier').setInputFiles(PDF)
   await expect(page.getByRole('region', { name: 'Fichier choisi' })).toContainText('licence.pdf')
   await page.getByRole('group', { name: 'Type de document' }).locator('label', { hasText: 'Diplôme' }).click()

@@ -20,6 +20,7 @@ export default function Page({
   nav = true,
   wide = false,
   aside,
+  asideLabel,
   children,
 }) {
   if (account === 'admin') {
@@ -39,7 +40,7 @@ export default function Page({
 
   if (account === true) {
     return (
-      <EmployeeLayout title={title} backTo={backTo} backLabel={backLabel} actions={actions} nav={nav} aside={aside} wide={wide}>
+      <EmployeeLayout title={title} backTo={backTo} backLabel={backLabel} actions={actions} nav={nav} aside={aside} asideLabel={asideLabel} wide={wide}>
         {children}
       </EmployeeLayout>
     )

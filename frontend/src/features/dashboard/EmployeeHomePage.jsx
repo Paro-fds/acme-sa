@@ -1,7 +1,10 @@
 import { useEffect, useId } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { getMyCareer } from '../../api/career.js'
+import { getCertificateForm, listCertificates } from '../../api/certificates.js'
 import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
+import { listMyApplications, listMyOpenings } from '../../api/openings.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
 import { useIsDesktop } from '../../lib/useIsDesktop.js'
@@ -10,6 +13,7 @@ import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
 import { DEPOSIT_PATH } from '../certificates/paths.js'
 import { CONSENT_PATH } from '../dossier/paths.js'
 import NewForYouCard from '../notifications/NewForYouCard.jsx'
+import { CareerFigures, DatesPanel, DiplomasCard, OpeningsPanel, Tiles, todayText, yearsSince } from './homeParts.jsx'
 import StillAccurateCard from './StillAccurateCard.jsx'
 
 export const HOME_PATH = '/accueil'
@@ -36,44 +40,36 @@ const REMAINING = {
   },
 }
 
+/** Une donnée indisponible (hors connexion, service en panne) laisse sa partie vide sans bloquer l'accueil. */
+const optional = (promise) => promise.catch(() => null)
+
+/** US-123 : le profil d'abord ; les postes, certificats, candidatures et le parcours seulement si le dossier est complet. */
 async function load() {
   const [profile, dossier, freshness] = await Promise.all([getProfile(), getDossier(), getFreshness()])
-  return { profile, freshness, consentGiven: Boolean(dossier.consent.information_notice_at) }
+  const base = { profile, freshness, consentGiven: Boolean(dossier.consent.information_notice_at) }
+  if (!profile.completion.is_complete) return base
+  const [openings, certificates, applications, career, form] = await Promise.all([
+    optional(listMyOpenings()),
+    optional(listCertificates()),
+    optional(listMyApplications()),
+    optional(getMyCareer()),
+    optional(getCertificateForm()),
+  ])
+  return { ...base, openings, certificates, applications, career, form }
 }
 
-/** Anneau de l'écran 06 (`code.html`) : 112 px, trait de 8, fond bleu pâle, pourcentage en bleu. */
-function Ring({ percent }) {
-  const radius = 40
-  const circumference = 2 * Math.PI * radius
-  return (
-    <div
-      role="progressbar"
-      aria-label="Progression du dossier"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={percent}
-      className="relative size-28 shrink-0"
-    >
-      <svg viewBox="0 0 100 100" className="size-28 -rotate-90" aria-hidden="true">
-        <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="8" className="stroke-highlight" />
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          strokeWidth="8.5"
-          strokeLinecap="round"
-          className="stroke-primary transition-[stroke-dashoffset]"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - percent / 100)}
-        />
-      </svg>
-      <span className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden="true">
-        <span className="text-[22px] leading-none font-bold text-primary tabular-nums">{percent} %</span>
-        <span className="mt-0.5 text-xs text-help">complété</span>
-      </span>
-    </div>
-  )
+/** Plus haut diplôme validé, dans l'ordre de l'échelle des niveaux. */
+function highestDiploma(certificates, form) {
+  const order = (form?.levels ?? []).map((level) => level.value)
+  const validated = (certificates?.certificates ?? []).filter((c) => c.status === 'VALIDATED')
+  if (validated.length === 0) return null
+  return validated.reduce((best, c) => (order.indexOf(c.level) > order.indexOf(best.level) ? c : best)).level_label
+}
+
+/** La candidature en cours la plus récente (une candidature clôturée ne compte plus). */
+function currentApplication(applications) {
+  const open = (applications?.items ?? []).filter((a) => a.step !== 'CLOSED')
+  return open.sort((a, b) => b.received_at.localeCompare(a.received_at))[0] ?? null
 }
 
 function Remaining({ elements }) {
@@ -122,62 +118,10 @@ function Remaining({ elements }) {
   )
 }
 
-function DepositCard({ open }) {
-  const titleId = useId()
-  return (
-    <section
-      aria-labelledby={titleId}
-      className={`flex items-start gap-3 rounded-xl p-4 ${open ? 'bg-surface shadow-card' : 'bg-section/70'}`}
-    >
-      <span
-        className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full bg-highlight ${
-          open ? 'text-primary' : 'text-muted'
-        }`}
-        aria-hidden="true"
-      >
-        <span className="material-symbols-outlined text-xl">{open ? 'lock_open' : 'lock'}</span>
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 id={titleId} className="text-lg font-semibold">
-            Dépôt de certificats
-          </h3>
-          {!open && (
-            <span className="rounded-full bg-border px-2 py-0.5 text-sm text-help">Disponible dès votre profil complet</span>
-          )}
-        </div>
-        {open ? (
-          <>
-            <p>Votre profil est complet : déposez vos diplômes et certificats pour les faire valider par les RH.</p>
-            <Link
-              to={DEPOSIT_PATH}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
-            >
-              <span className="material-symbols-outlined" aria-hidden="true">upload_file</span>
-              Déposer un certificat
-            </Link>
-          </>
-        ) : (
-          <>
-            <p className="font-semibold text-primary">Complétons votre profil pour valoriser votre certificat</p>
-            <p className="leading-relaxed text-help">
-              Dès que votre profil atteint 100 %, vous pourrez déposer vos diplômes et certificats pour les faire valider
-              par les RH.
-            </p>
-            <span className="mt-2 flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-highlight px-4 text-sm font-semibold text-help select-none sm:w-fit">
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">lock_clock</span>
-              Déblocage à 100 % du profil
-            </span>
-          </>
-        )}
-      </div>
-    </section>
-  )
-}
-
 /**
- * US-207 CA-01, écran validé 06 : l'accueil de l'employé après la connexion.
- * US-113 : sans La Penseuse ; sur ordinateur, la progression et l'aide passent dans la colonne de droite.
+ * US-207 CA-01 : l'accueil de l'employé après la connexion ; à la première connexion, « Avant de commencer » d'abord.
+ * US-123 : tableau de bord (maquette validée le 2026-10-15) : en-tête sobre, tuiles chiffrées, postes ouverts,
+ * dates à retenir, diplômes, parcours en chiffres ; sur ordinateur, les dates et les diplômes à droite.
  */
 export default function EmployeeHomePage() {
   const navigate = useNavigate()
@@ -191,73 +135,76 @@ export default function EmployeeHomePage() {
   }, [needsConsent, navigate])
 
   const page = (children, aside) => (
-    <Page account title="Accueil" aside={aside}>
+    <Page account title="Accueil" aside={aside} asideLabel="Dates et diplômes">
       {children}
     </Page>
   )
   if (loading || needsConsent) return page(<p role="status">Chargement…</p>)
   if (error) return page(<Alert>{error.message}</Alert>)
 
-  const { profile } = data
+  const today = new Date()
+  const { profile, freshness } = data
   const { completion } = profile
+  const complete = completion.is_complete
   const missing = completion.elements.filter((element) => !element.complete)
-  const progress = (
-    <section className="flex flex-col items-center gap-4 rounded-xl bg-surface p-4 text-center shadow-card sm:flex-row sm:text-left lg:flex-col lg:items-start">
-      <Ring percent={completion.percent} />
-      <div className="flex min-w-0 flex-col">
-        <p className="mb-1 flex items-center justify-center gap-1.5 text-sm font-semibold tracking-wider text-primary uppercase sm:justify-start">
-          <span className="material-symbols-outlined text-lg" aria-hidden="true">task_alt</span>
-          Avancement du profil
-        </p>
-        <h3 className="text-lg font-bold">Votre dossier est complet à {completion.percent} %</h3>
-        <p className="mt-1 text-help">
-          {completion.complete} élément{completion.complete > 1 ? 's' : ''} complété{completion.complete > 1 ? 's' : ''}{' '}
-          sur {completion.total} au total.
-        </p>
-      </div>
-    </section>
-  )
-const help = (
-    <section className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
-      <span
-        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-highlight text-primary-active"
-        aria-hidden="true"
-      >
-        <span className="material-symbols-outlined text-xl">support_agent</span>
-      </span>
-      <p className="flex flex-col">
-        <span className="text-sm font-semibold text-heading">Besoin d'aide pour votre profil ?</span>
-        <span className="text-sm text-help">Une question ? Adressez-vous au service RH de votre agence.</span>
-      </p>
-      </section>
+  const openings = data.openings?.items ?? []
+  const n = missing.length
+  const lead = !complete
+    ? `Plus que ${n} information${n > 1 ? 's' : ''}, et vos diplômes pourront vous ouvrir de nouveaux postes.`
+    : openings.length > 1
+      ? `${openings.length} postes correspondent déjà à votre profil.`
+      : openings.length === 1
+        ? 'Un poste correspond déjà à votre profil.'
+        : 'Votre dossier est complet : chaque diplôme validé peut vous ouvrir de nouveaux postes.'
+
+  const side = complete && (
+    <>
+      <DatesPanel openings={openings} freshness={freshness} today={today} />
+      <DiplomasCard />
+    </>
   )
   return page(
     <>
-      <section className="flex flex-col gap-1 rounded-xl bg-surface p-4 shadow-card lg:bg-transparent lg:p-0 lg:shadow-none">
-        <p className="text-sm text-help">Bienvenue sur votre espace</p>
-        <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-balance text-primary-active lg:text-[30px] lg:leading-[38px]">
-          Bonjour {profile.first_name}
-        </h2>
-        <p className="text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
-        <p className="mt-2 font-semibold text-primary">
-          {missing.length > 0
-            ? `Plus que ${missing.length} étape${missing.length > 1 ? 's' : ''} pour compléter votre dossier.`
-            : 'Bravo, votre dossier est complet !'}
-        </p>
+      <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-sm text-help">{todayText(today)}</p>
+          <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-balance text-primary-active lg:text-[30px] lg:leading-[38px]">
+            Bonjour {profile.first_name}
+          </h2>
+          <p className="text-base font-semibold text-heading">{lead}</p>
+          <p className="text-sm text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
+        </div>
+        {complete && (
+          <Link
+            to={DEPOSIT_PATH}
+            className="flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">upload_file</span>
+            Déposer un certificat
+          </Link>
+        )}
       </section>
 
       <NewForYouCard />
-      <StillAccurateCard freshness={data.freshness} />
-      {!desktop && progress}
-      {missing.length > 0 && <Remaining elements={missing} />}
-      <DepositCard open={completion.is_complete} />
-      {!desktop && help}
+      <StillAccurateCard freshness={freshness} />
+      <Tiles
+        completion={completion}
+        missing={missing}
+        openings={openings}
+        certificates={data.certificates?.certificates ?? []}
+        application={currentApplication(data.applications)}
+      />
+      {!complete && <Remaining elements={missing} />}
+      {complete && <OpeningsPanel openings={openings} today={today} />}
+      {complete && !desktop && side}
+      {complete && (
+        <CareerFigures
+          years={yearsSince(profile.hire_date, today)}
+          highestDiploma={highestDiploma(data.certificates, data.form)}
+          entries={data.career ? data.career.kinds.reduce((sum, kind) => sum + kind.count, 0) : null}
+        />
+      )}
     </>,
-    desktop ? (
-      <>
-        {progress}
-        {help}
-      </>
-    ) : undefined,
+    desktop && complete ? side : undefined,
   )
 }

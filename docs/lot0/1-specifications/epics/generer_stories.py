@@ -283,6 +283,18 @@ S = [
    "La visibilité d'un nouveau poste ne dépend plus du grade ; les autres critères (unités, domaines, niveau, ancienneté) fonctionnent comme avant.",
    "Les postes déjà saisis gardent leur valeur en base, sans l'afficher."],
   "Demande de l'utilisateur du 2026-10-15 (« ce n'est pas la peine de remplir le champ grade visé ») et choix du même jour : retirer les deux champs de grade et l'affichage du grade visé. ❓ Tous les employés ont un grade, mais sa gestion n'est pas connue (utilisateur) : à demander à la DRH avant de réintroduire un critère de grade. Écart avec US-802 (grade visé obligatoire) : à faire noter par M. Hilaire."),
+ ("123","D2","Voir mon tableau de bord sur l'accueil","2","",
+  "Should","EF-201, EF-805, EF-902","RG-07","D-47",
+  "employé","voir dès l'accueil mes postes ouverts, mes certificats, ma candidature et mon dossier, avec leurs chiffres et leurs dates",
+  "savoir en deux secondes où j'en suis et ce que je peux faire maintenant",
+  ["L'en-tête montre la date du jour, « Bonjour » et le prénom, une phrase qui dit un fait réel (nombre de postes ouverts pour moi, ou informations qui restent), le poste et l'agence ; « Déposer un certificat » à droite quand le dossier est complet.",
+   "Quatre tuiles chiffrées, chacune avec un lien : postes ouverts pour moi, certificats validés sur déposés (avec ceux en examen), étape de ma candidature en cours sur 7, dossier en pourcentage ; la tuile de candidature n'apparaît que si une candidature est en cours.",
+   "« Postes ouverts pour vous » liste les postes publiés dont je remplis tous les critères, avec le nombre de critères et le temps restant avant la date limite ; en tableau sur ordinateur, en cartes sur téléphone.",
+   "« À ne pas manquer » montre les dates limites de ces postes et la date de ma prochaine confirmation annuelle, les plus proches d'abord.",
+   "« Vos diplômes travaillent pour vous » invite à ajouter un diplôme ; « Mon parcours en chiffres » donne mon ancienneté, mon plus haut diplôme validé et le nombre d'éléments de mon parcours, avec un lien vers « Ma carrière » ; aucun grade n'est affiché.",
+   "Dossier incomplet : la tuile du dossier passe en premier avec ce qui manque, chaque élément menant à son écran ; les tuiles des certificats et des postes disent qu'elles se débloquent après le dossier.",
+   "« Nouveau pour vous » (US-120) et la demande de confirmation annuelle (US-205) restent en tête quand elles s'appliquent."],
+  "Maquette « Accueil employé : version tableau de bord » validée par l'utilisateur (« cette maquette peut marcher », revue le 2026-10-15 : « faisons-le comme dans la maquette »), sans grade depuis US-122. Choix du 2026-10-15 : « Mon parcours en chiffres » gardé sans grade ; la candidature reste une tuile ; les étapes de candidature restent celles d'US-902. « Postes occupés » n'existe pas dans les données : remplacé par le nombre d'éléments du parcours déclaré (US-114). Les données viennent des API existantes (profil, postes, certificats, candidatures, parcours, confirmation annuelle). Le ton des accroches est à faire valider par les RH : elles ne promettent aucun poste."),
  ("201","D2","Voir mon dossier et ma progression","1","",
   "Must","EF-201, EF-206","RG-01, RG-05, RG-17","D-03",
   "employé","voir mes informations RH et « Votre dossier est complet à X % »",
@@ -559,7 +571,7 @@ S = [
   "Lot distinct : format et fréquence à convenir avec la DIT."),
 ]
 
-STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait", "119": "Fait", "120": "Fait", "121": "Fait", "122": "Fait"}
+STATUS = {"105": "Fait", "101": "Fait", "001": "Fait", "102": "En cours", "501": "Fait", "201": "Fait", "202": "Fait", "203": "Fait", "204": "Fait", "206": "Fait", "301": "Fait", "302": "Fait", "303": "Fait", "502": "Fait", "605": "Fait", "207": "Fait", "107": "Fait", "103": "Fait", "104": "Fait", "304": "Fait", "401": "Fait", "402": "Fait", "403": "Fait", "601": "Fait", "602": "Fait", "603": "Fait", "604": "Fait", "802": "Fait", "801": "En cours", "205": "Fait", "902": "Fait", "108": "Fait", "109": "Fait", "110": "Fait", "111": "Fait", "112": "Fait", "113": "Fait", "114": "Fait", "115": "Fait", "116": "Fait", "117": "Fait", "118": "Fait", "119": "Fait", "120": "Fait", "121": "Fait", "122": "Fait", "123": "Fait"}
 
 LOT_ORDER = {"0 (démonstrateur)": 0, "1": 1, "2": 2, "3": 3, "4": 4, "Lot distinct": 5}
 

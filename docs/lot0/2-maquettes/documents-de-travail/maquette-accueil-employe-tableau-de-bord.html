@@ -99,7 +99,7 @@
   .cal.warn b { background: var(--note); }
 
   /* Parcours en chiffres */
-  .facts { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); }
   .facts div { padding: 4px 16px; border-left: 1px solid var(--border); }
   .facts div:first-child { border-left: 0; padding-left: 0; }
   .facts b { display: block; font-size: 26px; font-weight: 800; color: var(--primary); }
@@ -218,13 +218,13 @@
                 <thead><tr><th>Poste</th><th>Critères</th><th>Temps restant</th><th></th></tr></thead>
                 <tbody>
                   <tr>
-                    <td><strong>Chef d'agence adjoint</strong><span class="small muted">Agence Démo Sud · grade 12</span></td>
+                    <td><strong>Chef d'agence adjoint</strong><span class="small muted">Agence Démo Sud</span></td>
                     <td><span class="chip done"><span class="ms">check</span>3 sur 3</span></td>
                     <td><div class="left"><span class="small"><b class="num">33 jours</b> · 15 nov.</span><span class="bar"><i style="width:30%"></i></span></div></td>
                     <td style="text-align:right;padding-right:0"><a class="btn btn-ghost" href="#" style="min-height:44px">Voir et postuler</a></td>
                   </tr>
                   <tr>
-                    <td><strong>Analyste crédit senior</strong><span class="small muted">Direction Démo des crédits · grade 11</span></td>
+                    <td><strong>Analyste crédit senior</strong><span class="small muted">Direction Démo des crédits</span></td>
                     <td><span class="chip done"><span class="ms">check</span>2 sur 2</span></td>
                     <td><div class="left"><span class="small"><b class="num">48 jours</b> · 30 nov.</span><span class="bar"><i style="width:15%"></i></span></div></td>
                     <td style="text-align:right;padding-right:0"><a class="btn btn-ghost" href="#" style="min-height:44px">Voir et postuler</a></td>
@@ -261,7 +261,6 @@
             <p class="sub">Votre expérience compte : elle entre dans le calcul de chaque poste proposé.</p>
             <div class="facts">
               <div><b class="num">8 ans</b><span class="small muted">chez ACME SA</span></div>
-              <div><b class="num">Grade 10</b><span class="small muted">depuis 2023</span></div>
               <div><b class="num">3</b><span class="small muted">postes occupés</span></div>
               <div><b>Licence</b><span class="small muted">plus haut diplôme validé</span></div>
             </div>
@@ -314,12 +313,12 @@
             <p class="sub">Vous cochez tous les critères : à vous de jouer.</p>
             <a class="job-card" href="#">
               <div style="display:flex;justify-content:space-between;gap:8px"><strong>Chef d'agence adjoint</strong><span class="ms" style="color:var(--primary)">chevron_right</span></div>
-              <span class="small muted">Agence Démo Sud · grade 12</span>
+              <span class="small muted">Agence Démo Sud</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip done"><span class="ms">check</span>3 critères sur 3</span><span class="chip progress"><span class="ms">schedule</span>33 jours</span></div>
             </a>
             <a class="job-card" href="#">
               <div style="display:flex;justify-content:space-between;gap:8px"><strong>Analyste crédit senior</strong><span class="ms" style="color:var(--primary)">chevron_right</span></div>
-              <span class="small muted">Direction Démo des crédits · grade 11</span>
+              <span class="small muted">Direction Démo des crédits</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip done"><span class="ms">check</span>2 critères sur 2</span><span class="chip info"><span class="ms">schedule</span>48 jours</span></div>
             </a>
           </section>
@@ -385,13 +384,13 @@
     <div class="item"><span class="pin">2</span><p><strong>Quatre tuiles chiffrées, lisibles en 2 secondes</strong> : postes ouverts pour lui (en bleu plein, c'est ce qui donne envie), certificats validés, étape de candidature, dossier. Chaque tuile a un grand chiffre, une barre qui le montre, une phrase et un lien. Une tuile sans objet (pas de candidature) disparaît.<small>Krug : rendre évident ce que les gens viennent faire ; ce qui est cliquable en a l'air.</small></p></div>
     <div class="item"><span class="pin">3</span><p><strong>Les postes en tableau</strong>, avec le nombre de critères remplis et le temps restant en jours (barre orange qui se remplit à l'approche de la date limite). Sur téléphone, le tableau devient une liste de cartes.<small>Seulement les postes publiés auxquels il est éligible (US-801).</small></p></div>
     <div class="item"><span class="pin">4</span><p><strong>« À ne pas manquer » : de vraies dates</strong>, sous forme de petits calendriers. La confirmation annuelle (US-205) y apparaît à son échéance au lieu d'occuper une carte entière.<small>Krug : l'utilisateur sait ce qu'il doit faire, et quand.</small></p></div>
-    <div class="item"><span class="pin">5</span><p><strong>« Mon parcours en chiffres »</strong> : ancienneté, grade, postes occupés, plus haut diplôme validé, avec le lien vers la frise (US-114).<small>Un avant-goût valorisant, sans encombrer.</small></p></div>
+    <div class="item"><span class="pin">5</span><p><strong>« Mon parcours en chiffres »</strong> : ancienneté, postes occupés, plus haut diplôme validé, avec le lien vers la frise (US-114). Sans grade depuis US-122 (2026-10-15).<small>Un avant-goût valorisant, sans encombrer.</small></p></div>
     <div class="item"><span class="pin">6</span><p><strong>Dossier incomplet : la tuile du dossier passe en premier, en grand</strong>, avec ce qui manque et le temps estimé. Les autres tuiles sont grisées et disent ce qui les débloque.<small>Krug : une seule chose à faire, évidente.</small></p></div>
     <div class="item"><span class="pin">7</span><p><strong>Des textes qui donnent envie, sans phrases creuses.</strong> Une phrase d'accroche sous « Bonjour » (« Deux postes correspondent déjà à votre profil »), une ligne sous chaque titre, et un encart « Vos diplômes travaillent pour vous » qui explique l'intérêt de déposer un diplôme. Chaque phrase dit un fait réel ou un bénéfice concret ; aucune ne promet un poste.<small>Krug : pas de « Bienvenue sur votre espace » ; un texte qui sert la tâche reste, les autres partent.</small></p></div>
     <div class="ask">
       <p><strong>À trancher</strong></p>
       <p>• Charger sur l'accueil les postes, les certificats et les candidatures : les API existent, il faut une nouvelle story pour les appeler depuis l'accueil.</p>
-      <p>• « Grade depuis » et « postes occupés » demandent des données de parcours que le CSV ne donne peut-être pas : à défaut, ces deux chiffres sont retirés.</p>
+      <p>• « Postes occupés » demande des données de parcours que le CSV ne donne peut-être pas : à défaut, ce chiffre est retiré. Le grade n’apparaît plus nulle part (US-122, choix du 2026-10-15).</p>
       <p>• Le ton des accroches est à faire valider par les RH : elles ne doivent rien promettre (un poste proposé n'est pas un poste obtenu).</p>
       <p>• Validation par M. Hilaire, puis un test express avec 3 employés.</p>
     </div>

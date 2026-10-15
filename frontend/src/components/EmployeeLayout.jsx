@@ -218,7 +218,17 @@ function BackLink({ to, label }) {
  * Ordinateur : menu à gauche, contenu au centre, `aside` (progression, aide) dans la colonne de droite,
  * boutons d'action en bas du contenu au lieu d'une barre collée. `wide` : pleine largeur sans colonne de droite.
  */
-export default function EmployeeLayout({ title, backTo, backLabel, actions, nav = true, aside, wide = false, children }) {
+export default function EmployeeLayout({
+  title,
+  backTo,
+  backLabel,
+  actions,
+  nav = true,
+  aside,
+  asideLabel = 'Aide et progression',
+  wide = false,
+  children,
+}) {
   const desktop = useIsDesktop()
   const identity = useEmployeeIdentity()
 
@@ -239,7 +249,7 @@ export default function EmployeeLayout({ title, backTo, backLabel, actions, nav 
               )}
             </div>
             {aside && (
-              <aside aria-label="Aide et progression" className="sticky top-6 flex flex-col gap-6">
+              <aside aria-label={asideLabel} className="sticky top-6 flex flex-col gap-6">
                 {aside}
               </aside>
             )}

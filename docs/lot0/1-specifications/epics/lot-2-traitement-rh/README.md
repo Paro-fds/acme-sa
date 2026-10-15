@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
 
-28 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+29 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D1 Accès et compte
 
@@ -28,6 +28,7 @@ Chaque employé complète et confirme son dossier lui-même, en quelques minutes
 |---|---|---|---|---|
 | [US-113](US-113-retrouver-mon-espace-sur-ordinateur-avec-ma-photo.md) | Retrouver mon espace sur ordinateur, avec ma photo | Must | — | Fait |
 | [US-114](US-114-retracer-mon-parcours-dans-ma-carriere.md) | Retracer mon parcours dans Ma carrière | Should | — | Fait |
+| [US-123](US-123-voir-mon-tableau-de-bord-sur-l-accueil.md) | Voir mon tableau de bord sur l'accueil | Should | — | Fait |
 
 ## D3 Certificats
 

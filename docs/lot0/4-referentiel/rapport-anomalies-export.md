@@ -140,6 +140,6 @@ Choix de l'utilisateur du 2026-10-15 : importer dès maintenant un référentiel
 | Unités | 53 : 8 régions, 30 agences ouvertes (les 5 agences fermées sont exclues), 9 directions, 5 services, 1 siège |
 | Correspondances | 48 : 32 codes d'agence et 16 valeurs de direction ou service ; les doublons probables vont à la même unité ; aucune valeur « À rattacher » |
 | Provisoire, à confirmer | `PB` = « Siège » ; `RC` = « Recouvrement central » (service) ; codes des régions, directions et services créés pour l'occasion (`REG-METROPOLE-1`, `DIR-CREDIT`, `SVC-ADMINISTRATION`…) ; services sans direction de rattachement ; agences rattachées à leur région depuis le 01/01/2026 (R-02) |
-| Où | Base locale `C:\acme-data-v2` seulement. Le démonstrateur en ligne garde le référentiel fictif. L'ancienne base locale, trop ancienne pour le code actuel, est conservée sous `portail-avant-2026-10-15.db` |
+| Où | Base locale `C:\acme-data-v2` et démonstrateur en ligne (choix de l’utilisateur du 2026-10-15, import par l’écran `/admin/referentiel`). L'ancienne base locale, trop ancienne pour le code actuel, est conservée sous `portail-avant-2026-10-15.db` |
 
 Les employés fictifs de l'agence `AD` (« Agence Démo ») ne sont rattachés à aucune agence avec ce référentiel : c'est attendu, ce code n'existe pas chez ACME.

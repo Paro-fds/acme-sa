@@ -148,7 +148,7 @@ describe('US-120 CA-04 — l’accueil met en avant le poste ouvert pour moi', (
   it('poste déjà lu : pas d’encart', async () => {
     getMyNotifications.mockResolvedValue({ items: [{ ...OPENING, unread: false }], unread_count: 0, has_more: false })
     renderAt('/accueil', <EmployeeHomePage />)
-    await screen.findByText(/Bravo, votre dossier est complet/)
+    await screen.findByRole('heading', { name: /Bonjour/ })
     expect(screen.queryByRole('region', { name: 'Nouveau pour vous' })).not.toBeInTheDocument()
   })
 })

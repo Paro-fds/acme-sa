@@ -92,7 +92,7 @@ Les autres valeurs sont déjà dans `render.yaml` : `APP_ENV=demo`, `MFA_METHODS
 
 Les employés du démonstrateur sont ceux de `backend/demo/employes-fictifs.csv` : 7 actifs et 1 inactif.
 
-Le référentiel des unités (US-501) se charge depuis l'écran RH : menu du compte → **Référentiel** → importer `backend/demo/referentiel-fictif.xlsx` (régions, agences et directions « Démo » ; PB et RC restent « À rattacher », comme dans l'export réel). Le vrai référentiel ne va jamais sur le démonstrateur.
+Le référentiel des unités (US-501) se charge depuis l'écran RH **/admin/referentiel** (retiré des menus le 2026-10-13, toujours joignable par son adresse) : importer `C:cme-data-v2eferentieleferentiel-provisoire-2026-10-15.xlsx`, le **vrai référentiel provisoire** d'ACME (53 unités ; codes, libellés, régions et types seulement, aucune donnée de personne ; voir `docs/lot0/4-referentiel/rapport-anomalies-export.md` §8). Choix de l'utilisateur du 2026-10-15, qui lève la règle « le vrai référentiel ne va jamais sur le démonstrateur ». Les employés fictifs d'`AD` (« Agence Démo ») n'y sont rattachés à aucune agence. Le référentiel fictif `backend/demo/referentiel-fictif.xlsx` reste disponible.
 
 ## 6. Montrer la double authentification à M. Hilaire
 
