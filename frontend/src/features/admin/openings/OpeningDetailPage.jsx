@@ -1,18 +1,26 @@
 import { useId, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { getAdminMe } from '../../../api/admin.js'
-import { changeOpeningStatus, getOpening, listOpeningApplications } from '../../../api/openings.js'
+import {
+  changeOpeningStatus,
+  getOpening,
+  listOpeningApplications,
+  openingLetterUrl,
+  publishOpening,
+  sendHrLetter,
+} from '../../../api/openings.js'
 import Alert from '../../../components/Alert.jsx'
 import Button from '../../../components/Button.jsx'
 import Page from '../../../components/Page.jsx'
 import { formatDate, formatLocalDate } from '../../../lib/format.js'
 import { useLoader, useUnauthorizedRedirect } from '../../../lib/useLoader.js'
 import OpeningApplications from './OpeningApplications.jsx'
-import { canEdit, isAdministrator, LOGIN_PATH, OPENINGS_PATH, OpeningStatusBadge } from './openingParts.jsx'
+import { canEdit, isAdministrator, LOGIN_PATH, OPENINGS_PATH, OPENINGS_TITLE, OpeningStatusBadge } from './openingParts.jsx'
+import PublishPanel from './PublishPanel.jsx'
 
-/** Changements de statut proposés à l'Administrateur, selon le statut actuel (CA-02). */
+/** Clôturer et pourvoir : Administrateur seul (CA-02). La publication passe par `PublishPanel` (US-124). */
 const ACTIONS = {
-  DRAFT: [{ action: 'publish', label: 'Publier', done: 'Poste publié.' }],
+  DRAFT: [],
   PUBLISHED: [
     { action: 'close', label: 'Clôturer', done: 'Poste clôturé.', variant: 'secondary' },
     { action: 'fill', label: 'Marquer pourvu', done: 'Poste marqué pourvu.', variant: 'secondary' },
@@ -73,6 +81,32 @@ function CriteriaChanges({ changes }) {
   )
 }
 
+/** US-124 CA-03 : la lettre jointe à la publication ; tout compte qui consulte les postes l'ouvre (consultation tracée). */
+function LetterSection({ id, letter }) {
+  if (!letter) return null
+  return (
+    <Section title="Lettre du directeur RH">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="text-base font-semibold break-words text-heading">{letter.name}</p>
+          <p className="text-sm text-help">
+            Jointe le {formatLocalDate(letter.at)} par {letter.actor_name}
+          </p>
+        </div>
+        <a
+          href={openingLetterUrl(id)}
+          target="_blank"
+          rel="noreferrer"
+          className="flex min-h-11 items-center gap-2 self-start rounded-lg border-[1.5px] border-primary px-4 font-semibold text-primary hover:bg-info-bg"
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+          Voir la lettre
+        </a>
+      </div>
+    </Section>
+  )
+}
+
 function OpeningDetail({ id, initial, me, applications }) {
   const redirect = useUnauthorizedRedirect(LOGIN_PATH)
   const [opening, setOpening] = useState(initial)
@@ -82,12 +116,12 @@ function OpeningDetail({ id, initial, me, applications }) {
   const editable = canEdit(me) && (opening.status === 'DRAFT' || opening.status === 'PUBLISHED')
   const actions = isAdministrator(me) ? ACTIONS[opening.status] : []
 
-  async function change({ action, done }) {
+  async function run(work, done) {
     setSending(true)
     setError(null)
     setNotice(null)
     try {
-      setOpening(await changeOpeningStatus(id, action))
+      setOpening(await work())
       setNotice(done)
     } catch (caught) {
       if (!redirect(caught)) setError(caught)
@@ -95,6 +129,10 @@ function OpeningDetail({ id, initial, me, applications }) {
       setSending(false)
     }
   }
+
+  const change = ({ action, done }) => run(() => changeOpeningStatus(id, action), done)
+  const publish = (file) =>
+    run(async () => publishOpening(id, file ? await sendHrLetter(file) : null), 'Poste publié.')
 
   return (
     <>
@@ -116,11 +154,9 @@ function OpeningDetail({ id, initial, me, applications }) {
       </div>
 
       {notice && <Alert tone="success">{notice}</Alert>}
-      {error && <Alert>{error.message}</Alert>}
-      {opening.status === 'DRAFT' && !isAdministrator(me) && (
-        <p className="rounded-lg bg-info-bg p-3 text-base text-info-text">
-          En attente de la validation d'un Administrateur, qui le publiera.
-        </p>
+      {error && error.field !== 'letter' && <Alert>{error.message}</Alert>}
+      {opening.status === 'DRAFT' && canEdit(me) && (
+        <PublishPanel letterRequired={!isAdministrator(me)} sending={sending} error={error} onPublish={publish} />
       )}
       {actions.length > 0 && (
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -169,6 +205,8 @@ function OpeningDetail({ id, initial, me, applications }) {
         </ol>
       </Section>
 
+      <LetterSection id={id} letter={opening.letter} />
+
       <CriteriaChanges changes={opening.criteria_changes} />
 
       {opening.status !== 'DRAFT' && <OpeningApplications applications={applications} canAct={canEdit(me)} />}
@@ -176,7 +214,8 @@ function OpeningDetail({ id, initial, me, applications }) {
   )
 }
 
-/** US-802 : fiche d'un poste, son statut daté et signé, et les changements de statut de l'Administrateur. */
+/** US-802 : fiche d'un poste, son statut daté et signé, et les changements de statut de l'Administrateur.
+ * US-124 : publication par l'Agent RH avec la lettre du directeur RH, lettre visible sur la fiche. */
 export default function OpeningDetailPage() {
   const { id } = useParams()
   const { data, loading, error } = useLoader(
@@ -188,7 +227,7 @@ export default function OpeningDetailPage() {
   )
 
   return (
-    <Page account="admin" backTo={OPENINGS_PATH} backLabel="Postes ouverts">
+    <Page account="admin" backTo={OPENINGS_PATH} backLabel={OPENINGS_TITLE}>
       {loading && <p role="status">Chargement…</p>}
       {error && <Alert>{error.message}</Alert>}
       {data && <OpeningDetail key={id} id={id} initial={data.opening} me={data.me} applications={data.applications} />}

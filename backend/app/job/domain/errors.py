@@ -34,6 +34,21 @@ class OpeningLocked(Conflict):
     message = "Un poste clôturé ou pourvu ne se modifie plus."
 
 
+class HrLetterRequired(InvalidInput):
+    """US-124 : l'Agent RH publie seulement avec la lettre du directeur RH."""
+
+    code = "HR_LETTER_REQUIRED"
+    message = "Joignez la lettre du directeur RH pour publier ce poste."
+
+    def __init__(self) -> None:
+        super().__init__(field="letter")
+
+
+class HrLetterNotFound(NotFound):
+    code = "HR_LETTER_NOT_FOUND"
+    message = "Aucune lettre du directeur RH jointe à ce poste."
+
+
 # --- US-902 : candidatures ----------------------------------------------------------------
 
 

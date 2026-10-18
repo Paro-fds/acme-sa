@@ -75,6 +75,10 @@ from app.job.application.use_cases import (
     GetApplicationCv,
     GetOpening,
     GetOpeningForm,
+    GetOpeningLetter,
+    PublishOpening,
+    ReceiveLetterUpload,
+    RequestLetterUpload,
     ListMyApplications,
     ListMyOpenings,
     PreviewAudience,
@@ -183,6 +187,7 @@ class Container:
         self.applications = SqlApplicationRepository(self.database)
         self.job_profiles = JsonJobProfileCatalogue(settings.job_profiles_path)
         self.certificate_storage = _certificate_storage(settings)
+        self.letter_storage = _certificate_storage(settings, upload_url="/api/admin/openings/letter-uploads")
         self.file_storage = _file_storage(settings)
         self.password_hasher = Argon2PasswordHasher()
         self.totp = PyOtpTotpService()
@@ -522,6 +527,20 @@ class Container:
     def change_opening_status(self) -> ChangeOpeningStatus:
         return ChangeOpeningStatus(*self._opening_ports())
 
+    # --- job : lettre du directeur RH (US-124) ----------------------------------
+
+    def request_letter_upload(self) -> RequestLetterUpload:
+        return RequestLetterUpload(self.letter_storage, self.certificate_limits())
+
+    def receive_letter_upload(self) -> ReceiveLetterUpload:
+        return ReceiveLetterUpload(self.letter_storage, self.certificate_limits())
+
+    def publish_opening(self) -> PublishOpening:
+        return PublishOpening(*self._opening_ports(), storage=self.letter_storage, limits=self.certificate_limits())
+
+    def get_opening_letter(self) -> GetOpeningLetter:
+        return GetOpeningLetter(*self._opening_ports(), storage=self.letter_storage)
+
     # --- job : catalogue des postes ACME (US-119) -------------------------------
 
     def list_job_profiles(self) -> ListJobProfiles:
@@ -615,8 +634,9 @@ def _file_storage(settings: Settings):
     return LocalFileStorage(settings.documents_dir)
 
 
-def _certificate_storage(settings: Settings):
-    """US-301 CA-06 : en ligne, dépôt signé direct dans le compartiment privé ; en local, sur le disque."""
+def _certificate_storage(settings: Settings, upload_url: str = "/api/me/certificates/uploads"):
+    """US-301 CA-06 : en ligne, dépôt signé direct dans le compartiment privé ; en local, sur le disque.
+    US-124 : les lettres du directeur RH vont au même stockage ; en local, elles arrivent par `upload_url`."""
     if settings.storage_backend == "s3":
         return S3CertificateStorage.create(
             settings.s3_bucket,
@@ -625,4 +645,4 @@ def _certificate_storage(settings: Settings):
             settings.s3_access_key_id,
             settings.s3_secret_access_key,
         )
-    return LocalCertificateStorage(settings.certificates_dir)
+    return LocalCertificateStorage(settings.certificates_dir, upload_url)

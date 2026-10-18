@@ -6,7 +6,7 @@ import Page from '../../../components/Page.jsx'
 import { formatDate } from '../../../lib/format.js'
 import { useLoader } from '../../../lib/useLoader.js'
 import JobCatalogue from './JobCatalogue.jsx'
-import { canEdit, LOGIN_PATH, OPENINGS_PATH, OpeningStatusBadge } from './openingParts.jsx'
+import { canEdit, LOGIN_PATH, OPENINGS_PATH, OPENINGS_TITLE, OpeningStatusBadge } from './openingParts.jsx'
 
 const CATALOGUE = 'catalogue'
 
@@ -54,6 +54,7 @@ function Tab({ selected, onSelect, icon, children }) {
 
 /**
  * US-802 : postes saisis par les RH, avec leur statut (Brouillon, Publié, Clôturé, Pourvu).
+ * US-124 : titre « Publication de postes », sans sous-titre ; « Saisir un poste hors catalogue ».
  * US-119 : second onglet « Catalogue des postes ACME » (`?onglet=catalogue`), d'où l'on publie un poste à partir de sa fiche.
  */
 export default function OpeningsPage() {
@@ -66,8 +67,7 @@ export default function OpeningsPage() {
     <Page
       account="admin"
       wide
-      title="Postes ouverts"
-      subtitle="Un Agent RH saisit le poste ; un Administrateur le valide et le publie."
+      title={OPENINGS_TITLE}
       headerActions={
         data &&
         canEdit(data.me) && (
@@ -76,12 +76,12 @@ export default function OpeningsPage() {
             className="flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-base font-semibold text-white hover:bg-primary-active"
           >
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
-            Saisir un poste
+            Saisir un poste hors catalogue
           </Link>
         )
       }
     >
-      <div role="tablist" aria-label="Postes ouverts" className="flex gap-1 overflow-x-auto border-b border-border">
+      <div role="tablist" aria-label={OPENINGS_TITLE} className="flex gap-1 overflow-x-auto border-b border-border">
         <Tab selected={!catalogue} onSelect={() => show(null)} icon="campaign">
           Postes publiés
         </Tab>

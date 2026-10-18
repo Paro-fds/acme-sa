@@ -4,6 +4,8 @@
 - Les critères sont structurés pour que l'éligibilité (US-801, EF-805) puisse les calculer ; aucun n'est obligatoire.
 - Statuts Brouillon → Publié → Clôturé → Pourvu, chacun daté et signé ; un critère modifié après publication est
   tracé (CA-02). Un poste clôturé ou pourvu ne se modifie plus.
+- US-124 : l'Agent RH publie en joignant la lettre du directeur RH ; l'Administrateur publie avec ou sans lettre.
+  La lettre est jointe à la publication et ne change plus ensuite.
 """
 
 import re
@@ -12,7 +14,7 @@ from datetime import date, datetime
 from enum import StrEnum
 
 from app.certificate.domain.certificate import DOMAIN_LABELS, DOMAINS
-from app.job.domain.errors import InvalidOpeningField, OpeningLocked, OpeningTransitionRefused
+from app.job.domain.errors import HrLetterRequired, InvalidOpeningField, OpeningLocked, OpeningTransitionRefused
 from app.shared.domain.levels import LEVELS_BY_CODE
 
 _CODE = re.compile(r"^[A-Z0-9][A-Z0-9_-]{1,19}$")
@@ -203,6 +205,18 @@ class CriteriaChange:
     after: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class HrLetter:
+    """US-124 : lettre du directeur RH jointe à la publication, dans le stockage privé des certificats."""
+
+    key: str
+    name: str
+    content_type: str
+    size_bytes: int
+    at: datetime
+    actor: Actor
+
+
 @dataclass
 class JobOpening:
     id: int | None
@@ -218,6 +232,7 @@ class JobOpening:
     history: list[StatusChange] = field(default_factory=list)
     criteria_changes: list[CriteriaChange] = field(default_factory=list)
     profile_code: str | None = None
+    letter: HrLetter | None = None
 
     @classmethod
     def create(cls, fields: OpeningFields, actor: Actor, at: datetime) -> "JobOpening":
@@ -244,8 +259,12 @@ class JobOpening:
             )
         self._apply(fields)
 
-    def publish(self, actor: Actor, at: datetime) -> None:
+    def publish(self, actor: Actor, at: datetime, letter: HrLetter | None = None, *, letter_required: bool = False) -> None:
+        """US-124 : `letter_required` pour l'Agent RH ; la lettre éventuelle est gardée avec la publication."""
+        if self.status is OpeningStatus.DRAFT and letter_required and letter is None:
+            raise HrLetterRequired()
         self._move({OpeningStatus.DRAFT}, OpeningStatus.PUBLISHED, actor, at, "Seul un brouillon peut être publié.")
+        self.letter = letter
 
     def close(self, actor: Actor, at: datetime) -> None:
         self._move({OpeningStatus.PUBLISHED}, OpeningStatus.CLOSED, actor, at, "Seul un poste publié peut être clôturé.")

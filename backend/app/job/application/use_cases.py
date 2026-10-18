@@ -5,6 +5,7 @@ changements de statut par l'Administrateur seul (choix de l'utilisateur du 2026-
 inscrite au journal d'audit (US-604).
 """
 
+import re
 import secrets
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -13,7 +14,7 @@ from typing import Protocol
 from app.admin.domain.audit import AuditAction, AuditEntry, AuditRepository
 from app.certificate.application.use_cases import Limits, storage_key
 from app.certificate.domain.certificate import DOMAIN_LABELS, DOMAINS, CertificateStatus, validated_level
-from app.certificate.domain.errors import CertificateFileTooLarge, UploadNotFound
+from app.certificate.domain.errors import CertificateFileTooLarge, LocalUploadsUnavailable, UploadNotFound
 from app.certificate.domain.files import SIGNATURE_LENGTH, check_announced_type, clean_original_name, detect_kind
 from app.certificate.domain.ports import CertificateRepository, CertificateStorage, UploadTicket
 from app.employee.domain.repository import EmployeeRepository, get_employee
@@ -23,6 +24,7 @@ from app.job.domain.eligibility import Audience, Candidate, ValidatedCertificate
 from app.job.domain.errors import (
     AlreadyApplied,
     ApplicationNotFound,
+    HrLetterNotFound,
     NotEligible,
     InvalidOpeningField,
     OpeningCodeTaken,
@@ -34,6 +36,7 @@ from app.job.domain.errors import (
 from app.job.domain.opening import (
     Actor,
     Criteria,
+    HrLetter,
     JobOpening,
     OpeningFields,
     OpeningStatus,
@@ -84,6 +87,17 @@ class CriteriaChangeView:
 
 
 @dataclass(frozen=True)
+class LetterView:
+    """US-124 : la lettre du directeur RH jointe à la publication (le fichier s'ouvre à part, consultation tracée)."""
+
+    name: str
+    content_type: str
+    size_bytes: int
+    at: datetime
+    actor_name: str
+
+
+@dataclass(frozen=True)
 class OpeningView:
     id: int
     code: str
@@ -102,6 +116,7 @@ class OpeningView:
     criteria_changes: list[CriteriaChangeView]
     profile_code: str | None = None
     profile_title: str | None = None
+    letter: LetterView | None = None
 
 
 def _unit_labels(referential: ReferentialRepository) -> dict[str, str]:
@@ -135,7 +150,14 @@ def _view(opening: JobOpening, units: dict[str, str], catalogue: JobProfileCatal
         ],
         profile_code=opening.profile_code,
         profile_title=profile.title if profile else None,
+        letter=_letter_view(opening.letter),
     )
+
+
+def _letter_view(letter: HrLetter | None) -> LetterView | None:
+    if letter is None:
+        return None
+    return LetterView(letter.name, letter.content_type, letter.size_bytes, letter.at, letter.actor.name)
 
 
 class _OpeningCase:
@@ -246,9 +268,9 @@ class UpdateOpening(_OpeningCase):
 
 
 class ChangeOpeningStatus(_OpeningCase):
-    """CA-02 : publier, clôturer, pourvoir ; chaque étape est datée et signée."""
+    """CA-02 : clôturer, pourvoir (Administrateur seul) ; chaque étape est datée et signée. Publier : PublishOpening."""
 
-    ACTIONS = ("publish", "close", "fill")
+    ACTIONS = ("close", "fill")
 
     def execute(self, opening_id: int, action: str, actor: Actor) -> OpeningView:
         if action not in self.ACTIONS:
@@ -260,6 +282,115 @@ class ChangeOpeningStatus(_OpeningCase):
         self._trace_status(actor, opening, now)
         return self._view(opening, _unit_labels(self._referential))
 
+
+# --- US-124 : publier avec la lettre du directeur RH ---------------------------------------
+
+_UPLOAD_ID = re.compile(r"^[0-9a-f]{32}$")
+
+
+def letter_key(upload_id: str) -> str:
+    """Nom aléatoire dans le dossier des lettres du stockage privé (comme un certificat, US-301 CA-05)."""
+    if not _UPLOAD_ID.match(upload_id or ""):
+        raise UploadNotFound()
+    return f"job-letters/{upload_id}"
+
+
+@dataclass(frozen=True)
+class LetterUpload:
+    upload_id: str
+    ticket: UploadTicket
+
+
+class RequestLetterUpload:
+    """Avant l'envoi de la lettre : type annoncé et taille contrôlés, dépôt signé vers le stockage privé."""
+
+    def __init__(self, storage: CertificateStorage, limits: Limits) -> None:
+        self._storage = storage
+        self._limits = limits
+
+    def execute(self, content_type: str, size_bytes: int) -> LetterUpload:
+        check_announced_type(content_type)
+        if size_bytes > self._limits.max_bytes:
+            raise CertificateFileTooLarge()
+        upload_id = secrets.token_hex(16)
+        return LetterUpload(upload_id, self._storage.presign_upload(letter_key(upload_id), content_type))
+
+
+class ReceiveLetterUpload:
+    """Poste du développeur seulement : le stockage local reçoit la lettre par l'API (en ligne, S3 la reçoit)."""
+
+    def __init__(self, storage: CertificateStorage, limits: Limits) -> None:
+        self._storage = storage
+        self._limits = limits
+
+    def execute(self, upload_id: str, content: bytes) -> None:
+        if not self._storage.receives_uploads:
+            raise LocalUploadsUnavailable()
+        if len(content) > self._limits.max_bytes:
+            raise CertificateFileTooLarge()
+        self._storage.receive(letter_key(upload_id), content)
+
+
+class PublishOpening(_OpeningCase):
+    """CA-01, CA-02 : l'Agent RH publie avec la lettre du directeur RH, contrôlée sur son contenu réel ;
+    l'Administrateur publie avec ou sans lettre."""
+
+    def __init__(self, *ports, storage: CertificateStorage, limits: Limits) -> None:
+        super().__init__(*ports)
+        self._storage = storage
+        self._limits = limits
+
+    def _letter(self, upload_id: str | None, name: str, actor: Actor, at: datetime) -> HrLetter | None:
+        if not upload_id:
+            return None
+        key = letter_key(upload_id)
+        size = self._storage.size(key)
+        if size is None:
+            raise UploadNotFound()
+        if size > self._limits.max_bytes:
+            self._storage.delete(key)
+            raise CertificateFileTooLarge()
+        try:
+            content_type = detect_kind(self._storage.head(key, SIGNATURE_LENGTH))
+        except Exception:
+            self._storage.delete(key)
+            raise
+        return HrLetter(key, clean_original_name(name or "lettre"), content_type, size, at, actor)
+
+    def execute(
+        self, opening_id: int, actor: Actor, *, letter_required: bool, letter_upload_id: str | None = None,
+        letter_name: str = "",
+    ) -> OpeningView:
+        opening = self._get(opening_id)
+        now = self._clock.now()
+        letter = self._letter(letter_upload_id, letter_name, actor, now) if opening.status is OpeningStatus.DRAFT else None
+        opening.publish(actor, now, letter, letter_required=letter_required)
+        self._openings.save(opening)
+        self._trace_status(actor, opening, now)
+        return self._view(opening, _unit_labels(self._referential))
+
+
+@dataclass(frozen=True)
+class LetterContent:
+    name: str
+    content_type: str
+    content: bytes
+
+
+class GetOpeningLetter(_OpeningCase):
+    """CA-03 : ouvrir la lettre jointe ; chaque consultation est inscrite au journal d'audit (US-604)."""
+
+    def __init__(self, *ports, storage: CertificateStorage) -> None:
+        super().__init__(*ports)
+        self._storage = storage
+
+    def execute(self, opening_id: int, actor: Actor) -> LetterContent:
+        opening = self._get(opening_id)
+        letter = opening.letter
+        if letter is None:
+            raise HrLetterNotFound()
+        self._trace(actor, opening, f"Consultation de la lettre du directeur RH du poste {opening.code}", self._clock.now())
+        return LetterContent(letter.name, letter.content_type, self._storage.read(letter.key))
 
 
 # --- US-801 : les postes publiés auxquels l'employé est apte ------------------------------

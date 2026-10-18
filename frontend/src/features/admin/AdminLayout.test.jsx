@@ -46,7 +46,7 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
       'Tableau de bord',
       'File de validation',
       'Employés',
-      'Postes ouverts',
+      'Postes à pourvoir',
       'Signalements',
       'Comptes et rôles',
       "Journal d'audit",
@@ -83,7 +83,7 @@ describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
   }
 
   it('Agent RH : ni « À rattacher », ni « Comptes et rôles », ni « Journal d’audit »', async () => {
-    expect(await menuFor('AGENT_RH')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes ouverts', 'Signalements'])
+    expect(await menuFor('AGENT_RH')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes à pourvoir', 'Signalements'])
   })
 
   it('Responsable du référentiel : tableau de bord et employés (« À rattacher » retiré du menu le 2026-10-13)', async () => {
@@ -91,7 +91,7 @@ describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
   })
 
   it('Lecture seule : consultation, sans référentiel, comptes ni journal', async () => {
-    expect(await menuFor('READONLY')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes ouverts', 'Signalements'])
+    expect(await menuFor('READONLY')).toEqual(['Tableau de bord', 'File de validation', 'Employés', 'Postes à pourvoir', 'Signalements'])
   })
 
   it('Administrateur : toutes les rubriques', async () => {

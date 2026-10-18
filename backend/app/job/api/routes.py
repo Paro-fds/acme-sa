@@ -1,5 +1,6 @@
 """US-802 : postes ouverts, côté espace RH. Tout compte RH consulte ; l'Agent RH et l'Administrateur saisissent ;
-seul l'Administrateur publie, clôture et marque un poste pourvu."""
+seul l'Administrateur clôture et marque un poste pourvu. US-124 : l'Agent RH publie avec la lettre du directeur RH,
+l'Administrateur avec ou sans lettre."""
 
 from datetime import date, datetime
 
@@ -40,7 +41,7 @@ def editor(request: Request) -> Actor:
 
 
 def administrator(request: Request) -> Actor:
-    """Publication, clôture, poste pourvu : Administrateur seul."""
+    """Clôture, poste pourvu : Administrateur seul."""
     account = current_admin_account(request)
     if account.role != AdminRole.ADMIN:
         raise InsufficientRole("Seul un Administrateur change le statut d'un poste.")
@@ -141,6 +142,14 @@ class CriteriaChangeOut(BaseModel):
     after: list[str]
 
 
+class LetterOut(BaseModel):
+    name: str
+    content_type: str
+    size_bytes: int
+    at: datetime
+    actor_name: str
+
+
 class OpeningOut(BaseModel):
     id: int
     code: str
@@ -159,6 +168,7 @@ class OpeningOut(BaseModel):
     criteria_changes: list[CriteriaChangeOut]
     profile_code: str | None
     profile_title: str | None
+    letter: LetterOut | None
 
 
 class OpeningListOut(BaseModel):
@@ -170,6 +180,7 @@ def _out(view: OpeningView) -> OpeningOut:
     data["criteria"] = CriteriaOut(**view.criteria.__dict__)
     data["history"] = [StepOut(**step.__dict__) for step in view.history]
     data["criteria_changes"] = [CriteriaChangeOut(**change.__dict__) for change in view.criteria_changes]
+    data["letter"] = LetterOut(**view.letter.__dict__) if view.letter else None
     return OpeningOut(**data)
 
 
@@ -205,6 +216,85 @@ def create_opening(body: OpeningIn, request: Request, actor: Actor = Depends(edi
     return _out(container(request).create_opening().execute(body.to_fields(), actor))
 
 
+# --- US-124 : lettre du directeur RH --------------------------------------------------------
+
+
+class LetterUploadIn(BaseModel):
+    content_type: str = Field("", max_length=100)
+    size_bytes: int = 0
+
+
+class LetterUploadOut(BaseModel):
+    upload_id: str
+    method: str
+    url: str
+    headers: dict[str, str]
+
+
+class PublishIn(BaseModel):
+    letter_upload_id: str | None = Field(None, max_length=64)
+    letter_name: str = Field("", max_length=300)
+
+
+def publisher(request: Request) -> tuple[Actor, bool]:
+    """Agent RH (lettre obligatoire) ou Administrateur (lettre facultative)."""
+    account = current_admin_account(request)
+    if account.role not in (AdminRole.ADMIN, AdminRole.AGENT_RH):
+        raise InsufficientRole("Seuls un Agent RH ou un Administrateur publient un poste.")
+    return _actor(account), account.role is AdminRole.AGENT_RH
+
+
+@router.post("/letter-uploads", response_model=LetterUploadOut)
+def request_letter_upload(body: LetterUploadIn, request: Request, _: Actor = Depends(editor)) -> LetterUploadOut:
+    """Dépôt signé de la lettre (PDF, JPG ou PNG) ; au poste du développeur, le fichier arrive par la route suivante."""
+    upload = container(request).request_letter_upload().execute(body.content_type, body.size_bytes)
+    return LetterUploadOut(
+        upload_id=upload.upload_id, method=upload.ticket.method, url=upload.ticket.url, headers=upload.ticket.headers
+    )
+
+
+@router.put("/letter-uploads/{upload_id}", status_code=204)
+async def receive_local_letter_upload(upload_id: str, request: Request, _: Actor = Depends(editor)) -> Response:
+    """Poste du développeur seulement (stockage local) : en ligne, cette adresse n'existe pas (404)."""
+    limit = container(request).settings.max_upload_mb * 1024 * 1024
+    content = bytearray()
+    async for chunk in request.stream():
+        content.extend(chunk)
+        if len(content) > limit:
+            break
+    container(request).receive_letter_upload().execute(upload_id, bytes(content))
+    return Response(status_code=204)
+
+
+@router.post("/{opening_id}/publish", response_model=OpeningOut)
+def publish_opening(
+    opening_id: int, request: Request, body: PublishIn | None = None, who: tuple[Actor, bool] = Depends(publisher)
+) -> OpeningOut:
+    actor, letter_required = who
+    body = body or PublishIn()
+    return _out(
+        container(request).publish_opening().execute(
+            opening_id, actor, letter_required=letter_required, letter_upload_id=body.letter_upload_id,
+            letter_name=body.letter_name,
+        )
+    )
+
+
+@router.get("/{opening_id}/letter")
+def opening_letter(opening_id: int, request: Request, actor: Actor = Depends(reader)) -> Response:
+    """Tout compte qui consulte les postes ouvre la lettre ; chaque consultation est tracée (US-604)."""
+    letter = container(request).get_opening_letter().execute(opening_id, actor)
+    return Response(
+        content=letter.content,
+        media_type=letter.content_type,
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(letter.name)}",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+        },
+    )
+
+
 @router.get("/{opening_id}", response_model=OpeningOut)
 def get_opening(opening_id: int, request: Request, _: Actor = Depends(reader)) -> OpeningOut:
     return _out(container(request).get_opening().execute(opening_id))
@@ -222,7 +312,7 @@ def _change_status(action: str):
     return route
 
 
-for _action in ("publish", "close", "fill"):
+for _action in ("close", "fill"):
     router.add_api_route(
         f"/{{opening_id}}/{_action}", _change_status(_action), methods=["POST"], response_model=OpeningOut,
         name=f"{_action}_opening",

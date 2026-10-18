@@ -14,6 +14,8 @@ import {
   listOpenings,
   moveApplication,
   previewAudience,
+  publishOpening,
+  sendHrLetter,
   updateOpening,
 } from '../../../api/openings.js'
 import OpeningDetailPage from './OpeningDetailPage.jsx'
@@ -31,6 +33,9 @@ vi.mock('../../../api/openings.js', () => ({
   moveApplication: vi.fn(),
   closeApplication: vi.fn(),
   previewAudience: vi.fn(),
+  publishOpening: vi.fn(),
+  sendHrLetter: vi.fn(),
+  openingLetterUrl: (id) => `/api/admin/openings/${id}/letter`,
   applicationCvUrl: (id) => `/api/admin/applications/${id}/cv`,
 }))
 vi.mock('../../../api/admin.js', () => ({ getAdminMe: vi.fn() }))
@@ -127,13 +132,22 @@ describe('US-802 — liste des postes', () => {
 
   it("un Agent RH peut saisir un poste ; un compte en lecture seule non", async () => {
     const { unmount } = renderAt('/admin/postes')
-    expect(await screen.findByRole('link', { name: /Saisir un poste/ })).toHaveAttribute('href', '/admin/postes/nouveau')
+    expect(await screen.findByRole('link', { name: 'Saisir un poste hors catalogue' })).toHaveAttribute(
+      'href',
+      '/admin/postes/nouveau',
+    )
     unmount()
 
     getAdminMe.mockResolvedValue(me('READONLY'))
     renderAt('/admin/postes')
     await screen.findByRole('list', { name: 'Postes' })
     expect(screen.queryByRole('link', { name: /Saisir un poste/ })).not.toBeInTheDocument()
+  })
+
+  it('US-124 CA-05 — l’écran s’intitule « Publication de postes », sans sous-titre', async () => {
+    renderAt('/admin/postes')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Publication de postes' })).toBeInTheDocument()
+    expect(screen.queryByText(/Un Agent RH saisit le poste/)).not.toBeInTheDocument()
   })
 
   it('aucun poste : le dit simplement', async () => {
@@ -336,21 +350,21 @@ describe('US-802 CA-02 — statuts, date et auteur', () => {
     expect(published).toHaveTextContent('Publié — 05/10/2026 · Administrateur Démo')
   })
 
-  it("l'Agent RH ne change pas le statut", async () => {
+  it("l'Agent RH ne clôture pas et ne marque pas pourvu", async () => {
+    getOpening.mockResolvedValue(PUBLISHED)
     renderAt('/admin/postes/7')
     await screen.findByRole('heading', { name: 'Chargé de crédit' })
-    expect(screen.queryByRole('button', { name: 'Publier' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Clôturer|Marquer pourvu/ })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Modifier' })).toHaveAttribute('href', '/admin/postes/7/modifier')
-    expect(screen.getByText(/En attente de la validation d'un Administrateur/)).toBeInTheDocument()
   })
 
   it("l'Administrateur publie un brouillon, puis peut le clôturer ou le marquer pourvu", async () => {
     const user = userEvent.setup()
     getAdminMe.mockResolvedValue(me('ADMIN'))
-    changeOpeningStatus.mockResolvedValue(PUBLISHED)
+    publishOpening.mockResolvedValue(PUBLISHED)
     renderAt('/admin/postes/7')
     await user.click(await screen.findByRole('button', { name: 'Publier' }))
-    expect(changeOpeningStatus).toHaveBeenCalledWith('7', 'publish')
+    expect(publishOpening).toHaveBeenCalledWith('7', null)
     expect(await screen.findByRole('button', { name: 'Clôturer' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Marquer pourvu' })).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('Poste publié.')
@@ -485,5 +499,57 @@ describe('US-122 — saisir un poste sans grade', () => {
     renderAt('/admin/postes')
     expect(await screen.findByText('Chargé de crédit')).toBeInTheDocument()
     expect(screen.queryByText(/grade 10/)).not.toBeInTheDocument()
+  })
+})
+
+const LETTER = { name: 'lettre-drh.pdf', content_type: 'application/pdf', size_bytes: 2048, at: '2026-10-05T09:00:00Z', actor_name: 'Agent RH Démo' }
+const pdf = () => new File(['%PDF-1.7'], 'lettre-drh.pdf', { type: 'application/pdf' })
+
+describe('US-124 — publier avec la lettre du directeur RH', () => {
+  it("CA-01 — l'Agent RH ne publie pas sans la lettre : le message est près du champ", async () => {
+    const user = userEvent.setup()
+    renderAt('/admin/postes/7')
+    const field = await screen.findByLabelText('Lettre du directeur RH')
+    await user.click(screen.getByRole('button', { name: 'Publier' }))
+    expect(field).toHaveAttribute('aria-invalid', 'true')
+    expect(field).toHaveAccessibleDescription(/Joignez la lettre du directeur RH pour publier ce poste\./)
+    expect(sendHrLetter).not.toHaveBeenCalled()
+    expect(publishOpening).not.toHaveBeenCalled()
+  })
+
+  it("CA-01 — l'Agent RH joint la lettre et publie", async () => {
+    const user = userEvent.setup()
+    sendHrLetter.mockResolvedValue({ uploadId: 'a'.repeat(32), name: 'lettre-drh.pdf' })
+    publishOpening.mockResolvedValue({ ...PUBLISHED, letter: LETTER })
+    renderAt('/admin/postes/7')
+    const file = pdf()
+    await user.upload(await screen.findByLabelText('Lettre du directeur RH'), file)
+    await user.click(screen.getByRole('button', { name: 'Publier' }))
+    expect(sendHrLetter).toHaveBeenCalledWith(file)
+    expect(publishOpening).toHaveBeenCalledWith('7', { uploadId: 'a'.repeat(32), name: 'lettre-drh.pdf' })
+    expect(await screen.findByRole('status')).toHaveTextContent('Poste publié.')
+    expect(screen.queryByRole('button', { name: 'Publier' })).not.toBeInTheDocument()
+  })
+
+  it("CA-02 — pour l'Administrateur, la lettre est facultative", async () => {
+    getAdminMe.mockResolvedValue(me('ADMIN'))
+    renderAt('/admin/postes/7')
+    expect(await screen.findByLabelText('Lettre du directeur RH (facultative)')).toBeInTheDocument()
+  })
+
+  it('un compte en lecture seule ne publie pas', async () => {
+    getAdminMe.mockResolvedValue(me('READONLY'))
+    renderAt('/admin/postes/7')
+    await screen.findByRole('heading', { name: 'Chargé de crédit' })
+    expect(screen.queryByRole('button', { name: 'Publier' })).not.toBeInTheDocument()
+  })
+
+  it('CA-03 — la fiche montre la lettre, qui l’a jointe et quand, avec un lien pour l’ouvrir', async () => {
+    getAdminMe.mockResolvedValue(me('ADMIN'))
+    getOpening.mockResolvedValue({ ...PUBLISHED, letter: LETTER })
+    renderAt('/admin/postes/7')
+    const section = await screen.findByRole('region', { name: 'Lettre du directeur RH' })
+    expect(section).toHaveTextContent('Jointe le 05/10/2026 par Agent RH Démo')
+    expect(within(section).getByRole('link', { name: /Voir la lettre/ })).toHaveAttribute('href', '/api/admin/openings/7/letter')
   })
 })

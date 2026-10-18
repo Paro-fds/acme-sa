@@ -14,7 +14,7 @@ const SCREENS = [
   { path: '/admin/signalements', name: 'a08-signalements', heading: "Signalements d'erreur", menu: 'Signalements' },
   { path: '/admin/comptes', name: 'a10-comptes-et-roles', heading: 'Comptes et rôles', menu: 'Comptes et rôles' },
   { path: '/admin/audit', name: 'a11-journal-d-audit', heading: "Journal d'audit", menu: "Journal d'audit" },
-  { path: '/admin/postes', name: 'postes-ouverts', heading: 'Postes ouverts', menu: 'Postes ouverts' },
+  { path: '/admin/postes', name: 'postes-a-pourvoir', heading: 'Publication de postes', menu: 'Postes à pourvoir' },
 ]
 
 /** US-108 : chaque écran RH a le cadre de l'écran A02, à 1280 px comme à 390 px. */

@@ -12,8 +12,10 @@ export function OpeningStatusBadge({ opening }) {
 }
 
 /** Saisie et modification : Agent RH ou Administrateur (US-802). */
+/** US-124 : titre de l'écran des postes dans l'espace de gestion (le menu dit « Postes à pourvoir »). */
+export const OPENINGS_TITLE = 'Publication de postes'
 export const canEdit = (me) => me?.role === 'ADMIN' || me?.role === 'AGENT_RH'
-/** Publier, clôturer, pourvoir : Administrateur seul. */
+/** Clôturer, pourvoir, publier sans lettre (US-124) : Administrateur seul. */
 export const isAdministrator = (me) => me?.role === 'ADMIN'
 
 function Label({ htmlFor, label, required }) {

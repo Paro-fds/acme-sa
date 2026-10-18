@@ -152,8 +152,9 @@ def test_ca02_l_administrateur_publie_apres_l_agent_rh(agent_client, admin_clien
     assert body["history"][1]["at"].startswith("2026-10-04T09:10")
 
 
-@pytest.mark.parametrize("action", ["publish", "close", "fill"])
+@pytest.mark.parametrize("action", ["close", "fill"])
 def test_ca02_seul_l_administrateur_change_le_statut(agent_client, action):
+    """US-124 : l'Agent RH publie avec la lettre du directeur RH ; clôturer et pourvoir restent à l'Administrateur."""
     created = _create(agent_client)
     response = agent_client.post(f"{OPENINGS}/{created['id']}/{action}")
     assert response.status_code == 403

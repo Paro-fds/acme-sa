@@ -28,9 +28,32 @@ export function previewAudience(criteria) {
   return request('/admin/openings/audience', { method: 'POST', body: criteria })
 }
 
-/** Administrateur seul : `publish`, `close` ou `fill`. */
+/** Administrateur seul : `close` ou `fill`. */
 export function changeOpeningStatus(id, action) {
   return request(`/admin/openings/${encodeURIComponent(id)}/${action}`, { method: 'POST' })
+}
+
+/** US-124 : publier un brouillon ; `letter` : `{ uploadId, name }` (obligatoire pour l'Agent RH) ou rien. */
+export function publishOpening(id, letter = null) {
+  return request(`/admin/openings/${encodeURIComponent(id)}/publish`, {
+    method: 'POST',
+    body: { letter_upload_id: letter?.uploadId ?? null, letter_name: letter?.name ?? '' },
+  })
+}
+
+/** US-124 : la lettre du directeur RH (PDF, JPG ou PNG) envoyée au stockage privé avant la publication. */
+export async function sendHrLetter(file) {
+  const ticket = await request('/admin/openings/letter-uploads', {
+    method: 'POST',
+    body: { content_type: file.type, size_bytes: file.size },
+  })
+  await uploadToStorage(ticket, file)
+  return { uploadId: ticket.upload_id, name: file.name }
+}
+
+/** Adresse de la lettre d'un poste, ouverte dans l'espace de gestion (chaque consultation est tracée). */
+export function openingLetterUrl(id) {
+  return `/api/admin/openings/${encodeURIComponent(id)}/letter`
 }
 
 /** US-801 : postes publiés et ouverts auxquels l'employé connecté est apte. */

@@ -3,7 +3,7 @@ from datetime import date, datetime
 from sqlalchemy import Date, ForeignKey, Integer, String, Text, delete, func, select
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from app.job.domain.opening import Actor, Criteria, CriteriaChange, JobOpening, OpeningStatus, StatusChange
+from app.job.domain.opening import Actor, Criteria, CriteriaChange, HrLetter, JobOpening, OpeningStatus, StatusChange
 from app.shared.infrastructure.database import Base, Database, UtcDateTime
 
 _LINES = "\n"
@@ -26,6 +26,14 @@ class OpeningRow(Base):
     min_years_in_position: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_grade: Mapped[str | None] = mapped_column(String, nullable=True)
     profile_code: Mapped[str | None] = mapped_column(String, nullable=True)
+    # US-124 : lettre du directeur RH jointe à la publication.
+    letter_key: Mapped[str | None] = mapped_column(String, nullable=True)
+    letter_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    letter_content_type: Mapped[str | None] = mapped_column(String, nullable=True)
+    letter_size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    letter_at: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+    letter_actor_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    letter_actor_name: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class OpeningDomainRow(Base):
@@ -85,6 +93,14 @@ def _write(row: OpeningRow, opening: JobOpening) -> None:
     row.closes_on = opening.closes_on
     row.status = opening.status.value
     row.profile_code = opening.profile_code
+    letter = opening.letter
+    row.letter_key = letter.key if letter else None
+    row.letter_name = letter.name if letter else None
+    row.letter_content_type = letter.content_type if letter else None
+    row.letter_size_bytes = letter.size_bytes if letter else None
+    row.letter_at = letter.at if letter else None
+    row.letter_actor_id = letter.actor.id if letter else None
+    row.letter_actor_name = letter.actor.name if letter else None
     criteria = opening.criteria
     row.min_level = criteria.min_level
     row.min_years_in_institution = criteria.min_years_in_institution
@@ -98,6 +114,15 @@ def _write_lists(session: Session, opening: JobOpening) -> None:
     session.execute(delete(OpeningUnitRow).where(OpeningUnitRow.opening_id == opening.id))
     session.add_all(OpeningDomainRow(opening_id=opening.id, domain=code) for code in opening.criteria.domains)
     session.add_all(OpeningUnitRow(opening_id=opening.id, unit_code=code) for code in opening.criteria.unit_codes)
+
+
+def _letter(row: OpeningRow) -> HrLetter | None:
+    if not row.letter_key:
+        return None
+    return HrLetter(
+        row.letter_key, row.letter_name, row.letter_content_type, row.letter_size_bytes, row.letter_at,
+        Actor(row.letter_actor_id, row.letter_actor_name),
+    )
 
 
 def _split(text: str) -> tuple[str, ...]:
@@ -201,6 +226,7 @@ class SqlOpeningRepository:
             ),
             status=OpeningStatus(row.status),
             profile_code=row.profile_code,
+            letter=_letter(row),
             history=[
                 StatusChange(OpeningStatus(step.status), step.at, Actor(step.actor_id, step.actor_name)) for step in steps
             ],
