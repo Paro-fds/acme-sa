@@ -168,13 +168,13 @@ def test_ca03_lock_survives_a_restart(settings, clock, client):
         restarted.state.container.close()
 
 
-# --- CA-07 : expiration après 2 heures d'inactivité (T-15.2) -----------------------------
+# --- CA-07 : expiration après 15 minutes d'inactivité (US-125 ; 2 heures avant le 2026-10-17) ---
 
 
-def test_ca07_session_expires_after_2_hours_of_inactivity(client, clock):
+def test_ca07_session_expires_after_15_minutes_of_inactivity(client, clock):
     _login(client)
 
-    clock.advance(hours=2)
+    clock.advance(minutes=15)
     response = client.get("/api/admin/employees")
 
     assert response.status_code == 401
@@ -186,7 +186,7 @@ def test_ca07_activity_keeps_the_session_alive(client, clock):
     _login(client)
 
     for _ in range(3):
-        clock.advance(hours=1, minutes=59)
+        clock.advance(minutes=14, seconds=59)
         assert client.get("/api/admin/employees").status_code == 200
 
 

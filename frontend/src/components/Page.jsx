@@ -1,6 +1,13 @@
 import AppHeader from './AppHeader.jsx'
 import EmployeeLayout from './EmployeeLayout.jsx'
 import AdminLayout from '../features/admin/AdminLayout.jsx'
+import { useIdleLogout } from '../lib/useIdleLogout.js'
+
+/** US-125 : déconnexion après 15 minutes sans activité, dans les deux espaces connectés. */
+function IdleLogout({ space }) {
+  useIdleLogout(space)
+  return null
+}
 
 /**
  * Mise en page commune :
@@ -25,24 +32,30 @@ export default function Page({
 }) {
   if (account === 'admin') {
     return (
-      <AdminLayout
-        title={title}
-        subtitle={subtitle}
-        backTo={backTo}
-        backLabel={backLabel}
-        headerActions={headerActions}
-        wide={wide}
-      >
-        {children}
-      </AdminLayout>
+      <>
+        <IdleLogout space="admin" />
+        <AdminLayout
+          title={title}
+          subtitle={subtitle}
+          backTo={backTo}
+          backLabel={backLabel}
+          headerActions={headerActions}
+          wide={wide}
+        >
+          {children}
+        </AdminLayout>
+      </>
     )
   }
 
   if (account === true) {
     return (
-      <EmployeeLayout title={title} backTo={backTo} backLabel={backLabel} actions={actions} nav={nav} aside={aside} asideLabel={asideLabel} wide={wide}>
-        {children}
-      </EmployeeLayout>
+      <>
+        <IdleLogout space="employee" />
+        <EmployeeLayout title={title} backTo={backTo} backLabel={backLabel} actions={actions} nav={nav} aside={aside} asideLabel={asideLabel} wide={wide}>
+          {children}
+        </EmployeeLayout>
+      </>
     )
   }
 

@@ -110,11 +110,12 @@ def test_us101_ca03_employee_without_password_gets_the_generic_answer(client, ac
     assert without_password.json() == wrong_password.json() == {"error": GENERIC}
 
 
-def test_ca07_session_expires_after_30_minutes_of_inactivity(client, account, clock):
+def test_ca07_session_expires_after_15_minutes_of_inactivity(client, account, clock):
+    """US-125 : 15 minutes (30 avant le 2026-10-17)."""
     account(EMP_A, PASSWORD)
     _login(client)
 
-    clock.advance(minutes=31)
+    clock.advance(minutes=15)
     response = client.get("/api/me/profile")
 
     assert response.status_code == 401
@@ -128,9 +129,9 @@ def test_ca07_activity_extends_the_session(client, account, clock):
     account(EMP_A, PASSWORD)
     _login(client)
 
-    clock.advance(minutes=20)
+    clock.advance(minutes=14)
     assert client.get("/api/me/profile").status_code == 200
-    clock.advance(minutes=20)
+    clock.advance(minutes=14)
     assert client.get("/api/me/profile").status_code == 200
 
 

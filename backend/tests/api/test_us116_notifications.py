@@ -155,7 +155,7 @@ def test_ca02_une_candidature(admin_client, container, clock):
 
 def test_ca02_les_plus_recentes_d_abord_filtre_et_limite(admin_client, container, clock):
     deposit(container, EMP_A, title="Premier", suffix="1")
-    clock.advance(hours=1)
+    clock.advance(minutes=10)
     deposit(container, EMP_E, title="Second", suffix="2")
     body = items(admin_client)
     assert [item["detail"] for item in body["items"]] == ["Second", "Premier"]

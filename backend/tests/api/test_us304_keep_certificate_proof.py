@@ -73,7 +73,7 @@ def test_ca02_remplace_l_ancien_reste_archive_avec_son_historique(employee_clien
     assert res_c1.status_code == 201
     c1_id = res_c1.json()["id"]
 
-    clock.advance(minutes=10)
+    clock.advance(minutes=5)
     admin_client.post(
         f"/api/admin/validation/{c1_id}/decide",
         json={"decision": "VALIDATED"},
@@ -84,7 +84,7 @@ def test_ca02_remplace_l_ancien_reste_archive_avec_son_historique(employee_clien
     assert any(h.action == "VALIDATED" for h in c1_history)
 
     # 2. L'employé dépose un nouveau certificat qui remplace C1
-    clock.advance(minutes=10)
+    clock.advance(minutes=5)
     res_c2 = _deposit(
         emp_client,
         title="Master Comptabilité Approfondie",

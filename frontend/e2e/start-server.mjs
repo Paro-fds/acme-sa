@@ -10,6 +10,7 @@
 //   us113 → EMP-H2 (parcourt les écrans employé sur ordinateur et téléphone, sans rien enregistrer)
 //   us114 → EMP-H2 (lit la frise de « Ma carrière », sans rien enregistrer)
 //   us116 → EMP-H2 (signale une erreur sur sa date d’embauche ; l’admin la voit dans ses notifications)
+//   us125 → EMP-H2 (reste inactif avec une horloge simulée, sans rien enregistrer)
 import { execFileSync, spawn } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'

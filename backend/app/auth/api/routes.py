@@ -60,6 +60,21 @@ def login(payload: LoginIn, request: Request, response: Response) -> None:
     set_session_cookie(request, response, token)
 
 
+@router.post("/api/auth/keep-alive", status_code=204, dependencies=[Depends(current_employee_id)])
+def keep_alive() -> None:
+    """US-125 : l'écran signale une activité (clic, saisie, défilement) ; la session repart pour sa durée."""
+
+
+@router.get("/api/auth/session-options")
+def session_options(request: Request) -> dict[str, int]:
+    """US-125 : durées d'inactivité après lesquelles l'écran ramène à la connexion."""
+    settings = container(request).settings
+    return {
+        "employee_idle_minutes": settings.employee_session_minutes,
+        "admin_idle_minutes": settings.admin_session_minutes,
+    }
+
+
 @router.post("/api/auth/logout", status_code=204, dependencies=[Depends(current_employee_id)])
 def logout(request: Request, response: Response) -> None:
     container(request).session_service().close(request.cookies.get(SESSION_COOKIE))
@@ -88,6 +103,11 @@ def admin_login(payload: AdminLoginIn, request: Request) -> Response:
     accepted = JSONResponse(step.model_dump(mode="json"), status_code=202)
     set_session_cookie(request, accepted, result.token)
     return accepted
+
+
+@router.post("/api/admin/auth/keep-alive", status_code=204, dependencies=[Depends(current_admin_pending)])
+def admin_keep_alive() -> None:
+    """US-125 : activité dans l'espace de gestion (y compris pendant le changement d'un mot de passe provisoire)."""
 
 
 @router.post("/api/admin/auth/logout", status_code=204, dependencies=[Depends(current_admin_pending)])

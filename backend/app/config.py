@@ -41,8 +41,9 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = ""
     admin_password_hash: str = ""
-    employee_session_minutes: int = 30
-    admin_session_minutes: int = 120
+    # US-125 : déconnexion après 15 minutes sans activité, employés et espace de gestion.
+    employee_session_minutes: int = 15
+    admin_session_minutes: int = 15
     admin_mfa_required: bool = False
     """US-112 : double authentification de l'espace de gestion. Coupée par défaut (connexion directe) ;
     `ADMIN_MFA_REQUIRED=true` la rallume sans toucher au code (US-102)."""

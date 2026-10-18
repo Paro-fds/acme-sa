@@ -142,7 +142,7 @@ Les écrans suivent ceux que M. Hilaire a validés (D-47) : `lot0/2-maquettes/2-
 
 - **Données** : aucune donnée réelle hors de la production sécurisée (US-002) ; le démonstrateur et la recette n'ont que des données fictives. Aucune colonne exclue de l'export dans l'API ni dans les journaux : le CSV de test met `FAKE-SECRET-…` dans ces colonnes et les tests le cherchent.
 - **Mots de passe** : Argon2, jamais renvoyés ni journalisés.
-- **Sessions** : jeton dans un cookie `HttpOnly`, `SameSite=Strict` ; 30 minutes pour l'employé, 120 pour les RH.
+- **Sessions** : jeton dans un cookie `HttpOnly`, `SameSite=Strict` ; 15 minutes sans activité pour l'employé comme pour les RH (US-125, 2026-10-17 ; 30 et 120 avant). L'écran compte les clics, la saisie et le défilement, les signale au serveur au plus une fois par minute (`/api/auth/keep-alive`, `/api/admin/auth/keep-alive`) et ramène à la connexion à la fin du délai (`lib/useIdleLogout.js`, branché dans `Page`).
 - **Comptes RH** : double authentification obligatoire, sans réglage pour la désactiver ; méthodes ouvertes selon `MFA_METHODS` ; 5 codes faux → blocage 15 minutes ; journal de sécurité (`acme.security`).
 - **Espace RH réservé au réseau des bureaux** : toute route `/api/admin/*`, connexion comprise, refuse une adresse hors de `RH_ALLOWED_NETWORKS` (vide = aucune restriction, poste du développeur et démonstrateur).
 - **Consentement** : aucune saisie dans le dossier avant l'accord à la mention d'information ; accord daté, avec la version du texte (US-202, D-09).
@@ -161,7 +161,7 @@ Variables d'environnement (`backend/app/config.py`, modèle dans `backend/.env.e
 | `STORAGE_BACKEND`, `S3_*` | `local` ou `s3` ; seau, région, adresse, clés |
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` | Premier compte RH, importé en base au démarrage |
 | `MFA_METHODS`, `RH_ALLOWED_NETWORKS` | Méthodes de double authentification ouvertes ; réseaux du bureau |
-| `EMPLOYEE_SESSION_MINUTES`, `ADMIN_SESSION_MINUTES` | Durée des sessions |
+| `EMPLOYEE_SESSION_MINUTES`, `ADMIN_SESSION_MINUTES` | Durée des sessions sans activité (15 par défaut, US-125) |
 | `MAX_UPLOAD_MB`, `MAX_CERTIFICATES_PER_EMPLOYEE` | 5 Mo par fichier, 20 certificats par employé (D-07) |
 | `MAX_DOCUMENTS_PER_EMPLOYEE`, `MAX_CAREER_ENTRIES_PER_KIND` | Limites héritées |
 
