@@ -48,3 +48,18 @@ export function formatGender(code) {
 export function initials(lastName, firstName) {
   return `${lastName?.[0] ?? ''}${firstName?.[0] ?? ''}`.toUpperCase()
 }
+
+const monthFormatters = {
+  long: new Intl.DateTimeFormat('fr-FR', { month: 'long', timeZone: 'UTC' }),
+  short: new Intl.DateTimeFormat('fr-FR', { month: 'short', timeZone: 'UTC' }),
+}
+
+/** V2 (D-07) : "2021-06" → "juin 2021" ; `short` : "2016-01" → "janv. 2016". Valeur invalide → "". */
+export function formatMonth(yearMonth, { short = false } = {}) {
+  const match = /^(\d{4})-(\d{2})$/.exec(yearMonth ?? '')
+  if (!match) return ''
+  const [year, month] = [Number(match[1]), Number(match[2])]
+  if (month < 1 || month > 12) return ''
+  const name = monthFormatters[short ? 'short' : 'long'].format(new Date(Date.UTC(year, month - 1, 1)))
+  return `${name} ${year}`
+}

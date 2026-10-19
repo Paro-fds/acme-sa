@@ -22,7 +22,7 @@ function renderWith(load) {
   render(
     <MemoryRouter initialEntries={['/profil']}>
       <Routes>
-        <Route path="/" element={<LoginProbe />} />
+        <Route path="/connexion" element={<LoginProbe />} />
         <Route path="/admin/mot-de-passe" element={<p>Choix du mot de passe</p>} />
         <Route path="/profil" element={<Screen load={load} />} />
       </Routes>

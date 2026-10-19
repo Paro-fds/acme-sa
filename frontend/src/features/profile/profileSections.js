@@ -1,5 +1,24 @@
 import { formatDate, formatGender } from '../../lib/format.js'
 
+/** US-201 CA-03 (RG-17) : valeur de l'export sans correspondance dans le référentiel. */
+export const UNIT_TO_CONFIRM = 'Unité à confirmer'
+
+/** Agence, région, direction : libellés officiels côté employé (US-201) ; code de l'export côté admin (US-20). */
+function unitFields(profile) {
+  if (!profile.affectation) {
+    return [
+      { label: 'Agence', value: profile.agency_code },
+      { label: 'Département', value: profile.department },
+    ]
+  }
+  const { agency, region, direction } = profile.affectation
+  return [
+    { label: 'Agence', value: agency ?? UNIT_TO_CONFIRM },
+    { label: 'Région', value: region ?? UNIT_TO_CONFIRM },
+    { label: 'Direction', value: direction ?? UNIT_TO_CONFIRM },
+  ]
+}
+
 /**
  * Sections « Identité », « Coordonnées », « Informations professionnelles » d'un dossier,
  * communes au profil employé (US-05) et au dossier vu par l'admin (US-20).
@@ -31,8 +50,7 @@ export function profileSections(profile) {
       title: 'Informations professionnelles',
       fields: [
         { label: 'Matricule', value: profile.employee_code },
-        { label: 'Agence', value: profile.agency_code },
-        { label: 'Département', value: profile.department },
+        ...unitFields(profile),
         { label: 'Poste', value: profile.position },
         { label: 'Grade', value: profile.grade },
         { label: 'Niveau', value: profile.level },

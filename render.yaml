@@ -1,0 +1,48 @@
+# US-001 : API du démonstrateur sur Render (Blueprint). Même image Docker que sur ECS Fargate.
+# Les valeurs « sync: false » (secrets) se saisissent dans le tableau de bord Render, jamais ici.
+services:
+  - type: web
+    name: acme-portail-api
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: v2
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: demo
+      - key: DATABASE_URL
+        sync: false
+      - key: MFA_METHODS
+        value: TOTP,WHATSAPP
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_BUCKET
+        value: certificat
+      - key: S3_REGION
+        value: us-west-2
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: WHATSAPP_META_TOKEN
+        sync: false
+      - key: WHATSAPP_META_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TWILIO_ACCOUNT_SID
+        sync: false
+      - key: WHATSAPP_TWILIO_AUTH_TOKEN
+        sync: false
+      - key: WHATSAPP_TWILIO_FROM
+        sync: false

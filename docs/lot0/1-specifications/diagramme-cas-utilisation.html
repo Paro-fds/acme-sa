@@ -1,0 +1,136 @@
+<title>Cas d'utilisation du portail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Même charte que « Portail carrière : le système » et « Séquences par persona ». Deux diagrammes UML en SVG, une couleur de trait par rôle RH. */
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --fg: #2c2e44; --heading: #12124d; --muted: #6a6c80;
+  --border: #e3e3ee; --primary: #1e1e82; --accent: #cc1111; --primary-bg: #eeeefa;
+  --todo-bg: #fff6dc; --todo-fg: #7a5a00;
+  --c-emp: #1e1e82; --c-agent: #2563c9; --c-admin: #1e1e82; --c-resp: #0f766e; --c-ls: #8a6100; --c-ext: #6a6c80;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a;
+  --c-emp: #a9a9ff; --c-agent: #7fb0ff; --c-admin: #c3c3ff; --c-resp: #5fd3c0; --c-ls: #e0c060; --c-ext: #9a9cb5; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a;
+  --c-emp: #a9a9ff; --c-agent: #7fb0ff; --c-admin: #c3c3ff; --c-resp: #5fd3c0; --c-ls: #e0c060; --c-ext: #9a9cb5; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2 { color: var(--heading); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 21px; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+p { margin: 0; max-width: 72ch; }
+ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; max-width: 72ch; }
+strong { color: var(--heading); }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 18px; }
+.note { font-size: 14px; color: var(--muted); }
+.todo { background: var(--todo-bg); color: var(--todo-fg); border-radius: 4px; padding: 0 5px; font-size: .92em; white-space: nowrap; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.scroll svg { display: block; width: 100%; height: auto; min-width: 860px; color: var(--fg); }
+figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { display: inline-block; width: 26px; height: 0; border-top: 2.5px solid; }
+.legend i.d { border-top-style: dashed; }
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+td.c, th.c { text-align: center; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+td:first-child { font-weight: 600; color: var(--heading); }
+
+svg text { fill: currentColor; font-family: var(--font); }
+svg .t { font-size: 13.5px; font-weight: 500; }
+svg .lot { font-size: 11px; font-weight: 600; fill: var(--muted); }
+svg .s { font-size: 11.5px; fill: var(--muted); }
+svg .an { font-size: 13.5px; font-weight: 700; }
+svg .lbl { font-size: 11.5px; font-style: italic; fill: var(--muted); }
+svg .ptitle { font-size: 13px; font-weight: 700; fill: var(--primary); }
+svg .sys { fill: none; stroke: var(--primary); stroke-width: 2; }
+svg .uc { fill: var(--primary-bg); stroke: var(--primary); stroke-width: 1.3; }
+svg .uc.todoe { fill: var(--todo-bg); stroke: var(--todo-fg); stroke-dasharray: 5 4; }
+svg .act circle, svg .act line { fill: none; stroke-width: 2; stroke-linecap: round; }
+svg .ln { stroke-width: 1.4; fill: none; }
+svg .dash { stroke-dasharray: 6 5; }
+svg .dep { stroke: currentColor; stroke-dasharray: 5 4; }
+svg .c-emp, svg .a-emp * { stroke: var(--c-emp); }
+svg .c-agent, svg .a-agent * { stroke: var(--c-agent); }
+svg .c-admin, svg .a-admin * { stroke: var(--c-admin); }
+svg .c-resp, svg .a-resp * { stroke: var(--c-resp); }
+svg .c-ls, svg .a-ls * { stroke: var(--c-ls); }
+svg .c-ext, svg .a-ext * { stroke: var(--c-ext); }
+@media (max-width: 520px) { h1 { font-size: 25px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Refonte du portail · Lot 0 · Livrable 1</span>
+    <h1>Diagramme des cas d'utilisation</h1>
+    <p class="lead">Ce que chaque persona peut faire dans le portail, d'après le champ d'action des rôles du cahier des charges (§4.3) et le registre des décisions v1.8. Le détail de chaque cas est dans les diagrammes de séquence.</p>
+    <p class="note">Version 1 du 7 octobre 2026. Un trait plein : autorisé par le registre. Un trait ou un cas en pointillés : <span class="todo">[à confirmer]</span> avec le directeur. Les personnes sont désignées par leur rôle, sans nom réel.</p>
+  </header>
+
+  <section>
+    <h2>1. Espace employé</h2>
+    <figure>
+      <div class="scroll"><svg viewBox="0 0 1000 682" role="img" aria-label="Cas d'utilisation de l'espace employé : l'employé découvre le portail, se connecte, complète son profil, dépose et suit ses certificats ; au lot 4, il voit les postes, dépose des demandes et reconfirme ses informations."><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs><rect class="sys" x="300" y="20" width="450" height="647" rx="14"/><text class="ptitle" x="320" y="44">Espace employé · téléphone d'abord</text><g class="act a-emp"><circle cx="110" cy="326" r="9"/><line x1="110" y1="335" x2="110" y2="360"/><line x1="95" y1="346" x2="125" y2="346"/><line x1="110" y1="360" x2="98" y2="378"/><line x1="110" y1="360" x2="122" y2="378"/></g><text class="an" x="110" y="398" text-anchor="middle">Employé</text><text class="s" x="110" y="414" text-anchor="middle">P1</text><line class="ln c-emp" x1="132" y1="346" x2="320" y2="100"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="152"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="256"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="360"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="412"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="464"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="516"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="568"/><line class="ln c-emp" x1="132" y1="346" x2="320" y2="620"/><ellipse class="uc" cx="520" cy="100" rx="200" ry="21"/><text class="t" x="520" y="101" text-anchor="middle" dominant-baseline="middle">Découvrir le portail (accueil)<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="152" rx="200" ry="21"/><text class="t" x="520" y="153" text-anchor="middle" dominant-baseline="middle">Se connecter<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="204" rx="200" ry="21"/><text class="t" x="520" y="205" text-anchor="middle" dominant-baseline="middle">Donner son consentement<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="256" rx="200" ry="21"/><text class="t" x="520" y="257" text-anchor="middle" dominant-baseline="middle">Compléter et confirmer son profil<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="308" rx="200" ry="21"/><text class="t" x="520" y="309" text-anchor="middle" dominant-baseline="middle">Signaler une erreur (agence, poste, embauche)<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="360" rx="200" ry="21"/><text class="t" x="520" y="361" text-anchor="middle" dominant-baseline="middle">Déposer un certificat (profil complet)<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="412" rx="200" ry="21"/><text class="t" x="520" y="413" text-anchor="middle" dominant-baseline="middle">Suivre ses certificats<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="520" cy="464" rx="200" ry="21"/><text class="t" x="520" y="465" text-anchor="middle" dominant-baseline="middle">Recevoir notifications et relances<tspan class="lot" dx="6">lots 1–4</tspan></text><ellipse class="uc" cx="520" cy="516" rx="200" ry="21"/><text class="t" x="520" y="517" text-anchor="middle" dominant-baseline="middle">Voir les postes ouverts et son éligibilité<tspan class="lot" dx="6">lot 4</tspan></text><ellipse class="uc" cx="520" cy="568" rx="200" ry="21"/><text class="t" x="520" y="569" text-anchor="middle" dominant-baseline="middle">Déposer et suivre une demande<tspan class="lot" dx="6">lot 4</tspan></text><ellipse class="uc" cx="520" cy="620" rx="200" ry="21"/><text class="t" x="520" y="621" text-anchor="middle" dominant-baseline="middle">Reconfirmer ses informations chaque année<tspan class="lot" dx="6">lot 4</tspan></text><line class="ln dep" x1="670" y1="190" x2="670" y2="168" marker-end="url(#arr)"/><text class="lbl" x="750" y="182" text-anchor="middle">«extend» 1re connexion</text><line class="ln dep" x1="670" y1="294" x2="670" y2="272" marker-end="url(#arr)"/><text class="lbl" x="712" y="286" text-anchor="middle">«extend»</text><g class="act a-ext"><circle cx="890" cy="128" r="9"/><line x1="890" y1="137" x2="890" y2="162"/><line x1="875" y1="148" x2="905" y2="148"/><line x1="890" y1="162" x2="878" y2="180"/><line x1="890" y1="162" x2="902" y2="180"/></g><text class="an" x="890" y="200" text-anchor="middle">Export RH</text><text class="s" x="890" y="216" text-anchor="middle">lecture seule</text><line class="ln c-ext dash" x1="868" y1="148" x2="720" y2="152"/><g class="act a-ext"><circle cx="890" cy="424" r="9"/><line x1="890" y1="433" x2="890" y2="458"/><line x1="875" y1="444" x2="905" y2="444"/><line x1="890" y1="458" x2="878" y2="476"/><line x1="890" y1="458" x2="902" y2="476"/></g><text class="an" x="890" y="496" text-anchor="middle">Notifications</text><text class="s" x="890" y="512" text-anchor="middle">WhatsApp, email</text><line class="ln c-ext dash" x1="868" y1="444" x2="720" y2="412"/><line class="ln c-ext dash" x1="868" y1="444" x2="720" y2="464"/></svg></div>
+      <figcaption>Les Agents RH, le responsable du référentiel, les Administrateurs et la Lecture seule sont aussi des employés : ils ont les mêmes cas d'utilisation pour leur propre dossier (§4.3). « Donner son consentement » n'a lieu qu'à la première connexion (D-09) ; « Signaler une erreur » prolonge la confirmation du profil quand agence, poste ou date d'embauche sont faux (Q1). Le dépôt de certificat ne se débloque que lorsque le profil est complet (Q1). L'export RH fournit l'identité de l'employé, sans jamais être modifié.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>2. Espace RH</h2>
+    <div class="legend" aria-label="Couleur des traits par rôle">
+      <span><i style="border-color: var(--c-agent)"></i>Agent RH</span>
+      <span><i style="border-color: var(--c-admin)"></i>Administrateur</span>
+      <span><i style="border-color: var(--c-resp)"></i>Responsable du référentiel</span>
+      <span><i style="border-color: var(--c-ls)"></i>Lecture seule</span>
+      <span><i class="d" style="border-color: var(--muted)"></i>à confirmer</span>
+    </div>
+    <figure>
+      <div class="scroll"><svg viewBox="0 0 1000 942" role="img" aria-label="Cas d'utilisation de l'espace RH : l'Agent RH valide les certificats et traite les signalements, l'Administrateur réaffecte, gère les comptes et pilote, le responsable du référentiel tient les unités, la Lecture seule consulte."><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs><rect class="sys" x="270" y="20" width="460" height="907" rx="14"/><text class="ptitle" x="290" y="44">Espace RH · réseau de l'institution ou VPN</text><line class="ln c-agent" x1="137" y1="292" x2="300" y2="98"/><line class="ln c-agent" x1="137" y1="292" x2="300" y2="150"/><line class="ln c-agent" x1="137" y1="292" x2="300" y2="202"/><line class="ln c-agent" x1="137" y1="292" x2="300" y2="306"/><line class="ln c-agent" x1="137" y1="292" x2="300" y2="358"/><line class="ln c-agent" x1="137" y1="292" x2="300" y2="410"/><line class="ln c-agent" x1="137" y1="292" x2="300" y2="462"/><line class="ln c-agent dash" x1="137" y1="292" x2="300" y2="722"/><line class="ln c-ls" x1="137" y1="718" x2="300" y2="98"/><line class="ln c-ls" x1="137" y1="718" x2="300" y2="150"/><line class="ln c-ls" x1="137" y1="718" x2="300" y2="722"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="98"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="150"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="202"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="514"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="566"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="618"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="670"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="722"/><line class="ln c-admin" x1="863" y1="500" x2="700" y2="826"/><line class="ln c-admin dash" x1="863" y1="500" x2="700" y2="774"/><line class="ln c-admin dash" x1="863" y1="500" x2="700" y2="306"/><line class="ln c-resp" x1="863" y1="686" x2="700" y2="98"/><line class="ln c-resp" x1="863" y1="686" x2="700" y2="618"/><line class="ln c-resp" x1="863" y1="686" x2="700" y2="670"/><ellipse class="uc" cx="500" cy="98" rx="200" ry="21"/><text class="t" x="500" y="99" text-anchor="middle" dominant-baseline="middle">Se connecter (double authentification)<tspan class="lot" dx="6">lot 3</tspan></text><ellipse class="uc" cx="500" cy="150" rx="200" ry="21"/><text class="t" x="500" y="151" text-anchor="middle" dominant-baseline="middle">Consulter un dossier d&#x27;employé<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="202" rx="200" ry="21"/><text class="t" x="500" y="203" text-anchor="middle" dominant-baseline="middle">Valider ou rejeter un certificat<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="254" rx="200" ry="21"/><text class="t" x="500" y="255" text-anchor="middle" dominant-baseline="middle">Corriger les informations du certificat<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="306" rx="200" ry="21"/><text class="t" x="500" y="307" text-anchor="middle" dominant-baseline="middle">Traiter un signalement d&#x27;erreur<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="358" rx="200" ry="21"/><text class="t" x="500" y="359" text-anchor="middle" dominant-baseline="middle">Enregistrer une demande reçue par lettre<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="410" rx="200" ry="21"/><text class="t" x="500" y="411" text-anchor="middle" dominant-baseline="middle">Contrôler les mouvements extraits des lettres<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="462" rx="200" ry="21"/><text class="t" x="500" y="463" text-anchor="middle" dominant-baseline="middle">Saisir un poste ouvert<tspan class="lot" dx="6">lot 4</tspan></text><ellipse class="uc" cx="500" cy="514" rx="200" ry="21"/><text class="t" x="500" y="515" text-anchor="middle" dominant-baseline="middle">Publier un poste, le marquer confidentiel<tspan class="lot" dx="6">lot 4</tspan></text><ellipse class="uc" cx="500" cy="566" rx="200" ry="21"/><text class="t" x="500" y="567" text-anchor="middle" dominant-baseline="middle">Réaffecter un certificat<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="618" rx="200" ry="21"/><text class="t" x="500" y="619" text-anchor="middle" dominant-baseline="middle">Tenir le référentiel des unités<tspan class="lot" dx="6">lots 0–1</tspan></text><ellipse class="uc" cx="500" cy="670" rx="200" ry="21"/><text class="t" x="500" y="671" text-anchor="middle" dominant-baseline="middle">Rattacher une valeur inconnue<tspan class="lot" dx="6">lot 1</tspan></text><ellipse class="uc" cx="500" cy="722" rx="200" ry="21"/><text class="t" x="500" y="723" text-anchor="middle" dominant-baseline="middle">Voir les tableaux de bord<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc todoe" cx="500" cy="774" rx="200" ry="21"/><text class="t" x="500" y="775" text-anchor="middle" dominant-baseline="middle">Exporter des listes<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc" cx="500" cy="826" rx="200" ry="21"/><text class="t" x="500" y="827" text-anchor="middle" dominant-baseline="middle">Gérer les comptes, réinitialiser un accès<tspan class="lot" dx="6">lot 2</tspan></text><ellipse class="uc todoe" cx="500" cy="878" rx="200" ry="21"/><text class="t" x="500" y="879" text-anchor="middle" dominant-baseline="middle">Consulter le journal d&#x27;audit<tspan class="lot" dx="6">lot 2</tspan></text><line class="ln dep" x1="500" y1="233" x2="500" y2="223" marker-end="url(#arr)"/><text class="lbl" x="0" y="0" text-anchor="middle"></text><text class="lbl" x="512" y="232">«extend»</text><g class="act a-agent"><circle cx="115" cy="272" r="9"/><line x1="115" y1="281" x2="115" y2="306"/><line x1="100" y1="292" x2="130" y2="292"/><line x1="115" y1="306" x2="103" y2="324"/><line x1="115" y1="306" x2="127" y2="324"/></g><text class="an" x="115" y="344" text-anchor="middle">Agent RH</text><text class="s" x="115" y="360" text-anchor="middle">P2</text><g class="act a-ls"><circle cx="115" cy="698" r="9"/><line x1="115" y1="707" x2="115" y2="732"/><line x1="100" y1="718" x2="130" y2="718"/><line x1="115" y1="732" x2="103" y2="750"/><line x1="115" y1="732" x2="127" y2="750"/></g><text class="an" x="115" y="770" text-anchor="middle">Lecture seule</text><text class="s" x="115" y="786" text-anchor="middle">P5</text><g class="act a-admin"><circle cx="885" cy="480" r="9"/><line x1="885" y1="489" x2="885" y2="514"/><line x1="870" y1="500" x2="900" y2="500"/><line x1="885" y1="514" x2="873" y2="532"/><line x1="885" y1="514" x2="897" y2="532"/></g><text class="an" x="885" y="552" text-anchor="middle">Administrateur</text><text class="s" x="885" y="568" text-anchor="middle">P4</text><g class="act a-resp"><circle cx="885" cy="666" r="9"/><line x1="885" y1="675" x2="885" y2="700"/><line x1="870" y1="686" x2="900" y2="686"/><line x1="885" y1="700" x2="873" y2="718"/><line x1="885" y1="700" x2="897" y2="718"/></g><text class="an" x="885" y="738" text-anchor="middle">Resp. du référentiel</text><text class="s" x="885" y="754" text-anchor="middle">P3</text></svg></div>
+      <figcaption>Un Agent RH ne valide jamais son propre certificat (Q2, RG-42). « Corriger les informations du certificat » prolonge la validation : niveau, intitulé, établissement, année, domaine, chaque correction étant tracée (D-13). Réaffecter est réservé à l'Administrateur (D-14). Export et journal d'audit : rôles autorisés <span class="todo">[à confirmer, QR-06, D-18]</span> ; l'Administrateur exporte dans la proposition par défaut.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>3. Le même contenu en tableau</h2>
+    <p class="note">✅ autorisé par le registre · ❌ interdit ou hors du rôle · ❓ à confirmer · « comme employé » : pour son propre dossier seulement.</p>
+    <div class="table">
+      <table>
+        <thead><tr><th>Cas d'utilisation</th><th>Lot</th><th class="c">Employé</th><th class="c">Agent RH</th><th class="c">Resp. référentiel</th><th class="c">Admin.</th><th class="c">Lecture seule</th></tr></thead>
+        <tbody>
+          <tr><td>Compléter et confirmer son profil, déposer et suivre ses certificats</td><td>1</td><td class="c">✅</td><td class="c" colspan="4">✅ comme employé</td></tr>
+          <tr><td>Signaler une erreur sur agence, poste, date d'embauche</td><td>1</td><td class="c">✅</td><td class="c" colspan="4">✅ comme employé</td></tr>
+          <tr><td>Voir les postes et son éligibilité, déposer une demande</td><td>4</td><td class="c">✅</td><td class="c" colspan="4">✅ comme employé</td></tr>
+          <tr><td>Consulter un dossier d'employé</td><td>2</td><td class="c">❌</td><td class="c">✅</td><td class="c">❓</td><td class="c">✅</td><td class="c">✅</td></tr>
+          <tr><td>Valider ou rejeter un certificat, corriger ses informations</td><td>2</td><td class="c">❌</td><td class="c">✅ sauf le sien</td><td class="c">—</td><td class="c">✅</td><td class="c">❌</td></tr>
+          <tr><td>Réaffecter un certificat</td><td>2</td><td class="c">❌</td><td class="c">❌</td><td class="c">—</td><td class="c">✅</td><td class="c">❌</td></tr>
+          <tr><td>Traiter un signalement d'erreur</td><td>2</td><td class="c">❌</td><td class="c">✅</td><td class="c">—</td><td class="c">❓</td><td class="c">❌</td></tr>
+          <tr><td>Enregistrer une demande reçue par lettre</td><td>2</td><td class="c">❌</td><td class="c">✅</td><td class="c">—</td><td class="c">❓</td><td class="c">❌</td></tr>
+          <tr><td>Contrôler les mouvements extraits des lettres</td><td>2</td><td class="c">❌</td><td class="c">✅</td><td class="c">—</td><td class="c">❓</td><td class="c">❌</td></tr>
+          <tr><td>Tenir le référentiel, rattacher une valeur inconnue</td><td>0–1</td><td class="c">❌</td><td class="c">❌</td><td class="c">✅</td><td class="c">✅</td><td class="c">❌</td></tr>
+          <tr><td>Saisir un poste ouvert</td><td>4</td><td class="c">❌</td><td class="c">✅</td><td class="c">—</td><td class="c">❓</td><td class="c">❌</td></tr>
+          <tr><td>Publier un poste, le marquer confidentiel</td><td>4</td><td class="c">❌</td><td class="c">❌</td><td class="c">—</td><td class="c">✅</td><td class="c">❌</td></tr>
+          <tr><td>Voir les tableaux de bord</td><td>2</td><td class="c">❌</td><td class="c">❓</td><td class="c">❓</td><td class="c">✅</td><td class="c">✅</td></tr>
+          <tr><td>Exporter des listes</td><td>2</td><td class="c">❌</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td></tr>
+          <tr><td>Gérer les comptes, réinitialiser l'accès d'un employé</td><td>2</td><td class="c">❌</td><td class="c">❌</td><td class="c">❌</td><td class="c">✅</td><td class="c">❌</td></tr>
+          <tr><td>Consulter le journal d'audit</td><td>2</td><td class="c">❌</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td><td class="c">❓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Source : cahier des charges §4.3, à partir de Q1 à Q8 ; réaffectation : avis du 2026-10-06 (D-14). Le responsable de département, l'évaluateur et la Direction Générale du circuit des demandes (Q6) n'apparaissent pas : on ne sait pas encore s'ils utilisent le portail (§4.2).</p>
+  </section>
+</div>

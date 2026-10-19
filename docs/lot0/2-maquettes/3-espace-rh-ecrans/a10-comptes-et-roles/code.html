@@ -1,0 +1,244 @@
+<!DOCTYPE html><html class="h-full bg-slate-50" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>A10 — Comptes et rôles | Portail RH ACME</title>
+<!-- Tailwind CSS v3 with forms and container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#1E1E82',
+              red: '#CC1111',
+              dark: '#111827',
+              muted: '#4B5563',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-styling">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#F8FAFC] text-slate-800">
+<!-- BEGIN: TopHeader -->
+<header class="w-full bg-[#1E1E82] text-white px-6 py-3 flex items-center justify-between shadow-sm z-20 flex-shrink-0">
+<!-- Brand / Logo Area -->
+<div class="flex items-center space-x-3">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPh_EyF7ekI1L6p6PfUhTWPujovESLY70P-N6zfhQBIt9Rp1_9OcTOAq2PaFOXGYUKTDokVPHuUdNp1oW30e6IQy4miIlLBlbFoNnBhqGnxR6XdXzrFlX2xlsxgMXn9UPLZ_JraEaJG9BlINDSG38cUQV6rhn6jg_duKhOfAyIfoY6Ri2V-PZa57NC166FHlO69Glz-nAxVpb7aIV5qD-fIUkpl_MhCj2Eg4bAaF9Obu--XGc1idIm" alt="ACME SA" class="h-8 object-contain bg-white rounded p-0.5">
+<span class="text-white/30 text-lg font-light leading-none">|</span>
+<span class="text-white text-base font-normal tracking-wide">Portail RH</span>
+</div>
+<!-- User & Session Info -->
+<div class="flex items-center space-x-5 text-xs text-white/90">
+<span class="">Administrateur Démo <span class="text-white/50">·</span> Administrateur</span>
+<a class="text-white/80 hover:text-white transition-colors duration-150" href="#">Se déconnecter</a>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContainer -->
+<div class="flex flex-1 min-h-[calc(100vh-48px)]">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 pt-5 pb-6 flex flex-col">
+<nav aria-label="Menu principal" class="space-y-1 px-3"><a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#"><span class="">Tableau de bord</span></a><a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#"><span class="">File de validation</span><span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">27</span></a><a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#"><span class="">Employés</span></a><a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#"><span class="">Signalements</span><span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-[#FEF3C7] text-[#B45309]">9</span></a><a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#"><span class="">À rattacher</span><span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-[#FEF3C7] text-[#B45309]">2</span></a><a aria-current="page" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md bg-[#1E1E82] text-white shadow-sm" href="#"><span class="">Comptes et rôles</span></a><a class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#"><span class="">Journal d'audit</span></a></nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 p-8 overflow-y-auto max-w-[1184px]"><!-- ContentHeader -->
+<section class="mb-6 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<h1 class="text-2xl font-bold tracking-tight text-[#1E1E82]">Comptes et rôles</h1>
+<span class="inline-flex items-center px-3 py-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 rounded-md shadow-2xs">
+      Réservé à l'Administrateur
+    </span>
+</div>
+<button class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#1E1E82] hover:bg-[#18186b] rounded-md shadow-2xs transition-colors duration-150 space-x-2" type="button">
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="">Créer un compte</span>
+</button>
+</section>
+<!-- Grid Layout: Tableau des comptes + Volet Créer un compte -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-8">
+<!-- Left: Table des comptes RH -->
+<section class="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+<thead class="bg-slate-50/75 text-slate-500 font-medium text-xs">
+<tr>
+<th class="py-3.5 pl-4 pr-3" scope="col">Nom</th>
+<th class="px-3 py-3.5" scope="col">Email</th>
+<th class="px-3 py-3.5" scope="col">Rôle</th>
+<th class="px-3 py-3.5" scope="col">Matricule rattaché</th>
+<th class="px-3 py-3.5" scope="col">Double authentification</th>
+<th class="px-3 py-3.5" scope="col">Dernière connexion</th>
+<th class="py-3.5 pl-3 pr-4 text-right" scope="col">Statut</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 bg-white text-xs">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/60">
+<td class="py-3.5 pl-4 pr-3 font-semibold text-slate-900 whitespace-nowrap">Administrateur Démo</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">admin.demo@domaine-demo.local</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">Administrateur</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">EMP-0001</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-medium space-x-1">
+<svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" fill-rule="evenodd"></path></svg>
+<span class="">Activée</span>
+</span>
+</td>
+<td class="px-3 py-3.5 text-slate-500 whitespace-nowrap">07/10/2026 08:30</td>
+<td class="py-3.5 pl-3 pr-4 text-right whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Actif</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/60">
+<td class="py-3.5 pl-4 pr-3 font-semibold text-slate-900 whitespace-nowrap">Agent RH Démo 1</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">agent1.demo@domaine-demo.local</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">Agent RH</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">EMP-0002</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-medium space-x-1">
+<svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" fill-rule="evenodd"></path></svg>
+<span class="">Activée</span>
+</span>
+</td>
+<td class="px-3 py-3.5 text-slate-500 whitespace-nowrap">06/10/2026 14:05</td>
+<td class="py-3.5 pl-3 pr-4 text-right whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Actif</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/60">
+<td class="py-3.5 pl-4 pr-3 font-semibold text-slate-900 whitespace-nowrap">Agent RH Démo 2</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">agent2.demo@domaine-demo.local</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">Agent RH</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">EMP-0003</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-medium space-x-1">
+<svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" fill-rule="evenodd"></path></svg>
+<span class="">Activée</span>
+</span>
+</td>
+<td class="px-3 py-3.5 text-slate-500 whitespace-nowrap">06/10/2026 10:20</td>
+<td class="py-3.5 pl-3 pr-4 text-right whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Actif</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50/60">
+<td class="py-3.5 pl-4 pr-3 font-semibold text-slate-900 whitespace-nowrap">Référentiel Démo</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">referentiel.demo@domaine-demo.local</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">Responsable du référentiel</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">EMP-0004</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-medium space-x-1">
+<svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" fill-rule="evenodd"></path></svg>
+<span class="">Activée</span>
+</span>
+</td>
+<td class="px-3 py-3.5 text-slate-500 whitespace-nowrap">02/10/2026 09:00</td>
+<td class="py-3.5 pl-3 pr-4 text-right whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Actif</span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-slate-50/60">
+<td class="py-3.5 pl-4 pr-3 font-semibold text-slate-900 whitespace-nowrap">Lecture Démo</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">lecture.demo@domaine-demo.local</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">Lecture seule</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">EMP-0005</td>
+<td class="px-3 py-3.5 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-medium space-x-1">
+<svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" fill-rule="evenodd"></path></svg>
+<span class="">Activée</span>
+</span>
+</td>
+<td class="px-3 py-3.5 text-slate-500 whitespace-nowrap">15/09/2026 16:40</td>
+<td class="py-3.5 pl-3 pr-4 text-right whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Désactivé</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Right: Volet Créer un compte -->
+<section class="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+<div class="border-b border-slate-100 pb-4 mb-5">
+<h2 class="text-lg font-bold text-slate-900">Créer un compte</h2>
+</div>
+<form class="space-y-4">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="account-name">Nom</label>
+<input class="w-full text-sm border-slate-300 rounded-md shadow-2xs focus:border-[#1E1E82] focus:ring-[#1E1E82] text-slate-800 bg-white" id="account-name" placeholder="Nom complet" type="text">
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="account-email">Email</label>
+<input class="w-full text-sm border-slate-300 rounded-md shadow-2xs focus:border-[#1E1E82] focus:ring-[#1E1E82] text-slate-800 bg-white" id="account-email" placeholder="adresse@domaine.fr" type="email">
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="account-role">Rôle</label>
+<select class="w-full text-sm border-slate-300 rounded-md shadow-2xs focus:border-[#1E1E82] focus:ring-[#1E1E82] text-slate-800 bg-white" id="account-role">
+<option>Administrateur</option>
+<option>Agent RH</option>
+<option>Responsable du référentiel</option>
+<option>Lecture seule</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="account-matricule">Matricule de la personne</label>
+<input class="w-full text-sm border-slate-300 rounded-md shadow-2xs focus:border-[#1E1E82] focus:ring-[#1E1E82] text-slate-800 bg-white" id="account-matricule" placeholder="ex. EMP-0042" type="text">
+<p class="mt-1 text-xs text-slate-500">Sert à ne jamais lui proposer ses propres certificats.</p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+<button class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-150" type="button">Annuler</button>
+<button class="px-4 py-2 text-sm font-semibold text-white bg-[#1E1E82] hover:bg-[#18186b] rounded-md shadow-2xs transition-colors duration-150" type="button">Créer le compte</button>
+</div>
+</form>
+</section>
+</div>
+<!-- Bottom Section: Accès des employés -->
+<section class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+<h2 class="text-lg font-bold text-slate-900 mb-4">Accès des employés</h2>
+<div class="space-y-4 max-w-2xl">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="search-employee">Rechercher un employé (nom ou matricule)</label>
+<div class="relative">
+<input class="w-full text-sm border-slate-300 rounded-md shadow-2xs focus:border-[#1E1E82] focus:ring-[#1E1E82] text-slate-800 bg-white pl-9 pr-3 py-2" id="search-employee" placeholder="Nom ou matricule de l'employé" type="text" value="Lucie Exemple">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-lg">
+<div class="text-sm font-medium text-slate-800">
+        Lucie Exemple <span class="text-slate-400 font-normal">·</span> EMP-0418 <span class="text-slate-400 font-normal">·</span> Agence Démo Nord
+      </div>
+<div class="flex flex-col items-end">
+<button class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-[#1E1E82] bg-white border border-[#1E1E82] rounded shadow-2xs hover:bg-[#1E1E82] hover:text-white transition-colors duration-150" type="button">
+          Réinitialiser son accès
+        </button>
+<span class="text-[11px] text-slate-500 mt-1.5 text-right">
+          L'employée devra créer un nouveau mot de passe. L'action est enregistrée dans le journal d'audit.
+        </span>
+</div>
+</div>
+</div>
+</section></main>
+<!-- END: MainContentArea -->
+</div>
+<!-- END: MainContainer -->
+
+
+</body></html>

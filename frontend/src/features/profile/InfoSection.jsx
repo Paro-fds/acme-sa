@@ -27,7 +27,7 @@ export default function InfoSection({ icon, title, fields, showEditable = true }
   const titleId = useId()
 
   return (
-    <section aria-labelledby={titleId} className="overflow-hidden rounded-xl border border-border bg-surface shadow-card">
+    <section aria-labelledby={titleId} className="overflow-hidden rounded-xl bg-surface shadow-card">
       <div className="flex items-center gap-2 bg-section px-4 py-3">
         <span className="material-symbols-outlined text-[20px] text-info-text" aria-hidden="true">{icon}</span>
         <h3 id={titleId} className="text-lg font-semibold">{title}</h3>

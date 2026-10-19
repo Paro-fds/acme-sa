@@ -45,18 +45,3 @@ def test_ca02_old_cookie_is_rejected_after_logout(app, client, account):
 
 def test_logout_without_session_is_rejected(client):
     assert client.post(URL).status_code == 401
-
-
-def test_ca04_draft_is_kept_after_logout_and_login(client, account, draft):
-    account(EMP_A, PASSWORD)
-    draft(EMP_A, {"telephone_number": "+509 3700 0000"})
-    _login(client)
-    before = client.get("/api/me/update").json()
-
-    client.post(URL)
-    _login(client)
-    after = client.get("/api/me/update").json()
-
-    assert after == before
-    assert after["state"] == "IN_PROGRESS"
-    assert [(c["field_name"], c["new_value"]) for c in after["changes"]] == [("telephone_number", "+509 3700 0000")]

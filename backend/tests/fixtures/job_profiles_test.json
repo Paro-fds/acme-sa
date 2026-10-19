@@ -1,0 +1,46 @@
+{
+  "source": "Postes fictifs des tests (US-119, US-121)",
+  "profiles": [
+    {
+      "code": "AF01",
+      "position_code": "AF01",
+      "title": "Agent fictif de crédit",
+      "department": "Crédit",
+      "service": "Réseau d'agences fictif",
+      "competences": ["Analyse des dossiers de prêt fictifs", "Suivi du portefeuille"],
+      "level_text": "Bac + 4",
+      "description": "L'agent fictif de crédit suit un portefeuille de prêts fictifs.",
+      "sections": [
+        {"title": "Missions", "lines": ["Rechercher de nouveaux clients fictifs", "Constituer les dossiers de prêts"]},
+        {"title": "Qualifications", "lines": ["Diplôme Bac + 4"]},
+        {"title": "Expérience", "lines": ["Aucune expérience antérieure n'est exigée"]},
+        {"title": "Conditions d'exercice", "lines": ["Travail sur le terrain et au bureau"]}
+      ]
+    },
+    {
+      "code": "CF02",
+      "position_code": "CF02",
+      "title": "Comptable fictif",
+      "department": "Finance",
+      "service": "Comptabilité",
+      "competences": ["Respect des normes comptables", "Clôture mensuelle fictive"],
+      "level_text": "Bac + 5",
+      "description": "Le comptable fictif tient les livres de l'institution fictive.",
+      "sections": [
+        {"title": "Missions", "lines": ["Concilier les comptes fictifs"]},
+        {"title": "Qualités attendues", "lines": ["Être rigoureux"]}
+      ]
+    },
+    {
+      "code": "charge-de-mission-fictif",
+      "position_code": "",
+      "title": "Chargé de mission fictif",
+      "department": "Direction générale",
+      "service": "Direction générale",
+      "competences": ["Suivi des projets fictifs"],
+      "level_text": null,
+      "description": "",
+      "sections": []
+    }
+  ]
+}

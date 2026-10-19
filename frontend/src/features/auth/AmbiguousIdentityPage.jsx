@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router'
 import Button from '../../components/Button.jsx'
 import Card from '../../components/Card.jsx'
 import Page from '../../components/Page.jsx'
+import { EMPLOYEE_LOGIN_PATH } from '../../lib/paths.js'
 
 /** US-01 CA-07 : plusieurs dossiers actifs correspondent, aucun n'est ouvert. */
 export default function AmbiguousIdentityPage() {
   const navigate = useNavigate()
 
   return (
-    <Page title="Identification" backTo="/" actions={<Button variant="secondary" onClick={() => navigate('/')}>Revenir à l'identification</Button>}>
+    <Page title="Identification" backTo={EMPLOYEE_LOGIN_PATH} actions={<Button variant="secondary" onClick={() => navigate(EMPLOYEE_LOGIN_PATH)}>Revenir à la connexion</Button>}>
       <div className="flex flex-col items-center gap-4 pt-4 text-center">
         <div
           className="flex size-16 items-center justify-center rounded-full bg-status-progress-bg text-status-progress-text"

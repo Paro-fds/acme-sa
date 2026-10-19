@@ -1,0 +1,394 @@
+<title>Séquences par persona</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Même charte que « Portail carrière : le système » : colonne de lecture, un diagramme par persona dans sa propre zone de défilement horizontal. */
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --fg: #2c2e44; --heading: #12124d; --muted: #6a6c80;
+  --border: #e3e3ee; --primary: #1e1e82; --accent: #cc1111; --primary-bg: #eeeefa;
+  --todo-bg: #fff6dc; --todo-fg: #7a5a00;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { color: var(--heading); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 21px; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; max-width: 72ch; }
+strong { color: var(--heading); }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 18px; }
+.note { font-size: 14px; color: var(--muted); }
+.todo { background: var(--todo-bg); color: var(--todo-fg); border-radius: 4px; padding: 0 5px; font-size: .92em; white-space: nowrap; }
+.who { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+.who b { color: var(--heading); font-weight: 600; }
+nav ul { flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; max-width: none; }
+nav a { display: inline-block; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; }
+nav a:hover { border-color: var(--primary); }
+figure { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.scroll pre.mermaid { margin: 0; min-width: 760px; color: #2c2e44; background: #ffffff; }
+figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+td:first-child { font-weight: 600; color: var(--heading); white-space: nowrap; }
+@media (max-width: 520px) { h1 { font-size: 25px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Refonte du portail · Lot 0 · Livrable 1</span>
+    <h1>Diagrammes de séquence par persona</h1>
+    <p class="lead">Pour chacun des cinq personas du cahier des charges (§4.1), l'enchaînement des échanges entre la personne, le portail et ce qui l'entoure : base de données, stockage des documents, journal d'audit, notifications, export RH.</p>
+    <p class="note">Version 1 du 7 octobre 2026. Chaque séquence suit les parcours du cahier des charges (§5) et le registre des décisions v1.8. Les éléments marqués <span class="todo">[à confirmer]</span> ne sont pas tranchés. Aucun nom réel : les personnes sont désignées par leur rôle.</p>
+    <nav aria-label="Personas">
+      <ul>
+        <li><a href="#p1">P1 Employé</a></li>
+        <li><a href="#p2">P2 Agent RH</a></li>
+        <li><a href="#p3">P3 Responsable du référentiel</a></li>
+        <li><a href="#p4">P4 Administrateur</a></li>
+        <li><a href="#p5">P5 Lecture seule</a></li>
+        <li><a href="#demande">Demande de promotion (lot 4)</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section>
+    <h2>Comment lire les diagrammes</h2>
+    <ul>
+      <li>Le temps s'écoule de haut en bas. Chaque flèche est numérotée.</li>
+      <li><strong>Flèche pleine</strong> : une action ou une demande. <strong>Flèche en pointillés</strong> : une réponse ou un message qui revient.</li>
+      <li><strong>alt</strong> : l'un ou l'autre des cas (séparés par <em>else</em>). <strong>opt</strong> : une étape qui n'a lieu que si besoin.</li>
+      <li><strong>Espace employé</strong> : sur téléphone, depuis Internet. <strong>Espace RH</strong> : réseau de l'institution ou VPN, avec double authentification (Q8).</li>
+    </ul>
+  </section>
+
+  <!-- P1 -->
+  <section id="p1">
+    <h2>P1 — L'employé : se connecter, compléter son profil, déposer un certificat</h2>
+    <div class="who"><span><b>Lot</b> 1 (validation au lot 2)</span><span><b>Parcours</b> E1 à E5</span><span><b>Sources</b> Q1, Q2, Q3, Q7, Q8 · D-07 à D-10</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor E as Employé (téléphone)
+  participant EE as Espace employé
+  participant P as Portail
+  participant BD as Base de données
+  participant S as Stockage des documents
+  participant N as Notifications&lt;br/&gt;WhatsApp, puis email
+  E->>EE: Ouvre l'accueil : les 3 bénéfices
+  E->>EE: Nom, prénom, date de naissance, mot de passe
+  EE->>P: Connexion
+  P->>BD: Vérifie l'identité (employé actif de l'export)
+  alt Première connexion
+    P-->>EE: Information et consentement (D-09)
+    E->>EE: Accepte, choisit WhatsApp ou non
+    EE->>P: Consentement
+    P->>BD: Enregistre le consentement et sa date
+  end
+  P->>BD: Lit le dossier
+  P-->>EE: Profil et « Votre dossier est complet à 60 % »
+  E->>EE: Téléphone, adresse, email, contact d'urgence, niveau d'études
+  EE->>P: Champs saisis
+  P->>P: Contrôles (formats, liste des niveaux)
+  P->>BD: Enregistre
+  alt Agence, poste ou date d'embauche faux
+    E->>EE: « Signaler une erreur » + valeur exacte
+    EE->>P: Signalement
+    P->>BD: Signalement enregistré (traité au lot 2)
+  else Informations exactes
+    E->>EE: « Ces informations sont exactes »
+    EE->>P: Confirmation
+    P->>BD: Date de confirmation
+  end
+  P-->>EE: Profil complet : le dépôt se débloque
+  E->>EE: Certificat (PDF, JPG, PNG, 5 Mo) + type, niveau, intitulé…
+  EE->>P: Fichier et informations
+  P->>S: Stocke le fichier (analyse antivirus)
+  P->>BD: Certificat « En vérification »
+  P-->>EE: Remerciement, récapitulatif, ce que le certificat débloque
+  Note over P,N: Plus tard, après la décision des RH (P2)
+  P->>N: Changement de statut
+  N-->>E: « Validé », ou « À corriger » avec le motif
+  E->>EE: Ouvre « Mes certificats », redépose si besoin
+      </pre></div>
+      <figcaption>Le verrou ne bloque que le dépôt : le profil reste toujours consultable (Q1). Une erreur sur une donnée que l'employé ne peut pas modifier part en signalement sans le bloquer (P-02, QP-05). Ordre des canaux de notification : WhatsApp, puis email institutionnel, puis email personnel si consenti (Q7).</figcaption>
+    </figure>
+  </section>
+
+  <!-- P2 -->
+  <section id="p2">
+    <h2>P2 — L'Agent RH : valider ou rejeter un certificat</h2>
+    <div class="who"><span><b>Lot</b> 2</span><span><b>Parcours</b> R1</span><span><b>Sources</b> Q2, Q3 · D-12, D-13 · RG-40 à RG-46</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor A as Agent RH
+  participant ER as Espace RH
+  participant P as Portail
+  participant BD as Base de données
+  participant S as Stockage des documents
+  participant J as Journal d'audit
+  participant N as Notifications
+  actor E as Employé
+  A->>ER: Connexion + code de double authentification
+  A->>ER: Ouvre la file de validation
+  ER->>P: Demande la file
+  P->>BD: Certificats en attente, sauf ceux de l'agent lui-même
+  P-->>ER: File commune, du plus ancien au plus récent, alerte au-delà de 5 j ouvrables
+  A->>ER: « Prendre le suivant »
+  ER->>P: Prise en charge
+  P->>BD: « En cours — Agent RH », plus proposé aux autres
+  P->>S: Lit le document
+  P->>J: Consultation du document
+  P-->>ER: Document à gauche, profil à droite
+  opt Une information du certificat est fausse
+    A->>ER: Corrige niveau, intitulé, établissement, année ou domaine
+    ER->>P: Correction
+    P->>J: Ancienne valeur, nouvelle valeur, qui, quand
+  end
+  alt Le document est conforme
+    A->>ER: « Valider »
+    ER->>P: Validation
+    P->>BD: « Validé », niveau d'études recalculé
+    P->>J: Décision, valideur, date et heure
+    P->>N: Statut changé
+    N-->>E: « Votre certificat est validé »
+  else Le document ne convient pas
+    A->>ER: « Rejeter » + un des 10 motifs (commentaire si « Autre »)
+    ER->>P: Rejet
+    P->>BD: « À corriger » + motif
+    P->>J: Décision, motif, valideur, date et heure
+    P->>N: Statut changé
+    N-->>E: Message poli avec le motif, invitation à redéposer
+  end
+      </pre></div>
+      <figcaption>Un document à la fois, sans validation groupée ; pas de double validation ni de vérification auprès des établissements (Q2). Le certificat d'un Agent RH n'apparaît jamais dans sa propre file : il va à l'autre Agent RH, ou à défaut à un Administrateur (Q2, RG-42).</figcaption>
+    </figure>
+
+    <h3>P2 — L'Agent RH : traiter un signalement d'erreur</h3>
+    <div class="who"><span><b>Lot</b> 2</span><span><b>Parcours</b> R2</span><span><b>Sources</b> Q1 · D-20 · QR-03</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor A as Agent RH
+  participant ER as Espace RH
+  participant P as Portail
+  participant BD as Base de données
+  participant J as Journal d'audit
+  participant SRH as Système RH&lt;br/&gt;(hors portail)
+  A->>ER: Ouvre « Signalements »
+  ER->>P: Demande la liste
+  P->>BD: Signalements des employés et des contrôles automatiques
+  P-->>ER: Date, employé, champ, valeur actuelle, valeur indiquée
+  A->>ER: Ouvre un signalement
+  P->>J: Consultation du dossier
+  alt La valeur indiquée est juste
+    A->>ER: Décision + commentaire
+    ER->>P: Décision
+    P->>BD: « Corrigé — en attente du système RH »
+    A->>SRH: Reporte la correction (geste manuel des RH)
+  else La valeur actuelle est juste
+    A->>ER: Décision + commentaire
+    ER->>P: Décision
+    P->>BD: « Clos — valeur exacte »
+  end
+  P->>J: Décision, qui, quand
+      </pre></div>
+      <figcaption>L'export RH reste en lecture seule : le portail n'écrit jamais dans le système RH, qui reste la source officielle. Comment la correction arrive dans le système RH, et si le portail affiche la valeur corrigée avant le prochain export : <span class="todo">[à confirmer, QR-03]</span>.</figcaption>
+    </figure>
+  </section>
+
+  <!-- P3 -->
+  <section id="p3">
+    <h2>P3 — Le responsable du référentiel : tenir les agences, régions et directions</h2>
+    <div class="who"><span><b>Lots</b> 0 et 1</span><span><b>Parcours</b> R3</span><span><b>Sources</b> Q4 §4 et §5 · RG-17</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor R as Resp. du référentiel
+  participant ER as Espace RH
+  participant P as Portail
+  participant BD as Base de données
+  participant X as Export RH&lt;br/&gt;(lecture seule)
+  participant J as Journal d'audit
+  actor E as Employé concerné
+  Note over R,P: Lot 0 : le tableau de correspondance est validé ligne par ligne
+  R->>P: Fichier agence → région, avec une date de début
+  P->>BD: Régions, l'historique est gardé
+  X->>P: Nouvel export (lu, jamais modifié)
+  P->>BD: Applique la correspondance : libellés officiels
+  opt Une valeur de l'export est inconnue
+    P->>BD: Ajoute la valeur à « À rattacher »
+    P-->>E: Son dossier affiche « Unité à confirmer »
+    R->>ER: Ouvre « À rattacher »
+    alt L'unité existe
+      R->>ER: Rattacher à une unité existante
+    else L'unité n'existe pas
+      R->>ER: Créer une nouvelle unité (nom, type)
+    end
+    ER->>P: Rattachement
+    P->>BD: Correspondance mémorisée, employés reclassés
+    P->>J: Modification du référentiel
+    P-->>E: Son unité officielle s'affiche
+  end
+      </pre></div>
+      <figcaption>Toute ouverture, fermeture, fusion ou renommage d'unité passe par le responsable du référentiel ; la DIT ne modifie pas le référentiel seule (Q4). Au lot 1, le référentiel est un fichier ou une table ; une interface de gestion peut attendre le lot 4 (Q4 §5) : l'écran « À rattacher » est la maquette A9. Fréquence de l'export : <span class="todo">[à confirmer]</span>.</figcaption>
+    </figure>
+  </section>
+
+  <!-- P4 -->
+  <section id="p4">
+    <h2>P4 — L'Administrateur : piloter, réaffecter, exporter, gérer les comptes</h2>
+    <div class="who"><span><b>Lot</b> 2</span><span><b>Parcours</b> R7 (et R1)</span><span><b>Sources</b> Q2, Q8 · D-14, D-18, D-22 · QR-06</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor Ad as Administrateur
+  participant ER as Espace RH
+  participant P as Portail
+  participant BD as Base de données
+  participant J as Journal d'audit
+  actor E as Employé
+  Ad->>ER: Connexion + code de double authentification
+  Ad->>ER: Tableau de bord
+  ER->>P: Demande les indicateurs
+  P->>BD: Employés, % de dossiers complets, certificats, par agence, région, direction
+  P-->>ER: Indicateurs et « À traiter »
+  opt Réaffecter un certificat en cours
+    Ad->>ER: « Réaffecter » vers un autre Agent RH
+    ER->>P: Réaffectation
+    P->>BD: Nouveau valideur
+    P->>J: Réaffectation, de qui à qui
+  end
+  opt Exporter une liste d'employés
+    Ad->>ER: Filtres + « Exporter » (Excel, CSV)
+    ER->>P: Export
+    P->>BD: Employés filtrés, libellés officiels
+    P->>J: Export, filtre, nombre de lignes
+    P-->>ER: Fichier
+  end
+  opt Un employé ne peut plus se connecter
+    E-->>Ad: Demande d'aide
+    Ad->>ER: Cherche l'employé, « Réinitialiser son accès »
+    ER->>P: Réinitialisation
+    P->>BD: Accès réinitialisé
+    P->>J: Gestion des comptes
+    E->>P: À sa prochaine connexion, crée un nouveau mot de passe
+  end
+  opt Créer un compte RH
+    Ad->>ER: Nom, email, rôle, matricule de la personne
+    ER->>P: Création
+    P->>BD: Compte rattaché au matricule
+    P->>J: Gestion des comptes
+  end
+      </pre></div>
+      <figcaption>L'Administrateur peut aussi valider ou rejeter un certificat, comme l'Agent RH (séquence P2). Le matricule rattaché sert à ne jamais proposer à une personne ses propres certificats (Q2). Qui peut exporter et quelles colonnes : <span class="todo">[à confirmer, QR-06, D-18]</span>. Comment l'employé demande l'aide et est prévenu de la réinitialisation : <span class="todo">[à confirmer]</span>.</figcaption>
+    </figure>
+  </section>
+
+  <!-- P5 -->
+  <section id="p5">
+    <h2>P5 — La Lecture seule : consulter sans valider</h2>
+    <div class="who"><span><b>Lot</b> 2</span><span><b>Parcours</b> R7 en consultation</span><span><b>Sources</b> Q2, Q8</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor L as Lecture seule&lt;br/&gt;(Direction Générale, audit)
+  participant ER as Espace RH
+  participant P as Portail
+  participant BD as Base de données
+  participant J as Journal d'audit
+  L->>ER: Connexion + code de double authentification
+  L->>ER: Tableau de bord
+  ER->>P: Demande les indicateurs
+  P->>BD: Lit les indicateurs
+  P-->>ER: Tableau de bord, sans action
+  L->>ER: Recherche un employé, ouvre son dossier
+  ER->>P: Demande le dossier
+  P->>BD: Lit le dossier
+  P->>J: Consultation du dossier
+  P-->>ER: Dossier en lecture seule
+  Note over ER,P: Aucun bouton Valider, Rejeter, Réaffecter ni Rattacher
+      </pre></div>
+      <figcaption>La Lecture seule « consulte les dossiers et les tableaux de bord, sans valider » (Q2). Peut-elle exporter et consulter le journal d'audit : <span class="todo">[à confirmer, §4.3]</span>.</figcaption>
+    </figure>
+  </section>
+
+  <!-- Demande lot 4 -->
+  <section id="demande">
+    <h2>Lot 4 — Une demande de promotion ou de mobilité</h2>
+    <div class="who"><span><b>Lot</b> 4 (enregistrement des lettres dès le lot 2)</span><span><b>Parcours</b> E7, R4</span><span><b>Sources</b> Q6 §2 à §4 · §4.2</span></div>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor E as Employé
+  participant P as Portail
+  actor A as Agent RH
+  actor Ad as Administrateur (DRH)
+  actor RD as Resp. de département
+  actor Ev as Évaluateur
+  actor DG as Direction Générale
+  alt Demande en ligne
+    E->>P: Dépose la demande (poste visé ou spontanée)
+  else Demande reçue par lettre
+    A->>P: Enregistre la demande + lettre scannée
+  end
+  P-->>E: Accusé de réception sous 2 jours ouvrables
+  Ad->>P: Étude par la DRH
+  P->>RD: Consultation
+  RD-->>P: « Disponibilité confirmée » ou « Pas de disponibilité »
+  opt Évaluation nécessaire
+    P->>Ev: Demande d'évaluation
+    Ev-->>P: « Positive » ou « Négative »
+  end
+  Ad->>P: Décision de la DRH
+  P->>DG: Approbation
+  DG-->>P: Approuve ou non
+  P->>P: Clôture : acceptée, refusée, reportée ou retirée
+  P-->>E: Suivi dans « Mes demandes » à chaque étape
+      </pre></div>
+      <figcaption>Circuit en 7 étapes du registre (Q6 §3) ; aucune demande n'est supprimée. Le responsable de département, l'évaluateur et la Direction Générale utilisent-ils le portail, ou les RH saisissent-elles leur réponse : <span class="todo">[à confirmer, §4.2]</span>. Le délai d'accusé de réception (2 jours) est une valeur proposée <span class="todo">[à confirmer]</span>. Les informations salariales des lettres ne sont jamais stockées (message de lancement §5).</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Ce que ces séquences ont en commun</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>Règle</th><th>Où on la voit</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>L'export RH n'est jamais modifié</td><td>P2 signalements, P3</td><td>Q4, D-20</td></tr>
+          <tr><td>Toute consultation et toute décision sont tracées</td><td>P2, P3, P4, P5</td><td>Q2</td></tr>
+          <tr><td>Personne ne valide son propre certificat</td><td>P2, P4</td><td>Q2, RG-42</td></tr>
+          <tr><td>Espace RH : réseau ou VPN, double authentification</td><td>P2, P4, P5</td><td>Q8</td></tr>
+          <tr><td>Messages à l'employé polis et orientés vers la correction</td><td>P1, P2</td><td>Demande, phase 2</td></tr>
+          <tr><td>Aucun salaire extrait ni stocké</td><td>Demande de promotion</td><td>Message de lancement §5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

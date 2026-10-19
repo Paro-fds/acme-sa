@@ -53,6 +53,7 @@ def test_ca01_each_row_has_name_code_agency_and_status(admin_client):
         "agency_code": "PV",
         "position": "Agent de crédit",
         "status": "NOT_UPDATED",
+        "photo_url": None,  # US-113 : vide tant que la source des photos n'est pas branchée
     }
 
 

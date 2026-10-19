@@ -1,32 +1,137 @@
-"""Paramètres de l'application, lus depuis les variables d'environnement ou le fichier .env."""
+"""Paramètres de l'application, lus depuis les variables d'environnement ou le fichier .env.
+
+US-001 CA-03 : aucune adresse ni aucun secret dans le code ; les mêmes noms de variables
+servent en local, sur les services gratuits (démonstrateur) et sur AWS.
+"""
 
 from pathlib import Path
+from typing import Literal
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = BACKEND_DIR.parent
+DEMO_CSV = BACKEND_DIR / "demo" / "employes-fictifs.csv"
+"""US-001 CA-05 : seul jeu d'employés chargé hors production (données fictives)."""
+DEMO_REFERENTIAL = BACKEND_DIR / "demo" / "referentiel-fictif.xlsx"
+"""US-501 : référentiel fictif au format d'import, pour le démonstrateur et les tests (agences et directions « Démo »)."""
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 
+    app_env: Literal["local", "demo", "recette", "production"] = "local"
+    """`demo` et `recette` : jeu fictif imposé (US-001 CA-05) ; `local` : poste du développeur et tests."""
     acme_csv_path: Path = PROJECT_DIR / "data" / "vault-employee-list_20261001-1400.csv"
     acme_data_dir: Path = Path("C:/acme-data")
+    job_profiles_path: Path = BACKEND_DIR / "app" / "job" / "infrastructure" / "fiches-de-poste.json"
+    """US-119 : catalogue des postes ACME, produit par `python -m app.tools.import_job_profiles`."""
+    database_url: str = ""
+    """`DATABASE_URL` : PostgreSQL (Supabase, puis RDS) ; vide = SQLite dans `ACME_DATA_DIR` (poste du développeur, tests)."""
+    auto_create_schema: bool = True
+    """Création directe du schéma (SQLite local, tests). Déployé : `false`, le schéma vient des migrations Alembic."""
+    storage_backend: Literal["local", "s3"] = "local"
+    s3_endpoint_url: str = ""
+    """Vide sur AWS (S3 par défaut) ; adresse S3 de Supabase Storage sur le démonstrateur."""
+    s3_bucket: str = ""
+    s3_region: str = "us-east-1"
+    s3_access_key_id: str = ""
+    s3_secret_access_key: str = ""
     admin_username: str = "admin"
+    admin_password: str = ""
     admin_password_hash: str = ""
-    employee_session_minutes: int = 30
-    admin_session_minutes: int = 120
+    # US-125 : déconnexion après 15 minutes sans activité, employés et espace de gestion.
+    employee_session_minutes: int = 15
+    admin_session_minutes: int = 15
+    admin_mfa_required: bool = False
+    """US-112 : double authentification de l'espace de gestion. Coupée par défaut (connexion directe) ;
+    `ADMIN_MFA_REQUIRED=true` la rallume sans toucher au code (US-102)."""
+    mfa_methods: str = "TOTP,EMAIL,WHATSAPP"
+    """US-102 : méthodes de double authentification proposées."""
+    demo_show_mfa_codes: bool = False
+    """En environnement demo, permet d'afficher les codes simulés si aucun provider réel n'est configuré."""
+    whatsapp_meta_token: str = ""
+    whatsapp_meta_phone_number_id: str = ""
+    whatsapp_twilio_account_sid: str = ""
+    whatsapp_twilio_auth_token: str = ""
+    whatsapp_twilio_from: str = ""
+    rh_allowed_networks: str = ""
+    """US-102 CA-06 : réseaux des bureaux (CIDR séparés par des virgules) ; vide = pas de restriction (démonstrateur)."""
     max_upload_mb: int = 5
     max_documents_per_employee: int = 10
+    max_certificates_per_employee: int = 20
+    """RG-22, D-07 : 20 certificats au plus par employé."""
+    max_career_entries_per_kind: int = 30
+    """V2 (D-10) : éléments au plus par rubrique du parcours professionnel."""
+    career_recent_days: int = 7
+    """V2 (D-15) : fenêtre « ces derniers jours » de la carte « Parcours enrichis »."""
     frontend_dist_dir: Path = PROJECT_DIR / "frontend" / "dist"
     api_docs: bool = False
     """Documentation interactive de l'API (/api/docs) : désactivée par défaut, le portail pouvant être exposé par un tunnel."""
 
+    @model_validator(mode="after")
+    def _derive(self) -> "Settings":
+        if self.app_env in ("demo", "recette"):
+            # US-001 CA-05 : en ligne hors production, aucun vrai CSV ne peut être chargé, quelle que soit la configuration.
+            self.acme_csv_path = DEMO_CSV
+        if not self.database_url and self.app_env != "local":
+            # US-001 : un conteneur déployé perd son disque à chaque redémarrage ; jamais de SQLite en ligne.
+            raise ValueError(f"DATABASE_URL est obligatoire avec APP_ENV={self.app_env} (base PostgreSQL).")
+        if not self.database_url:
+            self.database_url = f"sqlite:///{(self.acme_data_dir / 'portail.db').as_posix()}"
+        self.database_url = normalize_database_url(self.database_url)
+
+        # Si un mot de passe en clair est fourni, on génère automatiquement son empreinte Argon2
+        raw_password = (self.admin_password or "").strip()
+        if not raw_password and self.admin_password_hash and not self.admin_password_hash.startswith("$argon2"):
+            raw_password = self.admin_password_hash.strip()
+        if raw_password:
+            from argon2 import PasswordHasher
+            self.admin_password_hash = PasswordHasher().hash(raw_password)
+
+        return self
+
     @property
-    def database_url(self) -> str:
-        return f"sqlite:///{(self.acme_data_dir / 'portail.db').as_posix()}"
+    def is_demo(self) -> bool:
+        return self.app_env == "demo"
+
+    @property
+    def has_meta_whatsapp(self) -> bool:
+        return bool(self.whatsapp_meta_token and self.whatsapp_meta_phone_number_id)
+
+    @property
+    def has_twilio_whatsapp(self) -> bool:
+        return bool(self.whatsapp_twilio_account_sid and self.whatsapp_twilio_auth_token and self.whatsapp_twilio_from)
+
+    @property
+    def shows_local_codes(self) -> bool:
+        """US-102 : sur le poste du développeur seulement (et dans les tests), aucun code ne part ;
+        l'API le renvoie pour qu'il s'affiche à l'écran. En démo, actif si DEMO_SHOW_MFA_CODES=true."""
+        return self.app_env == "local" or (self.app_env == "demo" and self.demo_show_mfa_codes)
+
+    @property
+    def enabled_mfa_methods(self) -> list[str]:
+        return [part.strip().upper() for part in self.mfa_methods.split(",") if part.strip()]
+
+    @property
+    def certificates_dir(self) -> Path:
+        """US-301 : certificats sur le poste du développeur (`STORAGE_BACKEND=local`)."""
+        return self.acme_data_dir / "certificates"
 
     @property
     def documents_dir(self) -> Path:
         return self.acme_data_dir / "documents"
+
+    @property
+    def career_dir(self) -> Path:
+        """Justificatifs du parcours professionnel (V2, AD-V2-04), séparés des documents de la campagne."""
+        return self.acme_data_dir / "career"
+
+
+def normalize_database_url(url: str) -> str:
+    """Les chaînes de Supabase et RDS commencent par `postgres://` ou `postgresql://` : on choisit le pilote psycopg 3."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url

@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -8,6 +9,8 @@ from app.auth.domain.lockout import LOCK_DURATION, MAX_FAILED_ATTEMPTS
 class SubjectType(StrEnum):
     EMPLOYEE = "EMPLOYEE"
     ADMIN = "ADMIN"
+    ADMIN_MFA = "ADMIN_MFA"
+    """US-102 : mot de passe RH vérifié, second facteur attendu ; n'ouvre que les écrans de double authentification."""
 
 
 class Lockable:
@@ -25,6 +28,12 @@ class Lockable:
 
     def is_locked(self, now: datetime) -> bool:
         return self.locked_until is not None and now < self.locked_until
+
+    def seconds_until_unlock(self, now: datetime) -> int:
+        """Secondes restantes avant la fin du blocage, arrondies au-dessus ; 0 si le compte n'est pas bloqué."""
+        if not self.is_locked(now):
+            return 0
+        return math.ceil((self.locked_until - now).total_seconds())
 
     def register_failure(self, now: datetime) -> None:
         """Compte un mot de passe erroné ; la 5ᵉ erreur consécutive bloque le compte 15 minutes."""
