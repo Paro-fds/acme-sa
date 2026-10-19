@@ -42,7 +42,7 @@ test('candidature : postuler, accusé de réception, étape suivante côté RH, 
   await page.getByLabel("Date d'ouverture").fill(today)
   await page.getByLabel('Date limite').fill('2099-12-31')
   await page.getByLabel('Mission').fill('Suivre un portefeuille de clients (poste fictif).')
-  await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click()
+  await page.getByRole('button', { name: 'Suivant' }).click()
   await page.getByRole('button', { name: 'Publier' }).click()
   await expect(page.getByText('Poste publié.')).toBeVisible()
   const openingUrl = page.url()

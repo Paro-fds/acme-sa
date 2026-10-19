@@ -174,7 +174,7 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     createOpening.mockResolvedValue(OPENING)
     renderAt('/admin/postes/nouveau')
     await fill(user)
-    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+    await user.click(screen.getByRole('button', { name: 'Suivant' }))
 
     expect(createOpening).toHaveBeenCalledWith({
       code: 'cc-2026-01',
@@ -212,7 +212,7 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     await user.type(screen.getByLabelText('Mission'), 'Instruire les demandes.')
     await user.type(screen.getByLabelText("Date d'ouverture"), '2026-10-15')
     await user.type(screen.getByLabelText('Date limite'), '2026-11-15')
-    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+    await user.click(screen.getByRole('button', { name: 'Suivant' }))
 
     expect(createOpening).toHaveBeenCalledWith(expect.objectContaining({ unit_code: 'Agence de Pétion-Ville' }))
     expect(createOpening.mock.calls[0][0].criteria.unit_codes).toEqual([])
@@ -225,7 +225,7 @@ describe('US-802 CA-01 — saisir la fiche', () => {
     )
     renderAt('/admin/postes/nouveau')
     await fill(user)
-    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+    await user.click(screen.getByRole('button', { name: 'Suivant' }))
 
     const field = screen.getByLabelText('Date limite')
     expect(field).toHaveAttribute('aria-invalid', 'true')
@@ -266,7 +266,7 @@ describe('US-115 — qui verra ce poste', () => {
     ])
     await user.click(screen.getByRole('checkbox', { name: 'Finance' }))
     await user.click(screen.getByRole('checkbox', { name: 'Comptabilité' }))
-    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+    await user.click(screen.getByRole('button', { name: 'Suivant' }))
 
     expect(createOpening).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -323,7 +323,7 @@ describe('US-115 — qui verra ce poste', () => {
     await screen.findByLabelText('Code du poste')
 
     expect(await screen.findByText('Personne ne verra ce poste')).toBeInTheDocument()
-    const save = screen.getByRole('button', { name: 'Enregistrer le brouillon' })
+    const save = screen.getByRole('button', { name: 'Suivant' })
     expect(save).toBeEnabled()
   })
 

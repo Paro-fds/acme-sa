@@ -1,12 +1,12 @@
 ---
 created: 2026-10-17T21:00:00Z
-updated: 2026-10-17T21:00:00Z
+updated: 2026-10-19T12:00:00Z
 ---
 
 # ws-tech-08 — Carrière et postes
 
 **Workstream :** epic D8 « Carrière et postes » (`docs/lot0/1-specifications/epics/`).
-**Stories closes :** US-802, US-115, US-117, US-119, US-121, US-122, US-124 (espace de gestion) ; US-902 (candidature), US-120 (notification « Nouveau poste »). **En cours :** US-801 (indicateur orange et intérêt à décider).
+**Stories closes :** US-802, US-115, US-117, US-119, US-121, US-122, US-124, US-126 (espace de gestion) ; US-902 (candidature), US-120 (notification « Nouveau poste »). **En cours :** US-801 (indicateur orange et intérêt à décider).
 **Code :** module backend `app/job` (4 couches) ; frontend `features/admin/openings/` (gestion) et `features/openings/` (employé).
 
 ## 1. Carte du module
@@ -90,6 +90,7 @@ Migrations : 0014 (postes), 0015 (candidatures), 0016 (plusieurs unités et doma
 
 - `fiches-de-poste.json` est **produit**, jamais modifié à la main : `python -m app.tools.import_job_profiles` (depuis `backend/`) le régénère à partir de `matrice_competences.sqlite` (source de vérité, US-121) et des descriptions HTML de `postes/postes` (complément par intitulé, US-119).
 - Fichier absent → catalogue vide ; la saisie hors catalogue reste possible.
+- Recherche à l'écran (US-126, `features/admin/openings/catalogueSearch.js`) : intitulé contenant tous les mots, sans accents ni majuscules ; rangé en trois groupes (commence par la recherche → chaque mot cherché commence un mot de l'intitulé → contient seulement), alphabétiques chacun. Sans recherche, l'ordre de l'API.
 
 ### Notifications de l'employé
 
@@ -105,6 +106,7 @@ Calculées à chaque lecture ; seul l'état « lu » est stocké (`admin_notific
 | Colonnes retirées de `job_opening` par `ALTER TABLE` direct (0016) | le mode « batch » d'Alembic recrée la table et casse les clés étrangères sur SQLite | pour **retirer** une colonne, ne pas utiliser `batch_alter_table` ; pour en **ajouter**, il convient (0018, 0019) |
 | Visibilité par unités : le poste est montré à tous si aucune unité n'est choisie | US-117 : sans référentiel, aucun employé n'a d'unité | ne pas exiger une unité dans `Criteria` |
 | `DIPLOMA_DOMAINS` (département → domaines) est une **proposition** ❓ | à valider par la DRH (2026-10-15) | ne pas la présenter comme une règle validée |
+| Publier se fait en deux étapes : le formulaire (« Suivant ») enregistre un brouillon, la fiche du poste reçoit la lettre et publie | la lettre est jointe au moment exact de la publication et ne change plus (US-124) ; choix de l'utilisateur du 2026-10-19 de garder la lettre sur la fiche | ne pas déplacer la lettre dans le formulaire sans nouvelle décision |
 | Le grade n'est plus saisi mais reste en base | US-122 : gestion des grades inconnue, à demander à la DRH | ne pas supprimer les colonnes `target_grade`, `min_grade` |
 
 ## 5. Tests
@@ -112,4 +114,4 @@ Calculées à chaque lecture ; seul l'état « lu » est stocké (`admin_notific
 - Domaine (`tests/unit/`) : `test_us802_poste.py`, `test_us801_eligibilite.py`, `test_us115_audience.py`, `test_us117_poste_sans_referentiel.py`, `test_us119_catalogue.py`, `test_us121_matrice_postes.py`, `test_us122_poste_sans_grade.py`, `test_us124_lettre_directeur_rh.py`, `test_us902_candidature.py`.
 - API : `tests/api/test_us802_postes.py` (fixtures `agent_client`, `readonly_client`, `_create`, référentiel fictif importé automatiquement), `test_us124_lettre_directeur_rh.py` (`_upload_letter`), `test_us902_candidatures.py` (`_upload_cv`).
 - Toute nouvelle route `/api/admin/*` est couverte d'office par `test_us15_admin_auth.py` (401 sans session, 403 avec une session employé).
-- Écran : `features/admin/openings/Openings.test.jsx`, `JobCatalogue.test.jsx` ; E2E `e2e/us802-postes.spec.js` (l'Administrateur joint une lettre : la base E2E n'a pas de compte Agent RH).
+- Écran : `features/admin/openings/Openings.test.jsx`, `JobCatalogue.test.jsx`, `catalogueSearch.test.js` ; E2E `e2e/us802-postes.spec.js` (l'Administrateur joint une lettre : la base E2E n'a pas de compte Agent RH).

@@ -28,7 +28,7 @@ test('postes ouverts : saisir une fiche, la publier, voir son historique', async
   await page.getByLabel("Ancienneté dans l'institution (années)").fill('2')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await page.screenshot({ path: `${CAPTURES}/us802-saisie-390.png`, fullPage: true })
-  await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click()
+  await page.getByRole('button', { name: 'Suivant' }).click()
 
   await expect(page.getByRole('heading', { name: 'Chargé de crédit (fictif, US-802)' })).toBeVisible()
   await page.getByLabel('Lettre du directeur RH (facultative)').setInputFiles({

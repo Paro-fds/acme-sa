@@ -41,7 +41,7 @@ test('nouveau poste : plusieurs unités, plusieurs domaines, aperçu de l’audi
   await page.getByLabel("Date d'ouverture").fill('2026-10-15')
   await page.getByLabel('Date limite').fill('2026-11-15')
   await page.getByLabel('Mission').fill("Instruire les demandes de crédit de l'agence.")
-  await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click()
+  await page.getByRole('button', { name: 'Suivant' }).click()
   await expect(page.getByRole('heading', { name: 'Chargé de crédit (fictif)' })).toBeVisible()
   await expect(page.getByText('Domaines : Comptabilité ou Finance')).toBeVisible()
 })

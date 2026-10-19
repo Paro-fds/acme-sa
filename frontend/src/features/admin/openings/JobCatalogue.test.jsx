@@ -188,7 +188,7 @@ describe('US-119 CA-03 — publier à partir d’une fiche', () => {
     await user.type(screen.getByLabelText('Unité du poste'), 'Direction Démo Comptable')
     await user.type(screen.getByLabelText("Date d'ouverture"), '2026-10-15')
     await user.type(screen.getByLabelText('Date limite'), '2026-11-15')
-    await user.click(screen.getByRole('button', { name: 'Enregistrer le brouillon' }))
+    await user.click(screen.getByRole('button', { name: 'Suivant' }))
 
     expect(createOpening).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -250,5 +250,31 @@ describe('US-121 — le catalogue vient de la matrice des postes du directeur', 
     expect(screen.getByLabelText('Intitulé')).toHaveValue('Chargé de mission fictif')
     // Sans description détaillée, la mission reprend les compétences.
     expect(screen.getByLabelText('Mission')).toHaveValue('Compétences attendues :\n- Suivi des projets fictifs')
+  })
+})
+
+describe('US-126 — trouver un poste et préparer sa publication', () => {
+  it('CA-01 — « directeur » montre les directeurs avant les assistants', async () => {
+    const user = userEvent.setup()
+    listJobProfiles.mockResolvedValue({
+      items: ['Assistant directeur administratif', 'Assistant directeur comptable', 'Directeur crédit', 'Directeur administratif'].map(
+        (title, index) => ({ code: `P${index}`, position_code: `P${index}`, title, department: 'Administration', service: null, level_text: null }),
+      ),
+    })
+    renderAt('/admin/postes?onglet=catalogue')
+    await user.type(await screen.findByLabelText('Rechercher un poste'), 'directeur')
+    const items = within(screen.getByRole('list', { name: 'Fiches de poste' })).getAllByRole('listitem')
+    expect(items.map((item) => item.querySelector('p').textContent)).toEqual([
+      'Directeur administratif',
+      'Directeur crédit',
+      'Assistant directeur administratif',
+      'Assistant directeur comptable',
+    ])
+  })
+
+  it('CA-03 — le formulaire d’un nouveau poste mène à l’étape suivante par « Suivant »', async () => {
+    renderAt('/admin/postes/nouveau?fiche=CF02')
+    expect(await screen.findByRole('button', { name: 'Suivant' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Enregistrer le brouillon/ })).not.toBeInTheDocument()
   })
 })

@@ -31,7 +31,7 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
   const checked = admin.getByRole('checkbox', { checked: true })
   while ((await checked.count()) > 0) await checked.first().uncheck()
   await admin.getByLabel("Niveau d'études minimum").selectOption('')
-  await admin.getByRole('button', { name: 'Enregistrer le brouillon' }).click()
+  await admin.getByRole('button', { name: 'Suivant' }).click()
   await admin.getByRole('button', { name: 'Publier' }).click()
   await expect(admin.getByText('Poste publié.')).toBeVisible()
 

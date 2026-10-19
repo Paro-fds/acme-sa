@@ -248,7 +248,7 @@ function OpeningForm({ id, form, opening, profile }) {
           Annuler
         </Button>
         <Button type="submit" className="sm:w-auto" disabled={sending}>
-          {sending ? 'Enregistrement…' : id ? 'Enregistrer' : 'Enregistrer le brouillon'}
+          {sending ? 'Enregistrement…' : id ? 'Enregistrer' : 'Suivant'}
         </Button>
       </div>
       </div>

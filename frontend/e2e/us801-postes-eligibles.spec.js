@@ -28,7 +28,7 @@ test('postes ouverts : seul l’employé apte voit le poste publié', async ({ p
   await page.getByLabel('Date limite').fill('2099-12-31')
   await page.getByLabel('Mission').fill("Seconder le chef d'agence (poste fictif).")
   await page.getByLabel("Ancienneté dans l'institution (années)").fill('15')
-  await page.getByRole('button', { name: 'Enregistrer le brouillon' }).click()
+  await page.getByRole('button', { name: 'Suivant' }).click()
   await page.getByRole('button', { name: 'Publier' }).click()
   await expect(page.getByText('Poste publié.')).toBeVisible()
 

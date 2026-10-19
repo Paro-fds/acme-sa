@@ -6,13 +6,8 @@ import { useIsDesktop } from '../../../lib/useIsDesktop.js'
 import { useLoader } from '../../../lib/useLoader.js'
 import ProfileCompetences from '../../openings/ProfileCompetences.jsx'
 import ProfileSections from '../../openings/ProfileSections.jsx'
+import { searchProfiles } from './catalogueSearch.js'
 import { canEdit, LOGIN_PATH, OPENINGS_PATH } from './openingParts.jsx'
-
-const plain = (text) =>
-  text
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
 
 const ALL = ''
 
@@ -105,6 +100,7 @@ function ProfileItem({ profile, selected, onSelect, children }) {
 
 /**
  * US-119 CA-01, CA-02 : le catalogue des postes ACME, filtré par mots de l'intitulé (sans accents) et par département.
+ * US-126 : les intitulés qui commencent par la recherche d'abord (`catalogueSearch.js`).
  * US-121 : les postes de la matrice du directeur (code, département, service, compétences).
  * Sur ordinateur, la fiche choisie s'ouvre à droite ; sur téléphone, sous la ligne choisie.
  */
@@ -122,9 +118,9 @@ export default function JobCatalogue({ me }) {
     () => [...new Set(profiles.map((p) => p.department).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr')),
     [profiles],
   )
-  const words = plain(search).split(/\s+/).filter(Boolean)
-  const shown = profiles.filter(
-    (p) => (department === ALL || p.department === department) && words.every((word) => plain(p.title).includes(word)),
+  const shown = searchProfiles(
+    profiles.filter((p) => department === ALL || p.department === department),
+    search,
   )
   const toggle = (code) => setSelected((current) => (current === code ? null : code))
 
