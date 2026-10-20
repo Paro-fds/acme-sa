@@ -114,14 +114,12 @@ describe('US-129 CA-02 — progression', () => {
     expect(progress).toHaveTextContent('Dernière confirmation le 9 octobre 2026 · prochaine avant le 8 octobre 2027')
   })
 
-  it('dossier complet : ni « Votre dossier est complet » ni « 100 % » écrits', async () => {
+  it('US-136 CA-07 : dossier complet, la carte de progression disparaît', async () => {
     getDossier.mockResolvedValue({ ...DOSSIER, completion: { percent: 100, complete: 8, total: 8 } })
     await renderProfile()
 
-    const progress = screen.getByRole('region', { name: 'Progression du dossier' })
-    expect(progress).not.toHaveTextContent(/Votre dossier est complet|100 %/)
-    expect(within(progress).getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
-    expect(progress).toHaveTextContent('8 informations sur 8 saisies ou confirmées. Vous pouvez déposer des certificats et postuler.')
+    expect(screen.queryByRole('region', { name: 'Progression du dossier' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/8 informations sur 8|Dernière confirmation|Votre dossier est complet|100 %/)).not.toBeInTheDocument()
   })
 
   it('rien de confirmé : pas de ligne de confirmation', async () => {

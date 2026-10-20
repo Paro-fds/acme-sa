@@ -2,7 +2,6 @@ import { useId } from 'react'
 import { Link } from 'react-router'
 import stairs from '../../assets/illustration-escalier.png'
 import { CERTIFICATES_PATH, DEPOSIT_PATH } from '../certificates/paths.js'
-import { MY_NOTIFICATIONS_PATH } from '../notifications/myNotificationParts.jsx'
 
 /** US-123 : l'accueil « tableau de bord » (maquette validée le 2026-10-15), présentation seule. */
 
@@ -20,7 +19,6 @@ const plural = (n, word, words = `${word}s`) => (n > 1 ? words : word)
 const dateOf = (iso) => new Date(`${iso}T00:00:00`)
 const midnight = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
 export const daysUntil = (iso, today) => Math.round((dateOf(iso) - midnight(today)) / DAY)
-const shortMonth = (iso) => dateOf(iso).toLocaleDateString('fr-FR', { month: 'short' })
 const dayMonth = (iso) => dateOf(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 
 function Go({ children, tone = 'text-primary' }) {
@@ -52,11 +50,11 @@ function Label({ icon, tone, children }) {
   )
 }
 
-const TILE = 'flex min-h-40 min-w-0 flex-col gap-1.5 rounded-xl border border-border bg-surface p-4 shadow-card'
+const TILE = 'flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-card'
 
 function Tile({ to, wide = false, children }) {
   return (
-    <li className={`flex ${wide ? 'col-span-2 lg:col-span-1' : ''}`}>
+    <li className={`flex ${wide ? 'col-span-2 sm:col-span-1' : ''}`}>
       <Link to={to} className={`${TILE} w-full text-heading hover:bg-section`}>
         {children}
       </Link>
@@ -84,7 +82,7 @@ function Value({ value, unit }) {
       {unit && (
         <>
           {' '}
-          <span className="text-base font-semibold whitespace-nowrap">{unit}</span>
+          <span className="text-base whitespace-nowrap text-help">{unit}</span>
         </>
       )}
     </span>
@@ -101,13 +99,13 @@ function Bar({ parts }) {
   )
 }
 
-/** CA-02, CA-06 : les quatre tuiles ; un dossier incomplet passe en premier, les autres attendent. */
+/** US-123 CA-06 : un dossier incomplet passe en premier, les autres attendent. US-136 CA-03 : dossier complet, trois tuiles au plus, sans phrase. */
 export function Tiles({ completion, missing, openings, certificates, application }) {
   const titleId = useId()
   const complete = completion.is_complete
   // Sur téléphone, le dossier prend toute la largeur quand il serait seul sur sa ligne (3 tuiles) ou passe en premier.
   const dossier = (
-    <Tile key="dossier" to={PROFILE_PATH} wide={!completion.is_complete || !application}>
+    <Tile key="dossier" to={PROFILE_PATH} wide>
       <Label icon="person" tone="dossier">Mon dossier</Label>
       {complete ? <Value value={completion.percent} unit="%" /> : <Value value={completion.complete} unit={`sur ${completion.total}`} />}
       <Bar parts={[{ ratio: completion.percent / 100, className: complete ? 'bg-status-done-dot' : 'bg-primary' }]} />
@@ -136,17 +134,14 @@ export function Tiles({ completion, missing, openings, certificates, application
   const total = certificates.length
   const validated = certificates.filter((c) => c.status === 'VALIDATED').length
   const inReview = certificates.filter((c) => c.status === 'RECEIVED' || c.status === 'IN_REVIEW').length
-  const count = openings.length
+  // US-136 CA-03 : sur téléphone, la troisième tuile prend toute la largeur plutôt que de rester seule à moitié.
   return (
     <section aria-labelledby={titleId}>
       <h2 id={titleId} className="sr-only">Vos chiffres</h2>
-      <ul className={`grid grid-cols-2 gap-3 ${application ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
+      <ul className={`grid grid-cols-2 gap-3 ${application ? 'sm:grid-cols-3' : ''}`}>
         <Tile to={OPENINGS_LINK}>
           <Label icon="work" tone="openings">Postes pour vous</Label>
-          <Value value={count} />
-          <span className="text-base text-help">
-            {count > 0 ? 'Vous remplissez tous les critères : il ne reste qu’à postuler.' : 'Chaque diplôme validé peut vous en ouvrir.'}
-          </span>
+          <Value value={openings.length} />
           <Go tone={TONES.openings.link}>Voir les postes</Go>
         </Tile>
         <Tile to={CERTIFICATES_PATH}>
@@ -158,14 +153,10 @@ export function Tiles({ completion, missing, openings, certificates, application
               { ratio: total ? inReview / total : 0, className: 'bg-status-progress-dot' },
             ]}
           />
-          <span className="text-base text-help">
-            {total ? 'Chaque diplôme validé peut vous ouvrir un poste.' : 'Déposez un diplôme pour le faire valider par les RH.'}
-            {inReview > 0 && ` ${inReview} en examen.`}
-          </span>
           <Go tone={TONES.certificates.link}>Voir le suivi</Go>
         </Tile>
         {application && (
-          <Tile to={APPLICATIONS_LINK}>
+          <Tile to={APPLICATIONS_LINK} wide>
             <Label icon="send" tone="application">Ma candidature</Label>
             <Value value={application.step_number} unit={`étape sur ${STEP_COUNT}`} />
             <span className="flex gap-1" aria-hidden="true">
@@ -173,30 +164,10 @@ export function Tiles({ completion, missing, openings, certificates, application
                 <i key={index} className={`h-1.5 flex-1 rounded-full ${index < application.step_number ? 'bg-accent-icon' : 'bg-section'}`} />
               ))}
             </span>
-            <span className="text-base break-words text-help">
-              {application.opening_title} · {application.step_label}
-            </span>
             <Go tone={TONES.application.link}>Suivre</Go>
           </Tile>
         )}
-        {dossier}
       </ul>
-    </section>
-  )
-}
-
-function Panel({ title, link, sub, children }) {
-  const titleId = useId()
-  return (
-    <section aria-labelledby={titleId} className="flex min-w-0 flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id={titleId} className="text-lg font-bold text-heading">
-          {title}
-        </h2>
-        {link}
-      </div>
-      {sub && <p className="text-base text-help">{sub}</p>}
-      {children}
     </section>
   )
 }
@@ -207,37 +178,6 @@ function PanelLink({ to, children }) {
       {children}
       <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">chevron_right</span>
     </Link>
-  )
-}
-
-/** CA-04 : les dates limites des postes et la prochaine confirmation annuelle, les plus proches d'abord. */
-export function DatesPanel({ openings, freshness, today }) {
-  const dates = openings.map((opening) => ({ key: `opening-${opening.id}`, on: opening.closes_on, title: 'Date limite', detail: opening.title }))
-  const confirmation = freshness.items.map((item) => item.expires_on).sort()[0]
-  if (confirmation) dates.push({ key: 'confirmation', on: confirmation, title: 'Confirmer mon dossier', detail: 'Une fois par an' })
-  const upcoming = dates.filter((date) => daysUntil(date.on, today) >= 0).sort((a, b) => a.on.localeCompare(b.on)).slice(0, 4)
-  if (upcoming.length === 0) return null
-  const title = 'À ne pas manquer'
-  return (
-    <Panel title={title} sub="Vos dates à retenir, pour ne rater aucune occasion.">
-      <ul aria-label={title} className="flex flex-col">
-        {upcoming.map((date) => (
-          <li key={date.key} className="grid grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-3 border-b border-border py-3 last:border-0">
-            <span className="flex flex-col items-center rounded-lg border border-border bg-canvas py-1 leading-tight">
-              <span className="text-sm text-help uppercase">{shortMonth(date.on)}</span>
-              <span className="text-lg font-bold text-heading tabular-nums">{dateOf(date.on).getDate()}</span>
-              {dateOf(date.on).getFullYear() !== today.getFullYear() && (
-                <span className="text-sm text-help tabular-nums">{dateOf(date.on).getFullYear()}</span>
-              )}
-            </span>
-            <span className="flex min-w-0 flex-col">
-              <strong className="text-base text-heading">{date.title}</strong>
-              <span className="text-base break-words text-help">{date.detail}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Panel>
   )
 }
 
@@ -271,8 +211,6 @@ export function Hero({ firstName, canDeposit }) {
     </section>
   )
 }
-
-const longDate = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
 
 /** US-128 CA-03 : le poste dont la date limite est la plus proche, mis en avant ; les autres dans « Ma carrière ». */
 export function FeaturedOpening({ openings, today }) {
@@ -324,50 +262,31 @@ export function FeaturedOpening({ openings, today }) {
   )
 }
 
-/** US-128 CA-04 : pastille de chaque notification, par les jetons de statut. */
-const ACTIVITY = {
-  OPENING: { icon: 'work', circle: 'bg-info-bg text-primary', pill: 'bg-info-bg text-info-text', label: 'Poste' },
-  CERTIFICATE_VALIDATED: { icon: 'verified', circle: 'bg-status-done-bg text-status-done-text', pill: 'bg-status-done-bg text-status-done-text', label: 'Validé' },
-  CERTIFICATE_TO_CORRECT: { icon: 'edit_document', circle: 'bg-accent-bg text-accent-text', pill: 'bg-accent-bg text-accent-text', label: 'À corriger' },
+/** US-136 CA-02 : ce que l'employé a à faire ; la section n'existe que s'il y a quelque chose. */
+export function TodoSection({ children }) {
+  const titleId = useId()
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-3">
+      <h2 id={titleId} className="text-lg font-bold text-primary-active">
+        À faire
+      </h2>
+      {children}
+    </section>
+  )
 }
 
-/** US-128 CA-04 : les 3 dernières notifications de l'employé (US-120), à la place de « Nouveau pour vous ». */
-export function RecentActivity({ notifications }) {
-  const titleId = useId()
-  const items = notifications?.items ?? []
+/** Un certificat refusé par les RH : « Corriger » rouvre le dépôt de remplacement (US-130). */
+export function CorrectionRow({ certificate }) {
   return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-5 shadow-card">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id={titleId} className="flex items-center gap-2 text-lg font-bold text-primary-active">
-          <span className="material-symbols-outlined text-primary" aria-hidden="true">schedule</span>
-          Activité récente
-        </h2>
-        <PanelLink to={MY_NOTIFICATIONS_PATH}>Toutes mes notifications</PanelLink>
-      </div>
-      {items.length === 0 ? (
-        <p className="py-2 text-base text-help">Rien de nouveau pour le moment.</p>
-      ) : (
-        <ul className="flex flex-col">
-          {items.map((item) => {
-            const look = ACTIVITY[item.kind] ?? ACTIVITY.OPENING
-            return (
-              <li key={item.key} className="border-t border-border first:border-0">
-                <Link to={item.link} className="flex flex-wrap items-center gap-3 py-3 hover:bg-section">
-                  <span className={`flex size-10 shrink-0 items-center justify-center rounded-full ${look.circle}`} aria-hidden="true">
-                    <span className="material-symbols-outlined text-xl">{look.icon}</span>
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="text-base font-semibold text-heading">{item.title}</span>
-                    <span className="text-base break-words text-help">{item.detail}</span>
-                  </span>
-                  <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${look.pill}`}>{look.label}</span>
-                  <span className="w-28 text-right text-sm text-help">{longDate(item.at)}</span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </section>
+    <Link
+      to={`${DEPOSIT_PATH}?remplace=${encodeURIComponent(certificate.id)}`}
+      className="flex min-h-14 items-center gap-3 rounded-xl bg-surface p-4 shadow-card hover:bg-section"
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-bg text-accent-text" aria-hidden="true">
+        <span className="material-symbols-outlined text-xl">edit_document</span>
+      </span>
+      <span className="min-w-0 flex-1 text-base font-semibold break-words text-heading">Certificat à corriger : {certificate.title}</span>
+      <span className="flex min-h-11 shrink-0 items-center rounded-lg bg-primary px-4 font-semibold text-white">Corriger</span>
+    </Link>
   )
 }

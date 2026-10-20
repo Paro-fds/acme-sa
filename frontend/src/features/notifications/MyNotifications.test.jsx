@@ -119,8 +119,8 @@ describe('US-120 CA-05 — la page Notifications', () => {
   })
 })
 
-describe('US-120 CA-04, US-128 CA-04 — l’accueil montre le poste ouvert pour moi dans « Activité récente »', () => {
-  it('la notification du poste y figure, même si le dossier n’est pas complet ; « Nouveau pour vous » n’existe plus', async () => {
+describe('US-120 CA-04, US-136 CA-05 — sur l’accueil, la cloche signale le poste ouvert pour moi', () => {
+  it('plus d’« Activité récente » ni de « Nouveau pour vous » : la notification est dans la cloche', async () => {
     getProfile.mockResolvedValue({
       first_name: 'Lucie',
       last_name: 'EXEMPLE',
@@ -131,8 +131,9 @@ describe('US-120 CA-04, US-128 CA-04 — l’accueil montre le poste ouvert pour
     getFreshness.mockResolvedValue({ items: [], stale_count: 0 })
     getDossier.mockResolvedValue({ consent: { information_notice_at: '2026-10-08T09:00:00Z', whatsapp: false } })
     renderAt('/accueil', <EmployeeHomePage />)
-    const activity = await screen.findByRole('region', { name: 'Activité récente' })
-    expect(await within(activity).findByText(/Comptable fictif/)).toBeInTheDocument()
+    await screen.findByRole('heading', { name: 'Bonjour Lucie' })
+    expect(await screen.findByRole('link', { name: /Notifications, 1 non lue/ })).toBeVisible()
+    expect(screen.queryByRole('region', { name: 'Activité récente' })).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Nouveau pour vous' })).not.toBeInTheDocument()
   })
 })

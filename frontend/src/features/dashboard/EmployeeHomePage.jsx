@@ -3,15 +3,13 @@ import { Link, useNavigate } from 'react-router'
 import { listCertificates } from '../../api/certificates.js'
 import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
-import { getMyNotifications } from '../../api/notifications.js'
 import { listMyApplications, listMyOpenings } from '../../api/openings.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
-import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
 import { CONSENT_PATH } from '../dossier/paths.js'
-import { DatesPanel, FeaturedOpening, Hero, RecentActivity, Tiles } from './homeParts.jsx'
+import { CorrectionRow, FeaturedOpening, Hero, Tiles, TodoSection } from './homeParts.jsx'
 import StillAccurateCard from './StillAccurateCard.jsx'
 
 export const HOME_PATH = '/accueil'
@@ -41,15 +39,10 @@ const REMAINING = {
 /** Une donnée indisponible (hors connexion, service en panne) laisse sa partie vide sans bloquer l'accueil. */
 const optional = (promise) => promise.catch(() => null)
 
-/** US-123 : le profil et (US-128) l'activité récente d'abord ; les postes, certificats et candidatures si le dossier est complet. */
+/** US-123 : le profil d'abord ; les postes, certificats et candidatures si le dossier est complet. */
 async function load() {
-  const [profile, dossier, freshness, notifications] = await Promise.all([
-    getProfile(),
-    getDossier(),
-    getFreshness(),
-    optional(getMyNotifications({ limit: 3 })),
-  ])
-  const base = { profile, freshness, notifications, consentGiven: Boolean(dossier.consent.information_notice_at) }
+  const [profile, dossier, freshness] = await Promise.all([getProfile(), getDossier(), getFreshness()])
+  const base = { profile, freshness, consentGiven: Boolean(dossier.consent.information_notice_at) }
   if (!profile.completion.is_complete) return base
   const [openings, certificates, applications] = await Promise.all([
     optional(listMyOpenings()),
@@ -113,22 +106,21 @@ function Remaining({ elements }) {
 
 /**
  * US-207 CA-01 : l'accueil de l'employé après la connexion ; à la première connexion, « Avant de commencer » d'abord.
- * US-123 : tableau de bord (tuiles chiffrées, dates à retenir). US-128 (refonte du 2026-10-19) : en-tête avec la phrase
- * de bienvenue et le bandeau illustré, poste mis en avant, activité récente ; sur ordinateur, les dates à droite.
+ * US-123 : tableau de bord. US-128 (refonte du 2026-10-19) : en-tête avec la phrase de bienvenue et le bandeau illustré,
+ * poste mis en avant. US-136 (2026-10-20) : page allégée : « À faire », trois chiffres sans phrase, le poste mis en avant.
  */
 export default function EmployeeHomePage() {
   const navigate = useNavigate()
   const { data, error, loading } = useLoader(load)
   const needsConsent = data && !data.consentGiven
-  const desktop = useIsDesktop()
 
   // Écran 05 : à la première connexion, « Avant de commencer » passe d'abord.
   useEffect(() => {
     if (needsConsent) navigate(CONSENT_PATH, { replace: true, state: { next: HOME_PATH } })
   }, [needsConsent, navigate])
 
-  const page = (children, aside) => (
-    <Page account title="Accueil" aside={aside} asideLabel="Dates à retenir">
+  const page = (children) => (
+    <Page account title="Accueil">
       {children}
     </Page>
   )
@@ -141,23 +133,29 @@ export default function EmployeeHomePage() {
   const complete = completion.is_complete
   const missing = completion.elements.filter((element) => !element.complete)
   const openings = data.openings?.items ?? []
-  const side = complete && <DatesPanel openings={openings} freshness={freshness} today={today} />
+  const certificates = data.certificates?.certificates ?? []
+  const toCorrect = complete ? certificates.filter((certificate) => certificate.status === 'TO_CORRECT') : []
+  const stale = freshness.items.some((item) => item.state === 'STALE')
   return page(
     <>
       <Hero firstName={profile.first_name} canDeposit={complete} />
-      <StillAccurateCard freshness={freshness} />
+      {(stale || toCorrect.length > 0) && (
+        <TodoSection>
+          <StillAccurateCard freshness={freshness} />
+          {toCorrect.map((certificate) => (
+            <CorrectionRow key={certificate.id} certificate={certificate} />
+          ))}
+        </TodoSection>
+      )}
       <Tiles
         completion={completion}
         missing={missing}
         openings={openings}
-        certificates={data.certificates?.certificates ?? []}
+        certificates={certificates}
         application={currentApplication(data.applications)}
       />
       {!complete && <Remaining elements={missing} />}
       {complete && <FeaturedOpening openings={openings} today={today} />}
-      {complete && !desktop && side}
-      <RecentActivity notifications={data.notifications} />
     </>,
-    desktop && complete ? side : undefined,
   )
 }

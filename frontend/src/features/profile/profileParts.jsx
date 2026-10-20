@@ -67,12 +67,15 @@ function confirmationLine(freshness) {
   return `Dernière confirmation le ${longDate(new Date(last))} · prochaine avant le ${longDate(new Date(`${next}T00:00:00`))}`
 }
 
-/** CA-02 : l'anneau de progression (sans titre ni pourcentage écrits, choix du 2026-10-19), ce qui est saisi et la prochaine confirmation. */
+/** CA-02 : l'anneau de progression (sans titre ni pourcentage écrits, choix du 2026-10-19), ce qui est saisi et la prochaine confirmation ;
+ * US-136 CA-07 : seulement tant que le dossier est incomplet. */
 export function DossierProgressRing({ completion, freshness }) {
   const titleId = useId()
   const { percent, complete, total } = completion
   const done = complete >= total
   const line = confirmationLine(freshness)
+  // US-136 CA-07 : un dossier complet n'a plus besoin de cette carte (demande du 2026-10-20).
+  if (done) return null
   return (
     <section aria-labelledby={titleId} className={`${CARD} flex flex-wrap items-center gap-6 p-5 lg:p-6`}>
       <div

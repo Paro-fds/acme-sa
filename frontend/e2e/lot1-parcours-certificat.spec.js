@@ -56,19 +56,23 @@ test('compléter son profil puis déposer un certificat', async ({ browser, page
   await page.screenshot({ path: `${CAPTURES}/lot1-informations-rh-390.png`, fullPage: true })
   await page.getByRole('button', { name: /Valider et terminer mon profil/ }).click()
   await expect(page).toHaveURL(/\/accueil$/)
-  // US-123 : l'accueil « tableau de bord » montre le dossier à 100 %.
+  // US-136 : dossier complet, l'accueil allégé : trois chiffres au plus, plus de tuile « Mon dossier ».
   const tiles = page.getByRole('region', { name: 'Vos chiffres' })
-  await expect(tiles.getByRole('link', { name: /Mon dossier/ })).toContainText('100 %')
+  await expect(tiles.getByRole('link', { name: /Mes certificats/ })).toBeVisible()
+  await expect(tiles.getByRole('link', { name: /Mon dossier/ })).toHaveCount(0)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await page.screenshot({ path: `${CAPTURES}/us123-accueil-complet-390.png`, fullPage: true })
-  // US-128 : en-tête de la refonte, poste mis en avant et activité récente.
-  await expect(page.getByRole('region', { name: 'Activité récente' })).toBeVisible()
-  await page.screenshot({ path: `${REFONTE}/us128-accueil-390.png`, fullPage: true })
+  // US-136 : le poste mis en avant reste ; ni activité récente ni dates à retenir.
+  await expect(page.getByRole('region', { name: 'Poste ouvert pour vous' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Activité récente' })).toHaveCount(0)
+  await page.screenshot({ path: `${REFONTE}/us136-accueil-390.png`, fullPage: true })
   await page.setViewportSize({ width: 1280, height: 900 })
-  await expect(page.getByRole('complementary', { name: 'Dates à retenir' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Poste ouvert pour vous' })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Dates à retenir' })).toHaveCount(0)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280)
   await page.screenshot({ path: `${CAPTURES}/us123-accueil-complet-1280.png`, fullPage: true })
-  await page.screenshot({ path: `${REFONTE}/us128-accueil-1280.png`, fullPage: true })
+  await page.screenshot({ path: `${REFONTE}/us136-accueil-1280.png`, fullPage: true })
   await page.setViewportSize({ width: 390, height: 844 })
 
   // US-301 : le dépôt s'ouvre, depuis l'accueil.

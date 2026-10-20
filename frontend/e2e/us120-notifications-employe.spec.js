@@ -40,9 +40,9 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
   await page.goto('/accueil')
   if (await page.waitForURL(/avant-de-commencer/, { timeout: 3000 }).then(() => true, () => false)) await acceptConsent(page)
 
-  // US-128 : « Activité récente » remplace l'encart « Nouveau pour vous ».
-  const card = page.getByRole('region', { name: 'Activité récente' })
-  await expect(card).toContainText('Caissier (agent de caisse) · Agence Démo Nord')
+  // US-136 : l'accueil n'a plus d'« Activité récente » ; la cloche garde les notifications.
+  await expect(page.getByRole('heading', { name: /Bonjour/ })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Activité récente' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: /Notifications, \d+ non lues?/ })).toBeVisible()
   await noHorizontalScroll(page, 390)
   await page.screenshot({ path: `${CAPTURES}/us120-accueil-390.png`, fullPage: true })
@@ -54,7 +54,7 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
 
   await page.setViewportSize({ width: 1280, height: 860 })
   await page.goto('/accueil')
-  await expect(page.getByRole('region', { name: 'Activité récente' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Bonjour/ })).toBeVisible()
   await page.getByRole('button', { name: /Notifications, \d+ non lues?/ }).click()
   await expect(page.getByRole('dialog', { name: 'Notifications' })).toContainText('Caissier')
   await noHorizontalScroll(page, 1280)
