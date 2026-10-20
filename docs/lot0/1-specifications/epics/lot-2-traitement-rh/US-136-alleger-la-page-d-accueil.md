@@ -35,6 +35,7 @@ Dossier incomplet :
 Mon dossier (demande du 2026-10-20) :
 
 - **CA-07** Dossier complet : la carte de progression (anneau, « 8 informations sur 8 saisies ou confirmées… », « Dernière confirmation le … ») disparaît. Elle reste tant que le dossier est incomplet.
+- **CA-08** Les parties 1 et 2 terminées disent « À jour » (et non « Complet ») ; le cadenas de « Non modifiable » est plus net (20 px, aligné sur la première ligne).
 
 ## Notes
 

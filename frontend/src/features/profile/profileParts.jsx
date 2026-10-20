@@ -151,7 +151,7 @@ function PartLink({ to, number, icon, title, text, complete }) {
         <PartIcon number={number} icon={icon} />
         <PartTitle number={number} title={title} text={text} />
         <span className="flex items-center gap-2">
-          {complete ? <StatusBadge tone="done">Complet</StatusBadge> : <StatusBadge tone="neutral">À compléter</StatusBadge>}
+          {complete ? <StatusBadge tone="done">À jour</StatusBadge> : <StatusBadge tone="neutral">À compléter</StatusBadge>}
           <span className="material-symbols-outlined text-muted" aria-hidden="true">chevron_right</span>
         </span>
       </Link>
@@ -277,8 +277,8 @@ export function IdentityCard({ profile }) {
           <dd className="font-semibold text-heading">{formatGender(profile.gender)}</dd>
         </div>
       </dl>
-      <p className="flex items-center gap-2 rounded-lg bg-section px-3 py-2.5 text-help">
-        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">lock</span>
+      <p className="flex items-start gap-2.5 rounded-lg bg-section px-3 py-2.5 text-help">
+        <span className="material-symbols-outlined mt-0.5 shrink-0 text-xl leading-none text-muted" aria-hidden="true">lock</span>
         Non modifiable : une erreur ? Signalez-la aux RH.
       </p>
     </section>
