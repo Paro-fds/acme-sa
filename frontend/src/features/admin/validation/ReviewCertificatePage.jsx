@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useEffect, useId, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
 import {
   correctCertificateFields,
   decideCertificate,
@@ -8,7 +8,7 @@ import {
 } from '../../../api/validation.js'
 import Alert from '../../../components/Alert.jsx'
 import Page from '../../../components/Page.jsx'
-import { formatDateTime, formatLocalDate } from '../../../lib/format.js'
+import { formatSize } from '../../../lib/format.js'
 import { useLoader } from '../../../lib/useLoader.js'
 
 const LOGIN_PATH = '/admin/connexion'
@@ -130,68 +130,81 @@ function RejectionModal({ certificate, onConfirm, onCancel, submitting }) {
   )
 }
 
+const CARD = 'rounded-xl border border-rh-line bg-surface shadow-card'
+const INPUT =
+  'min-h-11 w-full rounded-lg border border-border-input bg-surface px-3 text-base text-rh-strong focus:border-primary focus:outline-none'
+const dayMonth = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+const longDate = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+const nameInitials = (name) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join('')
+
+/** US-133 CA-07 : un champ de la déclaration, corrigeable. */
+function Field({ label, children, wide = false }) {
+  const id = useId()
+  return (
+    <div className={`flex flex-col gap-1 ${wide ? 'sm:col-span-2' : ''}`}>
+      <label htmlFor={id} className="text-sm font-semibold text-rh-text">
+        {label}
+      </label>
+      {children(id)}
+    </div>
+  )
+}
+
+function Pill({ children }) {
+  return <span className="rounded-full bg-rh-hover px-2.5 py-0.5 text-sm font-semibold text-rh-text">{children}</span>
+}
+
+/**
+ * US-402 (écran A04), US-133 (refonte du 2026-10-19) : le document à gauche ; l'employé, ce qu'il a déclaré (corrigeable)
+ * et la décision à droite.
+ */
 export default function ReviewCertificatePage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const titleId = useId()
+  const employeeId = useId()
+  const declaredId = useId()
+  const decisionId = useId()
 
-  const { data, loading, error, reload } = useLoader(() => getCertificateReview(id), {
-    key: id,
-    loginPath: LOGIN_PATH,
-  })
+  const { data, loading, error } = useLoader(() => getCertificateReview(id), { key: id, loginPath: LOGIN_PATH })
 
-  const [formFields, setFormFields] = useState({
-    certificate_type: 'DIPLOME',
-    level: 'LICENCE',
-    title: '',
-    institution: '',
-    year: 2020,
-    domain: '',
-    country: '',
-  })
+  const [fields, setFields] = useState(null)
   const [dirty, setDirty] = useState(false)
-  const [savingFields, setSavingFields] = useState(false)
   const [deciding, setDeciding] = useState(false)
-  const [rejectModalOpen, setRejectModalOpen] = useState(false)
-  const [notice, setNotice] = useState(null)
+  const [rejecting, setRejecting] = useState(false)
   const [actionError, setActionError] = useState(null)
 
   useEffect(() => {
-    if (data?.certificate) {
-      setFormFields({
-        certificate_type: data.certificate.certificate_type,
-        level: data.certificate.level,
-        title: data.certificate.title,
-        institution: data.certificate.institution,
-        year: data.certificate.year,
-        domain: data.certificate.domain || '',
-        country: data.certificate.country || '',
-      })
-      setDirty(false)
-    }
+    if (!data?.certificate) return
+    const { certificate } = data
+    setFields({
+      certificate_type: certificate.certificate_type,
+      level: certificate.level,
+      title: certificate.title,
+      institution: certificate.institution,
+      year: certificate.year,
+      domain: certificate.domain || '',
+      country: certificate.country || '',
+    })
+    setDirty(false)
   }, [data])
 
-  async function handleSaveCorrections() {
-    setActionError(null)
-    setSavingFields(true)
-    try {
-      await correctCertificateFields(id, formFields)
-      setNotice('Modifications enregistrées.')
-      setDirty(false)
-      reload()
-    } catch (err) {
-      setActionError(err.message || 'Impossible d’enregistrer les modifications.')
-    } finally {
-      setSavingFields(false)
-    }
+  const set = (name, parse = (value) => value) => (event) => {
+    setFields((current) => ({ ...current, [name]: parse(event.target.value) }))
+    setDirty(true)
   }
 
-  async function handleValidate() {
+  async function validate() {
     setActionError(null)
     setDeciding(true)
     try {
-      if (dirty) {
-        await correctCertificateFields(id, formFields)
-      }
+      if (dirty) await correctCertificateFields(id, fields)
       await decideCertificate(id, { decision: 'VALIDATED' })
       navigate('/admin/validation')
     } catch (err) {
@@ -200,12 +213,12 @@ export default function ReviewCertificatePage() {
     }
   }
 
-  async function handleConfirmReject({ reason, comment }) {
+  async function reject({ reason, comment }) {
     setActionError(null)
     setDeciding(true)
     try {
       await decideCertificate(id, { decision: 'REJECTED', reason, comment })
-      setRejectModalOpen(false)
+      setRejecting(false)
       navigate('/admin/validation')
     } catch (err) {
       setActionError(err.message || 'Impossible de rejeter ce certificat.')
@@ -213,314 +226,188 @@ export default function ReviewCertificatePage() {
     }
   }
 
-  if (loading) {
-    return (
-      <Page account="admin" title="Examiner un certificat" backTo="/admin/validation" wide>
-        <p role="status" className="py-12 text-center text-rh-muted">
-          Chargement du dossier…
-        </p>
-      </Page>
-    )
-  }
-
-  if (error) {
-    return (
-      <Page account="admin" title="Examiner un certificat" backTo="/admin/validation" wide>
-        <Alert>{error.message}</Alert>
-      </Page>
-    )
-  }
-
-  const { certificate, employee, files, history, business_days } = data
-  const fileUrl = getCertificateFileUrl(id)
-  const isImage = files?.[0]?.content_type?.startsWith('image/')
-
-  return (
-    <Page account="admin" wide>
-      <div className="flex flex-col gap-6 pb-24">
-        {/* Fil d'Ariane & En-tête */}
-        <div className="flex flex-col gap-2">
-          <nav aria-label="Fil d'Ariane" className="text-xs text-rh-muted">
-            <Link to="/admin/validation" className="hover:text-rh-strong">
-              File de validation
-            </Link>{' '}
-            › <span className="font-semibold text-rh-strong">{employee.name}</span>
-          </nav>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-            <h1 className="text-2xl font-bold text-primary">{certificate.title}</h1>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="font-medium text-rh-text">
-                Déposé il y a {business_days} j ouvrable{business_days > 1 ? 's' : ''}
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-info-border bg-info-bg px-2.5 py-1 font-semibold text-info-text">
-                <span className="material-symbols-outlined text-[14px]">person</span>
-                En cours — {certificate.assigned_to || 'Non assigné'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {notice && <Alert tone="success">{notice}</Alert>}
-        {actionError && <Alert>{actionError}</Alert>}
-
-        {/* CONTENU PRINCIPAL EN 2 COLONNES (Maquette A04) */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* COLONNE GAUCHE (7/12) : APERÇU DU DOCUMENT */}
-          <div className="flex flex-col overflow-hidden rounded-lg border border-rh-line bg-surface shadow-card lg:col-span-7">
-            <div className="flex items-center justify-between border-b border-rh-line bg-rh-canvas px-4 py-2.5 text-xs text-rh-text">
-              <span className="font-semibold">{files?.[0]?.original_name || 'Document'}</span>
-              <a
-                href={fileUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
-              >
-                <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                Plein écran
-              </a>
-            </div>
-
-            <div className="flex min-h-[560px] flex-1 items-center justify-center bg-rh-hover p-4">
-              {isImage ? (
-                <img
-                  src={fileUrl}
-                  alt={`Certificat de ${employee.name}`}
-                  className="max-h-[600px] w-auto max-w-full rounded border border-border-input bg-surface object-contain shadow-md"
-                />
-              ) : (
-                <iframe
-                  src={fileUrl}
-                  title={`Certificat de ${employee.name}`}
-                  className="h-[600px] w-full rounded border border-border-input bg-surface shadow-card"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* COLONNE DROITE (5/12) : 3 BLOCS */}
-          <div className="flex flex-col gap-5 lg:col-span-5">
-            {/* 1. BLOC L'EMPLOYÉ */}
-            <section className="rounded-lg border border-rh-line bg-surface p-5 shadow-card">
-              <h2 className="mb-3 text-xs font-bold tracking-wider text-rh-muted uppercase">
-                L'employé
-              </h2>
-              <dl className="flex flex-col divide-y divide-rh-hover text-xs">
-                <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-rh-muted">Identité</dt>
-                  <dd className="font-semibold text-rh-strong">
-                    {employee.name} · {employee.employee_code}
-                  </dd>
-                </div>
-                <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-rh-muted">Poste &amp; Agence</dt>
-                  <dd className="font-medium text-rh-strong">
-                    {employee.position} · {employee.agency_name}
-                  </dd>
-                </div>
-                <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-rh-muted">Embauche</dt>
-                  <dd className="font-medium text-rh-strong">
-                    {employee.hire_date ? `Embauché le ${formatLocalDate(employee.hire_date)}` : '—'}
-                  </dd>
-                </div>
-                <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-rh-muted">État du profil</dt>
-                  <dd className="font-semibold text-status-done-text">Profil complet</dd>
-                </div>
-                <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-rh-muted">Niveau déclaré</dt>
-                  <dd className="font-medium text-rh-strong">{employee.declared_level_label}</dd>
-                </div>
-                <div className="flex items-baseline justify-between py-1.5">
-                  <dt className="text-rh-muted">Certificats déjà validés</dt>
-                  <dd className="font-medium text-rh-strong">
-                    {employee.already_validated_certificates.length > 0
-                      ? employee.already_validated_certificates.join(', ')
-                      : 'Aucun pour le moment'}
-                  </dd>
-                </div>
-              </dl>
-            </section>
-
-            {/* 2. BLOC INFORMATIONS DU CERTIFICAT AVEC CORRECTION */}
-            <section className="rounded-lg border border-rh-line bg-surface p-5 shadow-card">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-bold tracking-wider text-rh-muted uppercase">
-                  Informations du certificat
-                </h2>
-                {dirty && (
-                  <button
-                    type="button"
-                    onClick={handleSaveCorrections}
-                    disabled={savingFields}
-                    className="rounded bg-rh-hover px-2 py-0.5 text-xs font-semibold text-primary hover:bg-rh-line disabled:opacity-60"
-                  >
-                    {savingFields ? 'Enregistrement…' : 'Enregistrer la correction'}
-                  </button>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-3 text-xs">
-                {/* Type */}
-                <div>
-                  <label htmlFor="field-type" className="mb-1 block font-medium text-rh-text">
-                    Type
-                  </label>
-                  <select
-                    id="field-type"
-                    value={formFields.certificate_type}
-                    onChange={(e) => {
-                      setFormFields({ ...formFields, certificate_type: e.target.value })
-                      setDirty(true)
-                    }}
-                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
-                  >
-                    <option value="DIPLOME">Diplôme</option>
-                    <option value="CERTIFICAT">Certificat</option>
-                    <option value="ATTESTATION">Attestation</option>
-                    <option value="AUTRE">Autre</option>
-                  </select>
-                </div>
-
-                {/* Niveau */}
-                <div>
-                  <label htmlFor="field-level" className="mb-1 block font-medium text-rh-text">
-                    Niveau
-                  </label>
-                  <select
-                    id="field-level"
-                    value={formFields.level}
-                    onChange={(e) => {
-                      setFormFields({ ...formFields, level: e.target.value })
-                      setDirty(true)
-                    }}
-                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
-                  >
-                    <option value="FONDAMENTAL">Primaire / Fondamental</option>
-                    <option value="SECONDAIRE">Secondaire</option>
-                    <option value="BACCALAUREAT">Baccalauréat</option>
-                    <option value="FORMATION_PRO">Formation professionnelle / Technique</option>
-                    <option value="BAC_2">Technicien supérieur / Bac + 2</option>
-                    <option value="LICENCE">Licence</option>
-                    <option value="MASTER">Master</option>
-                    <option value="DOCTORAT">Doctorat</option>
-                    <option value="CERTIFICATION_PRO">Certification professionnelle</option>
-                    <option value="FORMATION_CONTINUE">Formation continue / Attestation</option>
-                  </select>
-                  {certificate.original_level && (
-                    <p className="mt-1 text-[11px] text-rh-muted italic">
-                      Modifié par vous — valeur d'origine : {certificate.original_level}
-                    </p>
-                  )}
-                </div>
-
-                {/* Intitulé */}
-                <div>
-                  <label htmlFor="field-title" className="mb-1 block font-medium text-rh-text">
-                    Intitulé
-                  </label>
-                  <input
-                    id="field-title"
-                    type="text"
-                    value={formFields.title}
-                    onChange={(e) => {
-                      setFormFields({ ...formFields, title: e.target.value })
-                      setDirty(true)
-                    }}
-                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
-                  />
-                </div>
-
-                {/* Établissement */}
-                <div>
-                  <label htmlFor="field-institution" className="mb-1 block font-medium text-rh-text">
-                    Établissement
-                  </label>
-                  <input
-                    id="field-institution"
-                    type="text"
-                    value={formFields.institution}
-                    onChange={(e) => {
-                      setFormFields({ ...formFields, institution: e.target.value })
-                      setDirty(true)
-                    }}
-                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
-                  />
-                </div>
-
-                {/* Année */}
-                <div>
-                  <label htmlFor="field-year" className="mb-1 block font-medium text-rh-text">
-                    Année
-                  </label>
-                  <input
-                    id="field-year"
-                    type="number"
-                    value={formFields.year}
-                    onChange={(e) => {
-                      setFormFields({ ...formFields, year: Number.parseInt(e.target.value, 10) || 2020 })
-                      setDirty(true)
-                    }}
-                    className="w-full rounded border border-border-input bg-surface px-2.5 py-1.5 text-rh-strong focus:border-primary focus:outline-none"
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* 3. BLOC HISTORIQUE */}
-            <section className="rounded-lg border border-rh-line bg-surface p-5 shadow-card">
-              <h2 className="mb-3 text-xs font-bold tracking-wider text-primary uppercase">
-                Historique du traitement
-              </h2>
-              <ul className="flex flex-col gap-2.5 text-xs text-rh-text">
-                <li className="flex items-start gap-2">
-                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-rh-muted" />
-                  <span>
-                    Déposé par l'employé — {formatDateTime(certificate.submitted_at)}
-                  </span>
-                </li>
-                {history.map((h, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-                    <span>
-                      {h.details || h.action} — {formatDateTime(h.at)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        </div>
-
-        {/* BARRE D'ACTIONS FIXÉE EN BAS (Maquette A04) */}
-        <footer className="fixed right-0 bottom-0 left-0 z-30 flex items-center justify-end gap-4 border-t border-rh-line bg-surface/95 px-8 py-3.5 shadow-lg backdrop-blur sm:left-64">
-          <button
-            type="button"
-            onClick={() => setRejectModalOpen(true)}
-            disabled={deciding}
-            className="inline-flex min-h-11 items-center justify-center rounded-md border-2 border-status-progress-dot px-5 text-xs font-semibold tracking-wide text-status-progress-text transition-colors hover:bg-status-progress-bg disabled:opacity-60"
-          >
-            Rejeter
-          </button>
-          <button
-            type="button"
-            onClick={handleValidate}
-            disabled={deciding}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-status-done-text px-6 text-xs font-semibold tracking-wide text-white shadow-card transition-colors hover:bg-status-done-text disabled:opacity-60"
-          >
-            {deciding ? 'Validation…' : 'Valider'}
-          </button>
-        </footer>
-
-        {rejectModalOpen && (
-          <RejectionModal
-            certificate={certificate}
-            submitting={deciding}
-            onCancel={() => setRejectModalOpen(false)}
-            onConfirm={handleConfirmReject}
-          />
-        )}
-      </div>
+  const frame = (children) => (
+    <Page account="admin" title="Examiner un certificat" backTo="/admin/validation" backLabel="File de validation" wide>
+      {children}
     </Page>
+  )
+
+  if (loading) return frame(<p role="status" className="py-12 text-center text-rh-muted">Chargement du dossier…</p>)
+  if (error) return frame(<Alert>{error.message}</Alert>)
+  if (!fields) return frame(null)
+
+  const { certificate, employee, files, business_days, choices } = data
+  const file = files?.[0]
+  const fileUrl = getCertificateFileUrl(id)
+  const isImage = file?.content_type?.startsWith('image/')
+  const overdue = business_days > 5
+  const takenBy = data.assigned_to_me ? 'pris par vous' : certificate.assigned_to ? `pris par ${certificate.assigned_to}` : 'non assigné'
+  const validatedCount = employee.already_validated_certificates.length
+
+  return frame(
+    <div className="flex flex-col gap-6">
+      <section aria-labelledby={titleId} className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <h2 id={titleId} className="text-[26px] leading-8 font-extrabold tracking-tight break-words text-primary-active lg:text-[30px] lg:leading-9">
+            {certificate.title}
+          </h2>
+          <p className="text-rh-text">
+            Déposé par {employee.name} le {longDate(certificate.submitted_at)} · {takenBy}
+          </p>
+        </div>
+        <span
+          className={`w-fit rounded-full border px-3 py-1 text-sm font-semibold ${
+            overdue
+              ? 'border-status-progress-border bg-status-progress-bg text-status-progress-text'
+              : 'border-info-border bg-info-bg text-info-text'
+          }`}
+        >
+          {overdue
+            ? `En retard · ${business_days} j`
+            : `Jour ${Math.max(business_days, 1)} sur 5${data.decide_by ? ` · décision avant le ${dayMonth(data.decide_by)}` : ''}`}
+        </span>
+      </section>
+
+      {actionError && <Alert>{actionError}</Alert>}
+
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
+        <section aria-label="Document déposé" className={`${CARD} flex flex-col overflow-hidden`}>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rh-line bg-rh-canvas px-4 py-2">
+            <span className="text-sm font-semibold text-rh-text">
+              {file ? `${file.original_name} · ${formatSize(file.size_bytes)}` : 'Document'}
+            </span>
+            <a href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1 font-semibold text-primary hover:underline">
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">open_in_new</span>
+              Ouvrir en grand
+            </a>
+          </div>
+          <div className="flex min-h-[420px] items-center justify-center bg-rh-hover p-4 lg:min-h-[600px]">
+            {isImage ? (
+              <img
+                src={fileUrl}
+                alt={`Certificat de ${employee.name}`}
+                className="max-h-[600px] w-auto max-w-full rounded border border-border-input bg-surface object-contain shadow-card"
+              />
+            ) : (
+              <iframe src={fileUrl} title={`Certificat de ${employee.name}`} className="h-[600px] w-full rounded border border-border-input bg-surface" />
+            )}
+          </div>
+        </section>
+
+        <aside aria-label="Vérification et décision" className="flex flex-col gap-5">
+          <section aria-labelledby={employeeId} className={`${CARD} flex flex-col gap-3 p-5`}>
+            <div className="flex items-center gap-3">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white" aria-hidden="true">
+                {nameInitials(employee.name)}
+              </span>
+              <div className="flex min-w-0 flex-col">
+                <h3 id={employeeId} className="text-lg font-bold break-words text-rh-strong">
+                  {employee.name}
+                </h3>
+                <span className="text-sm text-rh-text">
+                  {[employee.employee_code, employee.position, employee.agency_name].filter(Boolean).join(' · ')}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {employee.is_profile_complete && <Pill>Profil complet</Pill>}
+              <Pill>Niveau validé : {employee.validated_level_label ?? 'aucun'}</Pill>
+              <Pill>
+                {validatedCount} certificat{validatedCount > 1 ? 's' : ''} déjà validé{validatedCount > 1 ? 's' : ''}
+              </Pill>
+            </div>
+          </section>
+
+          <section aria-labelledby={declaredId} className={`${CARD} flex flex-col gap-3 p-5`}>
+            <div className="flex flex-col gap-0.5">
+              <h3 id={declaredId} className="text-lg font-bold text-rh-strong">
+                Ce que l’employé a déclaré
+              </h3>
+              <p className="text-sm text-rh-muted">Comparez avec le document ; corrigez si besoin.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Type">
+                {(fieldId) => (
+                  <select id={fieldId} value={fields.certificate_type} onChange={set('certificate_type')} className={INPUT}>
+                    {choices.types.map((choice) => (
+                      <option key={choice.value} value={choice.value}>{choice.label}</option>
+                    ))}
+                  </select>
+                )}
+              </Field>
+              <Field label="Année">
+                {(fieldId) => (
+                  <input
+                    id={fieldId}
+                    type="number"
+                    value={fields.year}
+                    onChange={set('year', (value) => Number.parseInt(value, 10) || '')}
+                    className={INPUT}
+                  />
+                )}
+              </Field>
+              <Field label="Niveau" wide>
+                {(fieldId) => (
+                  <>
+                    <select id={fieldId} value={fields.level} onChange={set('level')} className={INPUT}>
+                      {choices.levels.map((choice) => (
+                        <option key={choice.value} value={choice.value}>{choice.label}</option>
+                      ))}
+                    </select>
+                    {certificate.original_level && (
+                      <p className="text-sm text-rh-muted">Corrigé ; valeur d’origine : {certificate.original_level}</p>
+                    )}
+                  </>
+                )}
+              </Field>
+              <Field label="Domaine" wide>
+                {(fieldId) => (
+                  <select id={fieldId} value={fields.domain} onChange={set('domain')} className={INPUT}>
+                    <option value="">Aucun</option>
+                    {choices.domains.map((choice) => (
+                      <option key={choice.value} value={choice.value}>{choice.label}</option>
+                    ))}
+                  </select>
+                )}
+              </Field>
+              <Field label="Établissement" wide>
+                {(fieldId) => <input id={fieldId} value={fields.institution} onChange={set('institution')} className={INPUT} />}
+              </Field>
+              <Field label="Intitulé" wide>
+                {(fieldId) => <input id={fieldId} value={fields.title} onChange={set('title')} className={INPUT} />}
+              </Field>
+            </div>
+          </section>
+
+          <section aria-labelledby={decisionId} className={`${CARD} flex flex-col gap-3 p-5`}>
+            <h3 id={decisionId} className="text-lg font-bold text-rh-strong">
+              Votre décision
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={validate}
+                disabled={deciding}
+                className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-status-done-text px-4 font-semibold text-white hover:opacity-90 disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">check</span>
+                Valider
+              </button>
+              <button
+                type="button"
+                onClick={() => setRejecting(true)}
+                disabled={deciding}
+                className="flex min-h-12 items-center justify-center rounded-lg border-[1.5px] border-status-progress-dot px-4 font-semibold text-status-progress-text hover:bg-status-progress-bg disabled:opacity-60"
+              >
+                Rejeter…
+              </button>
+            </div>
+            <p className="text-sm text-rh-muted">L’employé est prévenu dans le portail. Un rejet demande un motif, choisi dans la liste.</p>
+          </section>
+        </aside>
+      </div>
+
+      {rejecting && <RejectionModal certificate={certificate} submitting={deciding} onCancel={() => setRejecting(false)} onConfirm={reject} />}
+    </div>,
   )
 }

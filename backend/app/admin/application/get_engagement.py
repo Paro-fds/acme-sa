@@ -1,4 +1,13 @@
-from app.admin.domain.engagement import RATING_LABELS, WINDOW, Engagement, FeedbackStats, LoginStats, RatingCount
+from app.admin.domain.engagement import (
+    RATING_LABELS,
+    WEEK,
+    WEEKS,
+    WINDOW,
+    Engagement,
+    FeedbackStats,
+    LoginStats,
+    RatingCount,
+)
 from app.employee.domain.repository import EmployeeRepository
 from app.shared.domain.clock import Clock
 
@@ -13,11 +22,16 @@ class GetEngagement:
         self._clock = clock
 
     def execute(self) -> Engagement:
-        counts = self._logins.execute(self._clock.now() - WINDOW)
+        now = self._clock.now()
+        counts = self._logins.execute(now - WINDOW)
         answers = self._feedback.execute()
+        weekly = tuple(
+            self._logins.execute(now - WEEK * (back + 1), now - WEEK * back).employees for back in reversed(range(WEEKS))
+        )
         return Engagement(
             counts.logins,
             counts.employees,
             len(self._employees.list_all()),
             tuple(RatingCount(rating, label, answers.get(rating, 0)) for rating, label in RATING_LABELS.items()),
+            weekly,
         )

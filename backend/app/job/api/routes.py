@@ -169,6 +169,8 @@ class OpeningOut(BaseModel):
     profile_code: str | None
     profile_title: str | None
     letter: LetterOut | None
+    application_count: int = 0
+    created_by_me: bool = False
 
 
 class OpeningListOut(BaseModel):
@@ -207,8 +209,8 @@ def preview_audience(body: CriteriaIn, request: Request, _: Actor = Depends(edit
 
 
 @router.get("", response_model=OpeningListOut)
-def list_openings(request: Request, _: Actor = Depends(reader)) -> OpeningListOut:
-    return OpeningListOut(items=[_out(view) for view in container(request).list_openings().execute()])
+def list_openings(request: Request, actor: Actor = Depends(reader)) -> OpeningListOut:
+    return OpeningListOut(items=[_out(view) for view in container(request).list_openings().execute(actor.id)])
 
 
 @router.post("", response_model=OpeningOut, status_code=201)

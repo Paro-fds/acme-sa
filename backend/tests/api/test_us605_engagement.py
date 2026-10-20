@@ -75,4 +75,7 @@ def test_ca02_les_reponses_a_la_question_en_un_clic_sont_comptees(employee_clien
 
 
 def test_ca02_aucun_commentaire_libre_n_est_expose(admin_client):
-    assert set(admin_client.get(ENGAGEMENT).json()) == {"logins_30_days", "employees_30_days", "active_employees", "feedback"}
+    # US-132 : la courbe des semaines n'ajoute que des nombres.
+    assert set(admin_client.get(ENGAGEMENT).json()) == {
+        "logins_30_days", "employees_30_days", "active_employees", "feedback", "weekly_employees",
+    }

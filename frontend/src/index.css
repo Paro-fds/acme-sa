@@ -63,6 +63,17 @@
   --color-rh-chart-incomplete: #fbbf24; /* « Profil incomplet » de la répartition (A02) */
   --color-rh-chart-profile: #3b82f6; /* « Profil complet » de la répartition (A02) */
 
+  /* Panneau de menu des deux espaces (US-127, refonte du 2026-10-19) : bleu de la charte et ses nuances */
+  --color-nav-bg: #1e1e82; /* = primary */
+  --color-nav-hover: #2b2b94; /* survol d'une rubrique */
+  --color-nav-active: #3d3db8; /* rubrique de la page en cours */
+  --color-nav-text: #e1e0ff; /* rubriques et liens (contraste 11:1 sur nav-bg) */
+  --color-nav-muted: #c0c1ff; /* sous-titre de la marque */
+  --color-nav-mountain-far: #34349e; /* montagnes du bas, de la plus lointaine à la plus proche */
+  --color-nav-mountain-snow: #5252c0;
+  --color-nav-mountain-mid: #262690;
+  --color-nav-mountain-near: #16166c;
+
   /* Ombres */
   --shadow-card: 0 1px 3px 0 rgb(17 28 45 / 0.08), 0 1px 2px -1px rgb(17 28 45 / 0.06); /* shadow-sm des écrans */
   --shadow-sticky: 0 -4px 12px 0 rgb(15 23 42 / 0.08);

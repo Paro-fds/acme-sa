@@ -1,65 +1,144 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { getAdminMe } from '../../../api/admin.js'
 import { claimNextCertificate, getValidationQueue } from '../../../api/validation.js'
 import Alert from '../../../components/Alert.jsx'
 import Page from '../../../components/Page.jsx'
-import { formatLocalDate } from '../../../lib/format.js'
 import { useLoader } from '../../../lib/useLoader.js'
+import { can } from '../roles.js'
 import { useUnits } from '../useUnits.js'
 
 const LOGIN_PATH = '/admin/connexion'
+const PAGE_SIZE = 20
+const ALL_AGENCIES = 'Toutes les agences'
+const ALL_TYPES = 'Tous les types'
+const TYPES = [
+  ['DIPLOME', 'Diplôme'],
+  ['CERTIFICAT', 'Certificat'],
+  ['ATTESTATION', 'Attestation'],
+  ['AUTRE', 'Autre'],
+]
+/** US-133 CA-03 : le filtre « Délai » remplace la case « En retard seulement ». */
+const DELAYS = {
+  Tous: () => true,
+  'En retard': (item) => item.is_overdue,
+  'Dans le délai': (item) => !item.is_overdue,
+}
 
+const plural = (n, word, words = `${word}s`) => (n > 1 ? words : word)
+const dayMonth = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+
+/** « En retard · 7 j » ou « Jour 3 sur 5 » (jours ouvrables depuis le dépôt). */
+export function delayLabel(item) {
+  if (item.is_overdue) return `En retard · ${item.business_days} j`
+  return `Jour ${Math.max(item.business_days, 1)} sur 5`
+}
+
+function takenBy(item) {
+  if (item.assigned_to_me) return 'Vous'
+  return item.assigned_to || 'Non assigné'
+}
+
+/** La file entière est chargée une fois : les compteurs portent sur toute la file, les filtres se font ici. */
+async function load() {
+  const [queue, me] = await Promise.all([getValidationQueue(), getAdminMe().catch(() => null)])
+  return { ...queue, me }
+}
+
+function Filter({ label, value, onChange, options }) {
+  const id = useId()
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-semibold text-rh-text">
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="min-h-11 w-full min-w-48 rounded-lg border border-border-input bg-surface px-3 text-base text-rh-strong focus:border-primary focus:outline-none"
+      >
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+function DelayBadge({ item }) {
+  return item.is_overdue ? (
+    <span className="inline-flex items-center gap-1 rounded-full border border-status-progress-border bg-status-progress-bg px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap text-status-progress-text">
+      {delayLabel(item)}
+    </span>
+  ) : (
+    <span className="text-sm whitespace-nowrap text-rh-text">{delayLabel(item)}</span>
+  )
+}
+
+const EXAMINE = 'inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 font-semibold text-white hover:bg-primary-active'
+
+/**
+ * US-401 (écran A03), US-133 (refonte du 2026-10-19) : en-tête et « Prendre le suivant », trois compteurs, filtres
+ * Agence / Type / Délai, le tableau du plus ancien au plus récent, 20 par page.
+ */
 export default function ValidationQueuePage() {
   const navigate = useNavigate()
   const { agencies } = useUnits()
-  const [agencyFilter, setAgencyFilter] = useState('Toutes')
-  const [levelFilter, setLevelFilter] = useState('Tous')
-  const [typeFilter, setTypeFilter] = useState('Tous')
-  const [overdueOnly, setOverdueOnly] = useState(false)
+  const [agency, setAgency] = useState(ALL_AGENCIES)
+  const [type, setType] = useState(ALL_TYPES)
+  const [delay, setDelay] = useState('Tous')
+  const [page, setPage] = useState(0)
   const [claiming, setClaiming] = useState(false)
-  const [errorNotice, setErrorNotice] = useState(null)
+  const [notice, setNotice] = useState(null)
+  const { data, loading, error, reload } = useLoader(load, { loginPath: LOGIN_PATH })
 
-  const { data, loading, error, reload } = useLoader(
-    () =>
-      getValidationQueue({
-        agency: agencyFilter,
-        level: levelFilter,
-        certificate_type: typeFilter,
-        overdue_only: overdueOnly,
-      }),
-    { key: `${agencyFilter}-${levelFilter}-${typeFilter}-${overdueOnly}`, loginPath: LOGIN_PATH },
-  )
-
-  async function handleClaimNext() {
-    setErrorNotice(null)
+  async function takeNext() {
+    setNotice(null)
     setClaiming(true)
     try {
-      const res = await claimNextCertificate()
-      if (res.claimed && res.certificate_id) {
-        navigate(`/admin/validation/${res.certificate_id}`)
-      } else {
-        setErrorNotice('Aucun certificat en attente dans la file.')
-        reload()
+      const result = await claimNextCertificate()
+      if (result.claimed && result.certificate_id) {
+        navigate(`/admin/validation/${result.certificate_id}`)
+        return
       }
+      setNotice('Aucun certificat en attente dans la file.')
+      reload()
     } catch (err) {
-      setErrorNotice(err.message || 'Impossible de prendre le certificat suivant.')
-    } finally {
-      setClaiming(false)
+      setNotice(err.message || 'Impossible de prendre le certificat suivant.')
     }
+    setClaiming(false)
   }
 
-  const items = data?.items || []
-  const totalWaiting = data?.total_waiting ?? 0
-  const totalOverdue = data?.total_overdue ?? 0
+  const filter = (setter) => (value) => {
+    setter(value)
+    setPage(0)
+  }
 
-  const claimButton = (
+  const all = [...(data?.items ?? [])].sort((a, b) => a.submitted_at.localeCompare(b.submitted_at))
+  const shown = all.filter(
+    (item) =>
+      (agency === ALL_AGENCIES || item.agency_code === agency) &&
+      (type === ALL_TYPES || item.certificate_type === type) &&
+      DELAYS[delay](item),
+  )
+  const pageItems = shown.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const waiting = data?.total_waiting ?? 0
+  const overdue = all.filter((item) => item.is_overdue).length
+  const mine = all.filter((item) => item.assigned_to_me).length
+
+  // Un seul titre : celui du cadre ; la phrase et « Prendre le suivant » dans son en-tête.
+  const claimButton = can(data?.me?.role ?? null, 'claim') && (
     <button
       type="button"
-      onClick={handleClaimNext}
-      disabled={claiming || totalWaiting === 0}
-      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-card transition-colors hover:bg-primary-active disabled:opacity-50"
+      onClick={takeNext}
+      disabled={claiming || waiting === 0}
+      className="flex min-h-12 w-fit items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active disabled:opacity-60"
     >
-      {claiming ? 'Attribution…' : 'Prendre le suivant'}
+      Prendre le suivant
+      <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
     </button>
   )
 
@@ -68,211 +147,108 @@ export default function ValidationQueuePage() {
       account="admin"
       wide
       title="File de validation des certificats"
-      subtitle={`${totalWaiting} certificat${totalWaiting > 1 ? 's' : ''} en attente · ${totalOverdue} en retard`}
-      headerActions={claimButton}
+      subtitle={`${waiting} ${plural(waiting, 'certificat')} ${waiting > 1 ? 'attendent' : 'attend'} une décision. Délai : 5 jours ouvrables après le dépôt.`}
+      headerActions={claimButton || null}
     >
       <div className="flex flex-col gap-6">
-        {errorNotice && <Alert>{errorNotice}</Alert>}
+        {notice && <Alert tone="info">{notice}</Alert>}
         {error && <Alert>{error.message}</Alert>}
 
-        {/* Note discrète d'information */}
-        <div className="flex items-center gap-2.5 rounded-md border border-info-border/80 bg-info-bg/70 px-4 py-2.5 text-sm text-rh-text">
-          <span className="material-symbols-outlined shrink-0 text-primary" aria-hidden="true">
-            info
-          </span>
-          <span>
-            Vos propres certificats n'apparaissent pas dans votre file : ils sont traités par un autre valideur.
-          </span>
+        {data && (
+          <ul aria-label="Compteurs" className="grid grid-cols-3 gap-3">
+            {[
+              [overdue, 'en retard', 'text-status-progress-text'],
+              [all.length - overdue, 'dans le délai', 'text-rh-strong'],
+              [mine, 'pris par vous', 'text-primary'],
+            ].map(([value, label, tone]) => (
+              <li key={label} className="flex flex-col rounded-xl border border-rh-line bg-surface p-4 shadow-card">
+                <span className={`text-[28px] leading-none font-bold tabular-nums ${tone}`}>{value}</span>
+                <span className="text-sm text-rh-text">{label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 rounded-xl border border-rh-line bg-surface p-4 shadow-card sm:grid-cols-3">
+          <Filter
+            label="Agence"
+            value={agency}
+            onChange={filter(setAgency)}
+            options={[[ALL_AGENCIES, ALL_AGENCIES], ...agencies.map((unit) => [unit.code, unit.label])]}
+          />
+          <Filter label="Type de document" value={type} onChange={filter(setType)} options={[[ALL_TYPES, ALL_TYPES], ...TYPES]} />
+          <Filter label="Délai" value={delay} onChange={filter(setDelay)} options={Object.keys(DELAYS).map((key) => [key, key])} />
         </div>
 
-        {/* FILTRES SUR UNE LIGNE */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-rh-line bg-surface p-4 shadow-card">
-          <div className="flex max-w-full min-w-0 flex-wrap items-center gap-5 text-sm">
-            {/* Agence */}
-            <div className="flex max-w-full min-w-0 items-center gap-2">
-              <label htmlFor="filter-agency" className="font-medium text-rh-text">
-                Agence :
-              </label>
-              <select
-                id="filter-agency"
-                value={agencyFilter}
-                onChange={(e) => setAgencyFilter(e.target.value)}
-                className="max-w-full min-w-0 rounded border border-border-input bg-rh-canvas px-2.5 py-1.5 text-sm font-medium text-rh-strong focus:border-primary focus:outline-none"
-              >
-                <option value="Toutes">Toutes</option>
-                {agencies.map((agency) => (
-                  <option key={agency.code} value={agency.code}>
-                    {agency.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Niveau déclaré */}
-            <div className="flex max-w-full min-w-0 items-center gap-2">
-              <label htmlFor="filter-level" className="font-medium text-rh-text">
-                Niveau déclaré :
-              </label>
-              <select
-                id="filter-level"
-                value={levelFilter}
-                onChange={(e) => setLevelFilter(e.target.value)}
-                className="max-w-full min-w-0 rounded border border-border-input bg-rh-canvas px-2.5 py-1.5 text-sm font-medium text-rh-strong focus:border-primary focus:outline-none"
-              >
-                <option value="Tous">Tous</option>
-                <option value="LICENCE">Licence</option>
-                <option value="MASTER">Master</option>
-                <option value="BAC_2">Technicien supérieur / Bac + 2</option>
-                <option value="CERTIFICATION_PRO">Certification professionnelle</option>
-              </select>
-            </div>
-
-            {/* Type de document */}
-            <div className="flex max-w-full min-w-0 items-center gap-2">
-              <label htmlFor="filter-type" className="font-medium text-rh-text">
-                Type de document :
-              </label>
-              <select
-                id="filter-type"
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="max-w-full min-w-0 rounded border border-border-input bg-rh-canvas px-2.5 py-1.5 text-sm font-medium text-rh-strong focus:border-primary focus:outline-none"
-              >
-                <option value="Tous">Tous : Diplôme, Certificat, Attestation</option>
-                <option value="DIPLOME">Diplôme</option>
-                <option value="CERTIFICAT">Certificat</option>
-                <option value="ATTESTATION">Attestation</option>
-              </select>
-            </div>
-
-            {/* En retard seulement */}
-            <div className="flex max-w-full min-w-0 items-center gap-2">
-              <input
-                type="checkbox"
-                id="retard-only"
-                checked={overdueOnly}
-                onChange={(e) => setOverdueOnly(e.target.checked)}
-                className="size-4 cursor-pointer rounded border-border-input text-primary focus:ring-0"
-              />
-              <label htmlFor="retard-only" className="cursor-pointer font-medium text-rh-text">
-                En retard seulement
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* LISTE / TABLEAU */}
-        {loading ? (
+        {loading && !data ? (
           <p role="status" className="py-8 text-center text-rh-muted">
             Chargement de la file…
           </p>
-        ) : items.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border-input bg-surface p-12 text-center text-rh-muted">
-            <span className="material-symbols-outlined text-4xl text-rh-muted">task_alt</span>
-            <p className="mt-2 font-medium">Aucun certificat en attente de validation.</p>
-          </div>
+        ) : shown.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border-input bg-surface p-10 text-center font-medium text-rh-muted">
+            Aucun certificat en attente de validation.
+          </p>
         ) : (
-          <div className="flex flex-col overflow-hidden rounded-lg border border-rh-line bg-surface shadow-card">
-            {/* Version mobile : cartes */}
-            <ul aria-label="Certificats en attente" className="flex flex-col divide-y divide-rh-hover lg:hidden">
-              {items.map((item) => (
-                <li key={item.certificate_id} className="p-4">
+          <div className="flex flex-col overflow-hidden rounded-xl border border-rh-line bg-surface shadow-card">
+            <ul aria-label="Certificats en attente, version téléphone" className="flex flex-col divide-y divide-rh-line lg:hidden">
+              {pageItems.map((item) => (
+                <li key={item.certificate_id} className="flex flex-col gap-2 p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-semibold text-rh-strong">
-                        {item.employee_name} · {item.employee_code}
-                      </p>
-                      <p className="text-xs text-rh-muted">{item.agency_name || 'Agence non renseignée'}</p>
+                    <div className="flex min-w-0 flex-col">
+                      <span className="font-semibold text-rh-strong">{item.employee_name}</span>
+                      <span className="text-sm text-rh-muted">
+                        {item.employee_code} · {item.agency_name || 'Agence non renseignée'}
+                      </span>
                     </div>
-                    {item.is_overdue ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-status-progress-border bg-status-progress-bg px-2.5 py-0.5 text-xs font-semibold text-status-progress-text">
-                        En retard ({item.business_days} j)
-                      </span>
-                    ) : item.assigned_to ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-info-border bg-info-bg px-2.5 py-0.5 text-xs font-semibold text-info-text">
-                        En cours — {item.assigned_to}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-rh-line bg-rh-hover px-2 py-0.5 text-xs font-semibold text-rh-text">
-                        Nouveau
-                      </span>
-                    )}
+                    <DelayBadge item={item} />
                   </div>
-                  <p className="mt-2 text-sm font-medium text-rh-strong">
-                    {item.title} · {item.certificate_type_label}
-                  </p>
-                  <p className="text-xs text-rh-text">Niveau : {item.declared_level_label}</p>
-                  <div className="mt-3 flex items-center justify-between border-t border-rh-hover pt-2 text-xs text-rh-muted">
-                    <span>Déposé le {formatLocalDate(item.submitted_at)}</span>
-                    <Link
-                      to={`/admin/validation/${item.certificate_id}`}
-                      className="inline-flex min-h-11 items-center justify-center rounded bg-primary px-4 py-2 font-semibold text-white"
-                    >
-                      Traiter
-                    </Link>
-                  </div>
+                  <span className="text-rh-strong">
+                    {item.certificate_type_label} · {item.title}
+                  </span>
+                  <span className="text-sm text-rh-text">
+                    {item.declared_level_label} · déposé le {dayMonth(item.submitted_at)} · {takenBy(item)}
+                  </span>
+                  <Link to={`/admin/validation/${item.certificate_id}`} className={`${EXAMINE} w-fit`}>
+                    Examiner
+                  </Link>
                 </li>
               ))}
             </ul>
 
-            {/* Version desktop : grand tableau */}
             <div className="hidden overflow-x-auto lg:block">
-              <table className="w-full border-collapse text-left">
+              <table aria-label="Certificats en attente" className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-rh-line bg-rh-hover/80 text-xs font-semibold tracking-wider text-rh-text uppercase">
-                    <th className="px-4 py-3">Employé</th>
-                    <th className="px-4 py-3">Agence</th>
-                    <th className="px-4 py-3">Certificat</th>
-                    <th className="px-4 py-3">Niveau déclaré</th>
-                    <th className="px-4 py-3">Déposé le</th>
-                    <th className="px-4 py-3">Délai</th>
-                    <th className="px-4 py-3">Statut</th>
-                    <th className="px-4 py-3 text-right">Action</th>
+                  <tr className="border-b border-rh-line bg-rh-hover/80 text-sm font-semibold text-rh-text">
+                    <th scope="col" className="px-4 py-3">Employé</th>
+                    <th scope="col" className="px-4 py-3">Document</th>
+                    <th scope="col" className="px-4 py-3">Niveau déclaré</th>
+                    <th scope="col" className="px-4 py-3">Déposé le</th>
+                    <th scope="col" className="px-4 py-3">Délai</th>
+                    <th scope="col" className="px-4 py-3">Pris par</th>
+                    <th scope="col" className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-rh-hover text-sm">
-                  {items.map((item) => (
-                    <tr key={item.certificate_id} className="transition-colors hover:bg-rh-canvas">
-                      <td className="px-4 py-3.5 font-semibold whitespace-nowrap text-rh-strong">
-                        {item.employee_name} · {item.employee_code}
+                <tbody className="divide-y divide-rh-line text-sm">
+                  {pageItems.map((item) => (
+                    <tr key={item.certificate_id} className="hover:bg-rh-canvas">
+                      <td className="px-4 py-3">
+                        <span className="block font-semibold text-rh-strong">{item.employee_name}</span>
+                        <span className="block text-rh-muted">
+                          {item.employee_code} · {item.agency_name || '—'}
+                        </span>
                       </td>
-                      <td className="px-4 py-3.5 whitespace-nowrap text-rh-text">
-                        {item.agency_name || '—'}
+                      <td className="px-4 py-3 text-rh-strong">
+                        {item.certificate_type_label} · {item.title}
                       </td>
-                      <td className="px-4 py-3.5 font-medium text-rh-strong">
-                        {item.title} · {item.certificate_type_label}
+                      <td className="px-4 py-3 text-rh-text">{item.declared_level_label}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-rh-text">{dayMonth(item.submitted_at)}</td>
+                      <td className="px-4 py-3">
+                        <DelayBadge item={item} />
                       </td>
-                      <td className="px-4 py-3.5 text-rh-text">{item.declared_level_label}</td>
-                      <td className="px-4 py-3.5 whitespace-nowrap text-rh-text">
-                        {formatLocalDate(item.submitted_at)}
-                      </td>
-                      <td className="px-4 py-3.5 font-medium whitespace-nowrap text-rh-text">
-                        {item.business_days} j ouvrables
-                      </td>
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        {item.is_overdue ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-status-progress-border bg-status-progress-bg px-2.5 py-1 text-xs font-semibold text-status-progress-text">
-                            <span className="material-symbols-outlined text-[14px]">schedule</span>
-                            En retard ({item.business_days} j)
-                          </span>
-                        ) : item.assigned_to ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-info-border bg-info-bg px-2.5 py-1 text-xs font-semibold text-info-text">
-                            <span className="material-symbols-outlined text-[14px]">person</span>
-                            En cours — {item.assigned_to}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-rh-line bg-rh-hover px-2.5 py-1 text-xs font-semibold text-rh-text">
-                            <span className="size-1.5 rounded-full bg-rh-muted" />
-                            Nouveau
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <Link
-                          to={`/admin/validation/${item.certificate_id}`}
-                          className="inline-flex min-h-9 items-center justify-center rounded bg-primary px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-active"
-                        >
-                          Traiter
+                      <td className={`px-4 py-3 ${item.assigned_to_me ? 'font-semibold text-primary' : 'text-rh-text'}`}>{takenBy(item)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Link to={`/admin/validation/${item.certificate_id}`} className={EXAMINE}>
+                          Examiner
                         </Link>
                       </td>
                     </tr>
@@ -281,10 +257,27 @@ export default function ValidationQueuePage() {
               </table>
             </div>
 
-            {/* Pied de tableau */}
-            <div className="flex items-center justify-between border-t border-rh-line bg-rh-canvas px-6 py-3.5 text-sm text-rh-text">
-              <span className="font-medium">
-                1 à {items.length} sur {totalWaiting}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-rh-line bg-rh-canvas px-4 py-3 text-sm text-rh-text">
+              <span>
+                {page * PAGE_SIZE + 1} à {page * PAGE_SIZE + pageItems.length} sur {shown.length}, du plus ancien au plus récent
+              </span>
+              <span className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                  className="min-h-11 rounded-lg border border-rh-line bg-surface px-4 font-semibold text-rh-strong disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                <button
+                  type="button"
+                  disabled={(page + 1) * PAGE_SIZE >= shown.length}
+                  onClick={() => setPage(page + 1)}
+                  className="min-h-11 rounded-lg border border-rh-line bg-surface px-4 font-semibold text-rh-strong disabled:opacity-50"
+                >
+                  Suivant
+                </button>
               </span>
             </div>
           </div>

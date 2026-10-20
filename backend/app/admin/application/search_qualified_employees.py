@@ -33,12 +33,15 @@ class QualifiedEmployeeItemView:
     validated_domain: str | None
     validated_domain_label: str | None
     updated_at: datetime | None
+    hire_year: int | None = None
 
 
 @dataclass(frozen=True)
 class QualifiedEmployeesSearchResult:
     items: list[QualifiedEmployeeItemView]
     total: int
+    total_all: int = 0
+    """US-134 : tous les employés actifs, sans filtre (« N employés sur M »)."""
 
 
 DOMAIN_LABELS = {
@@ -210,8 +213,9 @@ class SearchQualifiedEmployees:
                     validated_domain=best_domain_code,
                     validated_domain_label=domain_label,
                     updated_at=latest_cert_at,
+                    hire_year=emp.hire_date.year if emp.hire_date else None,
                 )
             )
 
         items.sort(key=lambda x: (x.last_name, x.first_name))
-        return QualifiedEmployeesSearchResult(items=items, total=len(items))
+        return QualifiedEmployeesSearchResult(items=items, total=len(items), total_all=len(all_employees))

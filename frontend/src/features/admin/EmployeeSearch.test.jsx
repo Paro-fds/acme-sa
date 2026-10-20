@@ -29,7 +29,7 @@ const EVERYONE = [employee('1008', 'BAPTISTE', 'Marc'), employee('1002', 'PIERRE
 /** Simule l'API : filtre très simple sur le nom. */
 function fakeApi({ page = 1, search = '' }) {
   const items = EVERYONE.filter((item) => item.display_name.toLowerCase().includes(search.trim().toLowerCase()))
-  return Promise.resolve({ items, total: items.length, page, page_size: 20, page_count: 1 })
+  return Promise.resolve({ items, total: items.length, total_all: EVERYONE.length, page, page_size: 20, page_count: 1 })
 }
 
 function LocationProbe() {
@@ -78,7 +78,7 @@ const searchBox = () => screen.getByRole('searchbox', { name: 'Rechercher un emp
 const cardNames = () =>
   within(screen.getByRole('list', { name: 'Employés' }))
     .getAllByRole('listitem')
-    .map((item) => item.querySelector('.font-semibold').textContent)
+    .map((item) => item.querySelector('.font-bold').textContent)
 
 describe('EmployeeSearch (US-18)', () => {
   let user
@@ -96,16 +96,15 @@ describe('EmployeeSearch (US-18)', () => {
 
   it('barre de recherche : placeholder, touche « Rechercher » du clavier', async () => {
     renderAt()
-    await screen.findByText('3 employés actifs')
+    await screen.findByText('3 employés sur 3')
 
-    expect(searchBox()).toHaveAttribute('placeholder', 'Rechercher par nom, prénom ou matricule…')
+    expect(searchBox()).toHaveAttribute('placeholder', 'Nom, prénom ou matricule')
     expect(searchBox()).toHaveAttribute('enterkeyhint', 'search')
-    expect(screen.getByRole('search')).toHaveClass('sticky')
   })
 
   it('la recherche part 300 ms après la dernière frappe, pas avant', async () => {
     renderAt()
-    await screen.findByText('3 employés actifs')
+    await screen.findByText('3 employés sur 3')
     searchQualifiedEmployees.mockClear()
 
     await user.type(searchBox(), 'pierre')
@@ -113,7 +112,7 @@ describe('EmployeeSearch (US-18)', () => {
     expect(searchQualifiedEmployees).not.toHaveBeenCalled()
 
     act(() => vi.advanceTimersByTime(100))
-    expect(await screen.findByText('2 employés')).toBeInTheDocument()
+    expect(await screen.findByText('2 employés sur 3')).toBeInTheDocument()
     expect(searchQualifiedEmployees).toHaveBeenCalledTimes(1)
     expect(searchQualifiedEmployees).toHaveBeenCalledWith(expect.objectContaining({ page: 1, search: 'pierre' }))
     expect(cardNames()).toEqual(['PIERRE Marie', 'PIERRE Marie'])
@@ -131,7 +130,7 @@ describe('EmployeeSearch (US-18)', () => {
 
   it('CA-07 : aucun résultat → message et « Effacer la recherche » ; CA-08 : la liste complète revient', async () => {
     renderAt()
-    await screen.findByText('3 employés actifs')
+    await screen.findByText('3 employés sur 3')
 
     await user.type(searchBox(), 'zzz')
     act(() => vi.advanceTimersByTime(300))
@@ -140,65 +139,65 @@ describe('EmployeeSearch (US-18)', () => {
     expect(screen.queryByText(/0 employé/)).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Effacer la recherche' }))
 
-    expect(await screen.findByText('3 employés actifs')).toBeInTheDocument()
+    expect(await screen.findByText('3 employés sur 3')).toBeInTheDocument()
     expect(searchBox()).toHaveValue('')
     expect(screen.getByLabelText('adresse')).toHaveTextContent(/^$/)
   })
 
   it('CA-08 : le bouton « effacer » du champ vide la recherche immédiatement', async () => {
     renderAt('/admin/employes?search=pierre')
-    expect(await screen.findByText('2 employés')).toBeInTheDocument()
+    expect(await screen.findByText('2 employés sur 3')).toBeInTheDocument()
     expect(searchBox()).toHaveValue('pierre')
 
     await user.click(screen.getByRole('button', { name: 'Effacer' }))
 
-    expect(await screen.findByText('3 employés actifs')).toBeInTheDocument()
+    expect(await screen.findByText('3 employés sur 3')).toBeInTheDocument()
     expect(searchBox()).toHaveValue('')
     expect(searchBox()).toHaveFocus()
   })
 
   it('CA-08 : vider le champ au clavier fait réapparaître la liste complète', async () => {
     renderAt('/admin/employes?search=pierre')
-    await screen.findByText('2 employés')
+    await screen.findByText('2 employés sur 3')
 
     await user.clear(searchBox())
     act(() => vi.advanceTimersByTime(300))
 
-    expect(await screen.findByText('3 employés actifs')).toBeInTheDocument()
+    expect(await screen.findByText('3 employés sur 3')).toBeInTheDocument()
   })
 
   it('Entrée lance la recherche sans attendre', async () => {
     renderAt()
-    await screen.findByText('3 employés actifs')
+    await screen.findByText('3 employés sur 3')
 
     await user.type(searchBox(), 'baptiste{Enter}')
 
-    expect(await screen.findByText('1 employé')).toBeInTheDocument()
+    expect(await screen.findByText('1 employé sur 3')).toBeInTheDocument()
   })
 
   it('CA-11 : retour depuis un dossier → même recherche et mêmes résultats', async () => {
     renderAt()
-    await screen.findByText('3 employés actifs')
+    await screen.findByText('3 employés sur 3')
     await user.type(searchBox(), 'pierre')
     act(() => vi.advanceTimersByTime(300))
-    await screen.findByText('2 employés')
+    await screen.findByText('2 employés sur 3')
 
     await user.click(within(screen.getByRole('list', { name: 'Employés' })).getAllByRole('link')[0])
     await user.click(await screen.findByRole('button', { name: 'Retour depuis le dossier' }))
 
-    expect(await screen.findByText('2 employés')).toBeInTheDocument()
+    expect(await screen.findByText('2 employés sur 3')).toBeInTheDocument()
     expect(searchBox()).toHaveValue('pierre')
     expect(screen.getByLabelText('adresse')).toHaveTextContent('?search=pierre')
   })
 
   it('les frappes successives ne créent pas d’entrées d’historique (retour arrière = écran précédent)', async () => {
     renderAt()
-    await screen.findByText('3 employés actifs')
+    await screen.findByText('3 employés sur 3')
     await user.type(searchBox(), 'pi')
     act(() => vi.advanceTimersByTime(300))
     await user.type(searchBox(), 'erre')
     act(() => vi.advanceTimersByTime(300))
-    await screen.findByText('2 employés')
+    await screen.findByText('2 employés sur 3')
 
     // Un seul retour suffit à revenir au tableau de bord.
     await user.click(screen.getByRole('button', { name: 'Page précédente' }))

@@ -119,36 +119,20 @@ describe('US-120 CA-05 — la page Notifications', () => {
   })
 })
 
-describe('US-120 CA-04 — l’accueil met en avant le poste ouvert pour moi', () => {
-  const complete = {
-    first_name: 'Lucie',
-    last_name: 'EXEMPLE',
-    position: 'Chargée de crédit',
-    affectation: { agency: 'Agence Démo', region: null, direction: null },
-    completion: { percent: 100, complete: 8, total: 8, is_complete: true, elements: [] },
-  }
-
-  beforeEach(() => {
-    getProfile.mockResolvedValue(complete)
+describe('US-120 CA-04, US-128 CA-04 — l’accueil montre le poste ouvert pour moi dans « Activité récente »', () => {
+  it('la notification du poste y figure, même si le dossier n’est pas complet ; « Nouveau pour vous » n’existe plus', async () => {
+    getProfile.mockResolvedValue({
+      first_name: 'Lucie',
+      last_name: 'EXEMPLE',
+      position: 'Chargée de crédit',
+      affectation: { agency: 'Agence Démo', region: null, direction: null },
+      completion: { percent: 87, complete: 7, total: 8, is_complete: false, elements: [{ key: 'telephone', label: 'Téléphone', complete: false }] },
+    })
     getFreshness.mockResolvedValue({ items: [], stale_count: 0 })
     getDossier.mockResolvedValue({ consent: { information_notice_at: '2026-10-08T09:00:00Z', whatsapp: false } })
-  })
-
-  it('« Nouveau pour vous » tant que le poste n’est pas lu ; « Voir le poste » le marque lu', async () => {
-    const user = userEvent.setup()
     renderAt('/accueil', <EmployeeHomePage />)
-    const card = await screen.findByRole('region', { name: 'Nouveau pour vous' })
-    expect(within(card).getByText(/Comptable fictif/)).toBeInTheDocument()
-
-    await user.click(within(card).getByRole('link', { name: 'Voir le poste' }))
-    expect(markMyNotificationRead).toHaveBeenCalledWith('opening:7')
-    expect(await screen.findByText('Page : /carriere')).toBeInTheDocument()
-  })
-
-  it('poste déjà lu : pas d’encart', async () => {
-    getMyNotifications.mockResolvedValue({ items: [{ ...OPENING, unread: false }], unread_count: 0, has_more: false })
-    renderAt('/accueil', <EmployeeHomePage />)
-    await screen.findByRole('heading', { name: /Bonjour/ })
+    const activity = await screen.findByRole('region', { name: 'Activité récente' })
+    expect(await within(activity).findByText(/Comptable fictif/)).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Nouveau pour vous' })).not.toBeInTheDocument()
   })
 })

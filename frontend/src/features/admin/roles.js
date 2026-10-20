@@ -14,6 +14,8 @@ export const ACCESS = {
   accounts: ['ADMIN'],
   audit: ['ADMIN'],
   resetAccess: ['ADMIN'],
+  /** US-132 : prendre le certificat suivant de la file (la lecture seule ne décide pas). */
+  claim: ['ADMIN', 'AGENT_RH'],
   /** US-116 : ceux qui traitent certificats, signalements et candidatures. */
   notifications: ['ADMIN', 'AGENT_RH'],
 }

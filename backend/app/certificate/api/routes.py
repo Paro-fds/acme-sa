@@ -1,6 +1,6 @@
 """US-301, US-303, US-118 : /api/me/certificates — formulaire, dépôt signé, enregistrement, liste, fichier."""
 
-from datetime import datetime
+from datetime import date, datetime
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Response
@@ -57,6 +57,10 @@ class CertificateOut(BaseModel):
     unlocks: UnlocksOut
     replaces_id: str | None = None
     is_archived: bool = False
+    decided_at: datetime | None = None
+    rejection_reason: str | None = None
+    rejection_comment: str | None = None
+    answer_by: date | None = None
 
     @classmethod
     def of(cls, view: CertificateView) -> "CertificateOut":

@@ -10,6 +10,7 @@ import {
   createOpening,
   getOpening,
   getOpeningForm,
+  listJobProfiles,
   listOpeningApplications,
   listOpenings,
   moveApplication,
@@ -24,6 +25,7 @@ import OpeningsPage from './OpeningsPage.jsx'
 
 vi.mock('../../../api/openings.js', () => ({
   listOpenings: vi.fn(),
+  listJobProfiles: vi.fn(),
   getOpeningForm: vi.fn(),
   getOpening: vi.fn(),
   createOpening: vi.fn(),
@@ -115,39 +117,123 @@ beforeEach(() => {
   getOpening.mockResolvedValue(OPENING)
   listOpeningApplications.mockResolvedValue({ items: [] })
   listOpenings.mockResolvedValue({ items: [PUBLISHED, { ...OPENING, id: 8, code: 'AG-2026-02', title: 'Agent de guichet' }] })
+  listJobProfiles.mockResolvedValue({ items: Array.from({ length: 84 }, (_, index) => ({ code: `P${index}` })) })
   previewAudience.mockResolvedValue({ base: 7, base_label: 'employés en activité', steps: [], visible: 7 })
 })
 
-describe('US-802 — liste des postes', () => {
-  it('montre chaque poste avec son statut en texte, son unité et ses dates', async () => {
+const LIST_LETTER = { name: 'lettre.pdf', content_type: 'application/pdf', size_bytes: 1000, at: '2026-10-15T09:00:00Z', actor_name: 'Marie LAFORTUNE' }
+const LIST = [
+  {
+    ...OPENING,
+    id: 1,
+    code: 'AR02',
+    title: 'Analyste des risques',
+    unit_label: 'Siège',
+    opens_on: '2026-11-01',
+    closes_on: '2026-11-30',
+    created_by_me: true,
+    application_count: 0,
+  },
+  { ...PUBLISHED, id: 2, code: 'CC01', unit_label: 'Agence de Delmas', opens_on: '2026-10-15', closes_on: '2026-11-09', letter: LIST_LETTER, application_count: 2 },
+  { ...PUBLISHED, id: 3, code: 'AG04', title: 'Agent d’entretien', unit_label: 'Siège', closes_on: '2026-12-25', letter: null, application_count: 1 },
+  {
+    ...PUBLISHED,
+    id: 4,
+    code: 'CA03',
+    title: 'Caissier principal',
+    status: 'CLOSED',
+    status_label: 'Clôturé',
+    unit_label: 'Agence de Carrefour',
+    closes_on: '2026-10-10',
+    application_count: 4,
+  },
+  {
+    ...PUBLISHED,
+    id: 5,
+    code: 'CH01',
+    title: 'Chef d’agence adjoint',
+    status: 'FILLED',
+    status_label: 'Pourvu',
+    unit_label: 'Agence de Pétion-Ville',
+    history: [...PUBLISHED.history, step('FILLED', 'Pourvu', '2026-09-30T15:00:00Z', 'Administrateur Démo')],
+    application_count: 0,
+  },
+]
+const items = async () => within(await screen.findByRole('list', { name: 'Postes' })).getAllByRole('listitem')
+
+describe('US-135 — la publication de postes de la refonte', () => {
+  beforeEach(() => listOpenings.mockResolvedValue({ items: LIST }))
+
+  it('CA-01, CA-02 : titre, « 5 postes · 2 publiés · 7 candidatures reçues », onglet du catalogue avec son nombre', async () => {
     renderAt('/admin/postes')
-    const list = await screen.findByRole('list', { name: 'Postes' })
-    const [first, second] = within(list).getAllByRole('listitem')
-    expect(within(first).getByRole('link', { name: /Chargé de crédit/ })).toHaveAttribute('href', '/admin/postes/7')
-    expect(within(first).getByText('Publié')).toBeInTheDocument()
-    expect(within(first).getByText(/Agence Démo/)).toBeInTheDocument()
-    expect(within(first).getByText(/15\/10\/2026 au 15\/11\/2026/)).toBeInTheDocument()
-    expect(within(second).getByText('Brouillon')).toBeInTheDocument()
+    await items()
+    expect(screen.getByRole('heading', { level: 1, name: 'Publication de postes' })).toBeVisible()
+    expect(screen.getByText('5 postes · 2 publiés · 7 candidatures reçues')).toBeVisible()
+    expect(screen.getByRole('tab', { name: /Postes publiés/, selected: true })).toBeVisible()
+    expect(await screen.findByRole('tab', { name: /Catalogue des postes ACME · 84/ })).toBeVisible()
+    expect(document.body.textContent).not.toMatch(/\p{Extended_Pictographic}/u)
   })
 
-  it("un Agent RH peut saisir un poste ; un compte en lecture seule non", async () => {
+  it('CA-03 : intitulé et code, unité et dates selon le statut, qui a saisi ou publié, candidatures, statut', async () => {
+    renderAt('/admin/postes')
+    const [draft, withLetter, noLetter, closed, filled] = await items()
+    expect(within(draft).getByRole('link', { name: /Analyste des risques/ })).toHaveAttribute('href', '/admin/postes/1')
+    expect(draft).toHaveTextContent('· AR02')
+    expect(draft).toHaveTextContent('Siège · du 1er nov. au 30 nov. 2026 · saisi par vous')
+    expect(within(draft).getByText('Brouillon')).toBeVisible()
+    expect(draft).not.toHaveTextContent(/candidature/)
+
+    expect(withLetter).toHaveTextContent('Agence de Delmas · du 15 oct. au 9 nov. 2026')
+    expect(withLetter).toHaveTextContent('Lettre du directeur RH jointe par Marie LAFORTUNE')
+    expect(withLetter).toHaveTextContent('2 candidatures')
+    expect(within(withLetter).getByText('Publié')).toBeVisible()
+    expect(noLetter).toHaveTextContent('Publié par Administrateur Démo')
+    expect(noLetter).toHaveTextContent('1 candidature')
+    expect(closed).toHaveTextContent('Agence de Carrefour · date limite passée le 10 oct.')
+    expect(within(closed).getByText('Clôturé')).toBeVisible()
+    expect(filled).toHaveTextContent('Agence de Pétion-Ville · pourvu le 30 sept.')
+    expect(within(filled).getByText('Pourvu')).toBeVisible()
+  })
+
+  it('CA-04 : un brouillon demande la lettre avant de publier ; rien pour la lecture seule', async () => {
     const { unmount } = renderAt('/admin/postes')
-    expect(await screen.findByRole('link', { name: 'Saisir un poste hors catalogue' })).toHaveAttribute(
-      'href',
-      '/admin/postes/nouveau',
-    )
+    const [draft, published] = await items()
+    expect(draft).toHaveTextContent('Pour publier, joignez la lettre du directeur RH.')
+    expect(within(draft).getByRole('link', { name: 'Joindre la lettre et publier' })).toHaveAttribute('href', '/admin/postes/1')
+    expect(published).not.toHaveTextContent('Pour publier')
     unmount()
+
+    getAdminMe.mockResolvedValue(me('ADMIN'))
+    const admin = renderAt('/admin/postes')
+    expect(within((await items())[0]).getByRole('link', { name: 'Joindre la lettre et publier' })).toBeVisible()
+    admin.unmount()
 
     getAdminMe.mockResolvedValue(me('READONLY'))
     renderAt('/admin/postes')
-    await screen.findByRole('list', { name: 'Postes' })
+    const [readonlyDraft] = await items()
+    expect(readonlyDraft).not.toHaveTextContent('Pour publier')
     expect(screen.queryByRole('link', { name: /Saisir un poste/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: 'Comment publier' })).not.toBeInTheDocument()
   })
 
-  it('US-124 CA-05 — l’écran s’intitule « Publication de postes », sans sous-titre', async () => {
+  it('CA-05 : « Publier un poste » en 3 étapes et « Clôturer ou marquer pourvu »', async () => {
     renderAt('/admin/postes')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Publication de postes' })).toBeInTheDocument()
-    expect(screen.queryByText(/Un Agent RH saisit le poste/)).not.toBeInTheDocument()
+    await items()
+    const aside = screen.getByRole('complementary', { name: 'Comment publier' })
+    expect(within(aside).getByRole('heading', { name: 'Publier un poste' })).toBeVisible()
+    const steps = within(within(aside).getByRole('list')).getAllByRole('listitem')
+    expect(steps.map((li) => li.querySelector('[data-step-title]').textContent)).toEqual([
+      'Choisissez une fiche',
+      'Complétez et cliquez « Suivant »',
+      'Joignez la lettre et publiez',
+    ])
+    expect(within(aside).getByRole('heading', { name: 'Clôturer ou marquer pourvu' })).toBeVisible()
+    expect(aside).toHaveTextContent('Réservé à l’Administrateur, depuis la fiche du poste.')
+  })
+
+  it('« Saisir un poste hors catalogue » pour l’Agent RH', async () => {
+    renderAt('/admin/postes')
+    expect(await screen.findByRole('link', { name: 'Saisir un poste hors catalogue' })).toHaveAttribute('href', '/admin/postes/nouveau')
   })
 
   it('aucun poste : le dit simplement', async () => {

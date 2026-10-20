@@ -40,7 +40,8 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
   await page.goto('/accueil')
   if (await page.waitForURL(/avant-de-commencer/, { timeout: 3000 }).then(() => true, () => false)) await acceptConsent(page)
 
-  const card = page.getByRole('region', { name: 'Nouveau pour vous' })
+  // US-128 : « Activité récente » remplace l'encart « Nouveau pour vous ».
+  const card = page.getByRole('region', { name: 'Activité récente' })
   await expect(card).toContainText('Caissier (agent de caisse) · Agence Démo Nord')
   await expect(page.getByRole('link', { name: /Notifications, \d+ non lues?/ })).toBeVisible()
   await noHorizontalScroll(page, 390)
@@ -53,7 +54,7 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
 
   await page.setViewportSize({ width: 1280, height: 860 })
   await page.goto('/accueil')
-  await expect(page.getByRole('region', { name: 'Nouveau pour vous' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Activité récente' })).toBeVisible()
   await page.getByRole('button', { name: /Notifications, \d+ non lues?/ }).click()
   await expect(page.getByRole('dialog', { name: 'Notifications' })).toContainText('Caissier')
   await noHorizontalScroll(page, 1280)
@@ -61,10 +62,9 @@ test('notifications employé : poste ouvert pour moi sur la cloche, l’accueil 
 
   await page.getByRole('dialog', { name: 'Notifications' }).getByText('Nouveau poste ouvert pour vous').click()
   await expect(page).toHaveURL(/\/carriere#postes-ouverts$/)
-  await expect(page.getByRole('heading', { name: 'Postes ouverts pour vous' })).toBeFocused()
+  await expect(page.getByRole('heading', { name: /^Postes ouverts pour vous · \d+$/ })).toBeFocused()
   await page.goto('/accueil')
   await expect(page.getByRole('heading', { name: /Bonjour/ })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Nouveau pour vous' })).toHaveCount(0)
 
   await admin.getByRole('button', { name: 'Clôturer' }).click()
   await expect(admin.getByText('Poste clôturé.')).toBeVisible()

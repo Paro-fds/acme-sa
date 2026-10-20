@@ -6,6 +6,7 @@ from typing import Any, Protocol
 
 from app.certificate.domain.certificate import (
     LEVEL_LABELS,
+    validated_level,
     REJECTION_REASONS,
     TYPE_LABELS,
     Certificate,
@@ -14,6 +15,7 @@ from app.certificate.domain.certificate import (
     CertificateStatus,
 )
 from app.certificate.domain.errors import InvalidCertificateField
+from app.certificate.domain.review import review_deadline
 from app.employee.domain.employee import Employee
 from app.shared.domain.clock import Clock
 
@@ -292,6 +294,8 @@ class ReviewEmployeeView:
     is_profile_complete: bool
     declared_level_label: str
     already_validated_certificates: list[str]
+    validated_level_label: str | None = None
+    """US-133 CA-06 : le niveau d'études déjà établi par les certificats validés de l'employé."""
 
 
 @dataclass(frozen=True)
@@ -301,6 +305,8 @@ class CertificateReviewView:
     files: list[CertificateFile]
     history: list[CertificateHistoryEntry]
     business_days: int
+    decide_by: date | None = None
+    """US-133 CA-05 : dernier jour pour décider (5 jours ouvrables après le dépôt)."""
 
 
 class GetCertificateReview:
@@ -390,6 +396,7 @@ class GetCertificateReview:
             is_profile_complete=True,
             declared_level_label=LEVEL_LABELS.get(cert.level, cert.level),
             already_validated_certificates=validated_titles,
+            validated_level_label=validated_level(all_emp_certs),
         )
 
         return CertificateReviewView(
@@ -398,6 +405,7 @@ class GetCertificateReview:
             files=files,
             history=history,
             business_days=b_days,
+            decide_by=review_deadline(cert.submitted_at.date()),
         )
 
 

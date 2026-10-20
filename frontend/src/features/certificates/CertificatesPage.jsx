@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
-import { listCertificates } from '../../api/certificates.js'
+import { getCertificateForm, listCertificates } from '../../api/certificates.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
@@ -7,14 +8,14 @@ import Tip from '../../components/Tip.jsx'
 import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { DossierProgress } from '../dossier/SectionParts.jsx'
-import CertificateList from './CertificateList.jsx'
+import { CertificateCards, CertificatesHelp, CertificatesHero, FILTERS, Filters, ValidatedLevel } from './certificatesParts.jsx'
 import { ELEMENT_LINKS } from './elementLinks.js'
-import { DEPOSIT_PATH } from './paths.js'
 
 async function load() {
   const profile = await getProfile()
-  const certificates = profile.completion.is_complete ? await listCertificates() : { certificates: [], limit: 0 }
-  return { completion: profile.completion, ...certificates }
+  if (!profile.completion.is_complete) return { completion: profile.completion, certificates: [], limit: 0 }
+  const [certificates, form] = await Promise.all([listCertificates(), getCertificateForm().catch(() => null)])
+  return { completion: profile.completion, ...certificates, maxMb: form?.max_mb }
 }
 
 /** US-204 CA-01 : ce qui reste avant de déposer, avec un lien vers chaque élément (RG-07). */
@@ -54,13 +55,15 @@ function Checklist({ completion }) {
 
 /**
  * US-204 (verrou et liste de ce qui reste), US-301 (accès au dépôt), US-303 (suivi des certificats).
- * US-113 : sur ordinateur, progression, niveau validé et conseils dans la colonne de droite.
+ * US-130 (refonte du 2026-10-19) : en-tête illustré, niveau validé, filtres, avancement, message des RH et
+ * « Corriger et renvoyer » ; « Comment ça marche » dans la colonne de droite sur ordinateur.
  */
 export default function CertificatesPage() {
   const { data, error, loading } = useLoader(load)
   const desktop = useIsDesktop()
-  const page = (children, aside) => (
-    <Page account title="Mes certificats" aside={desktop ? aside : undefined}>
+  const [filter, setFilter] = useState('all')
+  const page = (children, aside, asideLabel) => (
+    <Page account title="Mes certificats" aside={desktop ? aside : undefined} asideLabel={asideLabel}>
       {children}
     </Page>
   )
@@ -86,51 +89,24 @@ export default function CertificatesPage() {
       side,
     )
   }
-  const full = data.certificates.length >= data.limit
-  const level = (
-    <section aria-label="Niveau d'études validé" className="flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-info-bg text-info-text" aria-hidden="true">
-        <span className="material-symbols-outlined">workspace_premium</span>
-      </span>
-      <div className="flex min-w-0 flex-col">
-        <span className="text-sm font-semibold tracking-wide text-help uppercase">Niveau d'études validé</span>
-        <span className="font-semibold text-heading">{data.validated_level ?? "Aucun pour l'instant"}</span>
-        {!data.validated_level && <span className="text-sm text-help">Il sera établi par vos certificats validés par les RH.</span>}
-      </div>
-    </section>
-  )
-  const tip = (
-    <Tip>Retrouvez ici l'état de vos titres. Vos diplômes validés enrichissent vos opportunités de mobilité interne.</Tip>
-  )
-  const help = <p className="text-center text-sm text-help lg:text-left">Une question sur vos documents ? Adressez-vous au service RH de votre agence.</p>
+  const { certificates } = data
+  const help = <CertificatesHelp maxMb={data.maxMb} />
+  const shown = certificates.filter(FILTERS.find((item) => item.key === filter).keep)
   return page(
     <>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[26px] leading-8 font-bold">Mes certificats</h2>
-        <span className="rounded-full bg-info-bg px-3 py-1 text-sm font-semibold text-info-text">
-          {data.certificates.length} titre{data.certificates.length > 1 ? 's' : ''} déposé{data.certificates.length > 1 ? 's' : ''}
-        </span>
-      </div>
-      {!desktop && level}
-      {!desktop && tip}
-      {full ? (
-        <Alert tone="info">Vous avez déposé {data.limit} certificats, le nombre maximum.</Alert>
+      <CertificatesHero full={certificates.length >= data.limit} limit={data.limit} />
+      <ValidatedLevel level={data.validated_level} />
+      {certificates.length === 0 ? (
+        <p className="rounded-xl bg-section p-4 text-help">Aucun certificat déposé pour l'instant.</p>
       ) : (
-        <Link
-          to={DEPOSIT_PATH}
-          className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active lg:w-fit"
-        >
-          <span className="material-symbols-outlined" aria-hidden="true">upload_file</span>
-          Déposer un certificat
-        </Link>
+        <>
+          <Filters certificates={certificates} active={filter} onChange={setFilter} />
+          <CertificateCards certificates={shown} />
+        </>
       )}
-      <CertificateList certificates={data.certificates} />
       {!desktop && help}
     </>,
-    <>
-      {level}
-      {tip}
-      {help}
-    </>,
+    help,
+    'Comment ça marche',
   )
 }

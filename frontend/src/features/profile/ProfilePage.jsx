@@ -1,120 +1,105 @@
-import { useId } from 'react'
-import { Link } from 'react-router'
+import { useState } from 'react'
+import { confirmHrInformation, getDossier, getFreshness, reportHrError } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
-import Avatar from '../../components/Avatar.jsx'
 import Page from '../../components/Page.jsx'
 import { useIsDesktop } from '../../lib/useIsDesktop.js'
-import { useLoader } from '../../lib/useLoader.js'
-import { CERTIFICATES_PATH } from '../certificates/paths.js'
-import { CONTACT_EDUCATION_PATH, COORDINATES_PATH, HR_INFORMATION_PATH } from '../dossier/paths.js'
-import CompletionCard from './CompletionCard.jsx'
+import { useLoader, useUnauthorizedRedirect } from '../../lib/useLoader.js'
 import InfoSection from './InfoSection.jsx'
-import { UNIT_TO_CONFIRM, profileSections } from './profileSections.js'
-
-/** US-113 : photo officielle du système RH (cadenas : elle ne se change pas ici), sinon les initiales. */
-function ProfileSummary({ profile, large }) {
-  const titleId = useId()
-  return (
-    <section aria-labelledby={titleId} className="rounded-xl bg-surface p-4 shadow-card lg:p-6">
-      <div className="flex items-center gap-4 lg:gap-7">
-        <div className="flex shrink-0 flex-col items-center gap-2">
-          <Avatar firstName={profile.first_name} lastName={profile.last_name} photoUrl={profile.photo_url} size={large ? 'xl' : 'lg'} ring />
-          {profile.photo_url && (
-            <span className="flex items-center gap-1 text-xs text-muted">
-              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">lock</span>
-              Photo officielle
-            </span>
-          )}
-        </div>
-        <div className="flex min-w-0 flex-col">
-          <h2 id={titleId} className="text-xl font-bold break-words lg:text-2xl">
-            {profile.last_name} {profile.first_name}
-          </h2>
-          <p className="font-semibold text-info-text">{profile.position}</p>
-          <p className="flex items-center gap-1 text-sm text-muted">
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">location_on</span>
-            <span>{profile.affectation.agency ?? UNIT_TO_CONFIRM}</span>
-          </p>
-          <p className="text-sm text-muted">Matricule {profile.employee_code}</p>
-        </div>
-      </div>
-    </section>
-  )
-}
+import { DossierDetail, DossierHero, DossierParts, DossierProgressRing, IdentityCard, WhyCard } from './profileParts.jsx'
+import { profileSections } from './profileSections.js'
 
 const TITLE = 'Mon dossier'
 
-/** US-202 : sections du dossier à compléter (maquettes 08, 09). */
-const DOSSIER_SECTIONS = [
-  { to: COORDINATES_PATH, icon: 'contact_phone', title: 'Mes coordonnées', text: 'Section 1 / 3 · Téléphone, adresse, email' },
-  { to: CONTACT_EDUCATION_PATH, icon: 'school', title: "Contact d'urgence & études", text: "Section 2 / 3 · Personne à prévenir, niveau d'études" },
-  { to: HR_INFORMATION_PATH, icon: 'badge', title: 'Mes informations RH', text: "Section 3 / 3 · Agence, poste, date d'embauche" },
-]
-
-function NavCard({ to, icon, title, text }) {
-  return (
-    <Link
-      to={to}
-      className="flex min-h-16 items-center gap-3 rounded-xl bg-surface p-4 shadow-card hover:bg-canvas"
-    >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-info-bg text-info-text" aria-hidden="true">
-        <span className="material-symbols-outlined">{icon}</span>
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="font-semibold text-heading">{title}</span>
-        <span className="text-sm text-help">{text}</span>
-      </span>
-      <span className="material-symbols-outlined text-muted" aria-hidden="true">chevron_right</span>
-    </Link>
-  )
+async function loadDossier() {
+  const [profile, dossier, freshness] = await Promise.all([getProfile(), getDossier(), getFreshness().catch(() => null)])
+  return profile && dossier ? { profile, dossier, freshness } : null
 }
 
 /**
- * US-201 (dossier et pourcentage), sections du dossier (US-202, US-203), « Mes certificats » (US-204, US-301) et « Mon parcours » (hérité de la V2, D-44).
- * US-113 : « Mon dossier » ; sur ordinateur, la progression et les 3 sections à droite, Certificats et Parcours dans le menu à gauche.
+ * US-129 : « Confirmer » ou « Signaler » une information RH sans quitter la page ; le dossier renvoyé remplace
+ * l'ancien (progression à jour) et la date de la prochaine confirmation est relue.
+ */
+function useHrAnswers(setDossier, setFreshness) {
+  const redirectIfUnauthorized = useUnauthorizedRedirect()
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState(null)
+
+  async function save(send) {
+    if (sending) return false
+    setSending(true)
+    setError(null)
+    try {
+      setDossier(await send())
+      setFreshness(await getFreshness().catch(() => null))
+      return true
+    } catch (apiError) {
+      if (!redirectIfUnauthorized(apiError)) setError(apiError)
+      return false
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return {
+    onConfirm: (item) => save(() => confirmHrInformation(item.key)),
+    onReport: (item, values) => save(() => reportHrError(item.key, values)),
+    sending,
+    error,
+    fieldError: (field) => (error?.field === field ? error.message : null),
+  }
+}
+
+/**
+ * US-129 (refonte du 2026-10-19) : en-tête illustré, progression, les 3 parties (la partie 3 se confirme ici),
+ * l'identité et « Pourquoi ces données » à droite, puis le détail complet replié (US-05, US-201).
  */
 export default function ProfilePage() {
-  const { data: profile, error, loading } = useLoader(getProfile)
+  const { data, error, loading } = useLoader(loadDossier)
   const desktop = useIsDesktop()
+  const [dossier, setDossier] = useState(null)
+  const [freshness, setFreshness] = useState(undefined)
+  const hr = useHrAnswers(setDossier, setFreshness)
 
   if (loading) return <Page account title={TITLE}><p role="status">Chargement…</p></Page>
   if (error) return <Page account title={TITLE}><Alert>{error.message}</Alert></Page>
-  if (!profile) return <Page account title={TITLE}><Alert>Impossible de charger le profil.</Alert></Page>
+  if (!data) return <Page account title={TITLE}><Alert>Impossible de charger le profil.</Alert></Page>
 
+  const { profile } = data
+  const current = dossier ?? data.dossier
   const editable = (fieldName) => profile.editable_fields.includes(fieldName)
-  const progress = (
-    <>
-      <CompletionCard completion={profile.completion} />
-      {DOSSIER_SECTIONS.map((section) => (
-        <NavCard key={section.to} {...section} />
-      ))}
-    </>
-  )
+  const identity = <IdentityCard profile={profile} />
+  const why = <WhyCard />
 
   return (
-    <Page account title={TITLE} aside={desktop ? progress : undefined}>
-      <ProfileSummary profile={profile} large={desktop} />
-      {!desktop && progress}
-      {!desktop && (
-        <>
-          <NavCard
-            to={CERTIFICATES_PATH}
-            icon="workspace_premium"
-            title="Mes certificats"
-            text={profile.completion.is_complete ? 'Déposer et suivre mes certificats' : 'Disponible dès votre profil complet'}
+    <Page
+      account
+      title={TITLE}
+      asideLabel="Identité et aide"
+      aside={
+        desktop ? (
+          <>
+            {identity}
+            {why}
+          </>
+        ) : undefined
+      }
+    >
+      <DossierHero />
+      {!desktop && identity}
+      <DossierProgressRing completion={current.completion} freshness={freshness === undefined ? data.freshness : freshness} />
+      <DossierParts dossier={current} hr={hr} />
+      <DossierDetail>
+        {profileSections(profile).map(({ icon, title, fields }) => (
+          <InfoSection
+            key={title}
+            icon={icon}
+            title={title}
+            fields={fields.map(({ field, ...rest }) => ({ ...rest, editable: Boolean(field) && editable(field) }))}
           />
-        </>
-      )}
-
-      {profileSections(profile).map(({ icon, title, fields }) => (
-        <InfoSection
-          key={title}
-          icon={icon}
-          title={title}
-          fields={fields.map(({ field, ...rest }) => ({ ...rest, editable: Boolean(field) && editable(field) }))}
-        />
-      ))}
+        ))}
+      </DossierDetail>
+      {!desktop && why}
     </Page>
   )
 }

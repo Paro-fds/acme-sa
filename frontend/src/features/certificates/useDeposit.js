@@ -15,7 +15,8 @@ export function useDeposit() {
   const [progress, setProgress] = useState(null)
   const [error, setError] = useState(null)
 
-  async function deposit(file, fields) {
+  /** US-130 CA-06 : `replacesId`, le certificat « À corriger » que celui-ci remplace. */
+  async function deposit(file, fields, replacesId = null) {
     if (sending) return null
     if (!file) {
       setError({ field: 'file', message: NO_FILE_MESSAGE })
@@ -30,7 +31,7 @@ export function useDeposit() {
         await sendFile(ticket, file, setProgress)
         uploaded.current = { file, uploadId: ticket.upload_id }
       }
-      const certificate = await createCertificate(fields, uploaded.current.uploadId, file.name)
+      const certificate = await createCertificate(fields, uploaded.current.uploadId, file.name, replacesId)
       setSending(false)
       return certificate
     } catch (apiError) {

@@ -5,7 +5,7 @@ import { bellLabel } from '../admin/notifications/notificationParts.jsx'
 import { MY_NOTIFICATIONS_PATH, MyNotificationList, useMyNotifications } from './myNotificationParts.jsx'
 
 const PANEL_LIMIT = 8
-const BELL = 'relative flex size-11 shrink-0 items-center justify-center rounded-full text-primary hover:bg-canvas'
+const BELL = 'relative flex size-11 shrink-0 items-center justify-center rounded-full text-heading hover:bg-canvas'
 
 function BellIcon({ count }) {
   return (
@@ -24,7 +24,7 @@ function BellIcon({ count }) {
 }
 
 /**
- * US-120 CA-01 : cloche de l'espace employé et nombre de non lues. Sur ordinateur (menu de gauche), elle ouvre la
+ * US-120 CA-01 : cloche de l'espace employé et nombre de non lues. Sur ordinateur (barre du haut, US-127), elle ouvre la
  * liste des dernières notifications ; sur téléphone (en-tête), elle mène à la page Notifications.
  */
 export default function EmployeeNotificationBell() {
@@ -73,7 +73,7 @@ export default function EmployeeNotificationBell() {
         <div
           role="dialog"
           aria-label="Notifications"
-          className="absolute top-full left-0 z-40 mt-2 flex max-h-[min(36rem,80vh)] w-[24rem] flex-col gap-2 overflow-y-auto rounded-xl border border-border bg-surface px-2 pt-4 pb-2 shadow-modal"
+          className="absolute top-full right-0 z-40 mt-2 flex max-h-[min(36rem,80vh)] w-[24rem] flex-col gap-2 overflow-y-auto rounded-xl border border-border bg-surface px-2 pt-4 pb-2 shadow-modal"
         >
           <h2 className="px-3 text-lg font-bold text-heading">Notifications</h2>
           {data && data.items.length === 0 && (

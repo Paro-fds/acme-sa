@@ -79,7 +79,7 @@ describe('US-116 — la cloche', () => {
   it('CA-03 : pas de cloche pour la lecture seule ni le responsable du référentiel', async () => {
     getAdminFrame.mockResolvedValue(frame('READONLY'))
     renderLayout()
-    await screen.findByText('Agent RH Démo 1 · Agent RH')
+    await screen.findByText('Agent RH Démo 1')
     expect(screen.queryByRole('link', { name: /Notifications/ })).not.toBeInTheDocument()
     expect(getNotifications).not.toHaveBeenCalled()
   })

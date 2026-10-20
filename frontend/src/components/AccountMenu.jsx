@@ -17,9 +17,10 @@ const ADMIN_LINKS = [{ to: '/admin/mot-de-passe', icon: 'password', label: 'Chan
 
 /**
  * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23).
- * `label` (US-108, écran A02) : « Nom · Rôle » affiché à la place de l'avatar, en blanc sur l'en-tête bleu marine de l'espace RH.
+ * `person` (US-127, barre du haut blanche) : `{ name, detail, avatar }` ; nom et poste (ou rôle) à côté de l'avatar,
+ * l'avatar seul sur un petit écran.
  */
-export default function AccountMenu({ space = 'employee', label }) {
+export default function AccountMenu({ space = 'employee', person }) {
   const logout = useLogout(space)
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -63,16 +64,19 @@ export default function AccountMenu({ space = 'employee', label }) {
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         className={
-          label
-            ? 'flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm text-white/90 hover:bg-white/10 hover:text-white'
+          person
+            ? 'flex min-h-11 items-center gap-3 rounded-lg px-1.5 py-1 text-left hover:bg-canvas'
             : '-mr-2 flex size-11 items-center justify-center rounded-full text-primary hover:bg-canvas'
         }
       >
-        {label ? (
+        {person ? (
           <>
-            <span className="material-symbols-outlined text-[28px] sm:hidden" aria-hidden="true">account_circle</span>
-            <span className="hidden max-w-64 truncate sm:inline">{label}</span>
-            <span className="material-symbols-outlined hidden text-xl sm:inline" aria-hidden="true">keyboard_arrow_down</span>
+            {person.avatar}
+            <span className="hidden min-w-0 flex-col sm:flex">
+              <span className="max-w-56 truncate text-base font-bold text-heading">{person.name}</span>
+              {person.detail && <span className="max-w-56 truncate text-sm text-help">{person.detail}</span>}
+            </span>
+            <span className="material-symbols-outlined hidden text-xl text-help sm:inline" aria-hidden="true">keyboard_arrow_down</span>
           </>
         ) : (
           <span className="material-symbols-outlined text-[32px]" aria-hidden="true">account_circle</span>

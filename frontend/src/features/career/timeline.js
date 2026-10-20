@@ -27,6 +27,10 @@ const CERTIFICATE_SOURCES = { VALIDATED: 'VALIDATED', RECEIVED: 'IN_REVIEW', IN_
 
 const join = (separator, ...parts) => parts.filter(Boolean).join(separator)
 
+/** US-131 : nature d'un élément saisi dans l'ancien parcours. */
+const KIND_LABELS = { QUALIFICATION: 'Diplôme', TRAINING: 'Formation', EXPERIENCE: 'Expérience' }
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
+
 /** Années complètes entre la date d'embauche et aujourd'hui → « 8 ans chez ACME SA ». */
 export function seniorityLabel(hireDate, today = new Date()) {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(hireDate ?? '')
@@ -54,6 +58,7 @@ function hireEvent(hireDate) {
     when: formatMonth(hireDate.slice(0, 7)),
     detail: `Embauche le ${formatDate(hireDate)}`,
     source: 'HR',
+    dateLabel: capitalize(formatMonth(hireDate.slice(0, 7), { short: true })),
   }
 }
 
@@ -66,11 +71,19 @@ function certificateEvent(certificate) {
     when: `obtenu en ${certificate.year}`,
     detail: join(' · ', certificate.type_label, certificate.institution),
     source: CERTIFICATE_SOURCES[certificate.status],
+    kindLabel: certificate.type_label,
   }
 }
 
 function careerEvent(entry) {
-  const event = { id: `career-${entry.id}`, group: entry.kind, key: entry.start_month ?? '', title: entry.title, source: 'DECLARED' }
+  const event = {
+    id: `career-${entry.id}`,
+    group: entry.kind,
+    key: entry.start_month ?? '',
+    title: entry.title,
+    source: 'DECLARED',
+    kindLabel: KIND_LABELS[entry.kind],
+  }
   switch (entry.kind) {
     case 'QUALIFICATION':
       return { ...event, when: formatMonth(entry.start_month), detail: join(' · ', entry.qualification_type_label, entry.organization) }
@@ -97,7 +110,11 @@ export function buildTimeline({ profile, career, certificates }, now = new Date(
     ...items.filter((entry) => entry.kind !== 'SKILL').map(careerEvent),
   ]
     .sort((a, b) => b.key.localeCompare(a.key))
-    .map((event) => ({ ...event, year: event.key.slice(0, 4) || null }))
+    .map((event) => {
+      const year = event.key.slice(0, 4) || null
+      // US-131 : la date affichée à gauche de la frise.
+      return { ...event, year, dateLabel: event.dateLabel ?? year ?? 'Sans date' }
+    })
 
   return {
     today: {

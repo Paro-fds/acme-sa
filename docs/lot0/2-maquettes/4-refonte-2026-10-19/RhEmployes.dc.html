@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Gestion · Employés</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6FB}
+a{color:#1D3FA8;text-decoration:none}a:hover{color:#132C7A;text-decoration:underline}
+</style>
+</helmet>
+<div style="font-family: 'Public Sans', system-ui, sans-serif; color: #17213A; background: #F4F6FB; min-height: 1060px; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <nav aria-label="Menu de gestion" style="flex: 1 1 260px; max-width: 280px; min-width: 240px; position: sticky; top: 0; height: 100vh; align-self: flex-start; overflow-y: auto; background: #0F2A63; color: #FFFFFF; display: flex; flex-direction: column; padding: 24px 16px; box-sizing: border-box; gap: 28px">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D3FA8" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 20h18L12 3Z"></path><path d="M8.5 15h7"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px">ACME <span style="font-weight: 400">SA</span></span>
+        <span style="font-size: 13px; color: #C9D5F2">Espace de gestion</span>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <a href="RhTableauDeBord.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>
+        Tableau de bord
+      </a>
+      <a href="RhFileValidation.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+        <span style="flex: 1">File de validation</span>
+        <span style="min-width: 28px; padding: 2px 8px; border-radius: 999px; background: #E3EBFD; color: #0F2A63; font-size: 14px; font-weight: 700; text-align: center; box-sizing: border-box">18</span>
+      </a>
+      <a href="RhEmployes.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 17px; font-weight: 600; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.8"></circle><path d="M16 14.6c2.6-.3 4.7 1.4 5.5 4.4"></path></svg>
+        Employés
+      </a>
+      <a href="RhPostes.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path><path d="M3 13h18"></path></svg>
+        Postes à pourvoir
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"></path><path d="M5 4h11l-2 4 2 4H5"></path></svg>
+        <span style="flex: 1">Signalements</span>
+        <span style="min-width: 28px; padding: 2px 8px; border-radius: 999px; background: #FDBA74; color: #431407; font-size: 14px; font-weight: 700; text-align: center; box-sizing: border-box">6</span>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+        Comptes et rôles
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+        Journal d’audit
+      </a>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; color: #E6ECFA; font-size: 17px; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"></path><path d="M17 8l4 4-4 4"></path><path d="M21 12H10"></path></svg>
+      Se déconnecter
+    </a>
+    <div style="position: relative; margin: 0 -16px -24px; height: 170px; overflow: hidden">
+      <svg width="100%" height="140" viewBox="0 0 280 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" style="position: absolute; left: 0; bottom: 0; display: block">
+        <path d="M0 150 L0 96 L38 70 L62 84 L104 40 L136 66 L160 52 L206 90 L240 72 L280 96 L280 150 Z" fill="#1A3A7E" opacity="0.7"></path>
+        <path d="M104 40 L118 52 L110 52 L100 60 L94 50 Z" fill="#3B5FA8" opacity="0.6"></path>
+        <path d="M0 150 L0 116 L46 92 L84 110 L128 82 L170 104 L214 86 L252 104 L280 96 L280 150 Z" fill="#163370"></path>
+        <path d="M0 150 L0 132 L60 118 L120 130 L190 116 L250 128 L280 122 L280 150 Z" fill="#12306B"></path>
+      </svg>
+      <p style="position: absolute; left: 24px; right: 16px; bottom: 24px; margin: 0; font-size: 16px; line-height: 1.45; font-weight: 500; color: #FFFFFF">Grandir ensemble<br>pour un impact durable</p>
+    </div>
+  </nav>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E3E8F2; flex-wrap: wrap">
+      <span style="font-size: 16px; color: #4A5672">Lundi 19 octobre 2026</span>
+      <div style="display: flex; align-items: center; gap: 20px">
+        <button type="button" aria-label="Notifications : 5 non lues" style="position: relative; width: 44px; height: 44px; border: none; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #17213A">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+          <span style="position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; background: #C2410C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">5</span>
+        </button>
+        <div style="width: 1px; height: 36px; background: #E3E8F2"></div>
+        <button type="button" style="display: flex; align-items: center; gap: 12px; border: none; background: transparent; cursor: pointer; padding: 4px; font-family: inherit; text-align: left">
+          <span style="width: 44px; height: 44px; border-radius: 50%; background: #15803D; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center">ML</span>
+          <span style="display: flex; flex-direction: column">
+            <span style="font-size: 16px; font-weight: 700; color: #17213A">Marie LAFORTUNE</span>
+            <span style="font-size: 14px; color: #4A5672">Agent RH</span>
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <main style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 20px; max-width: 1180px; width: 100%; box-sizing: border-box">
+
+      <section style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #0F2A63; letter-spacing: -0.5px">Employés</h1>
+          <p style="margin: 0; font-size: 17px; color: #3A4664">Trouvez les employés qualifiés : par nom, niveau validé, domaine ou agence.</p>
+        </div>
+        <button type="button" style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px; border-radius: 10px; border: 1.5px solid #1D3FA8; background: #FFFFFF; color: #1D3FA8; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 20h16"></path></svg>
+          Exporter la liste
+        </button>
+      </section>
+
+      <div style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="r-nom" style="font-size: 15px; font-weight: 600">Rechercher un employé</label>
+          <div style="position: relative">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; left: 14px; top: 14px"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+            <input id="r-nom" placeholder="Nom, prénom ou matricule" style="width: 100%; min-height: 48px; padding: 0 14px 0 44px; border-radius: 10px; border: 1px solid #C8D1E3; font-family: inherit; font-size: 16px; box-sizing: border-box">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="r-niveau" style="font-size: 15px; font-weight: 600">Niveau validé minimum</label>
+            <select id="r-niveau" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1.5px solid #1D3FA8; background: #F4F7FE; font-family: inherit; font-size: 16px; color: #17213A"><option>Licence</option></select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="r-domaine" style="font-size: 15px; font-weight: 600">Domaine</label>
+            <select id="r-domaine" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1.5px solid #1D3FA8; background: #F4F7FE; font-family: inherit; font-size: 16px; color: #17213A"><option>Finance, Comptabilité</option></select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="r-agence" style="font-size: 15px; font-weight: 600">Agence</label>
+            <select id="r-agence" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1px solid #C8D1E3; background: #FFFFFF; font-family: inherit; font-size: 16px; color: #17213A"><option>Toutes</option></select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="r-statut" style="font-size: 15px; font-weight: 600">Statut du dossier</label>
+            <select id="r-statut" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1px solid #C8D1E3; background: #FFFFFF; font-family: inherit; font-size: 16px; color: #17213A"><option>Tous</option></select>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px">
+          <span style="color: #4A5672">Filtres actifs :</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 12px; border-radius: 999px; background: #E3EBFD; color: #0F2A63; font-weight: 600">Licence et plus <button type="button" aria-label="Retirer le filtre Licence et plus" style="width: 26px; height: 26px; border: none; border-radius: 50%; background: transparent; color: #0F2A63; cursor: pointer; font-size: 16px">×</button></span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 12px; border-radius: 999px; background: #E3EBFD; color: #0F2A63; font-weight: 600">Finance, Comptabilité <button type="button" aria-label="Retirer le filtre Finance, Comptabilité" style="width: 26px; height: 26px; border: none; border-radius: 50%; background: transparent; color: #0F2A63; cursor: pointer; font-size: 16px">×</button></span>
+          <span style="margin-left: auto; font-weight: 700">23 employés sur 412</span>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; overflow-x: auto">
+        <table aria-label="Employés" style="width: 100%; border-collapse: collapse; font-size: 15px; min-width: 820px">
+          <thead>
+            <tr style="background: #F7F9FD; text-align: left; color: #3A4664">
+              <th scope="col" style="padding: 14px 18px; font-weight: 700">Employé</th>
+              <th scope="col" style="padding: 14px 12px; font-weight: 700">Poste et agence</th>
+              <th scope="col" style="padding: 14px 12px; font-weight: 700">Niveau validé</th>
+              <th scope="col" style="padding: 14px 12px; font-weight: 700">Embauche</th>
+              <th scope="col" style="padding: 14px 12px; font-weight: 700">Dossier</th>
+              <th scope="col" style="padding: 14px 18px; font-weight: 700">Mis à jour</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top: 1px solid #EEF1F7">
+              <td style="padding: 14px 18px"><a href="#" style="display: flex; flex-direction: column; color: #17213A"><span style="font-weight: 700; color: #1D3FA8">Rose ÉTIENNE</span><span style="color: #4A5672">AC-1042</span></a></td>
+              <td style="padding: 14px 12px">Chargée de crédit · Delmas</td>
+              <td style="padding: 14px 12px">Master · Gestion</td>
+              <td style="padding: 14px 12px">2014</td>
+              <td style="padding: 14px 12px"><span style="padding: 3px 10px; border-radius: 999px; background: #DDF3E6; color: #166534; font-weight: 600">Complet</span></td>
+              <td style="padding: 14px 18px; color: #4A5672">8 oct. 2026</td>
+            </tr>
+            <tr style="border-top: 1px solid #EEF1F7">
+              <td style="padding: 14px 18px"><a href="#" style="display: flex; flex-direction: column; color: #17213A"><span style="font-weight: 700; color: #1D3FA8">Jean JOSEPH</span><span style="color: #4A5672">AC-1001</span></a></td>
+              <td style="padding: 14px 12px">Agent de crédit · Pétion-Ville</td>
+              <td style="padding: 14px 12px">Licence · Comptabilité</td>
+              <td style="padding: 14px 12px">2018</td>
+              <td style="padding: 14px 12px"><span style="padding: 3px 10px; border-radius: 999px; background: #DDF3E6; color: #166534; font-weight: 600">Complet</span></td>
+              <td style="padding: 14px 18px; color: #4A5672">9 oct. 2026</td>
+            </tr>
+            <tr style="border-top: 1px solid #EEF1F7">
+              <td style="padding: 14px 18px"><a href="#" style="display: flex; flex-direction: column; color: #17213A"><span style="font-weight: 700; color: #1D3FA8">Nadège CHARLES</span><span style="color: #4A5672">AC-1058</span></a></td>
+              <td style="padding: 14px 12px">Caissière · Delmas</td>
+              <td style="padding: 14px 12px">Licence · Finance</td>
+              <td style="padding: 14px 12px">2020</td>
+              <td style="padding: 14px 12px"><span style="padding: 3px 10px; border-radius: 999px; background: #FDEBDD; color: #9A3412; font-weight: 600">Incomplet · 75 %</span></td>
+              <td style="padding: 14px 18px; color: #4A5672">17 oct. 2026</td>
+            </tr>
+            <tr style="border-top: 1px solid #EEF1F7">
+              <td style="padding: 14px 18px"><a href="#" style="display: flex; flex-direction: column; color: #17213A"><span style="font-weight: 700; color: #1D3FA8">Wilson DORVAL</span><span style="color: #4A5672">AC-1120</span></a></td>
+              <td style="padding: 14px 12px">Comptable · Siège</td>
+              <td style="padding: 14px 12px">Licence · Comptabilité</td>
+              <td style="padding: 14px 12px">2016</td>
+              <td style="padding: 14px 12px"><span style="padding: 3px 10px; border-radius: 999px; background: #DDF3E6; color: #166534; font-weight: 600">Complet</span></td>
+              <td style="padding: 14px 18px; color: #4A5672">2 oct. 2026</td>
+            </tr>
+            <tr style="border-top: 1px solid #EEF1F7">
+              <td style="padding: 14px 18px"><a href="#" style="display: flex; flex-direction: column; color: #17213A"><span style="font-weight: 700; color: #1D3FA8">Carline JEAN-BAPTISTE</span><span style="color: #4A5672">AC-1134</span></a></td>
+              <td style="padding: 14px 12px">Analyste de crédit · Carrefour</td>
+              <td style="padding: 14px 12px">Master · Finance</td>
+              <td style="padding: 14px 12px">2021</td>
+              <td style="padding: 14px 12px"><span style="padding: 3px 10px; border-radius: 999px; background: #DDF3E6; color: #166534; font-weight: 600">Complet</span></td>
+              <td style="padding: 14px 18px; color: #4A5672">29 sept. 2026</td>
+            </tr>
+            <tr style="border-top: 1px solid #EEF1F7">
+              <td style="padding: 14px 18px"><a href="#" style="display: flex; flex-direction: column; color: #17213A"><span style="font-weight: 700; color: #1D3FA8">Ricardo PAUL</span><span style="color: #4A5672">AC-1089</span></a></td>
+              <td style="padding: 14px 12px">Agent de recouvrement · Cap-Haïtien</td>
+              <td style="padding: 14px 12px">Licence · Comptabilité</td>
+              <td style="padding: 14px 12px">2017</td>
+              <td style="padding: 14px 12px"><span style="padding: 3px 10px; border-radius: 999px; background: #FDEBDD; color: #9A3412; font-weight: 600">Incomplet · 50 %</span></td>
+              <td style="padding: 14px 18px; color: #4A5672">14 sept. 2026</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-top: 1px solid #EEF1F7; flex-wrap: wrap">
+          <span style="font-size: 15px; color: #4A5672">1 à 6 sur 23</span>
+          <div style="display: flex; gap: 8px">
+            <button type="button" disabled style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #D5DCEB; background: #F4F6FB; color: #8A93A8; font-family: inherit; font-size: 15px; font-weight: 600">Précédent</button>
+            <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid #1D3FA8; background: #FFFFFF; color: #1D3FA8; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Suivant</button>
+          </div>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 14px; color: #4A5672">Chaque export est enregistré dans le journal d’audit.</p>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

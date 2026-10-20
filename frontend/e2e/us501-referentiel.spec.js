@@ -7,8 +7,9 @@ const DEMO_REFERENTIAL = resolve(import.meta.dirname, '../../backend/demo/refere
 /** US-501 : un administrateur importe le référentiel fictif, puis voit les régions et leurs agences. */
 test('référentiel : import du classeur Excel, régions et agences, valeurs à rattacher', async ({ page }) => {
   await adminLogin(page)
-  // « À rattacher » n'est plus dans le menu (2026-10-13) : on y va par le lien du tableau de bord.
-  await page.getByRole('link', { name: /à rattacher → À rattacher/ }).click()
+  // « À rattacher » n'est plus dans le menu (2026-10-13) ; le tableau de bord (US-132) n'en montre le lien
+  // que s'il reste des valeurs à rattacher : on y va par l'adresse.
+  await page.goto('/admin/referentiel')
   await expect(page).toHaveURL(/\/admin\/referentiel$/)
 
   await page.getByLabel('Classeur Excel (.xlsx)').setInputFiles(DEMO_REFERENTIAL)

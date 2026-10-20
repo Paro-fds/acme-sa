@@ -9,6 +9,8 @@ import EmployeeNotificationBell from '../features/notifications/EmployeeNotifica
 import Avatar from './Avatar.jsx'
 import BottomNav from './BottomNav.jsx'
 import { EMPLOYEE_NAV } from './employeeNav.js'
+import NavPanel, { NavIcon, navItemClass } from './NavPanel.jsx'
+import TopBar from './TopBar.jsx'
 
 /** Nom, poste et photo de l'employé pour le menu ; le cadre s'affiche même si le profil ne charge pas. */
 function useEmployeeIdentity() {
@@ -108,28 +110,40 @@ function Brand() {
   )
 }
 
-/** Ordinateur : menu à gauche (rubriques, puis nom, poste et « Se déconnecter » en bas). */
-function Sidebar({ identity, nav }) {
+/** US-127 : sur ordinateur, panneau bleu fixe à gauche (rubriques, « Se déconnecter », montagnes). */
+function Sidebar({ nav }) {
   return (
-    // z-20 : la liste de la cloche (US-120) déborde du menu et doit passer au-dessus du contenu.
-    <aside className="relative z-20 w-64 shrink-0 border-r border-border bg-surface">
-      <div className="sticky top-0 flex h-dvh flex-col px-4 py-6">
-        <div className="flex items-center justify-between gap-2 pb-7 pl-2">
-          <Brand />
-          {nav && <EmployeeNotificationBell />}
-        </div>
-        {nav && (
-          <nav aria-label="Espace employé">
-            <NavItems />
-          </nav>
-        )}
-        <div className="mt-auto flex flex-col gap-2 border-t border-border px-2 pt-4">
-          <Identity identity={identity} />
-          <LogoutButton />
-        </div>
-      </div>
-    </aside>
+    <NavPanel
+      space="employee"
+      homeTo="/accueil"
+      subtitle="Microfinance, un avenir ensemble"
+      navLabel="Espace employé"
+      className="sticky top-0 h-dvh"
+    >
+      {nav && (
+        <ul className="flex flex-col gap-1.5">
+          {EMPLOYEE_NAV.map((item) => (
+            <li key={item.to}>
+              <NavLink to={item.to} className={navItemClass}>
+                <NavIcon name={item.icon} />
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      )}
+    </NavPanel>
   )
+}
+
+/** US-127 : nom, poste et photo de l'employé dans la barre du haut, avec le menu du compte. */
+function accountPerson(identity) {
+  if (!identity) return undefined
+  return {
+    name: `${identity.first_name} ${identity.last_name}`,
+    detail: identity.position,
+    avatar: <Avatar firstName={identity.first_name} lastName={identity.last_name} photoUrl={identity.photo_url} size="md" />,
+  }
 }
 
 /** Téléphone : bouton ☰ qui ouvre toutes les rubriques (dont « Mon parcours »), le compte et « Se déconnecter ». */
@@ -215,7 +229,7 @@ function BackLink({ to, label }) {
 /**
  * US-207, US-113 : cadre de l'espace employé.
  * Téléphone (écrans 06 → 13) : en-tête « Portail Carrière » avec le bouton ☰, contenu, barre d'actions et barre du bas.
- * Ordinateur : menu à gauche, contenu au centre, `aside` (progression, aide) dans la colonne de droite,
+ * Ordinateur (US-127) : panneau bleu fixe à gauche, barre du haut (date, cloche, compte), contenu au centre, `aside` (progression, aide) dans la colonne de droite,
  * boutons d'action en bas du contenu au lieu d'une barre collée. `wide` : pleine largeur sans colonne de droite.
  */
 export default function EmployeeLayout({
@@ -235,26 +249,32 @@ export default function EmployeeLayout({
   if (desktop) {
     return (
       <div className="flex min-h-dvh bg-canvas">
-        <Sidebar identity={identity} nav={nav} />
-        <main className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-6 px-10 py-9">
-          <h1 className="sr-only">{title}</h1>
-          {backTo && <BackLink to={backTo} label={backLabel} />}
-          <div className={aside ? 'grid grid-cols-[minmax(0,1fr)_20rem] items-start gap-6' : wide ? '' : 'max-w-3xl'}>
-            <div className="flex min-w-0 flex-col gap-6">
-              {children}
-              {actions && (
-                <div className="flex flex-row-reverse flex-wrap gap-3 border-t border-border pt-5 [&>*]:w-auto [&>*]:min-w-48">
-                  {actions}
-                </div>
+        <Sidebar nav={nav} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar>
+            {nav && <EmployeeNotificationBell />}
+            <AccountMenu space="employee" person={accountPerson(identity)} />
+          </TopBar>
+          <main className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-6 px-10 py-9">
+            <h1 className="sr-only">{title}</h1>
+            {backTo && <BackLink to={backTo} label={backLabel} />}
+            <div className={aside ? 'grid grid-cols-[minmax(0,1fr)_20rem] items-start gap-6' : wide ? '' : 'max-w-3xl'}>
+              <div className="flex min-w-0 flex-col gap-6">
+                {children}
+                {actions && (
+                  <div className="flex flex-row-reverse flex-wrap gap-3 border-t border-border pt-5 [&>*]:w-auto [&>*]:min-w-48">
+                    {actions}
+                  </div>
+                )}
+              </div>
+              {aside && (
+                <aside aria-label={asideLabel} className="sticky top-24 flex flex-col gap-6">
+                  {aside}
+                </aside>
               )}
             </div>
-            {aside && (
-              <aside aria-label={asideLabel} className="sticky top-6 flex flex-col gap-6">
-                {aside}
-              </aside>
-            )}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     )
   }

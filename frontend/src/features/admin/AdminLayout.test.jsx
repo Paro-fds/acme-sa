@@ -13,6 +13,9 @@ const FRAME = {
   counts: { validation: 27, reports: 9, to_attach: 0 },
 }
 
+/** Libellé d'une rubrique, sans son icône ni son compteur (US-127). */
+const label = (link) => link.querySelector('.flex-1').textContent
+
 function renderLayout(props = {}) {
   return render(
     <MemoryRouter initialEntries={['/admin/validation']}>
@@ -29,19 +32,21 @@ beforeEach(() => {
 })
 
 describe('US-108 — cadre de l’espace RH (écran A02)', () => {
-  it('CA-01 : en-tête « Espace de gestion » (US-111), nom et rôle du compte, « Se déconnecter »', async () => {
+  it('CA-01 : « Espace de gestion » (US-111) et « Se déconnecter » dans le menu, nom et rôle dans la barre du haut (US-127)', async () => {
     renderLayout()
+    const panel = screen.getByRole('navigation', { name: 'Menu principal RH' }).closest('[data-nav-panel]')
+    expect(panel).toHaveTextContent('Espace de gestion')
+    expect(within(panel).getByRole('button', { name: 'Se déconnecter' })).toBeInTheDocument()
     const header = screen.getByRole('banner')
-    expect(header).toHaveTextContent('Espace de gestion')
-    expect(await within(header).findByText('Administrateur Démo · Administrateur')).toBeInTheDocument()
-    expect(within(header).getByRole('button', { name: 'Se déconnecter' })).toBeInTheDocument()
+    expect(await within(header).findByText('Administrateur Démo')).toBeInTheDocument()
+    expect(within(header).getByText('Administrateur')).toBeInTheDocument()
   })
 
   it('CA-01 : menu des écrans validés, rubrique active, titre de la page dans le contenu', async () => {
     renderLayout()
     const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
-    await screen.findByText('Administrateur Démo · Administrateur')
-    const labels = within(nav).getAllByRole('link').map((link) => link.textContent.replace(/\d+$/, ''))
+    await screen.findByText('Administrateur Démo')
+    const labels = within(nav).getAllByRole('link').map(label)
     expect(labels).toEqual([
       'Tableau de bord',
       'File de validation',
@@ -68,7 +73,7 @@ describe('US-108 — cadre de l’espace RH (écran A02)', () => {
     getAdminFrame.mockRejectedValue(new Error('hors ligne'))
     renderLayout()
     const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
-    expect(within(nav).getAllByRole('link').map((link) => link.textContent)).toEqual(['Tableau de bord', 'Employés'])
+    expect(within(nav).getAllByRole('link').map(label)).toEqual(['Tableau de bord', 'Employés'])
     expect(screen.getByText('Contenu')).toBeInTheDocument()
   })
 })
@@ -79,7 +84,7 @@ describe('US-108 — menu selon le rôle (cahier des charges §4.3)', () => {
     renderLayout()
     const nav = screen.getByRole('navigation', { name: 'Menu principal RH' })
     await screen.findByText(/Administrateur Démo/)
-    return within(nav).getAllByRole('link').map((link) => link.textContent.replace(/\d+$/, ''))
+    return within(nav).getAllByRole('link').map(label)
   }
 
   it('Agent RH : ni « À rattacher », ni « Comptes et rôles », ni « Journal d’audit »', async () => {
@@ -104,7 +109,7 @@ describe('US-112 — menu du compte selon la double authentification', () => {
     getAdminFrame.mockResolvedValue({ ...FRAME, me: { ...FRAME.me, mfa_required: mfaRequired } })
     const user = userEvent.setup()
     renderLayout()
-    await screen.findByText('Administrateur Démo · Administrateur')
+    await screen.findByText('Administrateur Démo')
     await user.click(screen.getByRole('button', { name: 'Menu du compte' }))
     return screen.getByRole('menu')
   }

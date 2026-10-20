@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Gestion · Examiner un certificat</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6FB}
+a{color:#1D3FA8;text-decoration:none}a:hover{color:#132C7A;text-decoration:underline}
+</style>
+</helmet>
+<div style="font-family: 'Public Sans', system-ui, sans-serif; color: #17213A; background: #F4F6FB; min-height: 1100px; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <nav aria-label="Menu de gestion" style="flex: 1 1 260px; max-width: 280px; min-width: 240px; position: sticky; top: 0; height: 100vh; align-self: flex-start; overflow-y: auto; background: #0F2A63; color: #FFFFFF; display: flex; flex-direction: column; padding: 24px 16px; box-sizing: border-box; gap: 28px">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D3FA8" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 20h18L12 3Z"></path><path d="M8.5 15h7"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px">ACME <span style="font-weight: 400">SA</span></span>
+        <span style="font-size: 13px; color: #C9D5F2">Espace de gestion</span>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <a href="RhTableauDeBord.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>
+        Tableau de bord
+      </a>
+      <a href="RhFileValidation.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 17px; font-weight: 600; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+        <span style="flex: 1">File de validation</span>
+        <span style="min-width: 28px; padding: 2px 8px; border-radius: 999px; background: #FFFFFF; color: #0F2A63; font-size: 14px; font-weight: 700; text-align: center; box-sizing: border-box">18</span>
+      </a>
+      <a href="RhEmployes.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.8"></circle><path d="M16 14.6c2.6-.3 4.7 1.4 5.5 4.4"></path></svg>
+        Employés
+      </a>
+      <a href="RhPostes.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path><path d="M3 13h18"></path></svg>
+        Postes à pourvoir
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"></path><path d="M5 4h11l-2 4 2 4H5"></path></svg>
+        <span style="flex: 1">Signalements</span>
+        <span style="min-width: 28px; padding: 2px 8px; border-radius: 999px; background: #FDBA74; color: #431407; font-size: 14px; font-weight: 700; text-align: center; box-sizing: border-box">6</span>
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+        Comptes et rôles
+      </a>
+      <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 10px; color: #E6ECFA; font-size: 17px; font-weight: 500; text-decoration: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+        Journal d’audit
+      </a>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; color: #E6ECFA; font-size: 17px; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"></path><path d="M17 8l4 4-4 4"></path><path d="M21 12H10"></path></svg>
+      Se déconnecter
+    </a>
+    <div style="position: relative; margin: 0 -16px -24px; height: 170px; overflow: hidden">
+      <svg width="100%" height="140" viewBox="0 0 280 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" style="position: absolute; left: 0; bottom: 0; display: block">
+        <path d="M0 150 L0 96 L38 70 L62 84 L104 40 L136 66 L160 52 L206 90 L240 72 L280 96 L280 150 Z" fill="#1A3A7E" opacity="0.7"></path>
+        <path d="M104 40 L118 52 L110 52 L100 60 L94 50 Z" fill="#3B5FA8" opacity="0.6"></path>
+        <path d="M0 150 L0 116 L46 92 L84 110 L128 82 L170 104 L214 86 L252 104 L280 96 L280 150 Z" fill="#163370"></path>
+        <path d="M0 150 L0 132 L60 118 L120 130 L190 116 L250 128 L280 122 L280 150 Z" fill="#12306B"></path>
+      </svg>
+      <p style="position: absolute; left: 24px; right: 16px; bottom: 24px; margin: 0; font-size: 16px; line-height: 1.45; font-weight: 500; color: #FFFFFF">Grandir ensemble<br>pour un impact durable</p>
+    </div>
+  </nav>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E3E8F2; flex-wrap: wrap">
+      <a href="RhFileValidation.dc.html" style="display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; font-weight: 600">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m11 6-6 6 6 6"></path></svg>
+        File de validation
+      </a>
+      <div style="display: flex; align-items: center; gap: 20px">
+        <button type="button" aria-label="Notifications : 5 non lues" style="position: relative; width: 44px; height: 44px; border: none; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #17213A">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+          <span style="position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; background: #C2410C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">5</span>
+        </button>
+        <div style="width: 1px; height: 36px; background: #E3E8F2"></div>
+        <button type="button" style="display: flex; align-items: center; gap: 12px; border: none; background: transparent; cursor: pointer; padding: 4px; font-family: inherit; text-align: left">
+          <span style="width: 44px; height: 44px; border-radius: 50%; background: #15803D; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center">ML</span>
+          <span style="display: flex; flex-direction: column">
+            <span style="font-size: 16px; font-weight: 700; color: #17213A">Marie LAFORTUNE</span>
+            <span style="font-size: 14px; color: #4A5672">Agent RH</span>
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <main style="padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 20px; max-width: 1180px; width: 100%; box-sizing: border-box">
+
+      <section style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h1 style="margin: 0; font-size: 30px; font-weight: 800; color: #0F2A63; letter-spacing: -0.5px">Certificat Excel avancé</h1>
+          <p style="margin: 0; font-size: 17px; color: #3A4664">Déposé par Jean JOSEPH le 15 oct. 2026 · pris par vous</p>
+        </div>
+        <span style="display: inline-flex; padding: 6px 14px; border-radius: 999px; background: #E3EBFD; color: #1E3A8A; font-size: 15px; font-weight: 700">Jour 3 sur 5 · décision avant le 22 oct.</span>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+        <section aria-label="Document déposé" style="flex: 999 1 480px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+            <span style="font-size: 15px; color: #4A5672">certificat-excel.jpg · 1,2 Mo</span>
+            <a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; font-weight: 700">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>
+              Ouvrir en grand
+            </a>
+          </div>
+          <div role="img" aria-label="Aperçu du document : certificat de formation Excel avancé, au nom de Jean Joseph, 2025" style="background: #E9ECF3; border-radius: 10px; padding: 28px; display: flex; justify-content: center">
+            <svg width="100%" height="420" viewBox="0 0 520 380" aria-hidden="true" style="max-width: 560px; display: block">
+              <rect x="10" y="10" width="500" height="360" rx="4" fill="#FFFFFF"></rect>
+              <rect x="26" y="26" width="468" height="328" fill="none" stroke="#B8C6E6" stroke-width="3"></rect>
+              <rect x="34" y="34" width="452" height="312" fill="none" stroke="#DCE4F5" stroke-width="1"></rect>
+              <rect x="170" y="62" width="180" height="14" rx="3" fill="#0F2A63"></rect>
+              <rect x="200" y="86" width="120" height="8" rx="3" fill="#93B0EC"></rect>
+              <rect x="120" y="128" width="280" height="22" rx="4" fill="#1D3FA8"></rect>
+              <rect x="150" y="170" width="220" height="9" rx="3" fill="#C7D7F6"></rect>
+              <rect x="180" y="200" width="160" height="16" rx="3" fill="#17213A"></rect>
+              <rect x="130" y="236" width="260" height="8" rx="3" fill="#C7D7F6"></rect>
+              <rect x="160" y="254" width="200" height="8" rx="3" fill="#C7D7F6"></rect>
+              <line x1="80" y1="316" x2="190" y2="316" stroke="#4A5672" stroke-width="1.5"></line>
+              <line x1="330" y1="316" x2="440" y2="316" stroke="#4A5672" stroke-width="1.5"></line>
+              <circle cx="260" cy="306" r="26" fill="none" stroke="#C2410C" stroke-width="3"></circle>
+              <circle cx="260" cy="306" r="18" fill="none" stroke="#C2410C" stroke-width="1.5"></circle>
+            </svg>
+          </div>
+        </section>
+
+        <aside aria-label="Vérification et décision" style="flex: 1 1 380px; min-width: 320px; display: flex; flex-direction: column; gap: 18px">
+
+          <section aria-labelledby="employe" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="width: 48px; height: 48px; border-radius: 50%; background: #0F2A63; color: #FFFFFF; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">JJ</span>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <h2 id="employe" style="margin: 0; font-size: 18px; font-weight: 700">Jean JOSEPH</h2>
+                <span style="font-size: 15px; color: #4A5672">AC-1001 · Agent de crédit · Pétion-Ville</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <span style="padding: 3px 10px; border-radius: 999px; background: #DDF3E6; color: #166534; font-size: 14px; font-weight: 600">Dossier complet</span>
+              <span style="padding: 3px 10px; border-radius: 999px; background: #E9EFFC; color: #0F2A63; font-size: 14px; font-weight: 600">Niveau validé : Licence</span>
+              <span style="padding: 3px 10px; border-radius: 999px; background: #F4F6FB; color: #3A4664; font-size: 14px; font-weight: 600">1 certificat déjà validé</span>
+            </div>
+          </section>
+
+          <section aria-labelledby="declare" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <h2 id="declare" style="margin: 0; font-size: 18px; font-weight: 700; color: #0F2A63">Ce que l’employé a déclaré</h2>
+              <span style="font-size: 15px; color: #4A5672">Comparez avec le document ; corrigez si besoin.</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label for="e-type" style="font-size: 15px; font-weight: 600">Type</label>
+                <select id="e-type" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1px solid #C8D1E3; background: #FFFFFF; font-family: inherit; font-size: 16px"><option>Certificat</option></select>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label for="e-annee" style="font-size: 15px; font-weight: 600">Année</label>
+                <input id="e-annee" value="2025" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #C8D1E3; font-family: inherit; font-size: 16px; box-sizing: border-box">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2">
+                <label for="e-niveau" style="font-size: 15px; font-weight: 600">Niveau</label>
+                <select id="e-niveau" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1px solid #C8D1E3; background: #FFFFFF; font-family: inherit; font-size: 16px"><option>Formation continue / Attestation</option></select>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2">
+                <label for="e-domaine" style="font-size: 15px; font-weight: 600">Domaine</label>
+                <select id="e-domaine" style="min-height: 46px; padding: 0 10px; border-radius: 10px; border: 1px solid #C8D1E3; background: #FFFFFF; font-family: inherit; font-size: 16px"><option>Informatique</option></select>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2">
+                <label for="e-etab" style="font-size: 15px; font-weight: 600">Établissement</label>
+                <input id="e-etab" value="Centre de formation professionnelle de Port-au-Prince" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #C8D1E3; font-family: inherit; font-size: 16px; box-sizing: border-box">
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="decision" style="background: #FFFFFF; border: 2px solid #1D3FA8; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+            <h2 id="decision" style="margin: 0; font-size: 18px; font-weight: 700; color: #0F2A63">Votre décision</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button type="button" style="flex: 1 1 140px; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; border-radius: 10px; border: none; background: #15803D; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
+                Valider
+              </button>
+              <button type="button" style="flex: 1 1 140px; min-height: 50px; border-radius: 10px; border: 1.5px solid #C2410C; background: #FFFFFF; color: #9A3412; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Rejeter…</button>
+            </div>
+            <span style="font-size: 15px; color: #4A5672; line-height: 1.45">L’employé est prévenu dans le portail. Un rejet demande un motif, choisi dans la liste.</span>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

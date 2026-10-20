@@ -41,6 +41,8 @@ class ToProcessCountsOut(BaseModel):
     overdue_certificates: int
     error_reports: int
     to_attach: int
+    applications_in_progress: int
+    openings_with_applications: int
 
 
 class UnitBreakdownItemOut(BaseModel):
@@ -199,11 +201,13 @@ class QualifiedEmployeeItemOut(BaseModel):
     updated_at: datetime | None
     photo_url: str | None = None
     """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
+    hire_year: int | None = None
 
 
 class QualifiedEmployeesSearchResultOut(BaseModel):
     items: list[QualifiedEmployeeItemOut]
     total: int
+    total_all: int
     page: int
     page_size: int
     page_count: int
@@ -237,6 +241,7 @@ def search_qualified_employees(
     return QualifiedEmployeesSearchResultOut(
         items=[QualifiedEmployeeItemOut(**item.__dict__) for item in result.items[start : start + page_size]],
         total=result.total,
+        total_all=result.total_all,
         page=min(page, page_count),
         page_size=page_size,
         page_count=page_count,
@@ -355,6 +360,7 @@ class EngagementOut(BaseModel):
     employees_30_days: int
     active_employees: int
     feedback: list[RatingCountOut]
+    weekly_employees: list[int]
 
 
 @router.get("/engagement", response_model=EngagementOut)
@@ -365,6 +371,7 @@ def engagement(request: Request) -> EngagementOut:
         employees_30_days=result.employees_30_days,
         active_employees=result.active_employees,
         feedback=[RatingCountOut(**item.__dict__) for item in result.feedback],
+        weekly_employees=list(result.weekly_employees),
     )
 
 

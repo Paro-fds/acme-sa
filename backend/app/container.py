@@ -339,7 +339,9 @@ class Container:
         return GetStatistics(self.employees, self.updates)
 
     def get_pilot_dashboard(self) -> GetPilotDashboard:
-        return GetPilotDashboard(self.employees, self.dossiers, self.certificates, self.referential, self.clock)
+        return GetPilotDashboard(
+            self.employees, self.dossiers, self.certificates, self.referential, self.clock, self.openings, self.applications
+        )
 
     def get_notifications(self) -> GetNotifications:
         return GetNotifications(
@@ -513,7 +515,7 @@ class Container:
         return self.openings, self.referential, self.audit_logs, self.clock, self.job_profiles
 
     def list_openings(self) -> ListOpenings:
-        return ListOpenings(*self._opening_ports())
+        return ListOpenings(*self._opening_ports(), applications=self.applications)
 
     def get_opening(self) -> GetOpening:
         return GetOpening(*self._opening_ports())

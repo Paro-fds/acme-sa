@@ -30,10 +30,11 @@ test('connexion admin : refus, accès, déconnexion, routes protégées', async 
   await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
   await page.getByRole('button', { name: 'Continuer' }).click()
   await expect(page).toHaveURL(/\/admin$/)
-  await expect(page.getByRole('heading', { name: 'Suivi de la campagne' })).toBeVisible()
-  await page.getByRole('link', { name: 'Voir la liste des employés' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible()
+  // US-132 : la tuile « Dossiers complets » mène à la liste des employés.
+  await page.getByRole('link', { name: /Dossiers complets/ }).click()
   await expect(page).toHaveURL(/\/admin\/employes$/)
-  await expect(page.getByText(/^\d+ employés/)).toBeVisible()
+  await expect(page.getByText(/^\d+ employés sur \d+$/)).toBeVisible()
 
   // CA-06 : déconnexion
   await page.getByRole('button', { name: 'Menu du compte' }).click()

@@ -5,6 +5,7 @@ import { getMyCareer } from '../../api/career.js'
 import { getCertificateForm, listCertificates } from '../../api/certificates.js'
 import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
+import { getMyNotifications } from '../../api/notifications.js'
 import { listMyApplications, listMyOpenings } from '../../api/openings.js'
 import { setDesktop } from '../../lib/testViewport.js'
 import EmployeeHomePage from './EmployeeHomePage.jsx'
@@ -53,6 +54,7 @@ const OPENINGS = {
       opens_on: '2026-10-01',
       closes_on: '2026-11-15',
       criteria_lines: ['Licence au moins', 'Finance', "2 ans dans l'institution"],
+      mission: "Seconder le chef d'agence dans l'animation de l'équipe et le suivi du portefeuille de crédit de l'agence.",
     },
     {
       id: 2,
@@ -61,6 +63,7 @@ const OPENINGS = {
       opens_on: '2026-10-01',
       closes_on: '2026-11-30',
       criteria_lines: [],
+      mission: 'Analyser les demandes de crédit importantes.',
     },
   ],
 }
@@ -116,6 +119,7 @@ beforeEach(() => {
     ],
   })
   getMyCareer.mockResolvedValue({ kinds: [{ kind: 'EXPERIENCE', count: 3 }, { kind: 'TRAINING', count: 2 }] })
+  getMyNotifications.mockResolvedValue({ items: [], unread_count: 0, has_more: false })
 })
 
 afterEach(() => {
@@ -123,16 +127,20 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-describe('US-123 CA-01 — un en-tête sobre', () => {
-  it('date du jour, bonjour, un fait réel, poste et agence, et l’action principale', async () => {
+describe('US-128 CA-01 — en-tête de la refonte', () => {
+  it('bonjour, la phrase de bienvenue, l’action principale et le bandeau illustré ; ni date, ni poste, ni emoji', async () => {
     renderPage()
     expect(await screen.findByRole('heading', { name: 'Bonjour Jean' })).toBeVisible()
-    expect(screen.getByText('Mardi 13 octobre 2026')).toBeVisible()
-    expect(screen.getByText('2 postes correspondent déjà à votre profil.')).toBeVisible()
-    expect(screen.getByText('Agent de crédit · Agence Démo Nord')).toBeVisible()
+    expect(
+      screen.getByText(
+        'Bienvenue sur votre espace carrière. Ici, vous pouvez suivre vos dossiers, consulter les opportunités et gérer vos documents.',
+      ),
+    ).toBeVisible()
     expect(screen.getByRole('link', { name: /Déposer un certificat/ })).toHaveAttribute('href', '/certificats/deposer')
-    expect(screen.queryByText(/Bienvenue sur votre espace/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Penseuse/)).not.toBeInTheDocument()
+    expect(screen.getByText('Votre engagement d’aujourd’hui construit votre avenir chez ACME SA.')).toBeVisible()
+    expect(screen.queryByText('Mardi 13 octobre 2026')).not.toBeInTheDocument()
+    expect(screen.queryByText('Agent de crédit · Agence Démo Nord')).not.toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/\p{Extended_Pictographic}/u)
   })
 })
 
@@ -172,28 +180,64 @@ describe('US-123 CA-02 — quatre tuiles chiffrées', () => {
   })
 })
 
-describe('US-123 CA-03 — les postes ouverts pour moi', () => {
-  it('sur téléphone, une carte par poste : critères et temps restant', async () => {
+describe('US-128 CA-03 — le poste ouvert pour vous', () => {
+  it('met en avant le poste dont la date limite est la plus proche, avec ses critères et sa mission', async () => {
     renderPage()
-    const list = await screen.findByRole('list', { name: 'Postes ouverts pour vous' })
-    const [chef, analyste] = within(list).getAllByRole('listitem')
-    expect(chef).toHaveTextContent("Chef d'agence adjoint")
-    expect(chef).toHaveTextContent('Agence Démo Sud')
-    expect(chef).toHaveTextContent('3 critères sur 3')
-    expect(chef).toHaveTextContent('33 jours')
-    expect(analyste).toHaveTextContent('Ouvert à tous')
-    expect(analyste).toHaveTextContent('48 jours')
-    expect(analyste).not.toHaveTextContent(/grade/i)
+    const panel = await screen.findByRole('region', { name: 'Poste ouvert pour vous' })
+    expect(panel).toHaveTextContent("Chef d'agence adjoint")
+    expect(panel).toHaveTextContent('Vous remplissez les 3 critères')
+    expect(panel).toHaveTextContent('Agence Démo Sud')
+    expect(panel).toHaveTextContent('15 nov.')
+    expect(panel).toHaveTextContent('reste 33 jours')
+    expect(panel).toHaveTextContent("Seconder le chef d'agence")
+    expect(panel).not.toHaveTextContent('Analyste crédit senior')
+    expect(within(panel).getByRole('link', { name: /Voir le poste et postuler/ })).toHaveAttribute('href', '/carriere#poste-1')  // US-131 CA-04
+    expect(within(panel).getByRole('link', { name: 'Voir les 2 postes' })).toHaveAttribute('href', '/carriere#postes-ouverts')
+    expect(panel).not.toHaveTextContent(/grade/i)
   })
 
-  it('sur ordinateur, un tableau avec « Voir et postuler »', async () => {
-    setDesktop(true)
+  it('un poste ouvert à tous, sans lien vers les autres', async () => {
+    listMyOpenings.mockResolvedValue({ items: [OPENINGS.items[1]] })
     renderPage()
-    const table = await screen.findByRole('table', { name: 'Postes ouverts pour vous' })
-    const rows = within(table).getAllByRole('row')
-    expect(rows).toHaveLength(3)
-    expect(rows[1]).toHaveTextContent('15 nov.')
-    expect(within(rows[1]).getByRole('link', { name: /Voir et postuler/ })).toHaveAttribute('href', '/carriere#postes-ouverts')
+    const panel = await screen.findByRole('region', { name: 'Poste ouvert pour vous' })
+    expect(panel).toHaveTextContent('Ouvert à tous')
+    expect(within(panel).queryByRole('link', { name: /Voir les/ })).not.toBeInTheDocument()
+  })
+
+  it('aucun poste : une phrase le dit', async () => {
+    listMyOpenings.mockResolvedValue({ items: [] })
+    renderPage()
+    expect(await screen.findByText(/Aucun poste ouvert pour vous en ce moment/)).toBeVisible()
+  })
+})
+
+describe('US-128 CA-04 — activité récente', () => {
+  it('les 3 dernières notifications, avec leur pastille et leur date, et le lien vers toutes', async () => {
+    getMyNotifications.mockResolvedValue({
+      items: [
+        { key: 'certificate:a:VALIDATED', kind: 'CERTIFICATE_VALIDATED', kind_label: 'Certificat', title: 'Certificat validé', detail: 'Licence en comptabilité', at: '2026-10-12T09:00:00Z', link: '/certificats', unread: true },
+        { key: 'opening:1', kind: 'OPENING', kind_label: 'Poste', title: 'Nouveau poste ouvert pour vous', detail: "Chef d'agence adjoint", at: '2026-10-10T09:00:00Z', link: '/carriere#postes-ouverts', unread: false },
+        { key: 'certificate:c:TO_CORRECT', kind: 'CERTIFICATE_TO_CORRECT', kind_label: 'Certificat', title: 'Certificat à corriger', detail: 'Attestation : photo floue', at: '2026-10-08T09:00:00Z', link: '/certificats', unread: false },
+      ],
+      unread_count: 1,
+      has_more: true,
+    })
+    renderPage()
+    const activity = await screen.findByRole('region', { name: 'Activité récente' })
+    const items = await within(activity).findAllByRole('listitem')
+    expect(items.map((item) => item.textContent)).toEqual([
+      expect.stringMatching(/Certificat validé.*Licence en comptabilité.*Validé.*12 oct\. 2026/),
+      expect.stringMatching(/Nouveau poste ouvert pour vous.*Chef d'agence adjoint.*Poste.*10 oct\. 2026/),
+      expect.stringMatching(/Certificat à corriger.*Attestation : photo floue.*À corriger.*8 oct\. 2026/),
+    ])
+    expect(within(activity).getByRole('link', { name: /Toutes mes notifications/ })).toHaveAttribute('href', '/notifications')
+    expect(getMyNotifications).toHaveBeenCalledWith({ limit: 3 })
+  })
+
+  it('sans notification, une phrase le dit', async () => {
+    renderPage()
+    const activity = await screen.findByRole('region', { name: 'Activité récente' })
+    expect(await within(activity).findByText('Rien de nouveau pour le moment.')).toBeVisible()
   })
 })
 
@@ -210,24 +254,24 @@ describe('US-123 CA-04 — à ne pas manquer', () => {
   })
 })
 
-describe('US-123 CA-05 — diplômes et parcours en chiffres', () => {
-  it('invite à ajouter un diplôme et donne le parcours en chiffres, sans grade', async () => {
+describe('US-128 CA-05 — ce qui quitte l’accueil', () => {
+  it('ni « Nouveau pour vous », ni « Vos diplômes travaillent pour vous », ni « Mon parcours en chiffres »', async () => {
+    getMyNotifications.mockResolvedValue({
+      items: [{ key: 'opening:1', kind: 'OPENING', kind_label: 'Poste', title: 'Nouveau poste ouvert pour vous', detail: "Chef d'agence adjoint", at: '2026-10-10T09:00:00Z', link: '/carriere#postes-ouverts', unread: true }],
+      unread_count: 1,
+      has_more: false,
+    })
     renderPage()
-    const diplomas = await screen.findByRole('region', { name: 'Vos diplômes travaillent pour vous' })
-    expect(within(diplomas).getByRole('link', { name: /Ajouter un diplôme/ })).toHaveAttribute('href', '/certificats/deposer')
-    const figures = screen.getByRole('region', { name: 'Mon parcours en chiffres' })
-    expect(figures).toHaveTextContent('8 ans')
-    expect(figures).toHaveTextContent('chez ACME SA')
-    expect(figures).toHaveTextContent('Licence')
-    expect(figures).toHaveTextContent('plus haut diplôme validé')
-    expect(figures).toHaveTextContent('5')
-    expect(figures).not.toHaveTextContent(/grade/i)
-    expect(within(figures).getByRole('link', { name: /Voir la frise/ })).toHaveAttribute('href', '/carriere')
+    await screen.findByRole('region', { name: 'Activité récente' })
+    expect(screen.queryByRole('region', { name: 'Nouveau pour vous' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Vos diplômes travaillent pour vous' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Mon parcours en chiffres' })).not.toBeInTheDocument()
+    expect(getMyCareer).not.toHaveBeenCalled()
   })
 })
 
 describe('US-123 — premiers pas', () => {
-  it('sans certificat ni parcours : pas de « 0 sur 0 », pas de chiffre vide, et l’année d’une date lointaine', async () => {
+  it('sans certificat : pas de « 0 sur 0 », et l’année d’une date lointaine', async () => {
     listCertificates.mockResolvedValue({ certificates: [], limit: 10 })
     getMyCareer.mockResolvedValue({ kinds: [{ kind: 'EXPERIENCE', count: 0 }] })
     listMyOpenings.mockResolvedValue({ items: [] })
@@ -238,7 +282,6 @@ describe('US-123 — premiers pas', () => {
     renderPage()
     const tiles = await screen.findByRole('region', { name: 'Vos chiffres' })
     expect(within(tiles).getByRole('link', { name: /Mes certificats/ })).toHaveTextContent('0 certificat déposé')
-    expect(screen.getByRole('region', { name: 'Mon parcours en chiffres' })).not.toHaveTextContent(/élément/)
     expect(within(screen.getByRole('list', { name: 'À ne pas manquer' })).getByRole('listitem')).toHaveTextContent('2027')
   })
 })
@@ -247,8 +290,7 @@ describe('US-123 CA-06 — dossier incomplet', () => {
   it('le dossier passe en premier ; certificats et postes se débloquent après', async () => {
     getProfile.mockResolvedValue(profile(['emergency_contact', 'education_level', 'position_confirmed']))
     renderPage()
-    expect(await screen.findByText('Plus que 3 informations, et vos diplômes pourront vous ouvrir de nouveaux postes.')).toBeVisible()
-    const tiles = screen.getByRole('region', { name: 'Vos chiffres' })
+    const tiles = await screen.findByRole('region', { name: 'Vos chiffres' })
     const links = within(tiles).getAllByRole('link')
     expect(links[0]).toHaveAccessibleName(/Mon dossier/)
     expect(links[0]).toHaveTextContent('5 sur 8')

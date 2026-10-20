@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { getCertificateForm } from '../../api/certificates.js'
+import { Link, useNavigate, useSearchParams } from 'react-router'
+import { getCertificateForm, listCertificates } from '../../api/certificates.js'
 import { getProfile } from '../../api/employee.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
@@ -10,12 +10,15 @@ import TextField from '../../components/TextField.jsx'
 import { formatSize } from '../../lib/format.js'
 import { resizeImage } from '../../lib/resizeImage.js'
 import { useLoader } from '../../lib/useLoader.js'
+import { hrMessage } from './certificatesParts.jsx'
 import { CERTIFICATES_PATH } from './paths.js'
 import { useDeposit } from './useDeposit.js'
 
-async function load() {
-  const [form, profile] = await Promise.all([getCertificateForm(), getProfile()])
-  return { form, firstName: profile.first_name }
+/** US-130 CA-06 : seul un certificat « À corriger » non archivé se renvoie ; sinon `refused`. */
+async function load(replaceId) {
+  const [form, profile, mine] = await Promise.all([getCertificateForm(), getProfile(), replaceId ? listCertificates() : null])
+  const replacing = mine?.certificates.find((c) => c.id === replaceId && c.status === 'TO_CORRECT' && !c.is_archived) ?? null
+  return { form, firstName: profile.first_name, replacing, refused: Boolean(replaceId) && !replacing }
 }
 
 const ACCEPT = 'application/pdf,image/jpeg,image/png'
@@ -29,6 +32,40 @@ const EMPTY = {
   country: '',
   domain: '',
   domain_other: '',
+}
+
+/** US-130 CA-06 : le formulaire repart des informations du certificat à corriger ; seul le fichier est à choisir de nouveau. */
+function initialValues(certificate) {
+  if (!certificate) return EMPTY
+  return {
+    certificate_type: certificate.certificate_type,
+    level: certificate.level,
+    title: certificate.title,
+    institution: certificate.institution,
+    year: String(certificate.year),
+    foreign: Boolean(certificate.country),
+    country: certificate.country ?? '',
+    domain: certificate.domain ?? '',
+    domain_other: certificate.domain === 'AUTRE' ? (certificate.domain_label ?? '') : '',
+  }
+}
+
+/** US-130 CA-06 : ce que les RH ont demandé de corriger, rappelé en haut du formulaire. */
+function CorrectionReminder({ certificate }) {
+  const titleId = useId()
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-2 rounded-xl bg-error-bg p-4 text-error-text">
+      <h3 id={titleId} className="text-lg font-semibold">
+        Vous corrigez « {certificate.title} »
+      </h3>
+      {hrMessage(certificate) && (
+        <p className="leading-relaxed">
+          <strong>Message des RH :</strong> {hrMessage(certificate)}
+        </p>
+      )}
+      <p className="text-sm">Choisissez un nouveau fichier et corrigez ce qui doit l’être. L’ancien reste conservé comme preuve.</p>
+    </section>
+  )
 }
 
 function Select({ label, value, onChange, options, error, aside }) {
@@ -179,17 +216,17 @@ function FilePicker({ file, onFile, maxMb, error, progress }) {
   )
 }
 
-function DepositForm({ form, firstName, depositing }) {
+function DepositForm({ form, firstName, replacing, depositing }) {
   const navigate = useNavigate()
   const { deposit, progress, error, fieldError } = depositing
   const [file, setFile] = useState(null)
-  const [values, setValues] = useState(EMPTY)
+  const [values, setValues] = useState(() => initialValues(replacing))
   const set = (name) => (event) => setValues((current) => ({ ...current, [name]: event.target.value }))
   const level = form.levels.find((item) => item.value === values.level)
 
   async function handleSubmit(event) {
     event.preventDefault()
-    const certificate = await deposit(file, values)
+    const certificate = await deposit(file, values, replacing?.id ?? null)
     if (certificate) {
       navigate(`${CERTIFICATES_PATH}/merci`, { state: { certificate, fileName: file.name, fileSize: file.size, firstName } })
     }
@@ -197,7 +234,11 @@ function DepositForm({ form, firstName, depositing }) {
 
   return (
     <form id="deposit" onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
-      <Tip>Bravo ! Votre profil est complet : déposez votre certificat pour le faire valider par les RH sous 5 jours ouvrables.</Tip>
+      {replacing ? (
+        <CorrectionReminder certificate={replacing} />
+      ) : (
+        <Tip>Bravo ! Votre profil est complet : déposez votre certificat pour le faire valider par les RH sous 5 jours ouvrables.</Tip>
+      )}
       <FilePicker file={file} onFile={setFile} maxMb={form.max_mb} error={fieldError('file')} progress={progress} />
 
       <section aria-labelledby="fields-title" className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
@@ -259,23 +300,41 @@ function DepositForm({ form, firstName, depositing }) {
   )
 }
 
-/** US-301, écran « Déposer un certificat » (prototype). */
+/** US-301, écran « Déposer un certificat » (prototype) ; US-130 : « Corriger un certificat » avec `?remplace=<id>`. */
 export default function DepositPage() {
-  const { data, error, loading } = useLoader(load)
+  const [params] = useSearchParams()
+  const replaceId = params.get('remplace')
+  const { data, error, loading } = useLoader(() => load(replaceId))
   const depositing = useDeposit()
   const page = (children, actions) => (
-    <Page account title="Déposer un certificat" backTo={CERTIFICATES_PATH} backLabel="Mes certificats" actions={actions}>
+    <Page
+      account
+      title={replaceId ? 'Corriger un certificat' : 'Déposer un certificat'}
+      backTo={CERTIFICATES_PATH}
+      backLabel="Mes certificats"
+      actions={actions}
+    >
       {children}
     </Page>
   )
 
   if (loading) return page(<p role="status">Chargement…</p>)
   if (error) return page(<Alert>{error.message}</Alert>)
+  if (data.refused) {
+    return page(
+      <>
+        <Alert>Ce certificat ne peut plus être renvoyé : il a déjà été corrigé ou décidé.</Alert>
+        <Link to={CERTIFICATES_PATH} className="flex min-h-11 w-fit items-center font-semibold text-primary hover:underline">
+          Retour à mes certificats
+        </Link>
+      </>,
+    )
+  }
   return page(
-    <DepositForm form={data.form} firstName={data.firstName} depositing={depositing} />,
+    <DepositForm form={data.form} firstName={data.firstName} replacing={data.replacing} depositing={depositing} />,
     <Button type="submit" form="deposit" disabled={depositing.sending}>
       <span className="material-symbols-outlined" aria-hidden="true">send</span>
-      {depositing.sending ? 'Envoi en cours…' : 'Envoyer mon certificat'}
+      {depositing.sending ? 'Envoi en cours…' : data.replacing ? 'Renvoyer mon certificat' : 'Envoyer mon certificat'}
     </Button>,
   )
 }

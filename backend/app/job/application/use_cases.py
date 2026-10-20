@@ -7,7 +7,7 @@ inscrite au journal d'audit (US-604).
 
 import re
 import secrets
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime
 from typing import Protocol
 
@@ -117,6 +117,10 @@ class OpeningView:
     profile_code: str | None = None
     profile_title: str | None = None
     letter: LetterView | None = None
+    application_count: int = 0
+    """US-135 : candidatures reçues (liste des postes seulement)."""
+    created_by_me: bool = False
+    """US-135 : « saisi par vous » (liste des postes seulement)."""
 
 
 def _unit_labels(referential: ReferentialRepository) -> dict[str, str]:
@@ -223,9 +227,20 @@ class GetOpeningForm:
 
 
 class ListOpenings(_OpeningCase):
-    def execute(self) -> list[OpeningView]:
+    """US-135 : chaque poste avec ses candidatures reçues et « saisi par vous » pour le compte qui regarde."""
+
+    def __init__(self, *ports, applications: ApplicationRepository | None = None) -> None:
+        super().__init__(*ports)
+        self._applications = applications
+
+    def execute(self, viewer_id: str | None = None) -> list[OpeningView]:
         units = _unit_labels(self._referential)
-        return [self._view(opening, units) for opening in self._openings.list_all()]
+        views = []
+        for opening in self._openings.list_all():
+            count = len(self._applications.for_opening(opening.id)) if self._applications else 0
+            created_by_me = bool(viewer_id and opening.history and opening.history[0].actor.id == viewer_id)
+            views.append(replace(self._view(opening, units), application_count=count, created_by_me=created_by_me))
+        return views
 
 
 class GetOpening(_OpeningCase):

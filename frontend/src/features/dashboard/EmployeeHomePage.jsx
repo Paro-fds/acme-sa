@@ -1,19 +1,17 @@
 import { useEffect, useId } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { getMyCareer } from '../../api/career.js'
-import { getCertificateForm, listCertificates } from '../../api/certificates.js'
+import { listCertificates } from '../../api/certificates.js'
 import { getDossier, getFreshness } from '../../api/dossier.js'
 import { getProfile } from '../../api/employee.js'
+import { getMyNotifications } from '../../api/notifications.js'
 import { listMyApplications, listMyOpenings } from '../../api/openings.js'
 import Alert from '../../components/Alert.jsx'
 import Page from '../../components/Page.jsx'
 import { useIsDesktop } from '../../lib/useIsDesktop.js'
 import { useLoader } from '../../lib/useLoader.js'
 import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
-import { DEPOSIT_PATH } from '../certificates/paths.js'
 import { CONSENT_PATH } from '../dossier/paths.js'
-import NewForYouCard from '../notifications/NewForYouCard.jsx'
-import { CareerFigures, DatesPanel, DiplomasCard, OpeningsPanel, Tiles, todayText, yearsSince } from './homeParts.jsx'
+import { DatesPanel, FeaturedOpening, Hero, RecentActivity, Tiles } from './homeParts.jsx'
 import StillAccurateCard from './StillAccurateCard.jsx'
 
 export const HOME_PATH = '/accueil'
@@ -43,27 +41,22 @@ const REMAINING = {
 /** Une donnée indisponible (hors connexion, service en panne) laisse sa partie vide sans bloquer l'accueil. */
 const optional = (promise) => promise.catch(() => null)
 
-/** US-123 : le profil d'abord ; les postes, certificats, candidatures et le parcours seulement si le dossier est complet. */
+/** US-123 : le profil et (US-128) l'activité récente d'abord ; les postes, certificats et candidatures si le dossier est complet. */
 async function load() {
-  const [profile, dossier, freshness] = await Promise.all([getProfile(), getDossier(), getFreshness()])
-  const base = { profile, freshness, consentGiven: Boolean(dossier.consent.information_notice_at) }
+  const [profile, dossier, freshness, notifications] = await Promise.all([
+    getProfile(),
+    getDossier(),
+    getFreshness(),
+    optional(getMyNotifications({ limit: 3 })),
+  ])
+  const base = { profile, freshness, notifications, consentGiven: Boolean(dossier.consent.information_notice_at) }
   if (!profile.completion.is_complete) return base
-  const [openings, certificates, applications, career, form] = await Promise.all([
+  const [openings, certificates, applications] = await Promise.all([
     optional(listMyOpenings()),
     optional(listCertificates()),
     optional(listMyApplications()),
-    optional(getMyCareer()),
-    optional(getCertificateForm()),
   ])
-  return { ...base, openings, certificates, applications, career, form }
-}
-
-/** Plus haut diplôme validé, dans l'ordre de l'échelle des niveaux. */
-function highestDiploma(certificates, form) {
-  const order = (form?.levels ?? []).map((level) => level.value)
-  const validated = (certificates?.certificates ?? []).filter((c) => c.status === 'VALIDATED')
-  if (validated.length === 0) return null
-  return validated.reduce((best, c) => (order.indexOf(c.level) > order.indexOf(best.level) ? c : best)).level_label
+  return { ...base, openings, certificates, applications }
 }
 
 /** La candidature en cours la plus récente (une candidature clôturée ne compte plus). */
@@ -120,8 +113,8 @@ function Remaining({ elements }) {
 
 /**
  * US-207 CA-01 : l'accueil de l'employé après la connexion ; à la première connexion, « Avant de commencer » d'abord.
- * US-123 : tableau de bord (maquette validée le 2026-10-15) : en-tête sobre, tuiles chiffrées, postes ouverts,
- * dates à retenir, diplômes, parcours en chiffres ; sur ordinateur, les dates et les diplômes à droite.
+ * US-123 : tableau de bord (tuiles chiffrées, dates à retenir). US-128 (refonte du 2026-10-19) : en-tête avec la phrase
+ * de bienvenue et le bandeau illustré, poste mis en avant, activité récente ; sur ordinateur, les dates à droite.
  */
 export default function EmployeeHomePage() {
   const navigate = useNavigate()
@@ -135,7 +128,7 @@ export default function EmployeeHomePage() {
   }, [needsConsent, navigate])
 
   const page = (children, aside) => (
-    <Page account title="Accueil" aside={aside} asideLabel="Dates et diplômes">
+    <Page account title="Accueil" aside={aside} asideLabel="Dates à retenir">
       {children}
     </Page>
   )
@@ -148,44 +141,10 @@ export default function EmployeeHomePage() {
   const complete = completion.is_complete
   const missing = completion.elements.filter((element) => !element.complete)
   const openings = data.openings?.items ?? []
-  const n = missing.length
-  const lead = !complete
-    ? `Plus que ${n} information${n > 1 ? 's' : ''}, et vos diplômes pourront vous ouvrir de nouveaux postes.`
-    : openings.length > 1
-      ? `${openings.length} postes correspondent déjà à votre profil.`
-      : openings.length === 1
-        ? 'Un poste correspond déjà à votre profil.'
-        : 'Votre dossier est complet : chaque diplôme validé peut vous ouvrir de nouveaux postes.'
-
-  const side = complete && (
-    <>
-      <DatesPanel openings={openings} freshness={freshness} today={today} />
-      <DiplomasCard />
-    </>
-  )
+  const side = complete && <DatesPanel openings={openings} freshness={freshness} today={today} />
   return page(
     <>
-      <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-base text-help">{todayText(today)}</p>
-          <h2 className="text-[26px] leading-[34px] font-bold tracking-tight text-balance text-primary-active lg:text-[30px] lg:leading-[38px]">
-            Bonjour {profile.first_name}
-          </h2>
-          <p className="text-base text-body">{lead}</p>
-          <p className="text-base text-help">{[profile.position, profile.affectation.agency].filter(Boolean).join(' · ')}</p>
-        </div>
-        {complete && (
-          <Link
-            to={DEPOSIT_PATH}
-            className="flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">upload_file</span>
-            Déposer un certificat
-          </Link>
-        )}
-      </section>
-
-      <NewForYouCard />
+      <Hero firstName={profile.first_name} canDeposit={complete} />
       <StillAccurateCard freshness={freshness} />
       <Tiles
         completion={completion}
@@ -195,15 +154,9 @@ export default function EmployeeHomePage() {
         application={currentApplication(data.applications)}
       />
       {!complete && <Remaining elements={missing} />}
-      {complete && <OpeningsPanel openings={openings} today={today} />}
+      {complete && <FeaturedOpening openings={openings} today={today} />}
       {complete && !desktop && side}
-      {complete && (
-        <CareerFigures
-          years={yearsSince(profile.hire_date, today)}
-          highestDiploma={highestDiploma(data.certificates, data.form)}
-          entries={data.career ? data.career.kinds.reduce((sum, kind) => sum + kind.count, 0) : null}
-        />
-      )}
+      <RecentActivity notifications={data.notifications} />
     </>,
     desktop && complete ? side : undefined,
   )

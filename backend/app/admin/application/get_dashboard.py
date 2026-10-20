@@ -8,6 +8,7 @@ from app.dossier.application.use_cases import IsProfileComplete
 from app.dossier.domain.hr_information import ReportStatus
 from app.dossier.domain.ports import DossierRepository
 from app.employee.domain.repository import EmployeeRepository
+from app.job.domain.ports import ApplicationRepository, OpeningRepository
 from app.referential.domain.ports import ReferentialRepository
 from app.shared.domain.clock import Clock
 
@@ -38,6 +39,9 @@ class ToProcessCounts:
     overdue_certificates: int
     error_reports: int
     to_attach: int
+    applications_in_progress: int = 0
+    """US-132 CA-04 : candidatures pas encore clôturées, et le nombre de postes qu'elles concernent."""
+    openings_with_applications: int = 0
 
 
 @dataclass(frozen=True)
@@ -72,13 +76,28 @@ class GetPilotDashboard:
         certificates: CertificateRepository,
         referentials: ReferentialRepository,
         clock: Clock,
+        openings: OpeningRepository | None = None,
+        applications: ApplicationRepository | None = None,
     ) -> None:
+        self._openings = openings
+        self._applications = applications
         self._employees = employees
         self._dossiers = dossiers
         self._certificates = certificates
         self._referentials = referentials
         self._clock = clock
         self._is_profile_complete = IsProfileComplete(dossiers)
+
+    def _applications_in_progress(self) -> dict[int, int]:
+        """Poste → nombre de candidatures pas encore clôturées (seuls les postes qui en ont)."""
+        if self._openings is None or self._applications is None:
+            return {}
+        counts = {}
+        for opening in self._openings.list_all():
+            count = sum(1 for application in self._applications.for_opening(opening.id) if not application.closed)
+            if count:
+                counts[opening.id] = count
+        return counts
 
     def execute(self) -> DashboardView:
         now = self._clock.now()
@@ -151,10 +170,13 @@ class GetPilotDashboard:
         mappings = self._referentials.mappings()
         to_attach_count = sum(1 for m in mappings if not m.unit_code)
 
+        in_progress = self._applications_in_progress()
         to_process = ToProcessCounts(
             overdue_certificates=len(overdue_certs),
             error_reports=pending_reports,
             to_attach=to_attach_count,
+            applications_in_progress=sum(in_progress.values()),
+            openings_with_applications=len(in_progress),
         )
 
         # 4. Décomposition par agence, région et direction

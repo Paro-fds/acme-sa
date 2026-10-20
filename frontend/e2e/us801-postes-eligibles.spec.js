@@ -38,6 +38,8 @@ test('postes ouverts : seul l’employé apte voit le poste publié', async ({ p
   await employeePage.getByRole('navigation', { name: 'Navigation principale' }).getByRole('link', { name: 'Ma carrière' }).click()
   const list = employeePage.getByRole('list', { name: 'Postes ouverts pour vous' })
   await expect(list.getByRole('heading', { name: TITLE })).toBeVisible()
+  // US-131 : la carte se déplie pour montrer les critères.
+  await list.getByRole('article', { name: TITLE }).getByRole('button', { name: 'Voir le poste et postuler' }).click()
   await expect(list).toContainText("Ancienneté dans l'institution : 15 ans au moins")
   expect(await employeePage.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await employeePage.screenshot({ path: `${CAPTURES}/us801-carriere-390.png`, fullPage: true })
@@ -50,7 +52,7 @@ test('postes ouverts : seul l’employé apte voit le poste publié', async ({ p
   const otherPage = await other.newPage()
   await signIn(otherPage, EMP_B)
   await otherPage.goto('/carriere')
-  await expect(otherPage.getByRole('heading', { name: 'Postes ouverts pour vous' })).toBeVisible()
+  await expect(otherPage.getByRole('heading', { name: /^Postes ouverts pour vous · \d+$/ })).toBeVisible()
   await expect(otherPage.getByRole('heading', { name: TITLE })).toHaveCount(0)
   await other.close()
 })

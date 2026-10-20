@@ -12,7 +12,7 @@ function BellIcon({ count }) {
       <span className="material-symbols-outlined text-[26px]" aria-hidden="true">notifications</span>
       {count > 0 && (
         <span
-          className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-primary bg-error-dot px-1 text-xs font-bold text-white tabular-nums"
+          className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-surface bg-error-dot px-1 text-xs font-bold text-white tabular-nums"
           aria-hidden="true"
         >
           {count > 99 ? '99+' : count}
@@ -22,10 +22,10 @@ function BellIcon({ count }) {
   )
 }
 
-const BELL = 'relative flex size-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-surface/10'
+const BELL = 'relative flex size-11 shrink-0 items-center justify-center rounded-full text-heading hover:bg-canvas'
 
 /**
- * US-116 CA-01 : cloche de l'en-tête et nombre de non lues. Sur ordinateur, elle ouvre la liste des dernières
+ * US-116 CA-01 : cloche de la barre du haut (blanche depuis US-127) et nombre de non lues. Sur ordinateur, elle ouvre la liste des dernières
  * notifications ; sur téléphone, elle mène à la page Notifications.
  */
 export default function NotificationBell() {
@@ -67,7 +67,7 @@ export default function NotificationBell() {
           if (!open) reload()
           setOpen(!open)
         }}
-        className={`${BELL} ${open ? 'bg-surface/15' : ''}`}
+        className={`${BELL} ${open ? 'bg-info-bg' : ''}`}
       >
         <BellIcon count={count} />
       </button>

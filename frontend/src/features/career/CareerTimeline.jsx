@@ -16,14 +16,6 @@ async function load() {
   return buildTimeline({ profile, career, certificates })
 }
 
-/** Icône et couleurs de chaque type d'élément. */
-const GROUPS = {
-  ACME: { label: 'Chez ACME', icon: 'apartment', dot: 'bg-info-bg text-info-text', text: 'text-info-text' },
-  QUALIFICATION: { label: 'Diplôme', icon: 'school', dot: 'bg-status-done-bg text-status-done-text', text: 'text-status-done-text' },
-  TRAINING: { label: 'Formation', icon: 'model_training', dot: 'bg-accent-bg text-accent-text', text: 'text-accent-text' },
-  EXPERIENCE: { label: 'Expérience', icon: 'work_history', dot: 'bg-status-progress-bg text-status-progress-text', text: 'text-status-progress-text' },
-}
-
 /** D'où vient l'élément : l'employé sait ce qu'il peut corriger, et où. */
 const SOURCES = {
   HR: { label: 'Système RH', icon: 'lock', classes: 'bg-status-neutral-bg text-status-neutral-text' },
@@ -32,18 +24,30 @@ const SOURCES = {
   DECLARED: { label: 'Déclaré par vous', icon: null, classes: 'bg-status-neutral-bg text-status-neutral-text' },
 }
 
-function TodayBanner({ today }) {
+/** US-131 : une ligne de la frise, la date à gauche, un point sur la ligne, le contenu à droite. */
+function Row({ date, dot, highlight = false, children }) {
   return (
-    <section aria-label="Aujourd’hui" className="flex items-center gap-4 rounded-xl bg-primary p-4 text-white shadow-card lg:p-5">
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/15" aria-hidden="true">
-        <span className="material-symbols-outlined">flag</span>
+    <li className="grid grid-cols-[4.5rem_1.5rem_minmax(0,1fr)] gap-2 pb-4 lg:grid-cols-[5.5rem_1.5rem_minmax(0,1fr)] lg:gap-3">
+      <span data-date className={`pt-3 text-right text-sm font-semibold ${highlight ? 'text-primary' : 'text-help'}`}>
+        {date}
       </span>
-      <div className="flex min-w-0 flex-col">
-        <p className="text-sm font-semibold tracking-wide uppercase opacity-80">Aujourd’hui</p>
-        <p className="text-lg font-bold break-words lg:text-xl">{[today.position, today.agency].filter(Boolean).join(' · ')}</p>
-        {today.seniority && <p className="text-sm opacity-85">{today.seniority}</p>}
+      <span className="relative flex justify-center pt-3.5" aria-hidden="true">
+        <span className={`relative z-10 size-4 rounded-full border-[3px] border-surface ${dot}`} />
+      </span>
+      {children}
+    </li>
+  )
+}
+
+/** « Aujourd'hui » : le poste, l'agence et l'ancienneté (US-114 CA-01), en tête de la frise. */
+function TodayRow({ today }) {
+  return (
+    <Row date="Aujourd’hui" dot="bg-primary ring-4 ring-primary-soft" highlight>
+      <div className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-primary px-4 py-3 text-white shadow-card">
+        <span className="text-lg font-bold break-words">{today.position}</span>
+        <span className="text-sm opacity-90">{[today.agency, today.seniority].filter(Boolean).join(' · ')}</span>
       </div>
-    </section>
+    </Row>
   )
 }
 
@@ -57,57 +61,41 @@ function SourceChip({ source }) {
   )
 }
 
+const DOTS = {
+  ACME: 'bg-primary',
+  QUALIFICATION: 'bg-status-done-dot',
+  TRAINING: 'bg-accent-icon',
+  EXPERIENCE: 'bg-status-progress-dot',
+}
+
 function TimelineEvent({ event }) {
   const titleId = useId()
-  const group = GROUPS[event.group]
+  const scope = event.group === 'ACME' ? 'Chez ACME' : 'Hors ACME'
   return (
-    <li className="relative flex gap-3 pb-4 lg:gap-4">
-      <span
-        className={`relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border-[3px] border-canvas ${group.dot}`}
-        aria-hidden="true"
-      >
-        <span className="material-symbols-outlined text-xl">{group.icon}</span>
-      </span>
-      <article aria-labelledby={titleId} className="flex min-w-0 flex-1 flex-col gap-1.5 rounded-xl border border-border bg-surface p-4 shadow-card">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm">
-            <span className={`font-semibold tracking-wide uppercase ${group.text}`}>{group.label}</span>
-            {event.when && <span className="text-help"> · {event.when}</span>}
-          </p>
-          <SourceChip source={event.source} />
-        </div>
-        <h3 id={titleId} className="text-lg font-bold break-words text-heading">
+    <Row date={event.dateLabel} dot={DOTS[event.group]}>
+      <article aria-labelledby={titleId} className="flex min-w-0 flex-col gap-1.5 rounded-xl border border-border bg-surface px-4 py-3 shadow-card">
+        <h3 id={titleId} className="text-base font-bold break-words text-heading lg:text-lg">
           {event.title}
         </h3>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="text-sm text-help">{[scope, event.kindLabel].filter(Boolean).join(' · ')}</span>
+          <SourceChip source={event.source} />
+        </div>
         {event.detail && <p className="text-sm text-help">{event.detail}</p>}
         {event.description && <p className="text-sm whitespace-pre-line text-help">{event.description}</p>}
       </article>
-    </li>
+    </Row>
   )
 }
 
-function YearMarker({ year }) {
-  return (
-    <li className="relative z-10 flex pb-3">
-      <span className="min-w-10 rounded-full bg-heading px-2 py-0.5 text-center text-sm font-bold text-white">{year ?? 'Sans date'}</span>
-    </li>
-  )
-}
-
-function Frise({ events }) {
-  const rows = []
-  let lastYear
-  for (const event of events) {
-    if (event.year !== lastYear) {
-      rows.push(<YearMarker key={`year-${event.year}`} year={event.year} />)
-      lastYear = event.year
-    }
-    rows.push(<TimelineEvent key={event.id} event={event} />)
-  }
+function Frise({ today, events }) {
   return (
     <ol aria-label="Mon parcours, du plus récent au plus ancien" className="relative flex flex-col">
-      <span className="absolute top-2 bottom-6 left-[19px] w-0.5 bg-border" aria-hidden="true" />
-      {rows}
+      <span className="absolute top-4 bottom-6 left-[calc(4.5rem+1.25rem)] w-0.5 bg-border lg:left-[calc(5.5rem+1.5rem)]" aria-hidden="true" />
+      {today && <TodayRow today={today} />}
+      {events.map((event) => (
+        <TimelineEvent key={event.id} event={event} />
+      ))}
     </ol>
   )
 }
@@ -170,7 +158,7 @@ function EmptyInvite() {
 }
 
 /**
- * US-114 : « Aujourd'hui » puis la frise du parcours (entrée chez ACME SA, certificats, parcours déjà saisi),
+ * US-114, US-131 : la frise du parcours, « Aujourd'hui » en tête (entrée chez ACME SA, certificats, parcours déjà saisi),
  * du plus récent au plus ancien, avec des filtres. Se charge à part : une erreur ici n'empêche pas d'afficher les postes.
  */
 export default function CareerTimeline() {
@@ -182,28 +170,27 @@ export default function CareerTimeline() {
   if (error) return <Alert>{error.message}</Alert>
 
   const visible = filterEvents(data.events, filter)
+  const showToday = (filter === 'ALL' || filter === 'ACME') && Boolean(data.today.position)
   return (
-    <>
-      <TodayBanner today={data.today} />
-      <section aria-labelledby={titleId} className="flex flex-col gap-4 rounded-xl bg-section p-4 lg:p-5">
-        <h2 id={titleId} className="text-xl font-bold text-primary-active">
-          Mon parcours
-        </h2>
+    <section aria-labelledby={titleId} className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 shadow-card lg:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id={titleId} className="text-xl font-bold text-primary-active">
+            Mon parcours
+          </h2>
+          {data.events.length > 0 && <Filters filters={visibleFilters(data.events)} value={filter} onChange={setFilter} />}
+        </div>
         {data.events.length === 0 ? (
-          <EmptyInvite />
-        ) : (
           <>
-            <Filters filters={visibleFilters(data.events)} value={filter} onChange={setFilter} />
-            {visible.length > 0 ? (
-              <Frise events={visible} />
-            ) : (
-              <p className="text-help">Rien dans cette catégorie pour le moment.</p>
-            )}
+            {data.today.position && <Frise today={data.today} events={[]} />}
+            <EmptyInvite />
           </>
+        ) : visible.length > 0 || showToday ? (
+          <Frise today={showToday ? data.today : null} events={visible} />
+        ) : (
+          <p className="text-help">Rien dans cette catégorie pour le moment.</p>
         )}
         {data.skills.length > 0 && <Skills skills={data.skills} />}
         <p className="text-sm text-help">{VISIBILITY_NOTICE}</p>
-      </section>
-    </>
+    </section>
   )
 }

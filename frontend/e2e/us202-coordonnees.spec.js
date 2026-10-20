@@ -44,7 +44,7 @@ test('compléter ses coordonnées, son contact d’urgence et son niveau d’ét
   // US-203 : la section 2 enchaîne sur la section 3.
   await expect(page.getByRole('heading', { name: 'Mes informations RH' })).toBeVisible()
   await page.goto('/profil')
-  await expect(page.getByRole('heading', { name: 'Votre dossier est complet à 62 %' })).toBeVisible()
+  await expect(page.getByRole('progressbar', { name: 'Progression du dossier' })).toHaveAttribute('aria-valuenow', '62')
 
   // Une seule fois : la mention n'est plus redemandée.
   await page.goto('/profil')

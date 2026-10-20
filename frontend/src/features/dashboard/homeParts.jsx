@@ -1,7 +1,8 @@
 import { useId } from 'react'
 import { Link } from 'react-router'
-import { useIsDesktop } from '../../lib/useIsDesktop.js'
+import stairs from '../../assets/illustration-escalier.png'
 import { CERTIFICATES_PATH, DEPOSIT_PATH } from '../certificates/paths.js'
+import { MY_NOTIFICATIONS_PATH } from '../notifications/myNotificationParts.jsx'
 
 /** US-123 : l'accueil « tableau de bord » (maquette validée le 2026-10-15), présentation seule. */
 
@@ -15,11 +16,6 @@ const DAY = 24 * 60 * 60 * 1000
 
 const plural = (n, word, words = `${word}s`) => (n > 1 ? words : word)
 
-/** « Mardi 13 octobre 2026 ». */
-export function todayText(today) {
-  const text = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-  return text.charAt(0).toUpperCase() + text.slice(1)
-}
 
 const dateOf = (iso) => new Date(`${iso}T00:00:00`)
 const midnight = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -27,42 +23,41 @@ export const daysUntil = (iso, today) => Math.round((dateOf(iso) - midnight(toda
 const shortMonth = (iso) => dateOf(iso).toLocaleDateString('fr-FR', { month: 'short' })
 const dayMonth = (iso) => dateOf(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 
-/** Années pleines depuis l'embauche. */
-export function yearsSince(iso, today) {
-  if (!iso) return null
-  const start = dateOf(iso)
-  let years = today.getFullYear() - start.getFullYear()
-  if (today.getMonth() < start.getMonth() || (today.getMonth() === start.getMonth() && today.getDate() < start.getDate())) years -= 1
-  return Math.max(years, 0)
-}
-
-function Go({ children }) {
+function Go({ children, tone = 'text-primary' }) {
   return (
-    <span className="mt-auto flex items-center gap-0.5 pt-1 text-base font-semibold">
+    <span className={`mt-auto flex items-center gap-0.5 pt-1 text-base font-semibold ${tone}`}>
       {children}
       <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">chevron_right</span>
     </span>
   )
 }
 
-function Label({ icon, children, tone = 'text-primary' }) {
+/** US-128 : couleur de chaque tuile (rond de l'icône, lien), par les jetons de la charte. */
+const TONES = {
+  openings: { circle: 'bg-info-bg text-primary', link: 'text-primary' },
+  certificates: { circle: 'bg-status-done-bg text-status-done-text', link: 'text-status-done-text' },
+  application: { circle: 'bg-accent-bg text-accent-text', link: 'text-accent-text' },
+  dossier: { circle: 'bg-primary-soft text-primary', link: 'text-primary' },
+  locked: { circle: 'bg-section text-help', link: 'text-help' },
+}
+
+function Label({ icon, tone, children }) {
   return (
-    <span className={`flex items-center gap-1.5 text-base font-semibold ${tone}`}>
-      <span className="material-symbols-outlined shrink-0 hidden text-lg sm:inline" aria-hidden="true">{icon}</span>
-      {children}
+    <span className="flex flex-col gap-2.5">
+      <span className={`flex size-11 items-center justify-center rounded-full ${TONES[tone].circle}`} aria-hidden="true">
+        <span className="material-symbols-outlined text-[22px]">{icon}</span>
+      </span>
+      <span className="text-base font-bold text-heading">{children}</span>
     </span>
   )
 }
 
-const TILE = 'flex min-h-40 min-w-0 flex-col gap-1.5 rounded-xl p-4 shadow-card'
+const TILE = 'flex min-h-40 min-w-0 flex-col gap-1.5 rounded-xl border border-border bg-surface p-4 shadow-card'
 
-function Tile({ to, solid = false, wide = false, children }) {
+function Tile({ to, wide = false, children }) {
   return (
     <li className={`flex ${wide ? 'col-span-2 lg:col-span-1' : ''}`}>
-      <Link
-        to={to}
-        className={`${TILE} w-full ${solid ? 'bg-primary text-white hover:bg-primary-active' : 'bg-surface text-heading hover:bg-section'}`}
-      >
+      <Link to={to} className={`${TILE} w-full text-heading hover:bg-section`}>
         {children}
       </Link>
     </li>
@@ -73,8 +68,8 @@ function Tile({ to, solid = false, wide = false, children }) {
 function LockedTile({ icon, label }) {
   return (
     <li className="flex">
-      <div className={`${TILE} w-full bg-section/70 text-help shadow-none`}>
-        <Label icon={icon} tone="text-help">{label}</Label>
+      <div className={`${TILE} w-full border-transparent bg-section/70 text-help shadow-none`}>
+        <Label icon={icon} tone="locked">{label}</Label>
         <span className="text-[32px] leading-none font-bold tabular-nums">–</span>
         <span className="text-base">Après le dossier</span>
       </div>
@@ -113,7 +108,7 @@ export function Tiles({ completion, missing, openings, certificates, application
   // Sur téléphone, le dossier prend toute la largeur quand il serait seul sur sa ligne (3 tuiles) ou passe en premier.
   const dossier = (
     <Tile key="dossier" to={PROFILE_PATH} wide={!completion.is_complete || !application}>
-      <Label icon="person">Mon dossier</Label>
+      <Label icon="person" tone="dossier">Mon dossier</Label>
       {complete ? <Value value={completion.percent} unit="%" /> : <Value value={completion.complete} unit={`sur ${completion.total}`} />}
       <Bar parts={[{ ratio: completion.percent / 100, className: complete ? 'bg-status-done-dot' : 'bg-primary' }]} />
       <span className="text-base text-help">
@@ -121,7 +116,7 @@ export function Tiles({ completion, missing, openings, certificates, application
           ? 'À jour : les RH voient votre vrai profil.'
           : `Il manque : ${missing.map((element) => element.label.toLowerCase()).join(', ')}.`}
       </span>
-      <Go>{complete ? 'Voir mon dossier' : 'Continuer mon dossier'}</Go>
+      <Go tone={TONES.dossier.link}>{complete ? 'Voir mon dossier' : 'Continuer mon dossier'}</Go>
     </Tile>
   )
 
@@ -146,16 +141,16 @@ export function Tiles({ completion, missing, openings, certificates, application
     <section aria-labelledby={titleId}>
       <h2 id={titleId} className="sr-only">Vos chiffres</h2>
       <ul className={`grid grid-cols-2 gap-3 ${application ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
-        <Tile to={OPENINGS_LINK} solid>
-          <Label icon="work" tone="text-white">Postes pour vous</Label>
+        <Tile to={OPENINGS_LINK}>
+          <Label icon="work" tone="openings">Postes pour vous</Label>
           <Value value={count} />
-          <span className="text-base text-white/85">
+          <span className="text-base text-help">
             {count > 0 ? 'Vous remplissez tous les critères : il ne reste qu’à postuler.' : 'Chaque diplôme validé peut vous en ouvrir.'}
           </span>
-          <Go>Voir les postes</Go>
+          <Go tone={TONES.openings.link}>Voir les postes</Go>
         </Tile>
         <Tile to={CERTIFICATES_PATH}>
-          <Label icon="verified" tone="text-status-done-text">Mes certificats</Label>
+          <Label icon="verified" tone="certificates">Mes certificats</Label>
           <Value value={validated} unit={total ? `${plural(validated, 'validé')} sur ${total}` : 'certificat déposé'} />
           <Bar
             parts={[
@@ -167,11 +162,11 @@ export function Tiles({ completion, missing, openings, certificates, application
             {total ? 'Chaque diplôme validé peut vous ouvrir un poste.' : 'Déposez un diplôme pour le faire valider par les RH.'}
             {inReview > 0 && ` ${inReview} en examen.`}
           </span>
-          <Go>Voir le suivi</Go>
+          <Go tone={TONES.certificates.link}>Voir le suivi</Go>
         </Tile>
         {application && (
           <Tile to={APPLICATIONS_LINK}>
-            <Label icon="send" tone="text-accent-text">Ma candidature</Label>
+            <Label icon="send" tone="application">Ma candidature</Label>
             <Value value={application.step_number} unit={`étape sur ${STEP_COUNT}`} />
             <span className="flex gap-1" aria-hidden="true">
               {Array.from({ length: STEP_COUNT }, (_, index) => (
@@ -181,7 +176,7 @@ export function Tiles({ completion, missing, openings, certificates, application
             <span className="text-base break-words text-help">
               {application.opening_title} · {application.step_label}
             </span>
-            <Go>Suivre</Go>
+            <Go tone={TONES.application.link}>Suivre</Go>
           </Tile>
         )}
         {dossier}
@@ -212,106 +207,6 @@ function PanelLink({ to, children }) {
       {children}
       <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">chevron_right</span>
     </Link>
-  )
-}
-
-function Criteria({ lines }) {
-  const n = lines.length
-  return (
-    <span className="flex items-center gap-1 text-base text-status-done-text">
-      <span className="material-symbols-outlined shrink-0 text-lg" aria-hidden="true">check</span>
-      {n > 0 ? `${n} ${plural(n, 'critère')} sur ${n}` : 'Ouvert à tous'}
-    </span>
-  )
-}
-
-/** Temps restant : la barre se remplit à l'approche de la date limite. */
-function Remaining({ opening, today }) {
-  const days = daysUntil(opening.closes_on, today)
-  const span = Math.max(daysUntil(opening.closes_on, dateOf(opening.opens_on)), 1)
-  const elapsed = Math.min(Math.max(1 - days / span, 0), 1)
-  return (
-    <span className="flex min-w-28 flex-col gap-1 text-base">
-      <span>
-        <strong className="text-heading">
-          {days} {plural(days, 'jour')}
-        </strong>
-        <span className="text-sm text-help"> · {dayMonth(opening.closes_on)}</span>
-      </span>
-      <Bar parts={[{ ratio: elapsed, className: 'bg-status-progress-dot' }]} />
-    </span>
-  )
-}
-
-/** CA-03 : les postes publiés dont l'employé remplit tous les critères. */
-export function OpeningsPanel({ openings, today }) {
-  const desktop = useIsDesktop()
-  const title = 'Postes ouverts pour vous'
-  return (
-    <Panel
-      title={title}
-      link={<PanelLink to={OPENINGS_LINK}>Tous les postes</PanelLink>}
-      sub={openings.length > 0 ? 'Vous cochez déjà tous les critères. Ne laissez pas passer la date limite.' : null}
-    >
-      {openings.length === 0 ? (
-        <p className="rounded-lg bg-section p-3 text-base text-heading">
-          Aucun poste ouvert pour vous en ce moment. Chaque certificat validé peut vous en ouvrir de nouveaux.
-        </p>
-      ) : desktop ? (
-        <table aria-label={title} className="w-full text-left text-base">
-          <thead>
-            <tr className="border-b border-border text-sm text-help">
-              <th scope="col" className="py-2 font-semibold">Poste</th>
-              <th scope="col" className="py-2 font-semibold">Critères</th>
-              <th scope="col" className="py-2 font-semibold">Temps restant</th>
-              <th scope="col" className="py-2"><span className="sr-only">Action</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            {openings.map((opening) => (
-              <tr key={opening.id} className="border-b border-border last:border-0">
-                <td className="py-3 pr-3">
-                  <span className="flex flex-col">
-                    <strong className="break-words text-heading">{opening.title}</strong>
-                    <span className="text-base text-help">{opening.unit_label}</span>
-                  </span>
-                </td>
-                <td className="py-3 pr-3"><Criteria lines={opening.criteria_lines} /></td>
-                <td className="py-3 pr-3"><Remaining opening={opening} today={today} /></td>
-                <td className="py-3 text-right">
-                  <Link
-                    to={OPENINGS_LINK}
-                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-base font-semibold whitespace-nowrap text-primary hover:bg-info-bg"
-                  >
-                    Voir et postuler<span className="sr-only"> : {opening.title}</span>
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <ul aria-label={title} className="flex flex-col gap-2">
-          {openings.map((opening) => (
-            <li key={opening.id}>
-              <Link to={OPENINGS_LINK} className="flex flex-col gap-2 rounded-lg border border-border p-3 hover:bg-section">
-                <span className="flex items-start justify-between gap-2">
-                  <span className="flex min-w-0 flex-col">
-                    <strong className="break-words text-heading">{opening.title}</strong>
-                    <span className="text-base text-help">{opening.unit_label}</span>
-                  </span>
-                  <span className="material-symbols-outlined shrink-0 text-primary" aria-hidden="true">chevron_right</span>
-                </span>
-                <span className="flex flex-wrap items-end justify-between gap-3">
-                  <Criteria lines={opening.criteria_lines} />
-                  <Remaining opening={opening} today={today} />
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Panel>
   )
 }
 
@@ -346,52 +241,133 @@ export function DatesPanel({ openings, freshness, today }) {
   )
 }
 
-/** CA-05 : pourquoi déposer un diplôme. */
-export function DiplomasCard() {
-  const titleId = useId()
+/** US-128 CA-01 : bonjour, la phrase de bienvenue, l'action principale et le bandeau illustré (maquette du 2026-10-19). */
+export function Hero({ firstName, canDeposit }) {
   return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-2 rounded-xl bg-info-bg p-4">
-      <h2 id={titleId} className="flex items-center gap-2 text-lg font-bold text-info-text">
-        <span className="material-symbols-outlined shrink-0" aria-hidden="true">school</span>
-        Vos diplômes travaillent pour vous
-      </h2>
-      <p className="text-base text-info-text">
-        Une formation suivie, un master obtenu, une certification : une fois validé par les RH, chaque diplôme compte dans
-        les postes qui vous sont proposés.
-      </p>
-      <Link
-        to={DEPOSIT_PATH}
-        className="flex min-h-11 w-fit items-center gap-1 rounded-lg bg-surface px-4 text-base font-semibold text-primary shadow-card hover:bg-section"
-      >
-        <span className="material-symbols-outlined shrink-0" aria-hidden="true">add</span>
-        Ajouter un diplôme
-      </Link>
+    <section className="flex flex-col gap-5 2xl:flex-row 2xl:items-center 2xl:justify-between">
+      <div className="flex min-w-0 flex-col gap-2.5 2xl:flex-1">
+        <h2 className="text-[28px] leading-9 font-extrabold tracking-tight text-primary-active lg:text-[34px] lg:leading-[42px]">
+          Bonjour {firstName}
+        </h2>
+        <p className="text-base leading-relaxed text-help lg:text-lg">
+          Bienvenue sur votre espace carrière. Ici, vous pouvez suivre vos dossiers, consulter les opportunités et gérer vos documents.
+        </p>
+        {canDeposit && (
+          <Link
+            to={DEPOSIT_PATH}
+            className="mt-1 flex min-h-12 w-fit items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">upload_file</span>
+            Déposer un certificat
+          </Link>
+        )}
+      </div>
+      <div className="flex min-h-28 items-center gap-2 overflow-hidden rounded-2xl bg-info-bg 2xl:w-[22rem] 2xl:shrink-0">
+        <img src={stairs} alt="" width="156" height="113" className="ml-3 h-24 w-auto shrink-0 lg:ml-5 lg:h-28" />
+        <p className="py-4 pr-5 text-base leading-relaxed text-info-text">
+          Votre engagement d’aujourd’hui construit votre avenir chez ACME SA.
+        </p>
+      </div>
     </section>
   )
 }
 
-/** CA-05 : ancienneté, plus haut diplôme validé, éléments du parcours ; aucun grade (US-122). */
-export function CareerFigures({ years, highestDiploma, entries }) {
-  const facts = [
-    years !== null && { value: years === 0 ? 'Moins d’un an' : `${years} ${plural(years, 'an')}`, label: 'chez ACME SA' },
-    highestDiploma && { value: highestDiploma, label: 'plus haut diplôme validé' },
-    entries > 0 && { value: String(entries), label: `${plural(entries, 'élément')} dans votre parcours` },
-  ].filter(Boolean)
-  if (facts.length === 0) return null
+const longDate = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+
+/** US-128 CA-03 : le poste dont la date limite est la plus proche, mis en avant ; les autres dans « Ma carrière ». */
+export function FeaturedOpening({ openings, today }) {
+  const titleId = useId()
+  const [opening] = [...openings].sort((a, b) => a.closes_on.localeCompare(b.closes_on))
+  const n = opening?.criteria_lines.length ?? 0
+  const days = opening ? daysUntil(opening.closes_on, today) : 0
   return (
-    <Panel
-      title="Mon parcours en chiffres"
-      link={<PanelLink to={CAREER_PATH}>Voir la frise</PanelLink>}
-      sub="Votre expérience compte : elle entre dans le calcul de chaque poste proposé."
-    >
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {facts.map((fact) => (
-          <div key={fact.label} className="flex flex-col rounded-lg bg-section p-3">
-            <dt className="order-2 text-base text-help">{fact.label}</dt>
-            <dd className="order-1 text-[32px] leading-tight font-bold text-heading">{fact.value}</dd>
+    <section aria-labelledby={titleId} className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id={titleId} className="flex items-center gap-2 text-lg font-bold text-primary-active">
+          <span className="material-symbols-outlined text-accent-icon" aria-hidden="true">star</span>
+          Poste ouvert pour vous
+        </h2>
+        {openings.length > 1 && <PanelLink to={OPENINGS_LINK}>{`Voir les ${openings.length} postes`}</PanelLink>}
+      </div>
+      {!opening ? (
+        <p className="rounded-lg bg-section p-3 text-base text-heading">
+          Aucun poste ouvert pour vous en ce moment. Chaque certificat validé peut vous en ouvrir de nouveaux.
+        </p>
+      ) : (
+        <div className="flex gap-4">
+          <span className="hidden size-14 shrink-0 items-center justify-center rounded-xl bg-section text-primary sm:flex" aria-hidden="true">
+            <span className="material-symbols-outlined text-[28px]">work</span>
+          </span>
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <strong className="text-lg break-words text-heading">{opening.title}</strong>
+              <span className="inline-flex items-center gap-1 rounded-full bg-status-done-bg px-2.5 py-0.5 text-sm font-semibold text-status-done-text">
+                <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>
+                {n > 0 ? `Vous remplissez les ${n} ${plural(n, 'critère')}` : 'Ouvert à tous'}
+              </span>
+            </div>
+            <span className="text-base text-help">
+              {opening.unit_label} · date limite le {dayMonth(opening.closes_on)} · reste {days} {plural(days, 'jour')}
+            </span>
+            {opening.mission && <p className="line-clamp-2 text-base text-body">{opening.mission}</p>}
+            <Link
+              to={`${CAREER_PATH}#poste-${opening.id}`}
+              className="mt-1 flex min-h-12 w-fit items-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
+            >
+              Voir le poste et postuler
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">arrow_forward</span>
+            </Link>
           </div>
-        ))}
-      </dl>
-    </Panel>
+        </div>
+      )}
+    </section>
+  )
+}
+
+/** US-128 CA-04 : pastille de chaque notification, par les jetons de statut. */
+const ACTIVITY = {
+  OPENING: { icon: 'work', circle: 'bg-info-bg text-primary', pill: 'bg-info-bg text-info-text', label: 'Poste' },
+  CERTIFICATE_VALIDATED: { icon: 'verified', circle: 'bg-status-done-bg text-status-done-text', pill: 'bg-status-done-bg text-status-done-text', label: 'Validé' },
+  CERTIFICATE_TO_CORRECT: { icon: 'edit_document', circle: 'bg-accent-bg text-accent-text', pill: 'bg-accent-bg text-accent-text', label: 'À corriger' },
+}
+
+/** US-128 CA-04 : les 3 dernières notifications de l'employé (US-120), à la place de « Nouveau pour vous ». */
+export function RecentActivity({ notifications }) {
+  const titleId = useId()
+  const items = notifications?.items ?? []
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-5 shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id={titleId} className="flex items-center gap-2 text-lg font-bold text-primary-active">
+          <span className="material-symbols-outlined text-primary" aria-hidden="true">schedule</span>
+          Activité récente
+        </h2>
+        <PanelLink to={MY_NOTIFICATIONS_PATH}>Toutes mes notifications</PanelLink>
+      </div>
+      {items.length === 0 ? (
+        <p className="py-2 text-base text-help">Rien de nouveau pour le moment.</p>
+      ) : (
+        <ul className="flex flex-col">
+          {items.map((item) => {
+            const look = ACTIVITY[item.kind] ?? ACTIVITY.OPENING
+            return (
+              <li key={item.key} className="border-t border-border first:border-0">
+                <Link to={item.link} className="flex flex-wrap items-center gap-3 py-3 hover:bg-section">
+                  <span className={`flex size-10 shrink-0 items-center justify-center rounded-full ${look.circle}`} aria-hidden="true">
+                    <span className="material-symbols-outlined text-xl">{look.icon}</span>
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-base font-semibold text-heading">{item.title}</span>
+                    <span className="text-base break-words text-help">{item.detail}</span>
+                  </span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${look.pill}`}>{look.label}</span>
+                  <span className="w-28 text-right text-sm text-help">{longDate(item.at)}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
   )
 }

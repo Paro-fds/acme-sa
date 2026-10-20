@@ -21,9 +21,10 @@ test('dossier : libellés officiels de l’affectation et pourcentage', async ({
 
   await signIn(page, EMP_H1)
   await page.goto('/profil')
-  await expect(page.getByRole('heading', { name: /^Votre dossier est complet à \d+ %$/ })).toBeVisible()
   await expect(page.getByRole('progressbar', { name: 'Progression du dossier' })).toBeVisible()
 
+  // US-129 : le détail complet est replié en bas de « Mon dossier ».
+  await page.getByText('Voir tout le détail de mon dossier').click()
   const job = page.getByRole('region', { name: 'Informations professionnelles' })
   await expect(job.getByText('Agence Démo', { exact: true })).toBeVisible()
   await expect(job.getByText('Région Démo 1')).toBeVisible()

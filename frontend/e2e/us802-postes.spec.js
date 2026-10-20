@@ -52,4 +52,11 @@ test('postes ouverts : saisir une fiche, la publier, voir son historique', async
   await expect(page.getByRole('list', { name: 'Postes' }).getByText('Chargé de crédit (fictif, US-802)')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280)
   await page.screenshot({ path: `${CAPTURES}/us802-liste-1280.png`, fullPage: true })
+  // US-135 : la même liste à 390 px (onglets, poste publié avec sa lettre).
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.reload()
+  await expect(page.locator('[data-nav-panel]')).not.toBeInViewport()
+  await expect(page.getByRole('list', { name: 'Postes' })).toContainText('Lettre du directeur RH jointe par')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+  await page.screenshot({ path: `${CAPTURES}/us135-liste-390.png`, fullPage: true })
 })

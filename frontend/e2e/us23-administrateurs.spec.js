@@ -51,7 +51,7 @@ test('administrateurs : ajout, mot de passe provisoire puis choisi', async ({ pa
   await page.getByLabel('Confirmer le nouveau mot de passe', { exact: true }).fill(CHOSEN)
   await page.getByRole('button', { name: 'Enregistrer le mot de passe' }).click()
   await expect(page).toHaveURL(/\/admin$/)
-  await expect(page.getByRole('heading', { name: 'Suivi de la campagne' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible()
 
   // Le provisoire ne fonctionne plus, le nouveau oui
   await page.getByRole('button', { name: 'Menu du compte' }).click()

@@ -4,7 +4,7 @@ import re
 import secrets
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 from app.certificate.domain.certificate import (
     CERTIFICATE_TYPES,
@@ -38,6 +38,7 @@ from app.certificate.domain.errors import (
     TooManyCertificates,
     UploadNotFound,
 )
+from app.certificate.domain.review import review_deadline
 from app.certificate.domain.files import SIGNATURE_LENGTH, check_announced_type, clean_original_name, detect_kind
 from app.certificate.domain.ports import CertificateRepository, CertificateStorage, ProfileStatus, UploadTicket
 from app.shared.domain.clock import Clock
@@ -119,10 +120,19 @@ class CertificateView:
     unlocks: Unlocks
     replaces_id: str | None = None
     is_archived: bool = False
+    decided_at: datetime | None = None
+    rejection_reason: str | None = None
+    rejection_comment: str | None = None
+    answer_by: date | None = None
+    """US-130 CA-08 : décision, motif et commentaire des RH (à corriger), date limite de réponse (en examen) ; jamais l'agent."""
+
+
+_IN_REVIEW = (CertificateStatus.RECEIVED, CertificateStatus.IN_REVIEW)
 
 
 def certificate_view(certificate: Certificate) -> CertificateView:
     domain_label = None
+    to_correct = certificate.status is CertificateStatus.TO_CORRECT
     if certificate.domain:
         domain_label = certificate.domain_other if certificate.domain == "AUTRE" else DOMAIN_LABELS[certificate.domain]
     return CertificateView(
@@ -143,6 +153,10 @@ def certificate_view(certificate: Certificate) -> CertificateView:
         Unlocks(unlocked_level(certificate.level)),
         replaces_id=certificate.replaces_id,
         is_archived=certificate.is_archived,
+        decided_at=certificate.decided_at,
+        rejection_reason=certificate.rejection_reason if to_correct else None,
+        rejection_comment=certificate.rejection_comment if to_correct else None,
+        answer_by=review_deadline(certificate.submitted_at.date()) if certificate.status in _IN_REVIEW else None,
     )
 
 

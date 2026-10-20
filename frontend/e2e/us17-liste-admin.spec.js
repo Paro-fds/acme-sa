@@ -8,7 +8,7 @@ test('liste des employés : cartes sur mobile, tableau sur ordinateur', async ({
   await page.goto('/admin/employes')
 
   // 390 px : cartes
-  await expect(page.getByText('7 employés')).toBeVisible()
+  await expect(page.getByText('7 employés sur 7')).toBeVisible()
   const cards = page.getByRole('list', { name: 'Employés' })
   await expect(cards).toBeVisible()
   await expect(cards.getByRole('listitem')).toHaveCount(7)

@@ -53,6 +53,7 @@ test('candidature : postuler, accusé de réception, étape suivante côté RH, 
   await completeProfile(employeePage)
   await employeePage.goto('/carriere')
   const card = employeePage.getByRole('article', { name: TITLE })
+  await card.getByRole('button', { name: 'Voir le poste et postuler' }).click()
   await card.getByRole('button', { name: 'Postuler' }).click()
   await card.getByLabel('Votre message aux RH (facultatif)').fill('Je suis la caissière de l’agence depuis 2020.')
   await card.getByLabel('Votre CV (facultatif)').setInputFiles({
@@ -64,7 +65,8 @@ test('candidature : postuler, accusé de réception, étape suivante côté RH, 
   await expect(employeePage.getByText(/^Candidature reçue le/)).toBeVisible()
   await expect(card.getByText(/Candidature envoyée le/)).toBeVisible()
   const mine = employeePage.getByRole('list', { name: 'Mes candidatures' })
-  await expect(mine).toContainText('Étape 1 sur 7 : Reçue et enregistrée')
+  // US-131 : les 7 étapes, la première en cours.
+  await expect(mine.locator('[aria-current="step"]')).toContainText('Reçue et enregistrée')
   expect(await employeePage.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await employeePage.screenshot({ path: `${CAPTURES}/us902-candidature-390.png`, fullPage: true })
 
@@ -91,8 +93,9 @@ test('candidature : postuler, accusé de réception, étape suivante côté RH, 
   await expect(heading).toBeFocused()
   await expect(heading).toBeInViewport()
   await employeePage.screenshot({ path: `${CAPTURES}/us123-ancre-candidatures-390.png` })
-  await expect(employeePage.getByRole('list', { name: 'Mes candidatures' })).toContainText('Étape 2 sur 7 : Étude par la DRH')
+  await expect(employeePage.getByRole('list', { name: 'Mes candidatures' }).locator('[aria-current="step"]')).toContainText('Étude par la DRH')
   await employeePage.setViewportSize({ width: 1280, height: 900 })
   await employeePage.screenshot({ path: `${CAPTURES}/us902-suivi-1280.png`, fullPage: true })
+  await employeePage.screenshot({ path: `C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/7be86a6f-dfd2-47a0-9b44-97dbe2e73527/scratchpad/captures/us131-candidature-1280.png`, fullPage: true })
   await employee.close()
 })

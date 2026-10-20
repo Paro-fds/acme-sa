@@ -15,6 +15,8 @@ from app.auth.api.dependencies import (
     require_validator,
 )
 from app.auth.domain.admin import AdminAccount
+from app.certificate.domain.certificate import CERTIFICATE_TYPES, DOMAINS
+from app.shared.domain.levels import LEVELS
 from app.certificate.application.validation_queue import (
     CertificateReviewView,
     QueueItemView,
@@ -43,6 +45,8 @@ class QueueItemOut(BaseModel):
     is_overdue: bool
     status: str
     assigned_to: str | None
+    assigned_to_me: bool = False
+    """US-133 CA-02 : pris par le compte RH connecté."""
     assigned_at: datetime | None
 
 
@@ -69,7 +73,7 @@ def get_queue(
         overdue_only=overdue_only,
     )
     return ValidationQueueOut(
-        items=[QueueItemOut(**item.__dict__) for item in view.items],
+        items=[QueueItemOut(**item.__dict__, assigned_to_me=item.assigned_to == admin.username) for item in view.items],
         total_waiting=view.total_waiting,
         total_overdue=view.total_overdue,
     )
@@ -99,6 +103,7 @@ class ReviewEmployeeOut(BaseModel):
     is_profile_complete: bool
     declared_level_label: str
     already_validated_certificates: list[str]
+    validated_level_label: str | None
 
 
 class FileInfoOut(BaseModel):
@@ -134,12 +139,36 @@ class CertificateDetailsOut(BaseModel):
     rejection_comment: str | None
 
 
+class ChoiceOut(BaseModel):
+    value: str
+    label: str
+
+
+class ReviewChoicesOut(BaseModel):
+    """US-133 CA-07 : les listes de correction, les mêmes que celles du dépôt."""
+
+    types: list[ChoiceOut]
+    levels: list[ChoiceOut]
+    domains: list[ChoiceOut]
+
+
+def _review_choices() -> ReviewChoicesOut:
+    return ReviewChoicesOut(
+        types=[ChoiceOut(value=c.code, label=c.label) for c in CERTIFICATE_TYPES],
+        levels=[ChoiceOut(value=level.code, label=level.label) for level in LEVELS],
+        domains=[ChoiceOut(value=c.code, label=c.label) for c in DOMAINS],
+    )
+
+
 class CertificateReviewOut(BaseModel):
     certificate: CertificateDetailsOut
     employee: ReviewEmployeeOut
     files: list[FileInfoOut]
     history: list[HistoryEntryOut]
     business_days: int
+    assigned_to_me: bool
+    decide_by: date | None
+    choices: ReviewChoicesOut
 
 
 @router.get("/{certificate_id}", response_model=CertificateReviewOut)
@@ -177,6 +206,9 @@ def get_review(
         ],
         history=[HistoryEntryOut(**h.__dict__) for h in view.history],
         business_days=view.business_days,
+        assigned_to_me=view.certificate.assigned_to == admin.username,
+        decide_by=view.decide_by,
+        choices=_review_choices(),
     )
 
 

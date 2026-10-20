@@ -1,6 +1,12 @@
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 const timeFormatter = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' })
 
+/** Date du jour en toutes lettres : « Lundi 19 octobre 2026 » (US-123, barre du haut d'US-127). */
+export function formatToday(today = new Date()) {
+  const text = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 /** "1996-03-15" → "15/03/1996" (date sans heure : pas de conversion de fuseau). */
 export function formatDate(isoDate) {
   if (!isoDate) return ''
