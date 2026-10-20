@@ -150,7 +150,8 @@ describe('US-129 CA-04 — la partie 3 dans la page', () => {
     await renderProfile()
 
     expect(within(part3()).getByText('Partie 3 sur 3')).toBeVisible()
-    expect(within(part3()).getByRole('link', { name: /Ouvrir la partie 3/ })).toHaveAttribute('href', '/profil/informations-rh')
+    // La partie 3 est déjà ouverte dans la page : pas de lien « Ouvrir la partie 3 ».
+    expect(within(part3()).queryByRole('link')).not.toBeInTheDocument()
     expect(hrRow("Agence d'affectation")).toHaveTextContent('Agence Démo')
     expect(hrRow("Agence d'affectation")).toHaveTextContent('Confirmé le 06/10/2026')
     expect(within(hrRow("Agence d'affectation")).queryByRole('button')).not.toBeInTheDocument()
@@ -320,7 +321,7 @@ describe('US-129 CA-07 — sans consentement', () => {
 
     expect(hrRow('Poste actuel')).toHaveTextContent('Chargée de crédit')
     expect(within(part3()).queryByRole('button')).not.toBeInTheDocument()
-    expect(within(part3()).getByRole('link', { name: /Ouvrir la partie 3/ })).toHaveAttribute('href', '/profil/informations-rh')
+    expect(within(part3()).getByRole('link', { name: /Confirmer ou signaler une erreur/ })).toHaveAttribute('href', '/profil/informations-rh')
   })
 })
 

@@ -235,10 +235,13 @@ export function DossierParts({ dossier, hr }) {
             title="Mes informations RH"
             text="Ce que les RH savent de vous : confirmez ou signalez une erreur"
           />
-          <Link to={HR_INFORMATION_PATH} className="flex min-h-11 items-center gap-0.5 font-semibold text-primary hover:underline">
-            Ouvrir la partie 3
-            <span className="material-symbols-outlined text-lg" aria-hidden="true">chevron_right</span>
-          </Link>
+          {/* La partie 3 est déjà dans la page : le lien ne sert que là où les boutons manquent (sans consentement). */}
+          {!canAnswer && (
+            <Link to={HR_INFORMATION_PATH} className="flex min-h-11 items-center gap-0.5 font-semibold text-primary hover:underline">
+              Confirmer ou signaler une erreur
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">chevron_right</span>
+            </Link>
+          )}
         </div>
         <ul className="flex flex-col">
           {dossier.hr_information.map((item) => (
