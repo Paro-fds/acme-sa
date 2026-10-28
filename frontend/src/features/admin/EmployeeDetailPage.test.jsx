@@ -192,15 +192,15 @@ describe('EmployeeDetailPage (US-20, US-108 : écran A07)', () => {
     expect(within(screen.getByRole('region', { name: 'Documents' })).getByText('licence.pdf')).toBeInTheDocument()
   })
 
-  it('CA-04 : lecture seule, seule action : réinitialiser l’accès (US-22)', async () => {
+  it('CA-04 : lecture seule, seule action : débloquer l’accès (US-22, US-1003)', async () => {
     renderAt()
     await screen.findByRole('region', { name: 'Profil' })
 
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
     const buttons = within(screen.getByRole('main')).queryAllByRole('button')
     expect(buttons).toHaveLength(1)
-    expect(buttons[0]).toHaveAccessibleName("Réinitialiser l'accès")
-    expect(within(screen.getByRole('region', { name: 'Accès' })).getByText('Compte activé')).toBeInTheDocument()
+    expect(buttons[0]).toHaveAccessibleName("Débloquer l'accès")
+    expect(within(screen.getByRole('region', { name: 'Accès' })).getByText('Déjà connecté')).toBeInTheDocument()
   })
 
   it('CA-06 : employé inconnu ou inactif → « Employé introuvable » et lien vers la liste', async () => {

@@ -72,7 +72,7 @@ def test_ca03_a07_dossier_v2_avec_dates_de_confirmation(admin_client, employee_c
     assert employee.post("/api/me/dossier/consent", json={"information_notice": True, "whatsapp": False}).status_code == 200
     saved = employee.put(
         "/api/me/dossier/coordinates",
-        json={"telephone": "3712 3456", "address": "12 rue Capois, Port-au-Prince", "email": "", "no_email": True},
+        json={"address": "12 rue Capois, Port-au-Prince"},
     )
     assert saved.status_code == 200, saved.text
 

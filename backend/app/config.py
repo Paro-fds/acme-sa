@@ -25,6 +25,17 @@ class Settings(BaseSettings):
     """`demo` et `recette` : jeu fictif imposé (US-001 CA-05) ; `local` : poste du développeur et tests."""
     acme_csv_path: Path = PROJECT_DIR / "data" / "vault-employee-list_20261001-1400.csv"
     acme_data_dir: Path = Path("C:/acme-data")
+    vault_s3_bucket: str = ""
+    per_s3_bucket: str = ""
+    """US-1012 : seau des balances PER (`acme-pam-balances` en production), lecture seule de `per/`."""
+    per_s3_prefix: str = "pam/balances"
+    per_local_dir: Path = Path(__file__).resolve().parent.parent / "demo" / "per"
+    """Hors S3 : dossier des balances fictives, mêmes clés que le seau."""
+    carrieres_database_url: str = ""
+    """US-1007 : base PostgreSQL de Carrières (`archivage`), compte en lecture et ajout seuls. Vide hors production :
+    base fictive SQLite dans ACME_DATA_DIR (`carrieres.db`), créée au premier usage."""
+    """US-1001 : seau de la copie Vault (production : `acme-prospection-data`) ; vide = fichier `ACME_CSV_PATH`."""
+    vault_s3_key: str = "vault/vault-employee-list.csv"
     job_profiles_path: Path = BACKEND_DIR / "app" / "job" / "infrastructure" / "fiches-de-poste.json"
     """US-119 : catalogue des postes ACME, produit par `python -m app.tools.import_job_profiles`."""
     database_url: str = ""
@@ -43,7 +54,18 @@ class Settings(BaseSettings):
     admin_password_hash: str = ""
     # US-125 : déconnexion après 15 minutes sans activité, employés et espace de gestion.
     employee_session_minutes: int = 15
+    employee_idle_minutes: int = 5
+    """US-1017 : sans action pendant 5 minutes, l'écran ferme la session (modèle du directeur)."""
     admin_session_minutes: int = 15
+    ses_sender: str = ""
+    ses_reply_to: str = ""
+    """US-1016 : adresse de réponse (modèle du directeur : dit@acmehaiti.com)."""
+    """US-1003 : expéditeur des courriels de connexion (Amazon SES) ; vide = aucun envoi hors du poste local."""
+    ses_region: str = "us-east-1"
+    otp_hmac_key: str = ""
+    """US-1003 : clé secrète des empreintes des codes de connexion (Secrets Manager) ; obligatoire en production."""
+    login_min_response_ms: int = 500
+    """US-1003 : délai minimal de réponse de l'identification, le même que le code existe ou non (doc PAM)."""
     admin_mfa_required: bool = False
     """US-112 : double authentification de l'espace de gestion. Coupée par défaut (connexion directe) ;
     `ADMIN_MFA_REQUIRED=true` la rallume sans toucher au code (US-102)."""
@@ -53,6 +75,8 @@ class Settings(BaseSettings):
     """En environnement demo, permet d'afficher les codes simulés si aucun provider réel n'est configuré."""
     whatsapp_meta_token: str = ""
     whatsapp_meta_phone_number_id: str = ""
+    whatsapp_template: str = ""
+    """US-1004 : nom du modèle « Authentification » approuvé par Meta pour le code de connexion."""
     whatsapp_twilio_account_sid: str = ""
     whatsapp_twilio_auth_token: str = ""
     whatsapp_twilio_from: str = ""

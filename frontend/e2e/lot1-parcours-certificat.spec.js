@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { adminLogin } from './admin.js'
 import { acceptConsent, EMP_A, signIn } from './auth.js'
 
 const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/a3ac3411-0311-4109-b6a8-9aa1d82a8e84/scratchpad/captures'
@@ -10,10 +9,10 @@ const PDF = { name: 'licence.pdf', mimeType: 'application/pdf', buffer: Buffer.f
 /**
  * Lot 1, parcours « certificat » de bout en bout (EMP-A) :
  * US-204 dépôt fermé et liste de ce qui reste → US-202 sections 1 et 2 → US-203 section 3 →
- * US-301 dépôt signé → US-302 remerciement et avis → US-303 statut « Reçu » →
- * US-130 les RH demandent une correction, l'employé corrige et renvoie.
+ * US-1008 dépôt dans Carrières, « À compléter » dans « Mes certificats » ; doublon refusé.
+ * (La validation se fait dans Carrières : l'ancienne file de PAM sera retirée avec US-1010.)
  */
-test('compléter son profil puis déposer un certificat', async ({ browser, page }) => {
+test('compléter son profil puis déposer un certificat', async ({ page }) => {
   test.setTimeout(120000)
   // US-207 : première connexion → « Avant de commencer » (écran 05), puis l'accueil (écran 06).
   await signIn(page, EMP_A, { consent: false })
@@ -24,9 +23,9 @@ test('compléter son profil puis déposer un certificat', async ({ browser, page
 
   // US-204 : dépôt fermé tant que le profil n'est pas complet.
   await nav.getByRole('link', { name: 'Mes certificats' }).click()
-  await expect(page.getByRole('heading', { name: /Il reste 8 informations à compléter/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Il reste 6 informations à compléter/ })).toBeVisible()
   await page.screenshot({ path: `${CAPTURES}/lot1-verrou-390.png`, fullPage: true })
-  await page.getByRole('link', { name: /Ajouter mon téléphone/ }).click()
+  await page.getByRole('link', { name: /Ajouter mon adresse/ }).click()
 
   // US-202 : section 1 (la mention a déjà été acceptée).
   await expect(page.getByRole('heading', { name: 'Mes coordonnées' })).toBeVisible()
@@ -75,84 +74,31 @@ test('compléter son profil puis déposer un certificat', async ({ browser, page
   await page.screenshot({ path: `${REFONTE}/us136-accueil-1280.png`, fullPage: true })
   await page.setViewportSize({ width: 390, height: 844 })
 
-  // US-301 : le dépôt s'ouvre, depuis l'accueil.
+  // US-1008 : le dépôt s'ouvre depuis l'accueil et entre dans Carrières, « À compléter ».
   await page.getByRole('link', { name: /Déposer un certificat/ }).click()
+  await expect(page.getByRole('heading', { name: 'Déposer une pièce' })).toBeVisible()
   await page.getByLabel('Choisir un fichier').setInputFiles(PDF)
   await expect(page.getByRole('region', { name: 'Fichier choisi' })).toContainText('licence.pdf')
-  await page.getByRole('group', { name: 'Type de document' }).locator('label', { hasText: 'Diplôme' }).click()
-  await expect(page.getByRole('radio', { name: /Diplôme/ })).toBeChecked()
-  await page.getByLabel("Niveau d'études associé").selectOption({ label: 'Licence' })
-  await page.getByLabel('Intitulé exact').fill('Licence en sciences comptables')
-  await page.getByLabel("Établissement d'enseignement").fill("Université d'État d'Haïti")
-  await page.getByLabel("Année d'obtention").fill('2019')
-  await page.getByLabel("Domaine d'études").selectOption({ label: 'Comptabilité' })
-  await page.screenshot({ path: `${CAPTURES}/lot1-depot-390.png`, fullPage: true })
-  await page.getByRole('button', { name: /Envoyer mon certificat/ }).click()
-
-  // US-302 : remerciement, ce que ça débloque, avis.
-  await expect(page.getByRole('heading', { name: 'Merci, Jean !' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Ce que ce certificat débloque' })).toContainText('Licence')
-  await page.getByRole('button', { name: /Facile/ }).click()
-  await expect(page.getByText('Merci pour votre avis.')).toBeVisible()
+  await page.getByLabel('Intitulé (facultatif)').fill('Licence en sciences comptables (copie)')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await page.screenshot({ path: `${CAPTURES}/lot1-merci-390.png`, fullPage: true })
+  await page.screenshot({ path: `${CAPTURES}/us1008-depot-390.png`, fullPage: true })
+  await page.getByRole('button', { name: 'Déposer' }).click()
 
-  // US-303 : le certificat apparaît « Reçu ».
-  await page.getByRole('link', { name: 'Voir mes certificats' }).click()
-  const list = page.getByRole('list', { name: 'Certificats déposés' })
-  await expect(list).toContainText('Licence en sciences comptables')
-  await expect(list).toContainText('Reçu')
+  // US-1008 : retour à « Mes certificats », la pièce en tête, à compléter par la DRH.
+  await expect(page.getByText('Pièce déposée. La DRH va la compléter, puis la valider.')).toBeVisible()
+  const list = page.getByRole('list', { name: 'Mes pièces' })
+  const newest = list.getByRole('listitem').first()
+  await expect(newest).toContainText('Licence en sciences comptables (copie)')
+  await expect(newest).toContainText('À compléter')
+  await expect(list).toContainText('Approuvée')  // la licence déjà recueillie par la DRH (base fictive)
+  await page.screenshot({ path: `${CAPTURES}/us1008-certificats-390.png`, fullPage: true })
   await page.setViewportSize({ width: 1280, height: 900 })
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280)
-  await page.screenshot({ path: `${CAPTURES}/lot1-certificats-1280.png`, fullPage: true })
+  await page.screenshot({ path: `${CAPTURES}/us1008-certificats-1280.png`, fullPage: true })
 
-  // US-130 : les RH demandent une correction (motif et commentaire)…
-  // US-133 : par la file de validation et l'écran d'examen.
-  const admin = await (await browser.newContext({ baseURL: new URL(page.url()).origin, viewport: { width: 1280, height: 900 } })).newPage()
-  await adminLogin(admin)
-  await admin.goto('/admin/validation')
-  const queue = admin.getByRole('table', { name: 'Certificats en attente' })
-  const row = queue.getByRole('row').filter({ hasText: 'Licence en sciences comptables' }).filter({ hasText: 'Jean' })
-  await expect(row).toContainText('Jour')
-  await admin.screenshot({ path: `${REFONTE}/us133-file-1280.png`, fullPage: true })
-  await row.getByRole('link', { name: 'Examiner' }).click()
-  await expect(admin.getByRole('heading', { name: 'Licence en sciences comptables', level: 2 })).toBeVisible()
-  await expect(admin.getByText(/· pris par vous$/)).toBeVisible()
-  await expect(admin.getByRole('region', { name: 'Ce que l’employé a déclaré' }).getByLabel('Niveau')).toHaveValue('LICENCE')
-  await admin.screenshot({ path: `${REFONTE}/us133-examen-1280.png`, fullPage: true })
-  await admin.setViewportSize({ width: 390, height: 844 })
-  expect(await admin.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await admin.screenshot({ path: `${REFONTE}/us133-examen-390.png`, fullPage: true })
-  await admin.getByRole('button', { name: 'Rejeter…' }).click()
-  await admin.getByLabel(/Commentaire pour l’employé/).fill('La photo est floue.')
-  await admin.getByRole('button', { name: 'Confirmer le rejet' }).click()
-  await expect(admin.getByRole('heading', { name: 'File de validation des certificats', level: 1 })).toBeVisible()
-  expect(await admin.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await admin.screenshot({ path: `${REFONTE}/us133-file-390.png`, fullPage: true })
-  await admin.close()
-
-  // … l'employé voit le message, et l'avancement dans « Mes certificats ».
-  await page.reload()
-  const corrected = page.getByRole('heading', { name: 'Licence en sciences comptables', level: 3 }).locator('xpath=ancestor::li[1]')
-  await expect(corrected).toContainText('Message des RH : Document illisible ou de mauvaise qualité. La photo est floue.')
-  await page.screenshot({ path: `${REFONTE}/us130-certificats-1280.png`, fullPage: true })
-  await page.setViewportSize({ width: 390, height: 844 })
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await page.screenshot({ path: `${REFONTE}/us130-certificats-390.png`, fullPage: true })
-
-  // Corriger et renvoyer : le formulaire est rempli, seul le fichier est à choisir.
-  await corrected.getByRole('link', { name: 'Corriger et renvoyer' }).click()
-  await expect(page.getByRole('region', { name: 'Vous corrigez « Licence en sciences comptables »' })).toBeVisible()
-  await expect(page.getByLabel('Intitulé exact')).toHaveValue('Licence en sciences comptables')
+  // Le même fichier, une seconde fois : refusé, près du fichier.
+  await page.goto('/certificats/deposer')
   await page.getByLabel('Choisir un fichier').setInputFiles(PDF)
-  await page.screenshot({ path: `${REFONTE}/us130-corriger-390.png`, fullPage: true })
-  await page.getByRole('button', { name: /Renvoyer mon certificat/ }).click()
-  await expect(page.getByRole('heading', { name: 'Merci, Jean !' })).toBeVisible()
-
-  // Le nouveau est « Reçu », l'ancien reste archivé comme preuve.
-  await page.getByRole('link', { name: 'Voir mes certificats' }).click()
-  const filters = page.getByRole('group', { name: 'Filtrer mes certificats' })
-  await expect(filters.getByRole('button', { name: /^À corriger · 0$/ })).toBeVisible()
-  await expect(page.getByRole('list', { name: 'Certificats déposés' })).toContainText('Archivé (remplacé)')
-  await expect(page.getByRole('list', { name: 'Avancement' }).first()).toBeVisible()
+  await page.getByRole('button', { name: 'Déposer' }).click()
+  await expect(page.getByRole('alert')).toContainText('Vous avez déjà déposé ce fichier.')
 })

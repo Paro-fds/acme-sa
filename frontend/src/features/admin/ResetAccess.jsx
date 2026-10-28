@@ -5,8 +5,7 @@ import Button from '../../components/Button.jsx'
 import { useUnauthorizedRedirect } from '../../lib/useLoader.js'
 import Block from './Block.jsx'
 
-export const RESET_DONE =
-  "Accès réinitialisé. L'employé pourra créer un nouveau mot de passe à sa prochaine connexion."
+export const RESET_DONE = "Accès débloqué. L'employé peut se reconnecter avec un code reçu par courriel."
 
 /** Confirmation obligatoire, affichée dans le bloc (CA-07 : « Annuler » ne modifie rien). */
 function Confirmation({ name, resetting, onConfirm, onCancel }) {
@@ -29,9 +28,9 @@ function Confirmation({ name, resetting, onConfirm, onCancel }) {
       className="flex flex-col gap-3 rounded-lg border border-error-border bg-error-bg p-3"
     >
       <div className="flex flex-col gap-0.5">
-        <p id={titleId} className="font-semibold text-heading">Réinitialiser l'accès de {name}{' '}?</p>
+        <p id={titleId} className="font-semibold text-heading">Débloquer l'accès de {name}{' '}?</p>
         <p id={`${titleId}-detail`} className="text-sm text-help">
-          Son mot de passe sera effacé et ses connexions en cours fermées. Son dossier et ses documents sont conservés.
+          Le verrouillage est levé et ses connexions en cours sont fermées. Son dossier et ses documents sont conservés.
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -50,7 +49,7 @@ function Confirmation({ name, resetting, onConfirm, onCancel }) {
           disabled={resetting}
           className="min-h-11 rounded-lg bg-error-text font-semibold text-white disabled:opacity-60"
         >
-          {resetting ? 'Réinitialisation…' : 'Réinitialiser'}
+          {resetting ? 'Déblocage…' : 'Débloquer'}
         </button>
       </div>
     </div>
@@ -58,10 +57,11 @@ function Confirmation({ name, resetting, onConfirm, onCancel }) {
 }
 
 /**
- * US-20 CA-07, US-22 : bloc « Accès » du dossier admin.
- * Compte activé → bouton « Réinitialiser l'accès » avec confirmation ; `onReset()` recharge le dossier.
+ * US-20 CA-07, US-22 devenue « Débloquer l'accès » avec US-1003 : bloc « Accès » du dossier admin.
+ * `activated` : l'employé s'est déjà connecté ; `locked` : accès verrouillé après des échecs.
+ * Bouton « Débloquer l'accès » avec confirmation s'il y a quelque chose à débloquer ; `onReset()` recharge le dossier.
  */
-export default function ResetAccess({ employeeId, name, activated, onReset }) {
+export default function ResetAccess({ employeeId, name, activated, locked = false, onReset }) {
   const [confirming, setConfirming] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [done, setDone] = useState(false)
@@ -98,20 +98,28 @@ export default function ResetAccess({ employeeId, name, activated, onReset }) {
         >
           {activated ? 'verified_user' : 'no_accounts'}
         </span>
-        {activated ? 'Compte activé' : 'Compte non activé'}
+        {activated ? 'Déjà connecté' : 'Jamais connecté'}
       </p>
       <p className="text-sm text-help">
-        {activated ? "L'employé a créé son mot de passe." : "L'employé n'a pas encore créé de mot de passe."}
+        {activated
+          ? "L'employé s'est déjà connecté avec un code reçu par courriel."
+          : "L'employé ne s'est pas encore connecté."}
       </p>
+      {locked && (
+        <p className="flex items-center gap-2 font-semibold text-error-text">
+          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">lock</span>
+          Accès verrouillé après plusieurs échecs
+        </p>
+      )}
       {done && <Alert tone="success">{RESET_DONE}</Alert>}
       <Alert>{error}</Alert>
-      {activated &&
+      {(activated || locked) &&
         (confirming ? (
           <Confirmation name={name} resetting={resetting} onConfirm={confirm} onCancel={cancel} />
         ) : (
           <Button ref={buttonRef} variant="secondary" onClick={() => setConfirming(true)}>
-            <span className="material-symbols-outlined" aria-hidden="true">lock_reset</span>
-            Réinitialiser l'accès
+            <span className="material-symbols-outlined" aria-hidden="true">lock_open</span>
+            Débloquer l'accès
           </Button>
         ))}
     </Block>

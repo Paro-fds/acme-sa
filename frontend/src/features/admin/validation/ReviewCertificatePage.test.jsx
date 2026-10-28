@@ -157,7 +157,7 @@ describe('US-133 CA-08 — votre décision', () => {
     const decision = screen.getByRole('region', { name: 'Votre décision' })
     expect(within(decision).getByRole('button', { name: 'Valider' })).toBeVisible()
     expect(within(decision).getByRole('button', { name: 'Rejeter…' })).toBeVisible()
-    expect(decision).toHaveTextContent('L’employé est prévenu dans le portail. Un rejet demande un motif, choisi dans la liste.')
+    expect(decision).toHaveTextContent('L’employé est prévenu dans PAM. Un rejet demande un motif, choisi dans la liste.')
     expect(screen.queryByText('Historique du traitement')).not.toBeInTheDocument()
   })
 

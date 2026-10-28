@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "bulletins": [
+    {
+      "periode": "2026-09",
+      "date_paie": "2026-09-30",
+      "gains": "45000.00",
+      "retenues": "6120.00",
+      "charges_employeur": "2700.00",
+      "total": "38880.00",
+      "lignes": [
+        {
+          "code": "AA",
+          "libelle": "Salaire de base",
+          "nature": "gain",
+          "montant": "42000.00"
+        },
+        {
+          "code": "AC",
+          "libelle": "Prime de transport",
+          "nature": "gain",
+          "montant": "3000.00"
+        },
+        {
+          "code": "AB",
+          "libelle": "Prime exceptionnelle",
+          "nature": "gain",
+          "montant": "0.00"
+        },
+        {
+          "code": "AG",
+          "libelle": "IRI",
+          "nature": "retenue",
+          "montant": "3420.00"
+        },
+        {
+          "code": "AH",
+          "libelle": "ONA employé",
+          "nature": "retenue",
+          "montant": "2700.00"
+        },
+        {
+          "code": "AK",
+          "libelle": "ONA employeur",
+          "nature": "employeur",
+          "montant": "2700.00"
+        }
+      ]
+    },
+    {
+      "periode": "2026-08",
+      "date_paie": "2026-08-31",
+      "gains": "42000.00",
+      "retenues": "5880.00",
+      "charges_employeur": "2520.00",
+      "total": "36120.00",
+      "lignes": [
+        {
+          "code": "AA",
+          "libelle": "Salaire de base",
+          "nature": "gain",
+          "montant": "42000.00"
+        },
+        {
+          "code": "AG",
+          "libelle": "IRI",
+          "nature": "retenue",
+          "montant": "3360.00"
+        },
+        {
+          "code": "AH",
+          "libelle": "ONA employé",
+          "nature": "retenue",
+          "montant": "2520.00"
+        },
+        {
+          "code": "AK",
+          "libelle": "ONA employeur",
+          "nature": "employeur",
+          "montant": "2520.00"
+        }
+      ]
+    }
+  ]
+}

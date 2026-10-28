@@ -18,8 +18,8 @@ async function load() {
   return { completion: profile.completion, ...certificates, maxMb: form?.max_mb }
 }
 
-/** US-204 CA-01 : ce qui reste avant de déposer, avec un lien vers chaque élément (RG-07). */
-function Checklist({ completion }) {
+/** US-204 CA-01 : ce qui reste avant de déposer, avec un lien vers chaque élément (RG-07). Repris par US-1008. */
+export function Checklist({ completion }) {
   const missing = completion.elements.filter((element) => !element.complete)
   const n = missing.length
   return (

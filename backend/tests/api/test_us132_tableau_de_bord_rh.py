@@ -8,12 +8,11 @@ from fastapi.testclient import TestClient
 from app.auth.api.dependencies import SESSION_COOKIE
 from app.job.domain.application import JobApplication
 from app.job.domain.opening import Actor, JobOpening, OpeningFields
-from tests.conftest import admin_session
+from tests.conftest import admin_session, employee_login
 from tests.employees import EMP_A, EMP_B, EMP_E
 
 DASHBOARD = "/api/admin/dashboard"
 ENGAGEMENT = "/api/admin/engagement"
-PASSWORD = "Bonjour-2026"
 
 
 def _opening(container, clock, code):
@@ -54,19 +53,17 @@ def test_ca04_sans_candidature(admin_client):
 
 
 def _login(client, employee):
-    response = client.post("/api/auth/login", json=employee.identity(password=PASSWORD))
-    assert response.status_code == 204, response.text
+    employee_login(client, employee)  # US-1003
 
 
-def test_ca05_employes_differents_connectes_par_periode_de_7_jours(app, client, account, container, clock):
-    account(EMP_A, PASSWORD)
-    account(EMP_B, PASSWORD)
+def test_ca05_employes_differents_connectes_par_periode_de_7_jours(app, client, container, clock):
     _login(client, EMP_A)  # il y a 15 jours : 3e période en partant de la fin
     clock.advance(days=7)
     _login(client, EMP_A)  # il y a 8 jours : 2e période
     _login(client, EMP_B)
     clock.advance(days=4)
     _login(client, EMP_B)  # il y a 4 jours : ces 7 derniers jours
+    clock.advance(minutes=1)  # US-1003 : 60 secondes entre deux codes
     _login(client, EMP_B)
     clock.advance(days=4)
 

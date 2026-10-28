@@ -68,8 +68,8 @@ def test_ca07_deploye_l_application_demarre_sur_le_schema_des_migrations_sans_le
     app = create_app(settings)
     with TestClient(app) as client:
         assert client.get("/api/health").json() == {"status": "ok"}
-        identity = {"last_name": "JOSEPH", "first_name": "Jean", "birth_date": "1996-03-15"}
-        assert client.post("/api/auth/login", json={**identity, "password": "Bonjour-2026"}).status_code == 401
+        identity = {"employee_code": "INCONNU-0000", "birth_date": "15031996"}
+        assert client.post("/api/auth/identify", json=identity).status_code == 401  # US-1003
     app.state.container.close()
 
 

@@ -12,7 +12,7 @@ COORDINATES = "/api/me/dossier/coordinates"
 CONTACT_AND_EDUCATION = "/api/me/dossier/contact-and-education"
 FRESHNESS = "/api/me/dossier/freshness"
 STILL_ACCURATE = "/api/me/dossier/still-accurate"
-COORDINATES_OK = {"telephone": "3712 3456", "address": "12 rue Capois, Port-au-Prince", "email": "", "no_email": True}
+COORDINATES_OK = {"address": "12 rue Capois, Port-au-Prince"}
 CONTACT_OK = {
     "contact_name": "Jean Baptiste Pierre",
     "contact_relationship": "SIBLING",
@@ -40,11 +40,12 @@ def test_une_information_juste_confirmee_est_a_jour(employee_client, clock):
     body = employee_client(EMP_A).get(FRESHNESS).json()
     assert set(_states(body).values()) == {"FRESH"}
     assert body["stale_count"] == 0
-    telephone = next(item for item in body["items"] if item["key"] == "telephone")
-    assert telephone == {
-        "key": "telephone",
-        "label": "Téléphone",
-        "value": "+509 3712 3456",
+    assert not {"telephone", "email"} & set(_states(body))  # US-1011 : gérés par la DRH dans Vault
+    address = next(item for item in body["items"] if item["key"] == "address")
+    assert address == {
+        "key": "address",
+        "label": "Adresse",
+        "value": "12 rue Capois, Port-au-Prince",
         "confirmed_at": "2026-10-04T09:00:00Z",
         "expires_on": "2027-10-04",
         "reminder_on": "2027-09-04",
@@ -65,7 +66,7 @@ def test_ca01_apres_12_mois_l_information_est_perimee_sans_rien_bloquer(employee
     clock.advance(days=365)  # 04/10/2027
     client = employee_client(EMP_A)
     body = client.get(FRESHNESS).json()
-    assert body["stale_count"] == 7
+    assert body["stale_count"] == 5
     assert set(_states(body).values()) == {"STALE"}
     # Rien n'est bloqué : le profil reste complet (choix du 2026-10-11).
     assert client.get("/api/me/profile").json()["completion"]["percent"] == 100
@@ -83,8 +84,8 @@ def test_ca02_oui_met_a_jour_toutes_les_dates_de_confirmation(employee_client, c
     assert {item["confirmed_at"] for item in body["items"]} == {"2027-11-08T09:00:00Z"}
     # La confirmation garde la valeur : rien n'est modifié.
     dossier = client.get("/api/me/dossier").json()
-    assert dossier["telephone"]["value"] == "+509 3712 3456"
-    assert dossier["telephone"]["confirmed_at"] == "2027-11-08T09:00:00Z"
+    assert dossier["address"]["value"] == "12 rue Capois, Port-au-Prince"
+    assert dossier["address"]["confirmed_at"] == "2027-11-08T09:00:00Z"
 
 
 def test_ca02_une_information_signalee_aux_rh_attend_leur_reponse(employee_client, clock):

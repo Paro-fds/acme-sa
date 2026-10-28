@@ -9,12 +9,7 @@ CONSENT = "/api/me/dossier/consent"
 COORDINATES = "/api/me/dossier/coordinates"
 CONTACT_AND_EDUCATION = "/api/me/dossier/contact-and-education"
 
-COORDINATES_OK = {
-    "telephone": "3712 3456",
-    "address": "12 rue Capois, Port-au-Prince",
-    "email": "jean.joseph@exemple.test",
-    "no_email": False,
-}
+COORDINATES_OK = {"address": "12 rue Capois, Port-au-Prince"}
 CONTACT_OK = {
     "contact_name": "Jean Baptiste Pierre",
     "contact_relationship": "SIBLING",
@@ -60,7 +55,7 @@ def test_ca01_aucune_saisie_avant_le_consentement(employee_client):
 
     assert (coordinates.status_code, contact.status_code) == (403, 403)
     assert coordinates.json()["error"]["code"] == "CONSENT_REQUIRED"
-    assert client.get(DOSSIER).json()["telephone"]["complete"] is False
+    assert client.get(DOSSIER).json()["address"]["complete"] is False
 
 
 def test_ca01_la_case_de_la_mention_est_obligatoire(employee_client):
@@ -94,77 +89,79 @@ def test_ca01_une_seule_fois_la_date_du_premier_consentement_reste(employee_clie
     assert (consent["information_notice_at"], consent["whatsapp"]) == (first, True)
 
 
-# --- Pré-remplissage : l'export propose, l'employé confirme ------------------------------------------
+# --- Pré-remplissage ; US-1011 : téléphone et courriel de Vault, en lecture seule -------------------
 
 
 def test_les_valeurs_de_l_export_sont_proposees_mais_pas_encore_completes(consented):
     dossier = consented(EMP_A).get(DOSSIER).json()
 
-    assert dossier["telephone"] == {"value": "+509 3722 1111", "complete": False, "confirmed_at": None}
-    assert dossier["address"]["value"] == "12 rue Capois, Port-au-Prince"
-    assert dossier["email"]["value"] == "jean.joseph@exemple.test"
-    assert dossier["email"]["no_email"] is False
+    assert dossier["telephone"] == {"value": "+509 3722 1111", "complete": True, "confirmed_at": None, "read_only": True}
+    assert dossier["email"] == {
+        "value": "jean.joseph@exemple.test", "complete": True, "confirmed_at": None, "read_only": True, "no_email": False,
+    }
+    assert dossier["address"] | {"confirmed_at": None} == {
+        "value": "12 rue Capois, Port-au-Prince", "complete": False, "confirmed_at": None, "read_only": False,
+    }
     assert dossier["emergency_contact"]["complete"] is False
-    assert dossier["education_level"] == {"value": None, "complete": False, "confirmed_at": None}
+    assert dossier["education_level"]["value"] is None and dossier["education_level"]["complete"] is False
     assert SECRET_MARKER not in str(dossier)
 
 
-def test_au_depart_rien_n_est_complet(consented):
-    assert _percent(consented(EMP_A)) == 0
+def test_au_depart_seuls_le_telephone_et_le_courriel_de_vault_sont_complets(consented):
+    assert _percent(consented(EMP_A)) == 25  # 2 éléments sur 8
 
 
-# --- Enregistrer les coordonnées ------------------------------------------------------------------
+def test_us1011_sans_courriel_dans_vault(consented):
+    email = consented(EMP_E).get(DOSSIER).json()["email"]
+
+    assert (email["value"], email["no_email"], email["complete"], email["read_only"]) == (None, True, True, True)
 
 
-def test_enregistrer_les_coordonnees_les_rend_completes(consented):
+# --- Enregistrer l'adresse ; US-1011 : le téléphone et le courriel ne se changent pas ici ---------------
+
+
+def test_enregistrer_l_adresse_la_rend_complete(consented):
     client = consented(EMP_A)
 
     response = client.put(COORDINATES, json=COORDINATES_OK)
 
     assert response.status_code == 200
     dossier = response.json()
-    assert dossier["telephone"]["value"] == "+509 3712 3456"
     assert [dossier[key]["complete"] for key in ("telephone", "address", "email")] == [True, True, True]
     assert dossier["completion"]["percent"] == 37
     assert _percent(client) == 37
 
 
-def test_un_champ_vide_reste_a_completer_sans_bloquer_les_autres(consented):
-    client = consented(EMP_A)
-
-    response = client.put(COORDINATES, json=COORDINATES_OK | {"address": "", "email": ""})
-
-    assert response.status_code == 200
-    dossier = response.json()
-    assert [dossier[key]["complete"] for key in ("telephone", "address", "email")] == [True, False, False]
-
-
-def test_le_profil_affiche_les_coordonnees_du_dossier(consented):
-    client = consented(EMP_A)
-    client.put(COORDINATES, json=COORDINATES_OK)
-
-    assert client.get("/api/me/profile").json()["telephone_number"] == "+509 3712 3456"
-
-
-# --- CA-02 : format invalide → message près du champ, rien n'est enregistré ---------------------------
-
-
-@pytest.mark.parametrize(
-    ("changes", "field", "message"),
-    [
-        ({"telephone": "3712"}, "telephone", "Le numéro doit contenir 8 chiffres, par exemple +509 3712 3456."),
-        ({"email": "jean@exemple"}, "email", "Saisissez une adresse email complète, par exemple prenom.nom@exemple.com."),
-        ({"address": "Rue"}, "address", "Ajoutez votre adresse complète : au moins 5 caractères."),
-    ],
-)
-def test_ca02_un_format_invalide_dit_quoi_faire_et_rien_n_est_enregistre(consented, changes, field, message):
+@pytest.mark.parametrize("changes", [{"telephone": "3712 3456"}, {"email": "autre@exemple.test"}, {"no_email": True}])
+def test_us1011_le_telephone_et_le_courriel_sont_refuses(consented, changes):
     client = consented(EMP_A)
 
     response = client.put(COORDINATES, json=COORDINATES_OK | changes)
 
     assert response.status_code == 422
-    assert response.json()["error"] == {"code": "INVALID_FIELD", "message": message, "field": field}
-    assert client.get(DOSSIER).json()["telephone"]["complete"] is False
+    dossier = client.get(DOSSIER).json()
+    assert (dossier["telephone"]["value"], dossier["email"]["value"]) == ("+509 3722 1111", "jean.joseph@exemple.test")
+
+
+def test_une_adresse_vide_reste_a_completer(consented):
+    dossier = consented(EMP_A).put(COORDINATES, json={"address": ""}).json()
+
+    assert dossier["address"]["complete"] is False
+
+
+# --- CA-02 : format invalide → message près du champ, rien n'est enregistré ---------------------------
+
+
+def test_ca02_une_adresse_invalide_dit_quoi_faire_et_rien_n_est_enregistre(consented):
+    client = consented(EMP_A)
+
+    response = client.put(COORDINATES, json={"address": "Rue"})
+
+    assert response.status_code == 422
+    assert response.json()["error"] == {
+        "code": "INVALID_FIELD", "message": "Ajoutez votre adresse complète : au moins 5 caractères.", "field": "address",
+    }
+    assert client.get(DOSSIER).json()["address"]["complete"] is False
 
 
 def test_ca02_contact_incomplet_dit_ce_qui_manque(consented):
@@ -175,24 +172,7 @@ def test_ca02_contact_incomplet_dit_ce_qui_manque(consented):
     assert response.json()["error"]["message"] == "Ajoutez le numéro de téléphone de cette personne."
 
 
-# --- CA-03 : « Je n'ai pas d'adresse email » --------------------------------------------------------
-
-
-def test_ca03_pas_d_adresse_email_rend_l_email_complet(consented):
-    client = consented(EMP_E)
-
-    dossier = client.put(COORDINATES, json=COORDINATES_OK | {"email": "", "no_email": True}).json()
-
-    assert dossier["email"] == {"value": None, "no_email": True, "complete": True, "confirmed_at": dossier["email"]["confirmed_at"]}
-    assert dossier["email"]["confirmed_at"] is not None
-
-
-def test_ca03_la_case_cochee_efface_une_adresse_saisie(consented):
-    client = consented(EMP_A)
-
-    dossier = client.put(COORDINATES, json=COORDINATES_OK | {"no_email": True}).json()
-
-    assert (dossier["email"]["value"], dossier["email"]["complete"]) == (None, True)
+# CA-03 (« Je n'ai pas d'adresse email ») : retiré par US-1011, le courriel vient de Vault.
 
 
 # --- CA-04 : contact d'urgence et niveau d'études --------------------------------------------------
@@ -251,30 +231,28 @@ def test_ca05_chaque_information_garde_sa_date_de_confirmation(consented, clock)
 
     dossier = client.put(CONTACT_AND_EDUCATION, json=CONTACT_OK).json()
 
-    assert dossier["telephone"]["confirmed_at"] == _iso(first)
+    assert dossier["address"]["confirmed_at"] == _iso(first)
     assert dossier["emergency_contact"]["confirmed_at"] == _iso(clock.now())
     assert dossier["education_level"]["confirmed_at"] == _iso(clock.now())
 
 
 def test_ca05_confirmer_sans_changement_met_la_date_a_jour_et_garde_l_historique(consented, clock, container):
     client = consented(EMP_A)
-    client.put(COORDINATES, json=COORDINATES_OK)
+    client.put(COORDINATES, json={"address": "8 rue Pavée, Jacmel"})
     clock.advance(minutes=10)
 
-    dossier = client.put(COORDINATES, json=COORDINATES_OK).json()
+    dossier = client.put(COORDINATES, json={"address": "8 rue Pavée, Jacmel"}).json()
 
-    assert dossier["telephone"]["confirmed_at"] == _iso(clock.now())
-    history = [(c.information, c.gesture) for c in container.dossiers.confirmations(EMP_A.id) if c.information == "telephone"]
-    assert history == [("telephone", "CHANGE"), ("telephone", "CONFIRMATION")]
+    assert dossier["address"]["confirmed_at"] == _iso(clock.now())
+    history = [(c.information, c.gesture) for c in container.dossiers.confirmations(EMP_A.id) if c.information == "address"]
+    assert history == [("address", "CHANGE"), ("address", "CONFIRMATION")]
 
 
 def test_ca05_une_valeur_de_l_export_gardee_telle_quelle_est_une_confirmation(consented, container):
-    client = consented(EMP_A)
-
-    client.put(COORDINATES, json=COORDINATES_OK | {"telephone": "+509 3722 1111"})
+    consented(EMP_A).put(COORDINATES, json=COORDINATES_OK)
 
     gestures = {c.information: c.gesture for c in container.dossiers.confirmations(EMP_A.id)}
-    assert gestures == {"telephone": "CONFIRMATION", "address": "CONFIRMATION", "email": "CONFIRMATION"}
+    assert gestures == {"address": "CONFIRMATION"}
 
 
 def test_ca05_une_premiere_saisie_est_une_saisie(consented, container):

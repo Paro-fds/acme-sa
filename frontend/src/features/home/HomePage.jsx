@@ -17,7 +17,7 @@ const BENEFITS = [
 ]
 
 const STEPS = [
-  'Créez votre mot de passe avec votre nom, votre prénom et votre date de naissance.',
+  'Connectez-vous avec votre code employé, votre date de naissance et un code reçu par courriel.',
   'Vérifiez les 8 informations de votre profil.',
   'Déposez vos diplômes : les RH les valident.',
 ]

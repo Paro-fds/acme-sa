@@ -39,7 +39,6 @@ from app.dossier.domain.rules import (
     clean_address,
     clean_contact_name,
     clean_education_level,
-    clean_email,
     clean_phone,
     clean_relationship,
     normalize_text,
@@ -57,6 +56,8 @@ class FieldView:
     """Valeur du dossier, sinon celle de l'export proposée à l'employé."""
     complete: bool
     confirmed_at: datetime | None
+    read_only: bool = False
+    """US-1011 : valeur de Vault, que seule la DRH change (téléphone, courriel)."""
 
 
 @dataclass(frozen=True)
@@ -105,9 +106,14 @@ def _proposed_phone(value: str) -> str:
         return value
 
 
+FROM_VAULT = frozenset({Information.TELEPHONE.value, Information.EMAIL.value})
+"""US-1011 : le téléphone et le courriel viennent de Vault ; l'employé n'a rien à y faire, ils comptent comme complets."""
+
+
 def _completed(dossier: Dossier, dates: dict[str, datetime], reports: list[Report]) -> set[str]:
-    """Les éléments de RG-01 complets : ceux du dossier, et agence, poste, date d'embauche confirmés ou signalés."""
-    return dossier.done() | hr_done(set(dates), reports)
+    """Les éléments de RG-01 complets : ceux du dossier, le téléphone et le courriel de Vault (US-1011),
+    et agence, poste, date d'embauche confirmés ou signalés."""
+    return dossier.done() | FROM_VAULT | hr_done(set(dates), reports)
 
 
 class GetMyDossier:
@@ -134,17 +140,14 @@ class GetMyDossier:
             return FieldView(value if value else (proposed or None), information.value in done, dates.get(information.value))
 
         contact = dossier.emergency_contact
-        email_done = Information.EMAIL.value in done
+        vault_phone = _proposed_phone(export.get("telephone", "")) or None
+        vault_email = export.get("email") or None
         return DossierView(
             consent=ConsentState.of(self._dossiers.consents(employee_id)),
-            telephone=field(Information.TELEPHONE, dossier.telephone, _proposed_phone(export.get("telephone", ""))),
+            # US-1011 : téléphone et courriel de Vault, en lecture seule ; ils servent à la connexion (doc PAM).
+            telephone=FieldView(vault_phone, True, None, read_only=True),
             address=field(Information.ADDRESS, dossier.address, export.get("address")),
-            email=EmailView(
-                dossier.email if email_done else (export.get("email") or None),
-                email_done,
-                dates.get(Information.EMAIL.value),
-                no_email=dossier.no_email,
-            ),
+            email=EmailView(vault_email, True, None, read_only=True, no_email=vault_email is None),
             emergency_contact=ContactView(
                 contact.name if contact else None,
                 contact.relationship if contact else None,
@@ -249,22 +252,16 @@ def _export_value(export: dict[str, str], information: Information) -> str | Non
 
 
 class SaveCoordinates(_SaveSection):
-    """Section 1 / 3 : téléphone, adresse, email ou « Je n'ai pas d'adresse email » (CA-02, CA-03)."""
+    """Section 1 / 3 : l'adresse de résidence. US-1011 : le téléphone et le courriel viennent de Vault et ne se
+    changent qu'auprès de la DRH ; ils ne passent plus par ici."""
 
-    def execute(self, employee_id: str, telephone: str, address: str, email: str, no_email: bool) -> None:
-        values = {
-            "telephone": clean_phone(telephone, field="telephone") if normalize_text(telephone) else None,
-            "address": clean_address(address) if normalize_text(address) else None,
-            "email": clean_email(email) if normalize_text(email) and not no_email else None,
-        }
+    def execute(self, employee_id: str, address: str) -> None:
+        value = clean_address(address) if normalize_text(address) else None
 
         def update(dossier: Dossier) -> None:
-            dossier.telephone = values["telephone"]
-            dossier.address = values["address"]
-            dossier.email = values["email"]
-            dossier.no_email = no_email
+            dossier.address = value
 
-        self._save(employee_id, update, (Information.TELEPHONE, Information.ADDRESS, Information.EMAIL))
+        self._save(employee_id, update, (Information.ADDRESS,))
 
 
 class SaveContactAndEducation(_SaveSection):
@@ -406,6 +403,8 @@ class _Freshness:
         hr = self._hr_source.execute(employee_id)
         current = []
         for key in PERISHABLE:
+            if key in FROM_VAULT:  # US-1011 : la DRH tient le téléphone et le courriel à jour dans Vault
+                continue
             confirmed_at = dates.get(key)
             if confirmed_at is None:
                 continue

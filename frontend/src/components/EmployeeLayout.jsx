@@ -103,8 +103,8 @@ function Brand() {
     <Link to="/accueil" className="flex items-center gap-3">
       <img src={logo} alt="ACME SA" width="40" height="40" className="size-10 shrink-0 rounded-full" />
       <span className="flex min-w-0 flex-col">
-        <span className="truncate font-semibold text-heading">Portail Carrière</span>
-        <span className="truncate text-sm text-help">ACME SA</span>
+        <span className="truncate font-semibold text-heading">PAM</span>
+        <span className="truncate text-sm text-help">Plateforme ACME Multifonction</span>
       </span>
     </Link>
   )
@@ -205,8 +205,8 @@ function MobileHeader({ identity, nav }) {
           )}
           <img src={logo} alt="ACME SA" width="40" height="40" className="size-10 shrink-0 rounded-full" />
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate font-semibold text-heading">Portail Carrière</span>
-            <span className="truncate text-sm text-help">Institution de Microfinance — Haïti</span>
+            <span className="truncate font-semibold text-heading">PAM</span>
+            <span className="truncate text-sm text-help">Plateforme ACME Multifonction</span>
           </div>
           {nav && <EmployeeNotificationBell />}
           <AccountMenu space="employee" />
@@ -228,7 +228,7 @@ function BackLink({ to, label }) {
 
 /**
  * US-207, US-113 : cadre de l'espace employé.
- * Téléphone (écrans 06 → 13) : en-tête « Portail Carrière » avec le bouton ☰, contenu, barre d'actions et barre du bas.
+ * Téléphone (écrans 06 → 13) : en-tête « PAM » avec le bouton ☰, contenu, barre d'actions et barre du bas.
  * Ordinateur (US-127) : panneau bleu fixe à gauche, barre du haut (date, cloche, compte), contenu au centre, `aside` (progression, aide) dans la colonne de droite,
  * boutons d'action en bas du contenu au lieu d'une barre collée. `wide` : pleine largeur sans colonne de droite.
  */

@@ -11,9 +11,7 @@ def test_ca01_tant_que_le_profil_n_est_pas_complet_les_elements_manquants_sont_l
 
     assert completion["is_complete"] is False
     assert [e["key"] for e in completion["elements"] if not e["complete"]] == [
-        "telephone",
         "address",
-        "email",
         "emergency_contact",
         "education_level",
         "agency_confirmed",

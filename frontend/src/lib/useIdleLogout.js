@@ -15,8 +15,8 @@ const SPACES = {
   admin: { loginPath: '/admin/connexion', option: 'admin_idle_minutes' },
 }
 
-export const idleNotice = (minutes) =>
-  `Vous avez été déconnecté après ${minutes} minutes sans activité. Reconnectez-vous.`
+/** US-1017 : texte du modèle du directeur (« Session fermée après 5 minutes sans action. »). */
+export const idleNotice = (minutes) => `Session fermée après ${minutes} minutes sans action.`
 
 let options = null
 

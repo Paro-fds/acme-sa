@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -109,7 +109,8 @@ describe('US-120 CA-05 — la page Notifications', () => {
 
     await user.click(screen.getByRole('button', { name: 'Tout marquer comme lu' }))
     expect(markAllMyNotificationsRead).toHaveBeenCalled()
-    expect(getMyNotifications).toHaveBeenCalledTimes(3) // cloche + page, puis la page après « tout lu »
+    // cloche + page, puis la page après « tout lu » : le rechargement suit la réponse, il peut arriver après le clic
+    await waitFor(() => expect(getMyNotifications).toHaveBeenCalledTimes(3))
   })
 
   it('aucune notification : le dit simplement', async () => {

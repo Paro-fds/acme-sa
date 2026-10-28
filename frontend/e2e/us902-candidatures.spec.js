@@ -13,7 +13,7 @@ async function completeProfile(page) {
   const api = page.request
   await api.post('/api/me/dossier/consent', { data: { information_notice: true, whatsapp: false } })
   await api.put('/api/me/dossier/coordinates', {
-    data: { telephone: '3712 3456', address: '12 rue Capois, Port-au-Prince', email: '', no_email: true },
+    data: { address: '12 rue Capois, Port-au-Prince' }, // US-1011 : téléphone et courriel viennent de Vault
   })
   await api.put('/api/me/dossier/contact-and-education', {
     data: { contact_name: 'Paul Pierre', contact_relationship: 'SIBLING', contact_telephone: '4812 8901', education_level: 'LICENCE' },

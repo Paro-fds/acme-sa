@@ -14,7 +14,7 @@ from tests.referential import workbook
 
 OPENINGS = "/api/admin/openings"
 MY_APPLICATIONS = "/api/me/applications"
-COORDINATES_OK = {"telephone": "3712 3456", "address": "12 rue Capois, Port-au-Prince", "email": "", "no_email": True}
+COORDINATES_OK = {"address": "12 rue Capois, Port-au-Prince"}
 CONTACT_OK = {
     "contact_name": "Jean Baptiste Pierre",
     "contact_relationship": "SIBLING",

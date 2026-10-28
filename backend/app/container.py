@@ -5,8 +5,19 @@ Les cas d'utilisation sont créés à la demande : remplacer un adaptateur
 (ex. `container.clock` dans un test) est pris en compte immédiatement.
 """
 
+import secrets
 from datetime import timedelta
 
+from sqlalchemy import create_engine, inspect
+
+from app.per.application.my_per import DownloadMyPayslip, GetMyPayslips, GetMyPer
+from app.per.infrastructure.payslip_pdf import PdfPayslipRenderer
+from app.per.infrastructure.sources import LocalPerSource, S3PerSource
+from app.carrieres.application.deposit_piece import DepositPiece
+from app.carrieres.application.my_pieces import GetMyPieceFile, ListMyPieces
+from app.carrieres.infrastructure.sql_pieces import SqlCarrieresPieces
+from app.carrieres.infrastructure.tables import CARRIERES_TABLES
+from app.tools.create_fake_carrieres import create as create_fake_carrieres
 from app.admin.application.audit_cases import RecordDossierConsultation
 from app.admin.application.employee_documents import GetEmployeeDocumentFile, ListEmployeeDocuments
 from app.admin.application.export_employees import ExportEmployeesList
@@ -16,7 +27,7 @@ from app.admin.application.get_employee_folder import GetEmployeeFolder
 from app.admin.application.get_engagement import GetEngagement
 from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
-from app.admin.application.reset_access import ResetAccess
+from app.admin.application.reset_access import UnlockAccess
 from app.admin.application.search_qualified_employees import SearchQualifiedEmployees
 from app.admin.application.notifications import GetNotifications, MarkAllNotificationsRead, MarkNotificationRead
 from app.admin.infrastructure.sql_audit_repository import SqlAuditRepository
@@ -45,11 +56,21 @@ from app.auth.application.admin_accounts import (
     LoginAdmin,
     SetAdminStatus,
 )
-from app.auth.application.use_cases import CountLogins, LoginEmployee, RegisterPassword
+from app.auth.application.employee_login import (
+    ContactWatch,
+    IdentifyEmployee,
+    LoginGuard,
+    LoginMessages,
+    SendLoginCode,
+    VerifyLoginCode,
+)
+from app.auth.application.use_cases import CountLogins
 from app.auth.domain.model import SubjectType
 from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.network import parse_networks
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
+from app.auth.infrastructure.email import LocalEmailSender, SesEmailSender, UnconfiguredEmailSender, load_otp_template
+from app.auth.infrastructure.whatsapp import LocalWhatsAppSender, MetaWhatsAppSender, UnconfiguredWhatsAppSender
 from app.auth.infrastructure.mfa_adapters import (
     ConfigurableCodeSender,
     LocalOutboxCodeSender,
@@ -59,6 +80,11 @@ from app.auth.infrastructure.mfa_adapters import (
 )
 from app.auth.infrastructure.sql_repositories import (
     SqlAccountRepository,
+    SqlLoginCodeRepository,
+    SqlCaptchaRepository,
+    SqlLoginLockRepository,
+    SqlSeenContactRepository,
+    SqlWhatsAppQuotaRepository,
     SqlAdminAccountRepository,
     SqlLoginJournal,
     SqlSessionRepository,
@@ -116,7 +142,7 @@ from app.certificate.application.validation_queue import (
 )
 from app.certificate.infrastructure.sql_certificate_repository import SqlCertificateRepository
 from app.certificate.infrastructure.storage import LocalCertificateStorage, S3CertificateStorage
-from app.config import Settings
+from app.config import Settings, normalize_database_url
 from app.document.application.use_cases import UploadDocument
 from app.document.infrastructure.local_file_storage import LocalFileStorage
 from app.document.infrastructure.remote_file_storage import S3FileStorage
@@ -138,6 +164,7 @@ from app.dossier.application.use_cases import (
 from app.dossier.infrastructure.sql_dossier_repository import SqlDossierRepository
 from app.employee.application.get_profile import GetEmployeeProfile
 from app.employee.infrastructure.csv_employee_repository import CsvEmployeeRepository
+from app.employee.infrastructure.vault_source import LocalVaultFile, S3VaultObject
 from app.referential.application.use_cases import (
     GetReferential,
     ImportReferential,
@@ -170,11 +197,21 @@ class Container:
             self.database.create_schema()
 
         self.clock = SystemClock()
-        self.employees = CsvEmployeeRepository(settings.acme_csv_path)
+        self.employees = CsvEmployeeRepository(vault_source(settings))
+        self._carrieres = None
+        self.per_source = None
         self.accounts = SqlAccountRepository(self.database)
         self.admin_accounts = SqlAdminAccountRepository(self.database)
         self.sessions = SqlSessionRepository(self.database)
         self.employee_logins = SqlLoginJournal(self.database)
+        self.login_codes = SqlLoginCodeRepository(self.database)
+        self.email_sender = email_sender(settings)
+        self.whatsapp_sender = whatsapp_sender(settings)
+        self.whatsapp_quotas = SqlWhatsAppQuotaRepository(self.database)
+        self.seen_contacts = SqlSeenContactRepository(self.database)
+        self.login_locks = SqlLoginLockRepository(self.database)
+        self.captchas = SqlCaptchaRepository(self.database)
+        self.otp_key = otp_key(settings)
         self.updates = SqlUpdateRepository(self.database)
         self.documents = SqlDocumentRepository(self.database)
         self.careers = SqlCareerRepository(self.database)
@@ -214,29 +251,53 @@ class Container:
             SubjectType.EMPLOYEE: timedelta(minutes=self.settings.employee_session_minutes),
             SubjectType.ADMIN: timedelta(minutes=self.settings.admin_session_minutes),
             SubjectType.ADMIN_MFA: timedelta(minutes=10),
+            SubjectType.EMPLOYEE_LOGIN: timedelta(minutes=20),  # US-1016 : le défi du modèle dure 20 minutes
         }
-        return SessionService(self.sessions, self.clock, durations)
+        # US-1017 : la session employé est bornée à 15 minutes, même si la personne clique (modèle du directeur).
+        fixed = frozenset({SubjectType.EMPLOYEE, SubjectType.EMPLOYEE_LOGIN})
+        return SessionService(self.sessions, self.clock, durations, fixed)
 
-    def register_password(self) -> RegisterPassword:
-        return RegisterPassword(
+    def identify_employee(self) -> IdentifyEmployee:
+        return IdentifyEmployee(
             self.employees,
-            self.updates,
-            self.accounts,
-            self.password_hasher,
+            LoginGuard(self.login_locks, self.captchas, self.login_messages()),
             self.session_service(),
             self.clock,
-            self.employee_logins,
+            self.login_messages(),
+            self.whatsapp_quotas,
+            self.contact_watch(),
+            self.whatsapp_sender,
         )
 
-    def login_employee(self) -> LoginEmployee:
-        return LoginEmployee(
+    def login_messages(self) -> LoginMessages:
+        return LoginMessages(self.email_sender, load_otp_template())
+
+    def contact_watch(self) -> ContactWatch:
+        return ContactWatch(self.seen_contacts, self.login_messages())
+
+    def send_login_code(self) -> SendLoginCode:
+        return SendLoginCode(
             self.employees,
-            self.updates,
-            self.accounts,
-            self.password_hasher,
+            self.login_codes,
+            self.email_sender,
+            self.clock,
+            self.otp_key,
+            show_code=self.settings.app_env == "local",
+            whatsapp=self.whatsapp_sender,
+            quotas=self.whatsapp_quotas,
+            watch=self.contact_watch(),
+            messages=self.login_messages(),
+        )
+
+    def verify_login_code(self) -> VerifyLoginCode:
+        return VerifyLoginCode(
+            self.employees,
+            self.login_codes,
             self.session_service(),
             self.clock,
             self.employee_logins,
+            self.login_messages(),
+            self.otp_key,
         )
 
     def login_admin(self) -> LoginAdmin:
@@ -366,7 +427,7 @@ class Container:
         return GetMenuCounts(self.certificates, self.dossiers, self.referential)
 
     def get_employee_folder(self) -> GetEmployeeFolder:
-        return GetEmployeeFolder(self.employees, self.updates, self.accounts)
+        return GetEmployeeFolder(self.employees, self.updates, self.login_locks, self.employee_logins, self.clock)
 
     def list_employees(self) -> ListEmployees:
         return ListEmployees(self.employees, self.updates)
@@ -383,8 +444,8 @@ class Container:
     def get_audit_log(self) -> GetAuditLog:
         return GetAuditLog(self.audit_logs)
 
-    def reset_access(self) -> ResetAccess:
-        return ResetAccess(self.employees, self.accounts, self.session_service(), self.audit_logs, self.clock)
+    def unlock_access(self) -> UnlockAccess:
+        return UnlockAccess(self.employees, self.login_locks, self.session_service(), self.audit_logs, self.clock)
 
     def list_employee_documents(self) -> ListEmployeeDocuments:
         return ListEmployeeDocuments(self.employees, self.documents)
@@ -442,6 +503,43 @@ class Container:
 
     def receive_local_upload(self) -> ReceiveLocalUpload:
         return ReceiveLocalUpload(self.certificate_storage, self.certificate_limits())
+
+    @property
+    def carrieres(self) -> SqlCarrieresPieces:
+        """US-1007 : ouverte au premier usage, pour qu'une base Carrières absente ne bloque pas le reste de PAM."""
+        if self._carrieres is None:
+            self._carrieres = SqlCarrieresPieces(carrieres_engine(self.settings))
+        return self._carrieres
+
+    @carrieres.setter
+    def carrieres(self, value) -> None:
+        self._carrieres = value
+
+    def get_my_per(self) -> GetMyPer:
+        if self.per_source is None:  # ouvert au premier usage, comme la base Carrières
+            self.per_source = per_source(self.settings)
+        return GetMyPer(self.employees, self.per_source, self.settings.per_s3_prefix)
+
+    def get_my_payslips(self) -> GetMyPayslips:
+        if self.per_source is None:
+            self.per_source = per_source(self.settings)
+        return GetMyPayslips(self.employees, self.per_source, self.settings.per_s3_prefix)
+
+    def download_my_payslip(self) -> DownloadMyPayslip:
+        if self.per_source is None:
+            self.per_source = per_source(self.settings)
+        return DownloadMyPayslip(
+            self.employees, self.per_source, self.settings.per_s3_prefix, PdfPayslipRenderer.with_acme_logo()
+        )
+
+    def deposit_piece(self) -> DepositPiece:
+        return DepositPiece(self.employees, self.carrieres, self.clock, IsProfileComplete(self.dossiers))
+
+    def list_my_pieces(self) -> ListMyPieces:
+        return ListMyPieces(self.employees, self.carrieres)
+
+    def get_my_piece_file(self) -> GetMyPieceFile:
+        return GetMyPieceFile(self.employees, self.carrieres)
 
     def deposit_certificate(self) -> DepositCertificate:
         return DepositCertificate(
@@ -621,6 +719,74 @@ class Container:
 
 
 
+
+
+def email_sender(settings: Settings):
+    """US-1003 : SES dès qu'un expéditeur est configuré ; sinon rien ne part, et seul le poste local affiche le code."""
+    if settings.ses_sender:
+        return SesEmailSender.create(settings.ses_sender, settings.ses_region, settings.ses_reply_to)
+    if settings.app_env == "local":
+        return LocalEmailSender()
+    return UnconfiguredEmailSender()
+
+
+def whatsapp_sender(settings: Settings):
+    """US-1004 : API de Meta dès que le jeton, le numéro et le modèle sont configurés ; sinon, seul le poste local
+    affiche le code, et ailleurs WhatsApp est refusé."""
+    if settings.whatsapp_meta_token and settings.whatsapp_meta_phone_number_id and settings.whatsapp_template:
+        return MetaWhatsAppSender(
+            settings.whatsapp_meta_token, settings.whatsapp_meta_phone_number_id, settings.whatsapp_template
+        )
+    if settings.app_env == "local":
+        return LocalWhatsAppSender()
+    return UnconfiguredWhatsAppSender()
+
+
+def otp_key(settings: Settings) -> str:
+    """US-1003 : clé des empreintes des codes. Obligatoire en production ; ailleurs, une clé de développement
+    (poste local) ou tirée au démarrage (les codes en cours ne survivent pas à un redémarrage)."""
+    if settings.otp_hmac_key:
+        return settings.otp_hmac_key
+    if settings.app_env == "production":
+        raise ValueError("OTP_HMAC_KEY est obligatoire en production (clé des codes de connexion).")
+    if settings.app_env == "local":
+        return "cle-de-developpement-du-poste-local"
+    return secrets.token_hex(32)
+
+
+def per_source(settings: Settings):
+    """US-1012 : le seau des balances dès qu'il est configuré, sauf en `demo` et `recette` (balances fictives) ;
+    en production, jamais un fichier posé sur le disque."""
+    if settings.per_s3_bucket and settings.app_env not in ("demo", "recette"):
+        return S3PerSource.create(settings.per_s3_bucket, settings.s3_region)
+    if settings.app_env == "production":
+        raise ValueError("PER_S3_BUCKET est obligatoire en production : les balances viennent de l'export Shivam.")
+    return LocalPerSource(settings.per_local_dir)
+
+
+def carrieres_engine(settings: Settings):
+    """US-1007 : la base de Carrières. En production, `CARRIERES_DATABASE_URL` est obligatoire ; ailleurs, sans
+    adresse, une base fictive est créée dans ACME_DATA_DIR (US-1000), jamais à côté d'une vraie base."""
+    if settings.carrieres_database_url:
+        return create_engine(normalize_database_url(settings.carrieres_database_url), pool_pre_ping=True)
+    if settings.app_env == "production":
+        raise ValueError("CARRIERES_DATABASE_URL est obligatoire en production : PAM écrit les pièces dans Carrières.")
+    engine = create_engine(f"sqlite:///{(settings.acme_data_dir / 'carrieres.db').as_posix()}")
+    if not set(CARRIERES_TABLES) & set(inspect(engine).get_table_names()):
+        create_fake_carrieres(engine, app_env=settings.app_env)
+    return engine
+
+
+def vault_source(settings: Settings):
+    """US-1001 : la copie Vault sur S3 dès qu'un seau est configuré, sauf en `demo` et `recette` où le jeu
+    fictif reste imposé (US-001 CA-05) ; en production, jamais un fichier posé sur le disque."""
+    if settings.vault_s3_bucket and settings.app_env not in ("demo", "recette"):
+        return S3VaultObject.create(settings.vault_s3_bucket, settings.vault_s3_key, settings.s3_region)
+    if settings.app_env == "production":
+        raise ValueError(
+            "VAULT_S3_BUCKET est obligatoire en production : la liste des employés vient de la copie Vault sur S3."
+        )
+    return LocalVaultFile(settings.acme_csv_path)
 
 
 def _file_storage(settings: Settings):

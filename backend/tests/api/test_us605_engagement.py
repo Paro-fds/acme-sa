@@ -5,21 +5,17 @@ existeront (modèle de données §3, connexion qui ne suit aucun message).
 """
 
 from tests.api.test_us301_depot import _deposit
-from tests.conftest import complete_profile
+from tests.conftest import complete_profile, employee_login
 from tests.employees import EMP_A, EMP_B
 
 ENGAGEMENT = "/api/admin/engagement"
-PASSWORD = "Bonjour-2026"
 
 
 def _login(client, employee):
-    response = client.post("/api/auth/login", json=employee.identity(password=PASSWORD))
-    assert response.status_code == 204, response.text
+    employee_login(client, employee)  # US-1003
 
 
-def test_ca01_chaque_connexion_est_enregistree_avec_sa_date(client, account, container, clock):
-    account(EMP_A, PASSWORD)
-
+def test_ca01_chaque_connexion_est_enregistree_avec_sa_date(client, container, clock):
     _login(client, EMP_A)
     first = clock.now()
     clock.advance(minutes=40)
@@ -29,27 +25,21 @@ def test_ca01_chaque_connexion_est_enregistree_avec_sa_date(client, account, con
     assert [(login.employee_id, login.at) for login in logins] == [(EMP_A.id, first), (EMP_A.id, clock.now())]
 
 
-def test_ca01_une_connexion_refusee_n_est_pas_comptee(client, account, container):
-    account(EMP_A, PASSWORD)
-
-    client.post("/api/auth/login", json=EMP_A.identity(password="Mauvais-2026"))
+def test_ca01_une_connexion_refusee_n_est_pas_comptee(client, container):
+    client.post("/api/auth/identify", json={"employee_code": EMP_A.employee_code, "birth_date": "01011900"})
 
     assert container.employee_logins.all() == []
 
 
 def test_ca01_la_premiere_connexion_compte_aussi(client, container):
-    response = client.post(
-        "/api/auth/register", json=EMP_B.identity(password=PASSWORD, password_confirmation=PASSWORD)
-    )
+    _login(client, EMP_B)
 
-    assert response.status_code == 204, response.text
     assert [login.employee_id for login in container.employee_logins.all()] == [EMP_B.id]
 
 
-def test_ca01_le_tableau_compte_les_connexions_des_30_derniers_jours(client, account, admin_client, clock):
-    account(EMP_A, PASSWORD)
-    account(EMP_B, PASSWORD)
+def test_ca01_le_tableau_compte_les_connexions_des_30_derniers_jours(client, admin_client, clock):
     _login(client, EMP_A)
+    clock.advance(minutes=1)  # US-1003 : 60 secondes entre deux codes
     _login(client, EMP_A)
     _login(client, EMP_B)
 

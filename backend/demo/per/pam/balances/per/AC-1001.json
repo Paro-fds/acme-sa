@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "snapshots": [
+    {
+      "periode": "2026-08",
+      "date_rapport": "2026-08-31",
+      "balance": "118250.00",
+      "interet_cumule": "2310.40",
+      "comptes": [
+        {
+          "numero": "PER-FICTIF-01",
+          "date_ouverture": "2019-01-15",
+          "balance": "118250.00",
+          "interet_cumule": "2310.40"
+        }
+      ]
+    },
+    {
+      "periode": "2026-09",
+      "date_rapport": "2026-09-30",
+      "balance": "121480.75",
+      "interet_cumule": "2455.10",
+      "comptes": [
+        {
+          "numero": "PER-FICTIF-01",
+          "date_ouverture": "2019-01-15",
+          "balance": "121480.75",
+          "interet_cumule": "2455.10"
+        }
+      ]
+    }
+  ]
+}

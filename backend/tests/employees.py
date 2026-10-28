@@ -13,6 +13,12 @@ class TestEmployee:
     first_name: str
     birth_date: str  # format API AAAA-MM-JJ
 
+    @property
+    def typed_birth_date(self) -> str:
+        """US-1014 : la date telle qu'elle se tape à l'écran de connexion, JJMMAAAA."""
+        year, month, day = self.birth_date.split("-")
+        return f"{day}{month}{year}"
+
     def identity(self, **overrides) -> dict:
         return {
             "last_name": self.last_name,

@@ -119,7 +119,7 @@ export default function AuditLogPage() {
   }
 
   return (
-    <Page account="admin" wide title="Journal d'audit" subtitle="Toutes les actions des RH sur le portail.">
+    <Page account="admin" wide title="Journal d'audit" subtitle="Toutes les actions des RH dans PAM.">
       <div className="flex flex-col gap-6">
         {/* FILTRES SUR UNE LIGNE (A11) */}
         <div className="bg-surface p-4 rounded-xl border border-rh-line shadow-card flex flex-wrap items-center gap-6 text-sm">

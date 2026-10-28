@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.auth.api.dependencies import SESSION_COOKIE
 from app.auth.application.sessions import hash_token
+from tests.conftest import employee_login
 from tests.employees import EMP_A
 
 URL = "/api/auth/logout"
@@ -11,8 +12,7 @@ PASSWORD = "Bonjour-2026"
 
 
 def _login(client) -> str:
-    response = client.post("/api/auth/login", json=EMP_A.identity(password=PASSWORD))
-    assert response.status_code == 204
+    employee_login(client, EMP_A)  # US-1003
     return client.cookies[SESSION_COOKIE]
 
 

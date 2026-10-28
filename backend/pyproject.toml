@@ -17,6 +17,7 @@ dependencies = [
     "pyotp",
     "segno",
     "openpyxl",
+    "mangum",
 ]
 
 [project.optional-dependencies]
@@ -57,6 +58,8 @@ containers = [
     "app.dossier",
     "app.certificate",
     "app.job",
+    "app.carrieres",
+    "app.per",
 ]
 
 [[tool.importlinter.contracts]]
@@ -85,6 +88,10 @@ source_modules = [
     "app.certificate.application",
     "app.job.domain",
     "app.job.application",
+    "app.carrieres.domain",
+    "app.carrieres.application",
+    "app.per.domain",
+    "app.per.application",
 ]
 forbidden_modules = ["fastapi", "starlette", "pydantic", "sqlalchemy"]
 
@@ -138,6 +145,8 @@ forbidden_modules = [
     "app.dossier.infrastructure",
     "app.certificate.infrastructure",
     "app.job.infrastructure",
+    "app.carrieres.infrastructure",
+    "app.per.infrastructure",
     "app.container",
 ]
 

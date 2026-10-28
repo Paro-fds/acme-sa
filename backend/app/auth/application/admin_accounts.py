@@ -168,10 +168,11 @@ class ImportConfiguredAdmin:
         username = self._username.strip()
         existing = self._admins.find_by_username(username)
         if existing:
-            if (
-                existing.password_hash != self._password_hash
-                or existing.role != AdminRole.ADMIN
-            ):
+            if existing.password_hash != self._password_hash:
+                # voie de secours : un nouveau mot de passe dans la configuration rend l'accès, même bloqué.
+                # Sans changement, le blocage reste (US-15 CA-03) : chaque démarrage Lambda repasse ici.
+                existing.register_success()
+            if existing.password_hash != self._password_hash or existing.role != AdminRole.ADMIN:
                 existing.password_hash = self._password_hash
                 existing.role = AdminRole.ADMIN
                 self._admins.save(existing)

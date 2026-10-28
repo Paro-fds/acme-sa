@@ -1,0 +1,30 @@
+:root {
+  color: #1f2a44;
+  background: #f7f8fb;
+  font-family: "Segoe UI", Calibri, sans-serif;
+}
+body { margin: 0; }
+[hidden] { display: none !important; }
+header, footer, main { padding: 16px; }
+header { background: #09245f; color: #fff; }
+h1 { margin: 0; font-size: 1.8rem; }
+.marque { margin: 0; letter-spacing: 0.08em; }
+main { max-width: 28rem; }
+section {
+  background: #fff;
+  border: 1px solid #d8dee9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+label, button, input { display: block; width: 100%; box-sizing: border-box; }
+input, button { font-size: 1.05rem; margin-top: 6px; padding: 12px; }
+button { background: #0b56b7; color: #fff; border: 0; border-radius: 8px; }
+.secret { display: flex; gap: 8px; align-items: stretch; }
+.secret input { flex: 1; width: auto; min-width: 0; }
+button.voir { width: auto; flex: 0 0 auto; background: #e8eef8; color: #09245f; }
+button[disabled] { background: #e5e7eb; color: #64748b; }
+.etoile { color: #d80000; }
+.message { color: #9f1239; min-height: 1.2em; }
+#montant { font-size: 2rem; color: #09245f; font-weight: 700; }
+footer { color: #475569; font-size: 0.9rem; }

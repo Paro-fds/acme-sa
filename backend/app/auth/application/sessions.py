@@ -15,10 +15,18 @@ def hash_token(token: str) -> str:
 class SessionService:
     """Ouvre, vérifie (avec expiration glissante) et ferme les sessions."""
 
-    def __init__(self, sessions: SessionRepository, clock: Clock, durations: dict[SubjectType, timedelta]) -> None:
+    def __init__(
+        self,
+        sessions: SessionRepository,
+        clock: Clock,
+        durations: dict[SubjectType, timedelta],
+        fixed: frozenset[SubjectType] = frozenset(),
+    ) -> None:
         self._sessions = sessions
         self._clock = clock
         self._durations = durations
+        self._fixed = fixed
+        """US-1017 : sessions dont la fin ne recule pas avec l'activité (15 minutes au plus, modèle du directeur)."""
 
     def open(self, subject_type: SubjectType, subject_id: str) -> str:
         token = secrets.token_urlsafe(32)
@@ -54,7 +62,8 @@ class SessionService:
             raise SessionExpired()
 
         session.last_seen_at = now
-        session.expires_at = now + self._durations[expected]
+        if expected not in self._fixed:
+            session.expires_at = now + self._durations[expected]
         self._sessions.save(session)
         return session.subject_id
 
@@ -67,3 +76,6 @@ class SessionService:
         if subject_type == SubjectType.ADMIN:
             # US-102 : une connexion RH en attente de son code se ferme avec les autres.
             self._sessions.delete_for_subject(SubjectType.ADMIN_MFA, subject_id)
+        if subject_type == SubjectType.EMPLOYEE:
+            # US-1003 : une identification en attente de son code se ferme avec les autres.
+            self._sessions.delete_for_subject(SubjectType.EMPLOYEE_LOGIN, subject_id)

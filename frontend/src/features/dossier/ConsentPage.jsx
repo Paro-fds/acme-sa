@@ -225,7 +225,7 @@ export default function ConsentPage() {
           }
           aside={<span className="rounded-full bg-info-bg px-2 py-0.5 text-xs font-medium text-help">Facultatif</span>}
         >
-          J'accepte de recevoir des messages WhatsApp du portail (suivi de mes certificats, rappels).
+          J'accepte de recevoir des messages WhatsApp de PAM (suivi de mes certificats, rappels).
         </Checkbox>
       </section>
       {error && <Alert>{error}</Alert>}

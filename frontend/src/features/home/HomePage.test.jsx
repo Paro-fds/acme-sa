@@ -48,7 +48,7 @@ describe('HomePage (US-105, US-110)', () => {
     renderHome()
     const steps = within(screen.getByRole('list', { name: 'Trois étapes' })).getAllByRole('listitem')
     expect(steps.map((step) => step.textContent)).toEqual([
-      expect.stringMatching(/Créez votre mot de passe/),
+      expect.stringMatching(/Connectez-vous avec votre code employé/),
       expect.stringMatching(/Vérifiez les 8 informations de votre profil/),
       expect.stringMatching(/Déposez vos diplômes/),
     ])

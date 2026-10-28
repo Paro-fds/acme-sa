@@ -348,8 +348,9 @@ def test_ca06_hors_du_reseau_des_bureaux_l_espace_rh_est_ferme(settings):
                 "code": "OFFICE_NETWORK_ONLY",
                 "message": "L'espace RH n'est accessible que depuis le réseau des bureaux.",
             }
-            # l'espace employé reste ouvert partout
-            assert outside.post("/api/auth/login", json=EMP_A.identity(password="x")).status_code == 401
+            # l'espace employé reste ouvert partout (US-1003 : identification par code employé et date de naissance)
+            identity = {"employee_code": EMP_A.employee_code, "birth_date": EMP_A.typed_birth_date}
+            assert outside.post("/api/auth/identify", json=identity).status_code == 200
         with TestClient(app, client=("196.3.0.42", 50000)) as inside:
             assert login(inside).status_code == 202
     finally:

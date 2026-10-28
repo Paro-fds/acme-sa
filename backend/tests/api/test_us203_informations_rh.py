@@ -104,8 +104,8 @@ def test_ca04_confirme_ou_signale_compte_comme_complet(employee_client):
     completion = client.get("/api/me/profile").json()["completion"]
 
     done = {element["key"] for element in completion["elements"] if element["complete"]}
-    assert done == {"agency_confirmed", "position_confirmed"}
-    assert completion["percent"] == 25
+    assert done == {"agency_confirmed", "position_confirmed", "telephone", "email"}  # US-1011 : téléphone et courriel de Vault
+    assert completion["percent"] == 50
 
 
 # --- CA-05 : embauche avant 18 ans → signalement automatique, sans bloquer ------------------------

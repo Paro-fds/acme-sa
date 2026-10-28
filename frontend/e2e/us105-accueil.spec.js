@@ -22,8 +22,8 @@ test("téléphone : l'accueil montre la photo, les bénéfices et les étapes, p
   await page.getByRole('link', { name: 'Compléter mon dossier' }).click()
   await expect(page).toHaveURL(/\/connexion$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Connexion' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Créer mon mot de passe' })).toBeVisible()
-  await expect(page.getByRole('group', { name: 'Date de naissance' }).getByRole('textbox')).toHaveCount(3)
+  await expect(page.getByLabel('Code employé')).toBeVisible() // US-1003 : plus de mot de passe
+  await expect(page.getByLabel('Date de naissance', { exact: true })).toHaveAttribute('type', 'password') // US-1014
   expect(await hasHorizontalScroll(page)).toBe(false)
   await page.screenshot({ path: `${CAPTURES}/us110-connexion-390.png`, fullPage: true })
 })
@@ -41,7 +41,7 @@ test('ordinateur : la photo à côté du texte (accueil) et du formulaire (conne
   await page.getByRole('link', { name: 'Se connecter' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Connexion' })).toBeVisible()
   const loginPhoto = await page.getByRole('img', { name: /équipe d.ACME SA/ }).boundingBox()
-  const form = await page.getByRole('form', { name: 'Vous avez déjà un mot de passe' }).boundingBox()
+  const form = await page.getByRole('form', { name: 'Connexion' }).boundingBox()
   expect(form.x).toBeGreaterThan(loginPhoto.x + loginPhoto.width - 1)
   expect(await hasHorizontalScroll(page)).toBe(false)
   await page.screenshot({ path: `${CAPTURES}/us110-connexion-1280.png`, fullPage: true })

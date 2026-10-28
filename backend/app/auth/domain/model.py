@@ -1,14 +1,16 @@
 import math
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 
-from app.auth.domain.lockout import LOCK_DURATION, MAX_FAILED_ATTEMPTS
+from app.auth.domain.lockout import LOCK_DURATION, MAX_FAILED_ATTEMPTS, MAX_LOCK_DURATION
 
 
 class SubjectType(StrEnum):
     EMPLOYEE = "EMPLOYEE"
     ADMIN = "ADMIN"
+    EMPLOYEE_LOGIN = "EMPLOYEE_LOGIN"
+    """US-1003 : code employé et date de naissance vérifiés, code reçu attendu ; n'ouvre que l'envoi et la saisie du code."""
     ADMIN_MFA = "ADMIN_MFA"
     """US-102 : mot de passe RH vérifié, second facteur attendu ; n'ouvre que les écrans de double authentification."""
 
@@ -36,12 +38,17 @@ class Lockable:
         return math.ceil((self.locked_until - now).total_seconds())
 
     def register_failure(self, now: datetime) -> None:
-        """Compte un mot de passe erroné ; la 5ᵉ erreur consécutive bloque le compte 15 minutes."""
+        """Compte un échec ; la 5ᵉ erreur consécutive bloque le compte (`lock_duration`)."""
         if self.locked_until is not None and not self.is_locked(now):
-            self.register_success()  # blocage expiré : on repart de zéro
+            # blocage expiré : on repart de zéro erreur
+            self.failed_attempts = 0
+            self.locked_until = None
         self.failed_attempts += 1
         if self.failed_attempts >= MAX_FAILED_ATTEMPTS:
-            self.locked_until = now + LOCK_DURATION
+            self.locked_until = now + self.lock_duration()
+
+    def lock_duration(self) -> timedelta:
+        return LOCK_DURATION
 
     def register_success(self) -> None:
         self.failed_attempts = 0
@@ -50,16 +57,28 @@ class Lockable:
 
 @dataclass
 class Account(Lockable):
-    """Compte d'accès d'un employé : mot de passe et état du blocage."""
+    """Accès d'un employé : état du verrouillage (US-1003). `password_hash` reste de l'ancienne connexion par
+    mot de passe, retirée par US-1003 ; il n'est plus lu ni écrit."""
 
     employee_id: str
-    password_hash: str | None
+    password_hash: str | None = None
     failed_attempts: int = 0
     locked_until: datetime | None = None
+    lockouts: int = 0
+    """US-1003 : verrouillages successifs depuis la dernière connexion réussie (verrouillage progressif)."""
 
-    @property
-    def has_password(self) -> bool:
-        return bool(self.password_hash)
+    def lock_duration(self) -> timedelta:
+        """15 minutes, puis le double à chaque nouveau verrouillage, 24 heures au plus (doc PAM)."""
+        return min(LOCK_DURATION * 2**self.lockouts, MAX_LOCK_DURATION)
+
+    def register_failure(self, now: datetime) -> None:
+        super().register_failure(now)
+        if self.failed_attempts == MAX_FAILED_ATTEMPTS:  # ce verrouillage vient de commencer
+            self.lockouts += 1
+
+    def register_success(self) -> None:
+        super().register_success()
+        self.lockouts = 0
 
 
 @dataclass

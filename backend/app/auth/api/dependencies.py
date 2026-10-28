@@ -24,6 +24,13 @@ def current_employee_id(request: Request) -> str:
     )
 
 
+def current_employee_login(request: Request) -> str:
+    """US-1003 : employé identifié (code employé et date de naissance) qui attend son code ; 401 sinon."""
+    return container(request).session_service().authenticate(
+        request.cookies.get(SESSION_COOKIE), SubjectType.EMPLOYEE_LOGIN
+    )
+
+
 def current_admin_pending(request: Request) -> str:
     """Administrateur connecté, même s'il doit encore changer son mot de passe provisoire (US-23).
 
@@ -87,10 +94,12 @@ require_referential_editor = require_roles(AdminRole.ADMIN, AdminRole.REFERENTIA
 """Importer le référentiel et rattacher les valeurs inconnues."""
 
 
-def set_session_cookie(request: Request, response: Response, token: str) -> None:
+def set_session_cookie(request: Request, response: Response, token: str, max_age: int | None = None) -> None:
+    """`max_age` (US-1017) : le cookie disparaît avec la session (900 secondes pour l'employé, modèle du directeur)."""
     response.set_cookie(
         SESSION_COOKIE,
         token,
+        max_age=max_age,
         httponly=True,
         samesite="strict",
         secure=request.url.scheme == "https",

@@ -120,6 +120,7 @@ class EmployeeFolderOut(BaseModel):
     declined: bool
     changes: list[ChangeOut]
     account_activated: bool
+    access_locked: bool
     photo_url: str | None = None
     """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
 
@@ -343,8 +344,9 @@ def get_employee_document_file(document_id: str, request: Request) -> Response:
 
 @router.post("/employees/{employee_id}/reset-access", status_code=204, dependencies=[Depends(require_admin)])
 def reset_access(employee_id: str, request: Request, admin_id: str = Depends(current_admin)) -> None:
-    """US-22 : réinitialiser l'accès ; US-103 CA-01 : refusé en lecture seule ; US-104 CA-03 : tracé."""
-    container(request).reset_access().execute(employee_id, actor_id=admin_id)
+    """US-1003 : débloquer l'accès (verrouillage levé, sessions fermées) ; US-103 CA-01 : refusé en lecture seule ;
+    US-104 CA-03 : tracé."""
+    container(request).unlock_access().execute(employee_id, actor_id=admin_id)
 
 
 class RatingCountOut(BaseModel):

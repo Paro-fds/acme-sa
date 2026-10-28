@@ -20,7 +20,8 @@ def test_ca01_quinze_minutes_par_defaut(settings):
 def test_ca01_l_ecran_connait_les_durees(client):
     response = client.get("/api/auth/session-options")
     assert response.status_code == 200
-    assert response.json() == {"employee_idle_minutes": 15, "admin_idle_minutes": 15}
+    # US-1017 : 5 minutes sans action côté employé (modèle du directeur) ; la gestion garde 15 minutes.
+    assert response.json() == {"employee_idle_minutes": 5, "admin_idle_minutes": 15}
 
 
 def test_ca01_employe_deconnecte_apres_15_minutes_sans_activite(clock, employee_client):
@@ -41,12 +42,13 @@ def test_ca01_gestion_deconnectee_apres_15_minutes_sans_activite(clock, admin_cl
 # --- CA-02 : une activité sans enregistrement prolonge la session ----------------------------
 
 
-def test_ca02_l_activite_de_l_employe_prolonge_sa_session(clock, employee_client):
+def test_us1017_la_session_employe_est_bornee_a_15_minutes_meme_avec_de_l_activite(clock, employee_client):
     jean = employee_client(EMP_A)
     clock.advance(minutes=14)
     assert jean.post(EMPLOYEE_KEEP_ALIVE).status_code == 204
-    clock.advance(minutes=14)
-    assert jean.post(EMPLOYEE_KEEP_ALIVE).status_code == 204
+    clock.advance(minutes=1)
+    response = jean.post(EMPLOYEE_KEEP_ALIVE)
+    assert response.status_code == 401 and response.json()["error"]["code"] == "SESSION_EXPIRED"
 
 
 def test_ca02_l_activite_en_gestion_prolonge_la_session(clock, admin_client):

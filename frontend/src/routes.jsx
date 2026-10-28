@@ -17,14 +17,12 @@ import ReferentialPage from './features/admin/referential/ReferentialPage.jsx'
 import ErrorReportQueuePage from './features/admin/reports/ErrorReportQueuePage.jsx'
 import ValidationQueuePage from './features/admin/validation/ValidationQueuePage.jsx'
 import ReviewCertificatePage from './features/admin/validation/ReviewCertificatePage.jsx'
-import AmbiguousIdentityPage from './features/auth/AmbiguousIdentityPage.jsx'
-import CertificatesPage from './features/certificates/CertificatesPage.jsx'
-import DepositPage from './features/certificates/DepositPage.jsx'
-import ThanksPage from './features/certificates/ThanksPage.jsx'
+import PieceDepositPage from './features/pieces/PieceDepositPage.jsx'
+import PiecesPage from './features/pieces/PiecesPage.jsx'
+import PerPage from './features/per/PerPage.jsx'
 import EmployeeHomePage from './features/dashboard/EmployeeHomePage.jsx'
 import MyOpeningsPage from './features/openings/MyOpeningsPage.jsx'
 import MyNotificationsPage from './features/notifications/MyNotificationsPage.jsx'
-import CreatePasswordPage from './features/auth/CreatePasswordPage.jsx'
 import LoginPage from './features/auth/LoginPage.jsx'
 import ConsentPage from './features/dossier/ConsentPage.jsx'
 import ContactEducationPage from './features/dossier/ContactEducationPage.jsx'
@@ -37,18 +35,21 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/connexion" element={<LoginPage />} />
-      <Route path="/connexion/premiere" element={<CreatePasswordPage />} />
-      <Route path="/connexion/homonyme" element={<AmbiguousIdentityPage />} />
+      {/* US-1003 : plus de mot de passe employé ; les anciens liens ramènent à la connexion. */}
+      <Route path="/connexion/premiere" element={<Navigate to="/connexion" replace />} />
+      <Route path="/connexion/homonyme" element={<Navigate to="/connexion" replace />} />
       <Route path="/accueil" element={<EmployeeHomePage />} />
       <Route path="/profil" element={<ProfilePage />} />
       <Route path="/avant-de-commencer" element={<ConsentPage />} />
       <Route path="/profil/coordonnees" element={<CoordinatesPage />} />
       <Route path="/profil/contact-etudes" element={<ContactEducationPage />} />
       <Route path="/profil/informations-rh" element={<HrInformationPage />} />
-      <Route path="/certificats" element={<CertificatesPage />} />
-      <Route path="/certificats/deposer" element={<DepositPage />} />
-      <Route path="/certificats/merci" element={<ThanksPage />} />
+      {/* US-1008 : les pièces viennent de Carrières ; l'ancien dépôt sera retiré avec US-1010. */}
+      <Route path="/certificats" element={<PiecesPage />} />
+      <Route path="/certificats/deposer" element={<PieceDepositPage />} />
+      <Route path="/certificats/merci" element={<Navigate to="/certificats" replace />} />
       <Route path="/carriere" element={<MyOpeningsPage />} />
+      <Route path="/per" element={<PerPage />} />
       <Route path="/notifications" element={<MyNotificationsPage />} />
       {/* US-114 : « Mon parcours » est fondu dans « Ma carrière ». */}
       <Route path="/parcours/*" element={<Navigate to="/carriere" replace />} />

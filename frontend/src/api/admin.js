@@ -92,7 +92,7 @@ export function getEmployeesExportUrl({
   return `/api/admin/employees/export?${params}`
 }
 
-/** US-22 : efface le mot de passe de l'employé et ferme ses sessions (seule écriture de l'administration). */
+/** US-1003 (anciennement US-22) : débloque l'accès de l'employé et ferme ses sessions. */
 export function resetAccess(id) {
   return request(`/admin/employees/${encodeURIComponent(id)}/reset-access`, { method: 'POST' })
 }

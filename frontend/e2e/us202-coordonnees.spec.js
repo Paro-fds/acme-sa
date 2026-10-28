@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test'
-import { acceptConsent, EMP_E, signIn } from './auth.js'
+import { acceptConsent, EMP_D1, signIn } from './auth.js'
 
 const CAPTURES = 'C:/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-OneDrive-Desktop-ACME-SA-app-web/714b2012-8130-4f37-90c0-b587e71ccc7a/scratchpad/captures'
 
 /**
  * US-202 : consentement une seule fois (CA-01), format refusé avec message près du champ (CA-02),
- * « Je n'ai pas d'adresse email » (CA-03), lien choisi dans une liste (CA-04), pourcentage qui monte.
- * EMP-E (pas d'email dans l'export).
+ * lien choisi dans une liste (CA-04), pourcentage qui monte. US-1011 : téléphone et courriel de Vault en lecture seule.
+ * EMP-D1 (US-1003 : EMP-E, sans courriel, ne peut se connecter qu'avec WhatsApp, US-1004).
  */
 test('compléter ses coordonnées, son contact d’urgence et son niveau d’études', async ({ page }) => {
   // CA-01 : la mention passe avant toute saisie, dès la première connexion (US-207, écran 05).
-  await signIn(page, EMP_E, { consent: false })
+  await signIn(page, EMP_D1, { consent: false })
   await expect(page.getByRole('heading', { name: 'Avant de commencer' })).toBeVisible()
   await page.screenshot({ path: `${CAPTURES}/us202-consentement-390.png`, fullPage: true })
   await acceptConsent(page)
@@ -18,14 +18,15 @@ test('compléter ses coordonnées, son contact d’urgence et son niveau d’ét
 
   // Section 1 / 3
   await expect(page.getByRole('heading', { name: 'Mes coordonnées' })).toBeVisible()
-  const phone = page.getByLabel(/Numéro de téléphone principal/)
-  await phone.fill('3712')
+  await expect(page.getByLabel('Coordonnées enregistrées par la DRH')).toBeVisible()
+  await expect(page.getByLabel(/Numéro de téléphone principal/)).toHaveCount(0)
+  const address = page.getByLabel(/Adresse de résidence/)
+  await address.fill('Rue')
   await page.getByRole('button', { name: 'Enregistrer' }).click()
-  await expect(phone).toHaveAttribute('aria-invalid', 'true')
-  await expect(page.getByText('Le numéro doit contenir 8 chiffres, par exemple +509 3712 3456.').last()).toBeVisible()
+  await expect(address).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.getByText('Ajoutez votre adresse complète : au moins 5 caractères.').last()).toBeVisible()
 
-  await phone.fill('3712 3456')
-  await page.getByRole('checkbox', { name: /Je n'ai pas d'adresse email/ }).check()
+  await address.fill('12 rue Capois, Port-au-Prince')
   await page.getByRole('button', { name: 'Enregistrer' }).click()
   await expect(page.getByText('Enregistré dans votre profil.')).toBeVisible()
   await expect(page.getByText('37 %')).toBeVisible()

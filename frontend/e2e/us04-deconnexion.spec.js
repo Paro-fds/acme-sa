@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { createPassword, EMP_E } from './auth.js'
+import { EMP_D1, signIn } from './auth.js'
 
 /** US-04 : déconnexion depuis le menu de l'avatar, sur mobile. */
 test('déconnexion : message, retour arrière sans données', async ({ page }) => {
-  // Première connexion (EMP-E, réservé à ce test), depuis l'accueil
+  // Première connexion (EMP-D1, US-1003 : code reçu par courriel)
   await page.goto('/')
-  await createPassword(page, EMP_E)
-  // Sans accepter la mention : EMP-E la lira dans le test de US-202.
+  await signIn(page, EMP_D1, { consent: false })
+  // Sans accepter la mention : EMP-D1 la lira dans le test de US-202.
   await expect(page.getByRole('heading', { name: 'Avant de commencer' })).toBeVisible()
 
   // CA-01 : déconnexion

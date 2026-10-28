@@ -7,7 +7,7 @@ Critères d'acceptation :
 """
 
 import pytest
-from tests.conftest import rh_login
+from tests.conftest import employee_login, rh_login
 from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A, EMP_B
 
 ADMINS = "/api/admin/admins"
@@ -45,32 +45,25 @@ def _login_and_activate(client, username, provisional=PROVISIONAL, chosen=CHOSEN
 # --- CA-01 : Réinitialisation d'accès employé -----------------------------------------
 
 
-def test_ca01_reset_employee_access_and_re_register(admin_client, client, account, container):
-    # L'employé a un mot de passe actif
-    account(EMP_A, "Initial-2026!")
+def test_ca01_unlock_employee_access_then_login(admin_client, client, other_ip_client):
+    # US-1003 : l'employé a verrouillé son accès (5 dates fausses)
+    for _ in range(5):
+        client.post("/api/auth/identify", json={"employee_code": EMP_A.employee_code, "birth_date": "01011900"})
+    assert admin_client.get(f"/api/admin/employees/{EMP_A.id}").json()["access_locked"] is True
 
-    # L'administrateur réinitialise son accès
+    # L'administrateur débloque son accès
     res = admin_client.post(f"/api/admin/employees/{EMP_A.id}/reset-access")
     assert res.status_code == 204
 
-    # Les données de l'employé sont intactes mais le mot de passe est effacé
-    stored = container.accounts.get(EMP_A.id)
-    assert stored.password_hash is None
+    # Les données de l'employé sont intactes, l'accès n'est plus verrouillé
     folder = admin_client.get(f"/api/admin/employees/{EMP_A.id}").json()
-    assert folder["account_activated"] is False
+    assert folder["access_locked"] is False
     assert folder["first_name"] == EMP_A.first_name
     assert folder["last_name"] == EMP_A.last_name
 
-    # L'employé choisit un nouveau mot de passe à sa prochaine connexion
-    register_res = client.post(
-        "/api/auth/register",
-        json=EMP_A.identity(password="Nouveau-2026!", password_confirmation="Nouveau-2026!"),
-    )
-    assert register_res.status_code == 204
-
-    # La connexion avec le nouveau mot de passe fonctionne
-    login_res = client.post("/api/auth/login", json=EMP_A.identity(password="Nouveau-2026!"))
-    assert login_res.status_code == 204
+    # L'employé se reconnecte avec un code reçu par courriel (US-1015 : depuis un appareil dont l'adresse
+    # n'a pas été verrouillée par les essais)
+    employee_login(other_ip_client, EMP_A)
 
 
 # --- CA-02 : Désactivation d'un compte RH ---------------------------------------------
@@ -152,10 +145,10 @@ def test_ca03_all_actions_are_traced_in_audit_log(admin_client, account):
     enable_entry = next((e for e in audit_entries if e["target_id"] == "agent.trace" and e["details"] == "Compte réactivé"), None)
     assert enable_entry is not None
 
-    # 4. Réinitialisation employé tracée
+    # 4. Déblocage de l'accès employé tracé (US-1003)
     account(EMP_A)
     admin_client.post(f"/api/admin/employees/{EMP_A.id}/reset-access")
     audit_entries = admin_client.get(f"{AUDIT}?action=ACCOUNT_MANAGEMENT").json()["items"]
-    reset_entry = next((e for e in audit_entries if e["target_id"] == EMP_A.employee_code and e["details"] == "Accès réinitialisé"), None)
+    reset_entry = next((e for e in audit_entries if e["target_id"] == EMP_A.employee_code and e["details"] == "Accès débloqué"), None)
     assert reset_entry is not None
     assert reset_entry["target_name"] == f"{EMP_A.first_name} {EMP_A.last_name}"

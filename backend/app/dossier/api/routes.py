@@ -4,7 +4,7 @@ confirmer ou signaler agence, poste, date d'embauche ; US-205 : confirmer ses in
 from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.auth.api.dependencies import container, current_employee_id
 from app.dossier.application.use_cases import ContactView, DossierView, EmailView, FieldView, FreshnessView
@@ -21,10 +21,11 @@ class FieldOut(BaseModel):
     value: str | None
     complete: bool
     confirmed_at: datetime | None
+    read_only: bool = False
 
     @classmethod
     def of(cls, view: FieldView) -> "FieldOut":
-        return cls(value=view.value, complete=view.complete, confirmed_at=view.confirmed_at)
+        return cls(value=view.value, complete=view.complete, confirmed_at=view.confirmed_at, read_only=view.read_only)
 
 
 class EmailOut(FieldOut):
@@ -32,7 +33,10 @@ class EmailOut(FieldOut):
 
     @classmethod
     def of(cls, view: EmailView) -> "EmailOut":
-        return cls(value=view.value, complete=view.complete, confirmed_at=view.confirmed_at, no_email=view.no_email)
+        return cls(
+            value=view.value, complete=view.complete, confirmed_at=view.confirmed_at, read_only=view.read_only,
+            no_email=view.no_email,
+        )
 
 
 class ContactOut(BaseModel):
@@ -108,10 +112,11 @@ class ConsentIn(BaseModel):
 
 
 class CoordinatesIn(BaseModel):
-    telephone: str = ""
+    """US-1011 : seule l'adresse ; un téléphone ou un courriel envoyé est refusé (lecture seule)."""
+
+    model_config = ConfigDict(extra="forbid")
+
     address: str = ""
-    email: str = ""
-    no_email: bool = False
 
 
 class ContactAndEducationIn(BaseModel):
@@ -138,7 +143,7 @@ def give_consent(body: ConsentIn, request: Request, employee_id: str = Depends(c
 
 @router.put("/coordinates")
 def save_coordinates(body: CoordinatesIn, request: Request, employee_id: str = Depends(current_employee_id)) -> DossierOut:
-    container(request).save_coordinates().execute(employee_id, body.telephone, body.address, body.email, body.no_email)
+    container(request).save_coordinates().execute(employee_id, body.address)
     return _dossier(request, employee_id)
 
 

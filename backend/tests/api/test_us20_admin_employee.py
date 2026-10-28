@@ -1,5 +1,6 @@
 """US-20 — Consulter le dossier d'un employé (T-20.1 → T-20.4)."""
 
+from tests.conftest import employee_login
 from tests.employees import EMP_A, EMP_B, EMP_E, EMP_H1, EMP_I
 
 
@@ -148,8 +149,8 @@ def test_ca06_unknown_employee_gives_404(admin_client):
 # --- CA-07 : état du compte ------------------------------------------------------------
 
 
-def test_ca07_account_state(admin_client, account):
-    account(EMP_A)
+def test_ca07_account_state(admin_client, client):
+    employee_login(client, EMP_A)  # US-1003 : « activé » = s'est déjà connecté
 
     assert admin_client.get(url(EMP_A.id)).json()["account_activated"] is True
     assert admin_client.get(url(EMP_B.id)).json()["account_activated"] is False

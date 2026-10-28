@@ -63,6 +63,7 @@ def settings(tmp_path: Path, admin_password_hash: str) -> Settings:
         admin_username=ADMIN_USERNAME,
         admin_password_hash=admin_password_hash,
         admin_mfa_required=True,  # US-102 testée ; la connexion directe (US-112) a ses propres tests
+        login_min_response_ms=0,  # US-1003 : le délai uniforme a son propre test
     )
 
 
@@ -93,6 +94,13 @@ def client(app: FastAPI) -> Iterator[TestClient]:
 
 
 @pytest.fixture
+def other_ip_client(app: FastAPI) -> Iterator[TestClient]:
+    """US-1015 : un autre appareil, sur une autre adresse IP (les verrous comptent aussi par adresse)."""
+    with TestClient(app, client=("203.0.113.9", 50000)) as test_client:
+        yield test_client
+
+
+@pytest.fixture
 def account(container) -> Callable[[TestEmployee, str], None]:
     """Crée le compte d'un employé avec ce mot de passe."""
 
@@ -116,6 +124,20 @@ def employee_client(app: FastAPI, container) -> Iterator[Callable[[TestEmployee]
     yield connect
     for test_client in clients:
         test_client.close()
+
+
+def employee_login(client: TestClient, employee: TestEmployee) -> None:
+    """US-1003 : connexion complète par l'API (code employé et date de naissance, puis code reçu par courriel).
+
+    Sur le poste local, l'API rend le code (`local_code`) au lieu de l'envoyer.
+    """
+    identity = {"employee_code": employee.employee_code, "birth_date": employee.typed_birth_date}
+    response = client.post("/api/auth/identify", json=identity)
+    assert response.status_code == 200, response.text
+    sent = client.post("/api/auth/code", json={"channel": "EMAIL"})
+    assert sent.status_code == 200, sent.text
+    response = client.post("/api/auth/verify", json={"code": sent.json()["local_code"]})
+    assert response.status_code == 204, response.text
 
 
 RH_LOGIN = "/api/admin/auth/login"
@@ -223,7 +245,7 @@ def career_reference(career_entry) -> dict[str, list[CareerEntry]]:
 
 # --- Lot 1 : profil complet (US-204, US-301) --------------------------------------------------------
 
-COMPLETE_COORDINATES = {"telephone": "3712 3456", "address": "12 rue Capois, Port-au-Prince", "email": "", "no_email": True}
+COMPLETE_COORDINATES = {"address": "12 rue Capois, Port-au-Prince"}
 COMPLETE_CONTACT = {
     "contact_name": "Jean Baptiste Pierre",
     "contact_relationship": "SIBLING",

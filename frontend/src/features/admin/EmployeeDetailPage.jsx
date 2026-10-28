@@ -239,7 +239,7 @@ export default function EmployeeDetailPage() {
       <PreviousUpdateBlock folder={folder} />
       {documents.length > 0 && <AdminDocuments documents={documents} />}
       {can(me?.role, 'resetAccess') && (
-        <ResetAccess employeeId={folder.id} name={folder.display_name} activated={folder.account_activated} onReset={reload} />
+        <ResetAccess employeeId={folder.id} name={folder.display_name} activated={folder.account_activated} locked={folder.access_locked} onReset={reload} />
       )}
     </>,
   )

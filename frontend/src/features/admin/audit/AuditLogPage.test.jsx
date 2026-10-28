@@ -60,7 +60,7 @@ describe('US-604 — Rendre compte de chaque action (Écran A11)', () => {
   it('CA-01 : affiche les colonnes et badges d’action conformes à la maquette A11', async () => {
     renderAt()
 
-    expect(await screen.findByText('Toutes les actions des RH sur le portail.')).toBeInTheDocument()
+    expect(await screen.findByText('Toutes les actions des RH dans PAM.')).toBeInTheDocument()
 
     const table = screen.getByRole('table', { name: "Journal d'audit" })
     expect(within(table).getByText('Agent RH Démo 1')).toBeInTheDocument()

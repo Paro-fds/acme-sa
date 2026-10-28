@@ -8,7 +8,7 @@ import pytest
 
 from app.config import Settings
 from app.main import create_app
-from tests.conftest import TEST_CSV, rh_login
+from tests.conftest import TEST_CSV, employee_login, rh_login
 from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A
 
 LOGIN_URL = "/api/admin/auth/login"
@@ -149,9 +149,7 @@ def test_ca03_admin_lock_does_not_lock_employees(client, clock, account):
     _lock(client)
     account(EMP_A, "Bonjour-2026")
 
-    response = client.post("/api/auth/login", json=EMP_A.identity(password="Bonjour-2026"))
-
-    assert response.status_code == 204
+    employee_login(client, EMP_A)  # US-1003 : la connexion employé passe toujours
 
 
 def test_ca03_lock_survives_a_restart(settings, clock, client):

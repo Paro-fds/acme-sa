@@ -10,7 +10,7 @@ function Brand({ compact = false }) {
       <span className={`flex shrink-0 items-center justify-center rounded-xl bg-surface ${compact ? 'size-10' : 'size-13'}`}>
         <img src={logo} alt="ACME SA" width="42" height="42" className={compact ? 'size-8 object-contain' : 'size-10 object-contain'} />
       </span>
-      <span className="font-semibold text-info-border">Portail Carrière</span>
+      <span className="font-semibold text-info-border">PAM</span>
     </div>
   )
 }

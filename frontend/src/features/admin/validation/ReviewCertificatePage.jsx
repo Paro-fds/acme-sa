@@ -402,7 +402,7 @@ export default function ReviewCertificatePage() {
                 Rejeter…
               </button>
             </div>
-            <p className="text-sm text-rh-muted">L’employé est prévenu dans le portail. Un rejet demande un motif, choisi dans la liste.</p>
+            <p className="text-sm text-rh-muted">L’employé est prévenu dans PAM. Un rejet demande un motif, choisi dans la liste.</p>
           </section>
         </aside>
       </div>

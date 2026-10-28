@@ -8,7 +8,7 @@ import { LAST_ACTIVITY_KEY, resetIdleOptions, useIdleLogout } from './useIdleLog
 vi.mock('../api/session.js', () => ({ getSessionOptions: vi.fn(), keepAlive: vi.fn(), endSession: vi.fn() }))
 
 const MINUTE = 60_000
-const NOTICE = 'Vous avez été déconnecté après 15 minutes sans activité. Reconnectez-vous.'
+const NOTICE = 'Session fermée après 15 minutes sans action.'
 
 function Screen({ space }) {
   useIdleLogout(space)
@@ -116,7 +116,7 @@ describe('US-125 — déconnexion après 15 minutes sans activité', () => {
     renderSpace()
     await wait(5 * MINUTE + 15_000)
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Vous avez été déconnecté après 5 minutes sans activité. Reconnectez-vous.',
+      'Session fermée après 5 minutes sans action.',
     )
   })
 })

@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.carrieres.api import routes as carrieres_routes
+from app.per.api import routes as per_routes
 from app.admin.api import notification_routes as admin_notification_routes
 from app.admin.api import routes as admin_routes
 from app.auth.api import admin_account_routes, mfa_routes
@@ -27,12 +29,40 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     docs = settings.api_docs
     app = FastAPI(
-        title="Portail employés ACME SA",
+        title="PAM — Plateforme ACME Multifonction",
         docs_url="/api/docs" if docs else None,
         redoc_url=None,
         openapi_url="/api/openapi.json" if docs else None,
     )
     app.state.container = Container(settings)
+
+    @app.middleware("http")
+    async def security_headers(request, call_next):
+        """US-1017 : en-têtes de sécurité du modèle du directeur, sur chaque réponse."""
+        response = await call_next(request)
+        headers = response.headers
+        headers.setdefault("X-Content-Type-Options", "nosniff")
+        headers.setdefault("X-Frame-Options", "DENY")
+        headers.setdefault("Referrer-Policy", "no-referrer")
+        # 'self' comme le modèle ; images blob:/data: pour l'aperçu des scans, styles en ligne posés par React.
+        headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; "
+            "frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+        )
+        if request.url.scheme == "https":
+            headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        path = request.url.path
+        if path.startswith("/api/"):
+            headers.setdefault("Cache-Control", "no-store")
+        elif path.startswith("/assets/"):
+            # Noms changés à chaque compilation (index-Bshr0KLO.js) : gardés un an sans risque.
+            headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
+        else:
+            # La page et les fichiers sans empreinte : revérifiés à chaque visite, pour qu'une mise à jour de
+            # l'écran soit vue tout de suite (jamais une ancienne page qui appelle des fichiers disparus).
+            headers.setdefault("Cache-Control", "no-cache")
+        return response
 
     register_error_handlers(app)
     app.include_router(health.router)
@@ -46,6 +76,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(referential_routes.router)
     app.include_router(dossier_routes.router)
     app.include_router(certificate_routes.router)
+    app.include_router(carrieres_routes.router)
+    app.include_router(per_routes.router)
     app.include_router(admin_certificate_routes.router)
     app.include_router(admin_report_routes.router)
     app.include_router(admin_report_routes.employee_router)

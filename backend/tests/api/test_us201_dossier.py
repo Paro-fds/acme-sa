@@ -72,7 +72,7 @@ def test_ca03_une_direction_vide_dans_l_export_est_a_confirmer(employee_client, 
 # Une information compte quand l'employé l'a saisie ou confirmée (modèle de données §4.3, US-202) :
 # une valeur seulement présente dans l'export ne compte pas encore.
 
-COORDINATES = {"telephone": "3712 3456", "address": "12 rue Capois", "email": "jean@exemple.test", "no_email": False}
+COORDINATES = {"address": "12 rue Capois"}
 
 
 def _save(client, **changes):
@@ -83,7 +83,8 @@ def _save(client, **changes):
 def test_ca02_au_depart_les_8_elements_sont_a_completer(employee_client):
     completion = employee_client(EMP_A).get(PROFILE).json()["completion"]
 
-    assert (completion["complete"], completion["total"], completion["percent"]) == (0, 8, 0)
+    # US-1011 : le téléphone et le courriel viennent de Vault et comptent comme complets
+    assert (completion["complete"], completion["total"], completion["percent"]) == (2, 8, 25)
 
 
 def test_ca02_pourcentage_et_detail_des_8_elements(employee_client):
@@ -105,11 +106,11 @@ def test_ca02_pourcentage_et_detail_des_8_elements(employee_client):
     ]
 
 
-def test_ca02_sans_email_un_element_de_moins(employee_client):
+def test_ca02_sans_email_dans_vault_rien_a_faire_pour_l_employe(employee_client):
     client = employee_client(EMP_E)
-    _save(client, email="")
+    _save(client)
 
-    assert client.get(PROFILE).json()["completion"]["percent"] == 25
+    assert client.get(PROFILE).json()["completion"]["percent"] == 37  # US-1011
 
 
 def test_ca02_le_pourcentage_change_des_qu_une_information_est_enregistree(employee_client):
@@ -118,4 +119,4 @@ def test_ca02_le_pourcentage_change_des_qu_une_information_est_enregistree(emplo
 
     _save(client)
 
-    assert (before, client.get(PROFILE).json()["completion"]["percent"]) == (0, 37)
+    assert (before, client.get(PROFILE).json()["completion"]["percent"]) == (25, 37)

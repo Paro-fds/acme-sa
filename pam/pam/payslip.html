@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulletin de paie – ACME SA</title>
+<link rel="stylesheet" href="payslip.css">
+</head>
+<!--
+  TEMPLATE DE BULLETIN DE PAIE – ACME SA
+  Format : A4 portrait. Impression : Ctrl+P > Enregistrer au format PDF (marges : aucune).
+  Fichiers : payslip.html, payslip.css, logo-acme.jpg (même dossier).
+
+  Variables à remplacer pour chaque employé (format {{NOM}}) :
+       {{PERIODE}}  {{MATRICULE}}  {{NOM_COMPLET}}  {{DATE_PAIE}}
+       {{POSTE}}  {{AFFECTATION}}
+       {{TOTAL_GAINS}}  {{TOTAL_RETENUES}}  {{NET_A_PAYER}}
+
+  Rubriques de paie <- colonne de l'export "Emp_Salary_PayHeadDetails" :
+       {{AA}}  <-  AA (SALAIRE)
+       {{AR}}  <-  AR (SALAIRE CONTRACTUEL)
+       {{AB}}  <-  AB (TRANSPORT)
+       {{AC}}  <-  AC (REPRESENTATION)
+       {{AE}}  <-  AE (FRAIS SUPERVISION)
+       {{AX}}  <-  AX (Heures Supplementaires)
+       {{AF}}  <-  AF (Bonus(Accrued))
+       {{AZ}}  <-  AZ (BONUS (APPLIED))
+       {{AS}}  <-  AS (CREDIT ISR)
+       {{AJ}}  <-  AJ (ISR)
+       {{AG}}  <-  AG (ONA From Employee)
+       {{AH}}  <-  AH (CFGDCT From Employee)
+       {{AN}}  <-  AN (CAS From Employee)
+       {{AO}}  <-  AO (FDU From Employee)
+       {{AI}}  <-  AI (Fonds de Pension (5%) From Employee)
+       {{AT}}  <-  AT (Fonds de Pension (10%) From Employee)
+       {{AU}}  <-  AU (Fonds de Pension (3%) From Employee)
+       {{AW}}  <-  AW (ACOMPTE (10%) From Employee)
+       {{AP}}  <-  AP (PRET REMBOURSEMENT (PRINCIPAL))
+       {{AQ}}  <-  AQ (PRET REMBOURSEMENT (INTERET))
+       {{AY}}  <-  AY (Retenue (15%) sur Heures Supplementaires)
+       {{BB}}  <-  BB (RETENUE/REPRESENTATION (15%))
+       {{BA}}  <-  BA (BONUS (TAX DEDUCTED))
+       {{AK}}  <-  AK (TMS of Employer)
+       {{AL}}  <-  AL (ONA from Employer)
+       {{AM}}  <-  AM (Fonds de Pension (5%) from Employer)
+       {{AV}}  <-  AV (Fonds de Pension (3%) from Employer)
+
+  Montants : format français "36 411,00" (séparateur de milliers : espace, décimale : virgule).
+  Les variables des rubriques portent le code de colonne de l'export : {{AA}}, {{AB}}, ... {{BB}}.
+  Rubrique sans montant : afficher "0,00" (ou masquer la ligne côté code).
+  Net à payer = Total des gains - Total des retenues (colonne "Total" de l'export).
+-->
+<body>
+<main class="payslip">
+
+  <header class="payslip__header">
+    <div class="brand">
+      <img class="brand__logo" src="logo-acme.jpg" alt="Logo ACME SA">
+      <span class="brand__dept">Direction des Ressources Humaines</span>
+    </div>
+    <div class="period">
+      <span class="period__label">BULLETIN DE PAIE</span>
+      <span class="period__value">{{PERIODE}}</span>
+    </div>
+  </header>
+
+  <div class="payslip__body">
+
+    <section class="employee">
+      <div class="field"><span class="field__label">Matricule</span><span class="field__value">{{MATRICULE}}</span></div>
+      <div class="field field--span2"><span class="field__label">Nom et prénom</span><span class="field__value">{{NOM_COMPLET}}</span></div>
+      <div class="field"><span class="field__label">Date de paie</span><span class="field__value">{{DATE_PAIE}}</span></div>
+      <div class="field field--span2"><span class="field__label">Poste</span><span class="field__value">{{POSTE}}</span></div>
+      <div class="field"><span class="field__label">Affectation</span><span class="field__value">{{AFFECTATION}}</span></div>
+      <div class="field"><span class="field__label">Devise</span><span class="field__value">HTG</span></div>
+    </section>
+
+    <div class="columns">
+
+      <div class="col">
+        <section class="section">
+      <div class="section__head">Gains et indemnités</div>
+        <div class="row"><span class="row__label">Salaire de base</span><span class="row__amount">{{AA}}</span></div>
+        <div class="row"><span class="row__label">Salaire contractuel</span><span class="row__amount">{{AR}}</span></div>
+        <div class="row"><span class="row__label">Transport</span><span class="row__amount">{{AB}}</span></div>
+        <div class="row"><span class="row__label">Représentation</span><span class="row__amount">{{AC}}</span></div>
+        <div class="row"><span class="row__label">Frais de supervision</span><span class="row__amount">{{AE}}</span></div>
+        <div class="row"><span class="row__label">Heures supplémentaires</span><span class="row__amount">{{AX}}</span></div>
+        <div class="row"><span class="row__label">Bonus (accumulé)</span><span class="row__amount">{{AF}}</span></div>
+        <div class="row"><span class="row__label">Bonus (appliqué)</span><span class="row__amount">{{AZ}}</span></div>
+        <div class="row"><span class="row__label">Crédit d'ISR</span><span class="row__amount">{{AS}}</span></div>
+          <div class="row row--total"><span class="row__label">Total des gains</span><span class="row__amount">{{TOTAL_GAINS}}</span></div>
+        </section>
+
+        <section class="section">
+      <div class="section__head">Charges patronales <span class="section__note">(information)</span></div>
+        <div class="row"><span class="row__label">TMS – part employeur</span><span class="row__amount">{{AK}}</span></div>
+        <div class="row"><span class="row__label">ONA – part employeur</span><span class="row__amount">{{AL}}</span></div>
+        <div class="row"><span class="row__label">Fonds de pension 5 % – employeur</span><span class="row__amount">{{AM}}</span></div>
+        <div class="row"><span class="row__label">Fonds de pension 3 % – employeur</span><span class="row__amount">{{AV}}</span></div>
+        </section>
+      </div>
+
+      <div class="col">
+        <section class="section">
+      <div class="section__head">Taxes et cotisations légales</div>
+        <div class="row"><span class="row__label">ISR – impôt sur le revenu</span><span class="row__amount">{{AJ}}</span></div>
+        <div class="row"><span class="row__label">ONA – part employé</span><span class="row__amount">{{AG}}</span></div>
+        <div class="row"><span class="row__label">CFGDCT – part employé</span><span class="row__amount">{{AH}}</span></div>
+        <div class="row"><span class="row__label">CAS</span><span class="row__amount">{{AN}}</span></div>
+        <div class="row"><span class="row__label">FDU</span><span class="row__amount">{{AO}}</span></div>
+      <div class="section__head">Fonds de pension <span class="section__note">(part employé)</span></div>
+        <div class="row"><span class="row__label">Fonds de pension 5 %</span><span class="row__amount">{{AI}}</span></div>
+        <div class="row"><span class="row__label">Fonds de pension 10 %</span><span class="row__amount">{{AT}}</span></div>
+        <div class="row"><span class="row__label">Fonds de pension 3 %</span><span class="row__amount">{{AU}}</span></div>
+      <div class="section__head">Autres retenues</div>
+        <div class="row"><span class="row__label">Acompte 10 %</span><span class="row__amount">{{AW}}</span></div>
+        <div class="row"><span class="row__label">Prêt – remboursement du principal</span><span class="row__amount">{{AP}}</span></div>
+        <div class="row"><span class="row__label">Prêt – remboursement des intérêts</span><span class="row__amount">{{AQ}}</span></div>
+        <div class="row"><span class="row__label">Retenue 15 % sur heures supp.</span><span class="row__amount">{{AY}}</span></div>
+        <div class="row"><span class="row__label">Retenue 15 % sur représentation</span><span class="row__amount">{{BB}}</span></div>
+        <div class="row"><span class="row__label">Bonus – impôt retenu</span><span class="row__amount">{{BA}}</span></div>
+          <div class="row row--total"><span class="row__label">Total des retenues</span><span class="row__amount">{{TOTAL_RETENUES}}</span></div>
+        </section>
+      </div>
+
+    </div>
+
+    <section class="net">
+      <div class="net__text">
+        <span class="net__title">NET À PAYER</span>
+        <span class="net__sub">Total des gains − total des retenues</span>
+      </div>
+      <div class="net__amount">HTG {{NET_A_PAYER}}</div>
+    </section>
+
+    <section class="signatures">
+      <div class="signature"><div class="signature__line"></div><span class="signature__label">Signature de l'employé</span></div>
+      <div class="signature"><div class="signature__line"></div><span class="signature__label">Signature de l'employeur et cachet</span></div>
+    </section>
+
+    <footer class="payslip__footer">
+      <span>Document confidentiel, à conserver. Montants exprimés en gourdes (HTG).</span>
+      <span>ACME SA · Direction des Ressources Humaines</span>
+    </footer>
+
+  </div>
+</main>
+</body>
+</html>

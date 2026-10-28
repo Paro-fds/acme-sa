@@ -18,3 +18,7 @@ class LoginJournal(Protocol):
         """Du plus ancien au plus récent."""
 
     def since(self, moment: datetime) -> list[EmployeeLogin]: ...
+
+    def has_logged_in(self, employee_id: str) -> bool:
+        """US-1003 : l'employé a déjà ouvert une session au moins une fois."""
+        ...
