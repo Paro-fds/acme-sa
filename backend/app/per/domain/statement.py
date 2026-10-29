@@ -84,6 +84,14 @@ class PerSnapshot:
     amount: str
     interest: str
     accounts: tuple[PerAccount, ...]
+    reported_on: str = ""
+    """US-1024 : date du rapport, AAAA-MM-JJ ; vide si l'export ne la donne pas."""
+    name: str = ""
+
+
+def _iso_day(value) -> str:
+    parts = str(value or "").split("-")
+    return str(value) if len(parts) == 3 and all(part.isdigit() for part in parts) else ""
 
 
 def statement(document: dict | None) -> tuple[PerSnapshot, ...]:
@@ -100,6 +108,8 @@ def statement(document: dict | None) -> tuple[PerSnapshot, ...]:
             updated_on=date_fr(photo.get("date_rapport")),
             amount=amount_fr(photo.get("balance")),
             interest=amount_fr(photo.get("interet_cumule")),
+            reported_on=_iso_day(photo.get("date_rapport")),
+            name=" ".join(str(photo.get("nom") or "").split()),
             accounts=tuple(
                 PerAccount(
                     number=str(account.get("numero") or ""),

@@ -46,6 +46,18 @@ export async function request(path, { method = 'GET', body, headers } = {}) {
   return data
 }
 
+/** US-1024 : un fichier (PDF…) ; une erreur de l'API reste une ApiError au message affichable. */
+export async function requestBlob(path) {
+  let response
+  try {
+    response = await fetch(`/api${path}`, { credentials: 'same-origin' })
+  } catch {
+    throw new ApiError(0, 'NETWORK_ERROR', NETWORK_ERROR_MESSAGE)
+  }
+  if (!response.ok) throw toApiError(response.status, await response.json().catch(() => null))
+  return response.blob()
+}
+
 /**
  * Envoi d'un formulaire multipart avec suivi de progression (`onProgress(0..1)`).
  * XMLHttpRequest plutôt que fetch : seul moyen de connaître l'avancement d'un envoi.

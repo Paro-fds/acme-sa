@@ -173,7 +173,7 @@ def test_ca05_aucun_avertissement_par_whatsapp(client, container, clock, whatsap
     employee_login(client, EMP_A)  # autre connexion, par courriel
 
     assert len(whatsapp_outbox) == 1  # le seul code demandé
-    assert any("Une connexion" in message.body for message in container.email_sender.outbox)
+    assert any("Une consultation de vos documents" in message.body for message in container.email_sender.outbox)  # US-1025
 
 
 # --- CA-06 : envoi par Meta ; sans configuration, refus hors du poste local ------------------------------

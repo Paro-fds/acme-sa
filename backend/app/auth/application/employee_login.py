@@ -14,7 +14,6 @@ import logging
 from dataclasses import dataclass
 from html import escape
 from datetime import datetime
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from app.auth.application.sessions import SessionService, hash_token
 from app.auth.domain.errors import (
@@ -108,18 +107,24 @@ def _email_of(employee: Employee) -> str | None:
         return None
 
 
-def _when(moment: datetime) -> str:
-    """« 27/10/2026 à 09:05 », à l'heure d'Haïti (UTC si le fuseau n'est pas disponible)."""
-    try:
-        moment = moment.astimezone(ZoneInfo("America/Port-au-Prince"))
-        suffix = ""
-    except ZoneInfoNotFoundError:
-        suffix = " (heure UTC)"
-    return f"{moment:%d/%m/%Y} à {moment:%H:%M}{suffix}"
-
 
 CODE_SUBJECT = "ACME SA — Code de vérification PAM"
 NOTICE_SUBJECT = "ACME SA — PAM"
+# US-1025 : textes des avis du directeur (`noyau.py`, version du 2026-10-29)
+CONSULTATION_NOTICE = (
+    "Une consultation de vos documents de paie vient d'avoir lieu. Si vous n'êtes pas à l'origine de cette "
+    "connexion, contactez la DRH."
+)
+REFUSED_NOTICE = "Des essais de consultation ont été refusés. Si vous n'êtes pas à l'origine de ces essais, contactez la DRH."
+EMAIL_CHANGED_NOTICE = (
+    "Votre adresse du profil RH a changé. Le nouveau contact ne recevra pas de code pendant 72 heures. "
+    "Si vous n'êtes pas à l'origine de ce changement, contactez la DRH."
+)
+HOLD_LIFTED_NOTICE = "La DRH a levé le gel de votre accès à PAM. Vous pouvez demander un code de vérification."
+PHONE_CHANGED_NOTICE = (
+    "Votre numéro du profil RH a changé. L'ancien numéro ne sert plus à recevoir de code. "
+    "Si vous n'êtes pas à l'origine de ce changement, contactez la DRH."
+)
 
 
 def greeting_name(first_name: str | None) -> str:
@@ -132,12 +137,13 @@ class LoginMessages:
     """Textes des courriels (modèle du directeur) : ni lien, ni code employé, ni nom complet.
 
     Le code part en HTML (`pam_otp_email.html`, sujet « ACME SA — Code de vérification PAM ») avec une partie texte ;
-    les avis de sécurité restent en texte brut, sujet « ACME SA — PAM ».
+    les avis de sécurité aussi (US-1025 : `pam_alerte_email.html`, sujet « ACME SA — PAM »).
     """
 
-    def __init__(self, sender: EmailSender, code_template: str = "") -> None:
+    def __init__(self, sender: EmailSender, code_template: str = "", alert_template: str = "") -> None:
         self._sender = sender
         self._template = code_template
+        self._alert_template = alert_template
 
     def code_email(self, first_name: str | None, code: str, year: int) -> tuple[str, str, str | None]:
         """(sujet, texte, HTML) du courriel du code."""
@@ -169,36 +175,42 @@ class LoginMessages:
             )
         return CODE_SUBJECT, text, html
 
-    def login_succeeded(self, email: str | None, at: datetime) -> None:
-        self._notify(
-            email,
-            f"Une connexion à votre espace PAM a eu lieu le {_when(at)}.\n"
-            "Si ce n'est pas vous, contactez la DRH sans attendre.",
-        )
+    def login_succeeded(self, email: str | None, first_name: str | None, at: datetime) -> None:
+        self._notify(email, first_name, CONSULTATION_NOTICE, at)
 
-    def attempts_refused(self, email: str | None) -> None:
+    def attempts_refused(self, email: str | None, first_name: str | None, at: datetime) -> None:
         """US-1015 : à partir de 5 échecs pour ce code (modèle du directeur)."""
-        self._notify(
-            email,
-            "Des essais de connexion à votre espace PAM ont été refusés.\n"
-            "Si ce n'est pas vous, contactez la DRH sans attendre.",
-        )
+        self._notify(email, first_name, REFUSED_NOTICE, at)
 
-    def contact_changed(self, email: str | None, channel: LoginChannel, at: datetime, until: datetime) -> None:
-        what = "Le courriel" if channel is LoginChannel.EMAIL else "Le numéro WhatsApp"
-        self._notify(
-            email,
-            f"{what} enregistré à votre dossier a été modifié (constaté le {_when(at)}).\n"
-            f"Par sécurité, il ne recevra pas de code de connexion avant le {_when(until)}.\n"
-            "Si vous n'avez pas demandé ce changement, contactez la DRH sans attendre.",
-        )
+    def contact_changed(self, email: str | None, first_name: str | None, channel: LoginChannel, at: datetime) -> None:
+        self._notify(email, first_name, EMAIL_CHANGED_NOTICE if channel is LoginChannel.EMAIL else PHONE_CHANGED_NOTICE, at)
 
-    def _notify(self, email: str | None, body: str) -> None:
-        """Avertissement de sécurité : un échec d'envoi n'empêche ni la connexion ni le verrouillage."""
+    def hold_lifted(self, email: str | None, first_name: str | None, at: datetime) -> None:
+        """US-1026 : la DRH a levé le gel de 72 heures (`main_levee` du directeur)."""
+        self._notify(email, first_name, HOLD_LIFTED_NOTICE, at)
+
+    def notice(self, first_name: str | None, message: str, year: int) -> tuple[str, str | None]:
+        """US-1025 : (texte, HTML) d'un avis, comme `rendre_courriel_alerte` du directeur."""
+        name = greeting_name(first_name)
+        hello = f"Bonjour {name}," if name else "Bonjour,"
+        message = " ".join(message.split())
+        html = None
+        if self._alert_template:
+            html = (
+                self._alert_template.replace("{{SALUTATION}}", escape(hello))
+                .replace("{{MESSAGE}}", escape(message))
+                .replace("{{APERCU}}", escape(message))
+                .replace("{{ANNEE}}", str(year))
+            )
+        return f"{hello}\n\n{message}\n", html
+
+    def _notify(self, email: str | None, first_name: str | None, message: str, at: datetime) -> None:
+        """Avertissement de sécurité : un échec d'envoi n'empêche ni la connexion, ni le verrouillage, ni le gel."""
         if not email:
             return
+        text, html = self.notice(first_name, message, at.year)
         try:
-            self._sender.send(email, NOTICE_SUBJECT, body)
+            self._sender.send(email, NOTICE_SUBJECT, text, html=html)
         except MessageNotSent:
             logger.warning("Avertissement de sécurité non envoyé.")
 
@@ -250,7 +262,7 @@ class LoginGuard:
             lock.register_failure(now)
             self._locks.save(lock)
         if employee is not None and lock_duration(locks[0].failures) is not None:
-            self._messages.attempts_refused(_email_of(employee))
+            self._messages.attempts_refused(_email_of(employee), employee.first_name, now)
 
     def succeed(self, locks: tuple[LoginLock, LoginLock]) -> None:
         for lock in locks:
@@ -279,13 +291,12 @@ class ContactWatch:
         if seen.observe(value, now):
             self._contacts.save(seen)
             if value is not None:
-                self._alert(employee, channel, previous, now, seen.held_until())
+                self._alert(employee, channel, previous, now)
         return seen.is_held(now)
 
-    def _alert(self, employee: Employee, channel: LoginChannel, previous: str | None, now: datetime,
-               until: datetime) -> None:
+    def _alert(self, employee: Employee, channel: LoginChannel, previous: str | None, now: datetime) -> None:
         email = previous if channel is LoginChannel.EMAIL else _email_of(employee)
-        self._messages.contact_changed(email, channel, now, until)
+        self._messages.contact_changed(email, employee.first_name, channel, now)
 
 
 def _quota(quotas: WhatsAppQuotaRepository, employee_id: str, now: datetime) -> WhatsAppQuota:
@@ -468,5 +479,5 @@ class VerifyLoginCode:
         self._sessions.close(session_token)
         token = self._sessions.open(SubjectType.EMPLOYEE, employee.id)
         self._logins.record(EmployeeLogin(employee.id, now))
-        self._messages.login_succeeded(_email_of(employee), now)
+        self._messages.login_succeeded(_email_of(employee), employee.first_name, now)
         return token

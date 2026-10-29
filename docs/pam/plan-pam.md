@@ -16,6 +16,7 @@
 | D-61 | Le PER devient un **module de notre application** (une seule connexion). Ses fonctions de lecture (`releve_per`, montants, dates) sont reprises ; la clé `per/{CODE}.json` vient du code de la session | Développeur, 2026-10-28 | À confirmer par le directeur |
 | D-62 | Déploiement **par la console**, avec l'accès dev-conges (accord du directeur) : une fonction Lambda et une API HTTP, noms `conges-dispo-pam-*`, étiquette `Project`, rôle imposé `conges-dispo-lambda-role`. Guide : `docs/pam/deploiement-console.md`. La cible `stack.py` (CloudFront, WAF) attend des droits que cet accès n'a pas | Directeur et développeur, 2026-10-28 | Retenue ; droits du rôle et bases PostgreSQL à obtenir |
 | D-63 | Les postes ouverts qui correspondent au profil de l'employé connecté sont publiés dans PAM | Message du directeur | Retenue ; règles en Q15 à Q17 |
+| D-64 | La **main levée** du gel de 72 heures (version du directeur du 2026-10-29, `main_levee`) se fait depuis le **dossier de l'employé, dans l'espace de gestion RH**, et non depuis la session PAM d'un employé de la DRH : la DRH y a déjà une connexion forte et y débloque déjà les accès (US-22). Mêmes règles et même courriel à l'employé que le directeur | Choix de l'utilisateur, 2026-10-29 (US-1026) |
 
 **Écarts à corriger** (notre connexion → le modèle) : date en un champ de 8 chiffres JJMMAAAA masqué ; captcha à 3 échecs ; verrous de 1 min, 15 min puis 1 h, comptés par code **et** par adresse IP ; « Code incorrect ou expiré. » sans nombre d'essais ; 3 renvois par 15 minutes ; courriel du code en HTML (`pam_otp_email.html`, sujet « ACME SA — Code de vérification PAM », expéditeur `autorapport@acmehaiti.com`), avis en texte (« ACME SA — PAM ») ; WhatsApp « Indisponible » tant que le modèle Meta et le jeton manquent ; session de 15 minutes en cookie `HttpOnly; Secure; SameSite=Strict`, 5 minutes d'inactivité.
 
@@ -29,7 +30,13 @@
 | **US-1018** WhatsApp indisponible sans Meta | Bouton grisé « Indisponible » au lieu d'un refus au clic. **Fait le 2026-10-28** | — |
 | **US-1012** (revue) Consulter ma balance PER | Module de l'application, lecture de `pam/balances/per/{CODE}.json` (Q10 réglée par `export_shivam.py`). **Fait le 2026-10-28** ; devise non affichée (Q19) | D-61 |
 | **US-1020** Voir mes bulletins de paie | Comme l'onglet « Bulletin » du directeur, dans « Mon PER ». **Fait le 2026-10-28** | — |
-| **US-1021** Télécharger ma fiche de paie en PDF | Comme le bouton « Télécharger la fiche de paie (PDF) » et `fiche_paie.py` du directeur, à nos couleurs. **Fait le 2026-10-28** | Q20 |
+| **US-1021** Télécharger ma fiche de paie en PDF | Comme le bouton « Télécharger la fiche de paie (PDF) » et `fiche_paie.py` du directeur, à nos couleurs. **Fait le 2026-10-28, remplacée par US-1022 le 2026-10-29** | Q20 |
+| **US-1022** Fiche de paie au format du directeur | Version du directeur du 2026-10-29 : `payslip.html` affichée dans « Mon PER », « Enregistrer en PDF » par l'impression du navigateur, net sans le bonus AF et phrase du bonus, autres mois en lignes. Remplace le fichier PDF de US-1021. **Fait le 2026-10-29** | — |
+| **US-1023** Menu de « Mon PER » | Comme le « Menu principal » du directeur : Balance PER (centrée, en USD), Relevé PER, Fiche de paie, chacun sur sa page, « Menu principal » pour revenir. **Fait le 2026-10-29** | — |
+| **US-1027** Secrets Manager | Consignes du directeur (phase B) : la fonction lit `pam-dev/db-portail`, `pam-dev/db-carrieres` et `pam-dev/otp-hmac` au démarrage ; guide `deploiement-console.md` aux noms `pam-dev-…`. **Fait le 2026-10-29** | — |
+| **US-1024** Relevé PER entre deux dates | Comme le directeur : mois en base, deux dates (JJ/MM/AAAA), photos de l'intervalle, « Relevé en PDF » (fichier, en-tête répété, USD). **Fait le 2026-10-29** | — |
+| **US-1025** Avis de sécurité en HTML | `pam_alerte_email.html` du directeur à nos couleurs, ses quatre textes (consultation, essais refusés, courriel ou numéro changé). **Fait le 2026-10-29** | — |
+| **US-1026** Main levée du gel de 72 heures | Depuis le dossier de l'employé dans l'espace de gestion (D-64) : « Lever le gel », tracé, avis à l'employé. **Fait le 2026-10-29** | D-64 |
 | **US-1019** Voir les postes qui correspondent à mon profil | Liste des postes ouverts pour l'employé connecté, fiche du poste | Q15 à Q17 |
 
 Questions ajoutées : voir Q14 à Q18 au §5.
@@ -177,7 +184,7 @@ Le code garde ses ports (Clean Architecture) : les adaptateurs DynamoDB vont dan
 | Q17 | L'employé consulte-t-il seulement la fiche, ou peut-il postuler ? | Directeur | US-1019 |
 | Q18 | Déploiement : CDK (`stack.py`) ou script comme `publier.py` ? Accès à SiteGround pour le DNS ? | Directeur | Étape B |
 | Q19 | PER : faut-il afficher une devise (HTG ?) à côté des montants ? Votre module n'en montre pas. Et les bulletins de paie (`payslip/`) : à afficher ? | Directeur | US-1012 |
-| Q20 | Fiche de paie PDF : votre fiche montre les charges employeur « pour information », votre écran non. Les garder dans le PDF ? (repris tel quel en attendant) | Directeur | US-1021 |
+| Q20 | ~~Fiche de paie PDF : garder les charges employeur ?~~ **Réglée le 2026-10-28** : le format du directeur les montre, « Charges patronales (information) » (US-1022) | Directeur | US-1021 |
 | Q11 | WhatsApp : modèle « Authentification » approuvé ? Qui fournit le jeton d'utilisateur système ? | G. Hilaire | US-1004 |
 | Q12 | Afficher le portrait Vault (`vault/photos/{CODE}.jpg`) comme photo de l'employé ? | Directeur | — |
 | Q13 | Créole en option (doc PAM) : dans ce périmètre ou plus tard ? | Directeur | — |

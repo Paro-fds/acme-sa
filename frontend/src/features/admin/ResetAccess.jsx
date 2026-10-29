@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { resetAccess } from '../../api/admin.js'
+import { liftHold, resetAccess } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
 import Button from '../../components/Button.jsx'
 import { useUnauthorizedRedirect } from '../../lib/useLoader.js'
@@ -8,7 +8,7 @@ import Block from './Block.jsx'
 export const RESET_DONE = "Accès débloqué. L'employé peut se reconnecter avec un code reçu par courriel."
 
 /** Confirmation obligatoire, affichée dans le bloc (CA-07 : « Annuler » ne modifie rien). */
-function Confirmation({ name, resetting, onConfirm, onCancel }) {
+function Confirmation({ title, detail, confirmLabel, busyLabel, resetting, onConfirm, onCancel }) {
   const titleId = useId()
   const cancelRef = useRef(null)
   const panelRef = useRef(null)
@@ -28,9 +28,11 @@ function Confirmation({ name, resetting, onConfirm, onCancel }) {
       className="flex flex-col gap-3 rounded-lg border border-error-border bg-error-bg p-3"
     >
       <div className="flex flex-col gap-0.5">
-        <p id={titleId} className="font-semibold text-heading">Débloquer l'accès de {name}{' '}?</p>
+        <p id={titleId} className="font-semibold text-heading">
+          {title}
+        </p>
         <p id={`${titleId}-detail`} className="text-sm text-help">
-          Le verrouillage est levé et ses connexions en cours sont fermées. Son dossier et ses documents sont conservés.
+          {detail}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -49,10 +51,69 @@ function Confirmation({ name, resetting, onConfirm, onCancel }) {
           disabled={resetting}
           className="min-h-11 rounded-lg bg-error-text font-semibold text-white disabled:opacity-60"
         >
-          {resetting ? 'Déblocage…' : 'Débloquer'}
+          {resetting ? busyLabel : confirmLabel}
         </button>
       </div>
     </div>
+  )
+}
+
+/**
+ * US-1026 (D-64) : un gel de 72 heures en cours (contact changé récemment, US-1005) se lève ici, après confirmation,
+ * comme la « Main levée » du directeur ; l'employé est prévenu par courriel, l'adresse du dossier n'est pas modifiée.
+ * `onLifted(message)` : le bloc garde le message, qui reste affiché après le rechargement du dossier (gel disparu).
+ */
+function LiftHold({ employeeId, name, onLifted }) {
+  const [confirming, setConfirming] = useState(false)
+  const [lifting, setLifting] = useState(false)
+  const [error, setError] = useState(null)
+  const buttonRef = useRef(null)
+  const redirectIfUnauthorized = useUnauthorizedRedirect('/admin/connexion')
+
+  async function confirm() {
+    setLifting(true)
+    setError(null)
+    try {
+      onLifted((await liftHold(employeeId)).message)
+    } catch (caught) {
+      if (redirectIfUnauthorized(caught)) return
+      setError(caught.message)
+    }
+    setLifting(false)
+    setConfirming(false)
+  }
+
+  return (
+    <>
+      <p className="flex items-center gap-2 font-semibold text-error-text">
+        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+          lock_clock
+        </span>
+        Gel de 72 heures en cours : contact changé récemment
+      </p>
+      <Alert>{error}</Alert>
+      {confirming ? (
+        <Confirmation
+          title={`Lever le gel de ${name} ?`}
+          detail="Un code pourra de nouveau être envoyé aux contacts du dossier. L'employé est prévenu par courriel."
+          confirmLabel="Lever le gel"
+          busyLabel="Levée…"
+          resetting={lifting}
+          onConfirm={confirm}
+          onCancel={() => {
+            setConfirming(false)
+            setTimeout(() => buttonRef.current?.focus())
+          }}
+        />
+      ) : (
+        <Button ref={buttonRef} variant="secondary" onClick={() => setConfirming(true)}>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            lock_open
+          </span>
+          Lever le gel
+        </Button>
+      )}
+    </>
   )
 }
 
@@ -61,11 +122,12 @@ function Confirmation({ name, resetting, onConfirm, onCancel }) {
  * `activated` : l'employé s'est déjà connecté ; `locked` : accès verrouillé après des échecs.
  * Bouton « Débloquer l'accès » avec confirmation s'il y a quelque chose à débloquer ; `onReset()` recharge le dossier.
  */
-export default function ResetAccess({ employeeId, name, activated, locked = false, onReset }) {
+export default function ResetAccess({ employeeId, name, activated, locked = false, held = false, onReset }) {
   const [confirming, setConfirming] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState(null)
+  const [lifted, setLifted] = useState(null)
   const buttonRef = useRef(null)
   const redirectIfUnauthorized = useUnauthorizedRedirect('/admin/connexion')
 
@@ -107,7 +169,9 @@ export default function ResetAccess({ employeeId, name, activated, locked = fals
       </p>
       {locked && (
         <p className="flex items-center gap-2 font-semibold text-error-text">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">lock</span>
+          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+            lock
+          </span>
           Accès verrouillé après plusieurs échecs
         </p>
       )}
@@ -115,13 +179,34 @@ export default function ResetAccess({ employeeId, name, activated, locked = fals
       <Alert>{error}</Alert>
       {(activated || locked) &&
         (confirming ? (
-          <Confirmation name={name} resetting={resetting} onConfirm={confirm} onCancel={cancel} />
+          <Confirmation
+            title={`Débloquer l'accès de ${name} ?`}
+            detail="Le verrouillage est levé et ses connexions en cours sont fermées. Son dossier et ses documents sont conservés."
+            confirmLabel="Débloquer"
+            busyLabel="Déblocage…"
+            resetting={resetting}
+            onConfirm={confirm}
+            onCancel={cancel}
+          />
         ) : (
           <Button ref={buttonRef} variant="secondary" onClick={() => setConfirming(true)}>
-            <span className="material-symbols-outlined" aria-hidden="true">lock_open</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              lock_open
+            </span>
             Débloquer l'accès
           </Button>
         ))}
+      {lifted && <Alert tone="success">{lifted}</Alert>}
+      {held && (
+        <LiftHold
+          employeeId={employeeId}
+          name={name}
+          onLifted={(message) => {
+            setLifted(message)
+            onReset()
+          }}
+        />
+      )}
     </Block>
   )
 }

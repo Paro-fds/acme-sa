@@ -110,10 +110,10 @@ def test_ca03_courriel_change_previent_l_ancienne_adresse(client, container, vau
     _identify(client)
     _identify(client)  # vu une seule fois
 
-    alerts = [m for m in container.email_sender.outbox if "a été modifié" in m.body]
+    alerts = [m for m in container.email_sender.outbox if "du profil RH a changé" in m.body]
     assert [m.to for m in alerts] == [old]  # pas la nouvelle adresse (modèle du directeur)
     for message in alerts:
-        assert "Le courriel" in message.body
+        assert "Votre adresse du profil RH a changé" in message.body
         assert "http" not in message.body and EMP_A.employee_code not in message.body
         assert EMP_A.last_name not in message.body.upper()
     assert container.whatsapp_sender.outbox == []
@@ -127,9 +127,9 @@ def test_ca03_numero_change_previent_le_courriel_actuel_jamais_whatsapp(client, 
 
     _identify(client)
 
-    alerts = [m for m in container.email_sender.outbox if "a été modifié" in m.body]
+    alerts = [m for m in container.email_sender.outbox if "du profil RH a changé" in m.body]
     assert [m.to for m in alerts] == [email]
-    assert "Le numéro WhatsApp" in alerts[0].body
+    assert "Votre numéro du profil RH a changé" in alerts[0].body
     assert container.whatsapp_sender.outbox == []
 
 

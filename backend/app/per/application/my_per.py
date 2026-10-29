@@ -1,8 +1,9 @@
 from app.employee.domain.repository import EmployeeRepository, get_employee
 from app.per.domain.payslips import Payslip, payslip_key, payslips
-from app.per.domain.payslip_sheet import payslip_sheet, sheet_filename
-from app.per.domain.ports import PayslipRenderer, PerSource, PerSourceUnavailable
+from app.per.domain.payslip_sheet import payslip_sheet
+from app.per.domain.ports import PayslipRenderer, PerSource, PerSourceUnavailable, StatementRenderer
 from app.per.domain.statement import NoBalance, PerSnapshot, PerUnavailable, per_key, statement
+from app.per.domain.statement_period import StatementSheet, statement_between, statement_filename
 
 
 class GetMyPer:
@@ -42,8 +43,8 @@ class GetMyPayslips:
             raise PerUnavailable() from None
 
 
-class DownloadMyPayslip:
-    """US-1021 : la fiche de paie d'un mois en PDF ; seule la période vient du navigateur."""
+class ShowMyPayslip:
+    """US-1022 : la fiche de paie d'un mois, au format du directeur ; seule la période vient du navigateur."""
 
     def __init__(self, employees: EmployeeRepository, source: PerSource, prefix: str, renderer: PayslipRenderer) -> None:
         self._employees = employees
@@ -51,12 +52,26 @@ class DownloadMyPayslip:
         self._prefix = prefix
         self._renderer = renderer
 
-    def execute(self, employee_id: str, period: str) -> tuple[bytes, str]:
+    def execute(self, employee_id: str, period: str) -> str:
         employee = get_employee(self._employees, employee_id)
         try:
             document = self._source.read(payslip_key(employee.employee_code, self._prefix))
         except PerSourceUnavailable:
             raise PerUnavailable() from None
-        name = f"{employee.first_name} {employee.last_name}".strip()
-        sheet = payslip_sheet(document, period, employee.employee_code, name)
-        return self._renderer.render(sheet), sheet_filename(period)
+        return self._renderer.render(payslip_sheet(document, period, employee.employee_code))
+
+
+class GetMyStatementPdf:
+    """US-1024 : le relevé PER entre deux jours, en PDF ; seules les deux dates viennent du navigateur."""
+
+    def __init__(self, my_per: GetMyPer, employees: EmployeeRepository, renderer: StatementRenderer) -> None:
+        self._my_per = my_per
+        self._employees = employees
+        self._renderer = renderer
+
+    def execute(self, employee_id: str, start: str, end: str) -> tuple[bytes, str]:
+        photos = statement_between(self._my_per.execute(employee_id), start, end)
+        code = get_employee(self._employees, employee_id).employee_code
+        name = next((photo.name for photo in self._my_per.execute(employee_id) if photo.name), "")
+        sheet = StatementSheet(code, name, start, end, photos)
+        return self._renderer.render(sheet), statement_filename(sheet.start, sheet.end)

@@ -18,11 +18,17 @@ logger = logging.getLogger("acme.security")
 
 
 OTP_TEMPLATE = Path(__file__).parent / "templates" / "pam_otp_email.html"
+ALERT_TEMPLATE = Path(__file__).parent / "templates" / "pam_alerte_email.html"
 
 
 def load_otp_template() -> str:
     """US-1016 : modèle HTML du code, repris du directeur (`pam/pam/pam_otp_email.html`)."""
     return OTP_TEMPLATE.read_text(encoding="utf-8")
+
+
+def load_alert_template() -> str:
+    """US-1025 : modèle HTML des avis de sécurité, repris du directeur (`pam_alerte_email.html`)."""
+    return ALERT_TEMPLATE.read_text(encoding="utf-8")
 
 
 @dataclass(frozen=True)

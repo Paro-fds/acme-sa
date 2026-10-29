@@ -121,6 +121,7 @@ class EmployeeFolderOut(BaseModel):
     changes: list[ChangeOut]
     account_activated: bool
     access_locked: bool
+    contact_hold: bool = False
     photo_url: str | None = None
     """US-113 : photo officielle (système RH) ; vide tant que la source n'est pas branchée, l'écran affiche les initiales."""
 
@@ -347,6 +348,16 @@ def reset_access(employee_id: str, request: Request, admin_id: str = Depends(cur
     """US-1003 : débloquer l'accès (verrouillage levé, sessions fermées) ; US-103 CA-01 : refusé en lecture seule ;
     US-104 CA-03 : tracé."""
     container(request).unlock_access().execute(employee_id, actor_id=admin_id)
+
+
+class LiftHoldOut(BaseModel):
+    message: str
+
+
+@router.post("/employees/{employee_id}/lift-hold", response_model=LiftHoldOut, dependencies=[Depends(require_admin)])
+def lift_hold(employee_id: str, request: Request, admin_id: str = Depends(current_admin)) -> LiftHoldOut:
+    """US-1026 (D-64) : lever le gel de 72 heures après un changement de contact ; réservé aux administrateurs, tracé."""
+    return LiftHoldOut(message=container(request).lift_contact_hold().execute(employee_id, actor_id=admin_id))
 
 
 class RatingCountOut(BaseModel):

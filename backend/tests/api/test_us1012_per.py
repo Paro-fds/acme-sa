@@ -23,7 +23,7 @@ def test_ca01_balance_et_releve(employee_client):
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["balance"] | {"accounts": None} == {
-        "period": "2026-09", "period_label": "septembre 2026", "updated_on": "30/09/2026",
+        "period": "2026-09", "period_label": "septembre 2026", "updated_on": "30/09/2026", "reported_on": "2026-09-30",
         "amount": "121.480,75", "interest": "2.455,10", "accounts": None,
     }
     assert [photo["period_label"] for photo in body["statement"]] == ["septembre 2026", "août 2026"]

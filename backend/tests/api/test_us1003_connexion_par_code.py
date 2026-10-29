@@ -277,7 +277,7 @@ def test_ca07_courriel_apres_une_connexion_reussie(client, outbox):
 
     message = outbox[-1]
     assert message.to == "jean.joseph@exemple.test" and message.subject == "ACME SA — PAM"
-    assert "connexion" in message.body and message.html is None  # avis en texte brut
+    assert "Une consultation de vos documents de paie" in message.body and message.html  # US-1025 : en HTML
     _assert_discreet(message)
 
 

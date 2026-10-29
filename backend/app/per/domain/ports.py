@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from app.per.domain.payslip_sheet import PayslipSheet
+from app.per.domain.statement_period import StatementSheet
 
 
 class PerSourceUnavailable(Exception):
@@ -16,6 +17,12 @@ class PerSource(Protocol):
 
 
 class PayslipRenderer(Protocol):
-    """US-1021 : met une fiche de paie en page (PDF)."""
+    """US-1022 : met une fiche de paie en page, au format du directeur (HTML imprimable)."""
 
-    def render(self, sheet: PayslipSheet) -> bytes: ...
+    def render(self, sheet: PayslipSheet) -> str: ...
+
+
+class StatementRenderer(Protocol):
+    """US-1024 : met le relevé PER entre deux dates en page (PDF)."""
+
+    def render(self, sheet: StatementSheet) -> bytes: ...

@@ -19,7 +19,10 @@ import ValidationQueuePage from './features/admin/validation/ValidationQueuePage
 import ReviewCertificatePage from './features/admin/validation/ReviewCertificatePage.jsx'
 import PieceDepositPage from './features/pieces/PieceDepositPage.jsx'
 import PiecesPage from './features/pieces/PiecesPage.jsx'
+import PerBalancePage from './features/per/PerBalancePage.jsx'
 import PerPage from './features/per/PerPage.jsx'
+import PerPayslipPage from './features/per/PerPayslipPage.jsx'
+import PerStatementPage from './features/per/PerStatementPage.jsx'
 import EmployeeHomePage from './features/dashboard/EmployeeHomePage.jsx'
 import MyOpeningsPage from './features/openings/MyOpeningsPage.jsx'
 import MyNotificationsPage from './features/notifications/MyNotificationsPage.jsx'
@@ -50,6 +53,9 @@ export default function AppRoutes() {
       <Route path="/certificats/merci" element={<Navigate to="/certificats" replace />} />
       <Route path="/carriere" element={<MyOpeningsPage />} />
       <Route path="/per" element={<PerPage />} />
+      <Route path="/per/balance" element={<PerBalancePage />} />
+      <Route path="/per/releve" element={<PerStatementPage />} />
+      <Route path="/per/fiche" element={<PerPayslipPage />} />
       <Route path="/notifications" element={<MyNotificationsPage />} />
       {/* US-114 : « Mon parcours » est fondu dans « Ma carrière ». */}
       <Route path="/parcours/*" element={<Navigate to="/carriere" replace />} />

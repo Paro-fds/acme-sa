@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from app.auth.api.dependencies import container, current_employee_id
@@ -19,6 +20,7 @@ class PerSnapshotOut(BaseModel):
     updated_on: str
     amount: str
     interest: str
+    reported_on: str
     accounts: list[PerAccountOut]
 
 
@@ -63,10 +65,24 @@ def my_payslips(request: Request, employee_id: str = Depends(current_employee_id
     ]
 
 
-@router.get("/payslips/{period}.pdf", response_class=Response)
-def my_payslip_pdf(period: str, request: Request, employee_id: str = Depends(current_employee_id)) -> Response:
-    """US-1021 : la fiche de paie du mois AAAA-MM en PDF (comme /api/fiche.pdf du module du directeur)."""
-    content, filename = container(request).download_my_payslip().execute(employee_id, period)
-    return Response(
-        content, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"'}
-    )
+# Comme `_html` du directeur : la fiche n'est affichable que dans un cadre de PAM, sans script ni ressource externe.
+PAYSLIP_HEADERS = {
+    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; "
+    "frame-ancestors 'self'",
+    "X-Frame-Options": "SAMEORIGIN",
+}
+
+
+@router.get("/payslips/{period}.html", response_class=HTMLResponse)
+def my_payslip_sheet(period: str, request: Request, employee_id: str = Depends(current_employee_id)) -> HTMLResponse:
+    """US-1022 : la fiche de paie du mois AAAA-MM, au format du directeur (comme /api/fiche de son module)."""
+    return HTMLResponse(container(request).show_my_payslip().execute(employee_id, period), headers=PAYSLIP_HEADERS)
+
+
+@router.get("/statement.pdf", response_class=Response)
+def my_statement_pdf(
+    request: Request, start: str = "", end: str = "", employee_id: str = Depends(current_employee_id)
+) -> Response:
+    """US-1024 : le relevé PER du jour `start` au jour `end` (AAAA-MM-JJ), en PDF (/api/releve-pdf du directeur)."""
+    content, filename = container(request).get_my_statement_pdf().execute(employee_id, start, end)
+    return Response(content, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"'})

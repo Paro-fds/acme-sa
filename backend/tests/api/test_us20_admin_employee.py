@@ -103,8 +103,9 @@ def test_ca04_no_write_route_on_admin_employees(app):
         for method in operations
         if method.lower() in {"post", "put", "patch", "delete"}
     ]
-    # Seule exception prévue : la réinitialisation d'accès (US-22).
-    assert all(path.endswith("/reset-access") and method == "POST" for method, path in writes), writes
+    # Exceptions prévues : débloquer l'accès (US-22) et lever le gel de 72 heures (US-1026, D-64) ;
+    # aucune ne modifie le dossier.
+    assert all(path.endswith(("/reset-access", "/lift-hold")) and method == "POST" for method, path in writes), writes
 
 
 def test_ca04_write_methods_are_refused_and_change_nothing(admin_client):

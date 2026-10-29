@@ -26,7 +26,7 @@ Choix du 2026-10-27 : le portail devient PAM, l'interface des collaborateurs de 
 
 ## Notes
 
-Comme le module du directeur (choix du 2026-10-28 : « fais comme il a fait »). Sa fiche montre les charges employeur « pour information », alors que l'écran (US-1020) ne les montre pas : repris tel quel, à confirmer (Q20). PDF écrit sans bibliothèque, comme `fiche_paie.py` (rien à ajouter au paquet Lambda).
+Comme le module du directeur (choix du 2026-10-28 : « fais comme il a fait »). Sa fiche montre les charges employeur « pour information », alors que l'écran (US-1020) ne les montre pas : repris tel quel, à confirmer (Q20). PDF écrit sans bibliothèque, comme `fiche_paie.py` (rien à ajouter au paquet Lambda). **Remplacée par US-1022 le 2026-10-29** : dans la version du directeur, la fiche est une page imprimable, plus un fichier.
 
 ## Definition of Done
 

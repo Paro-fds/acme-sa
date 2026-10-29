@@ -73,3 +73,21 @@ def test_l_ecran_compile_est_servi_par_la_meme_fonction(monkeypatch, tmp_path):
     import base64
 
     assert base64.b64decode(font["body"]) == b"wOF2\x00\x01\x02binaire"
+
+
+def test_us1027_les_secrets_sont_lus_avant_la_configuration(monkeypatch, tmp_path):
+    from app.shared.infrastructure import aws_secrets
+
+    class Fake:
+        def get_secret_value(self, SecretId):  # noqa: N803
+            return {"SecretString": f"cle-lue-dans-{SecretId}"}
+
+    monkeypatch.setattr(aws_secrets, "secrets_client", Fake)
+    monkeypatch.setenv("OTP_HMAC_SECRET_ID", "pam-dev/otp-hmac")
+    monkeypatch.setenv("OTP_HMAC_KEY", "")  # rendue vide après le test
+    handler = _handler(monkeypatch, tmp_path)
+
+    import os
+
+    assert os.environ["OTP_HMAC_KEY"] == "cle-lue-dans-pam-dev/otp-hmac"
+    assert handler(_event("/api/auth/session-options"), None)["statusCode"] == 200

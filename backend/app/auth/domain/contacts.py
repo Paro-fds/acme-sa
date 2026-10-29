@@ -28,6 +28,10 @@ class SeenContact:
         self.changed_at = now
         return True
 
+    def lift(self) -> None:
+        """US-1026 : main levée de la DRH ; le contact reste celui de Vault, seul le gel disparaît."""
+        self.changed_at = None
+
     def held_until(self) -> datetime | None:
         return None if self.changed_at is None else self.changed_at + CONTACT_HOLD
 

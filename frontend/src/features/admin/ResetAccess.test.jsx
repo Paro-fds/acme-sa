@@ -3,12 +3,12 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import ResetAccess, { RESET_DONE } from './ResetAccess.jsx'
-import { resetAccess } from '../../api/admin.js'
+import { liftHold, resetAccess } from '../../api/admin.js'
 import { ApiError } from '../../api/client.js'
 
-vi.mock('../../api/admin.js', () => ({ resetAccess: vi.fn() }))
+vi.mock('../../api/admin.js', () => ({ resetAccess: vi.fn(), liftHold: vi.fn() }))
 
-function renderBlock({ activated = true, locked = false, onReset = vi.fn() } = {}) {
+function renderBlock({ activated = true, locked = false, held = false, onReset = vi.fn() } = {}) {
   const view = (props) => (
     <MemoryRouter initialEntries={['/admin/employes/1001']}>
       <Routes>
@@ -20,7 +20,7 @@ function renderBlock({ activated = true, locked = false, onReset = vi.fn() } = {
       </Routes>
     </MemoryRouter>
   )
-  const result = render(view({ activated, locked }))
+  const result = render(view({ activated, locked, held }))
   return { ...result, onReset, rerenderWith: (props) => result.rerender(view(props)) }
 }
 
@@ -131,5 +131,57 @@ describe('ResetAccess (US-22, « Débloquer l’accès » depuis US-1003)', () =
     await user.click(screen.getByRole('button', { name: 'Débloquer' }))
 
     expect(await screen.findByText('Écran connexion admin')).toBeInTheDocument()
+  })
+})
+
+describe('US-1026 — lever le gel de 72 heures (D-64)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    liftHold.mockResolvedValue({ message: "Gel levé. Un code peut de nouveau être envoyé à l'adresse du dossier." })
+  })
+
+  it('CA-01 : sans gel, rien ne s’affiche', () => {
+    renderBlock()
+
+    expect(screen.queryByText(/Gel de 72 heures en cours/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Lever le gel' })).not.toBeInTheDocument()
+  })
+
+  it('CA-01, CA-03 : gel en cours, confirmation, levée et message du serveur', async () => {
+    const user = userEvent.setup()
+    const { onReset } = renderBlock({ held: true })
+    expect(within(block()).getByText('Gel de 72 heures en cours : contact changé récemment')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Lever le gel' }))
+    const dialog = screen.getByRole('alertdialog', { name: 'Lever le gel de JOSEPH Jean\u00a0?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Lever le gel' }))
+
+    expect(liftHold).toHaveBeenCalledWith('1001')
+    expect(
+      await screen.findByText("Gel levé. Un code peut de nouveau être envoyé à l'adresse du dossier."),
+    ).toBeVisible()
+    expect(onReset).toHaveBeenCalledOnce()
+  })
+
+  it('CA-02 : « Annuler » ne lève rien', async () => {
+    const user = userEvent.setup()
+    renderBlock({ held: true })
+
+    await user.click(screen.getByRole('button', { name: 'Lever le gel' }))
+    await user.click(screen.getByRole('button', { name: 'Annuler' }))
+
+    expect(liftHold).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Lever le gel' })).toHaveFocus()
+  })
+
+  it('CA-02 : refus du serveur affiché', async () => {
+    liftHold.mockRejectedValue(new ApiError(409, 'NO_CONTACT_HOLD', 'Aucun gel en cours pour ce code.'))
+    const user = userEvent.setup()
+    renderBlock({ held: true })
+
+    await user.click(screen.getByRole('button', { name: 'Lever le gel' }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Lever le gel' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Aucun gel en cours pour ce code.')
   })
 })

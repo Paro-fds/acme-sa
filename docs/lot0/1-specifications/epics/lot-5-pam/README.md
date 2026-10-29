@@ -4,7 +4,7 @@
 
 **Démonstration de fin :** Un employé fictif se connecte par code, voit son dossier Carrières et dépose une pièce, en recette sur AWS.
 
-17 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
+23 stories, groupées par epic. Statuts et enchaînements : [index](../README.md).
 
 ## D10 PAM et Carrières
 
@@ -29,3 +29,9 @@ PAM est nourri par Carrières, protège l'accès par un code à usage unique et 
 | [US-1018](US-1018-whatsapp-indisponible-sans-meta.md) | WhatsApp indisponible sans Meta | Must | — | Fait |
 | [US-1020](US-1020-voir-mes-bulletins-de-paie.md) | Voir mes bulletins de paie | Must | — | Fait |
 | [US-1021](US-1021-telecharger-ma-fiche-de-paie-en-pdf.md) | Télécharger ma fiche de paie en PDF | Must | — | Fait |
+| [US-1022](US-1022-voir-ma-fiche-de-paie-au-format-du-directeur.md) | Voir ma fiche de paie au format du directeur | Must | — | Fait |
+| [US-1023](US-1023-choisir-mon-document-dans-le-menu-de-mon-per.md) | Choisir mon document dans le menu de « Mon PER » | Must | — | Fait |
+| [US-1024](US-1024-voir-mon-releve-per-entre-deux-dates-et-l-enregistrer-en-pdf.md) | Voir mon relevé PER entre deux dates et l'enregistrer en PDF | Must | — | Fait |
+| [US-1025](US-1025-recevoir-les-avis-de-securite-en-html-comme-le-directeur.md) | Recevoir les avis de sécurité en HTML, comme le directeur | Must | — | Fait |
+| [US-1026](US-1026-lever-le-gel-de-72-heures-d-un-employe-depuis-l-espace-de-ge.md) | Lever le gel de 72 heures d'un employé depuis l'espace de gestion | Must | — | Fait |
+| [US-1027](US-1027-lire-les-secrets-de-pam-dans-secrets-manager.md) | Lire les secrets de PAM dans Secrets Manager | Must | — | Fait |

@@ -1,91 +1,40 @@
-import { getMyPer } from '../../api/per.js'
-import Alert from '../../components/Alert.jsx'
+import { Link } from 'react-router'
 import Page from '../../components/Page.jsx'
-import { useLoader } from '../../lib/useLoader.js'
-import Payslips from './Payslips.jsx'
 
-function Accounts({ accounts }) {
-  if (accounts.length === 0) return null
-  return (
-    <ul aria-label="Comptes" className="flex flex-col gap-2">
-      {accounts.map((account) => (
-        <li
-          key={account.number}
-          className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-section p-3 text-sm"
-        >
-          <span className="flex flex-col">
-            <span className="font-semibold text-heading">Compte {account.number}</span>
-            <span className="text-help">Ouvert le {account.opened_on}</span>
-          </span>
-          <span className="flex flex-col tabular-nums sm:text-right">
-            <span className="font-semibold text-heading">{account.amount}</span>
-            <span className="text-help">dont intérêts {account.interest}</span>
-          </span>
-        </li>
-      ))}
-    </ul>
-  )
-}
+const DOCUMENTS = [
+  { to: '/per/balance', icon: 'savings', label: 'Balance PER', help: 'Votre épargne retraite à ce jour' },
+  { to: '/per/releve', icon: 'description', label: 'Relevé PER', help: 'Votre épargne, mois par mois' },
+  { to: '/per/fiche', icon: 'payments', label: 'Fiche de paie', help: 'Vos fiches de paie, à enregistrer en PDF' },
+]
 
-function Balance({ balance }) {
+/**
+ * US-1023 : « Mon PER » est un menu, comme le « Menu principal » du directeur (version du 2026-10-29) ; chaque choix
+ * ouvre son document. Le PER reste un module de PAM, une seule connexion (D-61) ; la main levée est côté RH (D-64).
+ */
+export default function PerPage() {
   return (
-    <section aria-labelledby="per-balance" className="flex flex-col gap-4 rounded-xl bg-surface p-5 shadow-card">
-      <div className="flex flex-col gap-1">
-        <h2 id="per-balance" className="text-sm font-semibold tracking-wide text-help uppercase">
-          Ma balance PER
-        </h2>
-        <p className="text-[32px] leading-tight font-bold text-primary tabular-nums">{balance.amount}</p>
-        <p className="text-sm text-help">
-          Mise à jour le {balance.updated_on} ({balance.period_label}) · intérêts cumulés {balance.interest}
-        </p>
-      </div>
-      <Accounts accounts={balance.accounts} />
-    </section>
-  )
-}
-
-function Statement({ photos }) {
-  return (
-    <section aria-labelledby="per-statement" className="flex flex-col gap-3">
-      <h2 id="per-statement" className="text-lg font-semibold text-heading">
-        Relevé PER
-      </h2>
-      <ul aria-label="Relevé PER" className="flex flex-col divide-y divide-border rounded-xl bg-surface shadow-card">
-        {photos.map((photo) => (
-          <li key={`${photo.period}-${photo.updated_on}`} className="flex items-baseline justify-between gap-4 p-4">
-            <span className="flex flex-col">
-              <span className="font-semibold text-heading first-letter:uppercase">{photo.period_label}</span>
-              <span className="text-sm text-help">Au {photo.updated_on}</span>
-            </span>
-            <span className="font-semibold text-heading tabular-nums">{photo.amount}</span>
+    <Page account title="Mon PER" subtitle="Plan d'épargne retraite et paie, en lecture seule.">
+      <ul aria-label="Documents du PER" className="grid gap-3 sm:grid-cols-3">
+        {DOCUMENTS.map((item) => (
+          <li key={item.to}>
+            <Link
+              to={item.to}
+              className="flex min-h-11 items-center gap-4 rounded-xl bg-surface p-5 shadow-card hover:bg-info-bg sm:h-full sm:flex-col sm:items-start"
+            >
+              <span className="material-symbols-outlined text-[32px] text-primary" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span className="flex flex-1 flex-col gap-1">
+                <span className="text-lg font-semibold text-heading">{item.label}</span>
+                <span className="text-sm text-help">{item.help}</span>
+              </span>
+              <span className="material-symbols-outlined text-muted sm:hidden" aria-hidden="true">
+                chevron_right
+              </span>
+            </Link>
           </li>
         ))}
       </ul>
-    </section>
-  )
-}
-
-/**
- * US-1012 : le PER, module de PAM (une seule connexion, D-61). Lecture seule : la balance la plus récente, ses
- * comptes, puis le relevé de chaque mois déposé par l'export Shivam. US-1020 : puis les bulletins de paie.
- */
-export default function PerPage() {
-  const { data, error, loading } = useLoader(getMyPer)
-
-  return (
-    <Page account title="Mon PER" subtitle="Plan d'épargne retraite, en lecture seule.">
-      <div className="flex flex-col gap-6">
-        {loading && <p role="status">Chargement…</p>}
-        {error && <Alert tone={error.code === 'NO_BALANCE' ? 'info' : 'error'}>{error.message}</Alert>}
-        {data && (
-          <>
-            <Balance balance={data.balance} />
-            <Statement photos={data.statement} />
-          </>
-        )}
-        <Payslips />
-        <p className="text-sm text-help">Une question sur votre PER ou votre paie ? Adressez-vous à la DRH.</p>
-      </div>
     </Page>
   )
 }

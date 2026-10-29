@@ -182,3 +182,8 @@ export function getAuditLog({ actor = '', target = '', action = '', period = '',
   if (period && period !== 'Tous' && period !== 'Toutes') params.set('period', period)
   return request(`/admin/audit?${params}`)
 }
+
+/** US-1026 (D-64) : lever le gel de 72 heures après un changement de contact ; rend le message à afficher. */
+export function liftHold(id) {
+  return request(`/admin/employees/${encodeURIComponent(id)}/lift-hold`, { method: 'POST' })
+}

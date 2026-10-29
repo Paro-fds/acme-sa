@@ -10,8 +10,9 @@ from datetime import timedelta
 
 from sqlalchemy import create_engine, inspect
 
-from app.per.application.my_per import DownloadMyPayslip, GetMyPayslips, GetMyPer
-from app.per.infrastructure.payslip_pdf import PdfPayslipRenderer
+from app.per.application.my_per import GetMyPayslips, GetMyPer, GetMyStatementPdf, ShowMyPayslip
+from app.per.infrastructure.payslip_html import HtmlPayslipRenderer
+from app.per.infrastructure.statement_pdf import PdfStatementRenderer
 from app.per.infrastructure.sources import LocalPerSource, S3PerSource
 from app.carrieres.application.deposit_piece import DepositPiece
 from app.carrieres.application.my_pieces import GetMyPieceFile, ListMyPieces
@@ -24,6 +25,7 @@ from app.admin.application.export_employees import ExportEmployeesList
 from app.admin.application.get_audit_log import GetAuditLog
 from app.admin.application.get_dashboard import GetMenuCounts, GetPilotDashboard
 from app.admin.application.get_employee_folder import GetEmployeeFolder
+from app.admin.application.lift_contact_hold import LiftContactHold
 from app.admin.application.get_engagement import GetEngagement
 from app.admin.application.get_statistics import GetStatistics
 from app.admin.application.list_employees import ListEmployees
@@ -69,7 +71,13 @@ from app.auth.domain.model import SubjectType
 from app.auth.domain.mfa import MfaMethod
 from app.auth.domain.network import parse_networks
 from app.auth.infrastructure.argon2_hasher import Argon2PasswordHasher
-from app.auth.infrastructure.email import LocalEmailSender, SesEmailSender, UnconfiguredEmailSender, load_otp_template
+from app.auth.infrastructure.email import (
+    LocalEmailSender,
+    SesEmailSender,
+    UnconfiguredEmailSender,
+    load_alert_template,
+    load_otp_template,
+)
 from app.auth.infrastructure.whatsapp import LocalWhatsAppSender, MetaWhatsAppSender, UnconfiguredWhatsAppSender
 from app.auth.infrastructure.mfa_adapters import (
     ConfigurableCodeSender,
@@ -270,7 +278,7 @@ class Container:
         )
 
     def login_messages(self) -> LoginMessages:
-        return LoginMessages(self.email_sender, load_otp_template())
+        return LoginMessages(self.email_sender, load_otp_template(), load_alert_template())
 
     def contact_watch(self) -> ContactWatch:
         return ContactWatch(self.seen_contacts, self.login_messages())
@@ -427,7 +435,12 @@ class Container:
         return GetMenuCounts(self.certificates, self.dossiers, self.referential)
 
     def get_employee_folder(self) -> GetEmployeeFolder:
-        return GetEmployeeFolder(self.employees, self.updates, self.login_locks, self.employee_logins, self.clock)
+        return GetEmployeeFolder(
+            self.employees, self.updates, self.login_locks, self.employee_logins, self.clock, self.seen_contacts
+        )
+
+    def lift_contact_hold(self) -> LiftContactHold:
+        return LiftContactHold(self.employees, self.seen_contacts, self.login_messages(), self.audit_logs, self.clock)
 
     def list_employees(self) -> ListEmployees:
         return ListEmployees(self.employees, self.updates)
@@ -525,12 +538,13 @@ class Container:
             self.per_source = per_source(self.settings)
         return GetMyPayslips(self.employees, self.per_source, self.settings.per_s3_prefix)
 
-    def download_my_payslip(self) -> DownloadMyPayslip:
+    def get_my_statement_pdf(self) -> GetMyStatementPdf:
+        return GetMyStatementPdf(self.get_my_per(), self.employees, PdfStatementRenderer.with_acme_logo())
+
+    def show_my_payslip(self) -> ShowMyPayslip:
         if self.per_source is None:
             self.per_source = per_source(self.settings)
-        return DownloadMyPayslip(
-            self.employees, self.per_source, self.settings.per_s3_prefix, PdfPayslipRenderer.with_acme_logo()
-        )
+        return ShowMyPayslip(self.employees, self.per_source, self.settings.per_s3_prefix, HtmlPayslipRenderer.load())
 
     def deposit_piece(self) -> DepositPiece:
         return DepositPiece(self.employees, self.carrieres, self.clock, IsProfileComplete(self.dossiers))

@@ -78,9 +78,9 @@ def test_ca03_salutation():
     assert "<b>" not in html and "&lt;b&gt;" in html
 
 
-def test_ca03_avis_en_texte_sujet_acme_sa_pam(client, container):
+def test_ca03_avis_sujet_acme_sa_pam(client, container):
     from tests.conftest import employee_login
 
     employee_login(client, EMP_A)
     notice = container.email_sender.outbox[-1]
-    assert notice.subject == "ACME SA — PAM" and notice.html is None
+    assert notice.subject == "ACME SA — PAM" and notice.html  # US-1025 : les avis partent aussi en HTML

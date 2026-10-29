@@ -19,7 +19,7 @@ def payslip_key(employee_code: str, prefix: str = PREFIX) -> str:
     return f"{prefix.strip('/')}/payslip/{code}.json"
 
 
-def is_zero(value) -> bool:
+def _zero(value) -> bool:
     raw = str(value if value is not None else "0").replace(" ", "").replace(".", "").replace(",", "")
     return set(raw.strip("-")) <= {"0"}
 
@@ -59,7 +59,7 @@ def payslips(document: dict | None) -> tuple[Payslip, ...]:
             lines=tuple(
                 PayslipLine(str(line.get("libelle") or ""), str(line.get("nature") or ""), amount_fr(line.get("montant")))
                 for line in item.get("lignes") or []
-                if not is_zero(line.get("montant")) and line.get("nature") != "employeur"
+                if not _zero(line.get("montant")) and line.get("nature") != "employeur"
             ),
         )
         for item in items
