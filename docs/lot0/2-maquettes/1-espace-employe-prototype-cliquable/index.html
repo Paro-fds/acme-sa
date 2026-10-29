@@ -1,0 +1,255 @@
+<title>Prototype parcours certificat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Mise en page : colonne des étapes à gauche, téléphone au centre, fiche de l'écran à droite ; une seule colonne sur téléphone. */
+:root {
+  --bg: #f4f4f9; --surface: #ffffff; --ink: #191a33; --muted: #5d5f78; --line: #dedeea;
+  --navy: #1e1e82; --navy-soft: #e8e8f7; --accent: #cc1111; --device: #15152b;
+  --amber-bg: #fdf2e3; --amber-fg: #8a4b06;
+  --font-body: 'IBM Plex Sans', system-ui, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f0f1d; --surface: #181830; --ink: #e7e7f4; --muted: #a2a3bd; --line: #2b2b4a;
+  --navy: #a9abff; --navy-soft: #23234a; --accent: #ff7a7a; --device: #000000;
+  --amber-bg: #3a2a10; --amber-fg: #f2c97a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f0f1d; --surface: #181830; --ink: #e7e7f4; --muted: #a2a3bd; --line: #2b2b4a;
+  --navy: #a9abff; --navy-soft: #23234a; --accent: #ff7a7a; --device: #000000;
+  --amber-bg: #3a2a10; --amber-fg: #f2c97a; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; margin: 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { margin: 0; line-height: 1.25; text-wrap: balance; }
+p { margin: 0; }
+header { display: flex; flex-direction: column; gap: 10px; max-width: 78ch; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: 28px; font-weight: 700; color: var(--navy); }
+.lead { color: var(--muted); font-size: 16px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; background: var(--navy-soft); color: var(--navy); font-weight: 500; }
+
+.stage { display: grid; grid-template-columns: 260px auto minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 1080px) { .stage { grid-template-columns: 240px minmax(0, 1fr); } .sheet { grid-column: 1 / -1; } }
+@media (max-width: 720px) { .stage { grid-template-columns: minmax(0, 1fr); } .steps { order: 3; } .sheet { order: 2; } }
+
+.steps { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.group h2 { font-size: 12px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.group ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.step { width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-radius: 8px; padding: 7px 10px; cursor: pointer; display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: baseline; }
+.step:hover { background: var(--navy-soft); }
+.step:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+.step .n { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.step[aria-current="true"] { background: var(--navy); color: #fff; }
+.step[aria-current="true"] .n { color: #c9caff; }
+
+.phone { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.device { width: 390px; max-width: 100%; height: 800px; border-radius: 40px; border: 10px solid var(--device); background: var(--device); overflow: hidden; box-shadow: 0 18px 40px rgba(20, 20, 60, .18); }
+.device iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; border-radius: 30px; }
+@media (max-width: 460px) { .device { height: 720px; border-width: 6px; border-radius: 28px; } .device iframe { border-radius: 22px; } }
+.nav { display: flex; gap: 8px; align-items: center; }
+.btn { font: inherit; font-weight: 600; font-size: 14px; color: var(--navy); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer; min-height: 40px; }
+.btn:hover { border-color: var(--navy); }
+.btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+.btn:disabled { opacity: .4; cursor: default; }
+.counter { font-family: var(--font-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 56px; text-align: center; }
+
+.sheet { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.card h3 { font-size: 19px; color: var(--navy); }
+.card .step-label { font-size: 12px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.refs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ref { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
+.hint { font-size: 13.5px; color: var(--muted); }
+.hint strong { color: var(--ink); }
+.pending { background: var(--amber-bg); border-color: transparent; }
+.pending h3 { color: var(--amber-fg); font-size: 15px; }
+.pending ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Lot 0 · Livrable 2 · Maquettes de l'espace employé</span>
+    <h1>Prototype du parcours « certificat »</h1>
+    <p class="lead">L'employé découvre le portail, se connecte, complète son profil, puis dépose et suit ses certificats. Touchez les boutons dans le téléphone pour avancer, ou choisissez un écran dans la liste.</p>
+    <div class="tags">
+      <span class="tag">13 écrans</span>
+      <span class="tag">Téléphone d'abord</span>
+      <span class="tag">Données fictives</span>
+      <span class="tag">Version du 7 octobre 2026</span>
+    </div>
+  </header>
+
+  <div class="stage">
+    <nav class="steps" id="steps" aria-label="Écrans du parcours"></nav>
+
+    <div class="phone">
+      <div class="device"><iframe id="screen" title="Écran du prototype" src="ecrans/accueil-public.html"></iframe></div>
+      <div class="nav">
+        <button class="btn" id="prev" type="button">← Précédent</button>
+        <span class="counter" id="counter">1 / 13</span>
+        <button class="btn" id="next" type="button">Suivant →</button>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <article class="card" aria-live="polite">
+        <span class="step-label" id="s-group"></span>
+        <h3 id="s-title"></h3>
+        <p id="s-text"></p>
+        <div class="refs" id="s-refs"></div>
+        <p class="hint" id="s-try"></p>
+      </article>
+
+      <article class="card pending">
+        <h3>Encore provisoire</h3>
+        <ul>
+          <li>La mascotte « La Penseuse » est un emplacement réservé : son dessin n'a pas encore été remis.</li>
+          <li>La police définitive n'est pas encore choisie : le guide de style la fixera.</li>
+          <li>Les erreurs sont en orange, parce que la charte réserve le rouge à l'accent : couleur proposée, à confirmer.</li>
+          <li>Le texte de la mention d'information reste à rédiger et à valider par la DRH.</li>
+          <li>Les niveaux d'études suivent la liste du registre, à aligner sur la grille de classification des postes.</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h3>Ce que ces écrans appliquent</h3>
+        <p class="hint">Les règles viennent du registre des décisions v1.8 et du tableau unique des règles du cahier des charges. Les codes renvoient à ces documents : <strong>Q</strong> = question du registre, <strong>RG</strong> = règle, <strong>D</strong> = décision du 6 octobre, <strong>P</strong> = proposition à confirmer.</p>
+      </article>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCREENS = [
+  { id: 'accueil-public', group: 'Découvrir et se connecter', title: 'Accueil, avant la connexion',
+    text: 'Un message court et chaleureux, les trois bénéfices avec un exemple chacun. Aucun pourcentage : l\'employé n\'est pas encore identifié.',
+    refs: ['E1', 'D-08'], tryIt: 'Touchez « Se connecter ».' },
+  { id: 'connexion', group: 'Découvrir et se connecter', title: 'Connexion',
+    text: 'Nom, prénom, date de naissance au format JJ/MM/AAAA et mot de passe, comme dans le portail actuel.',
+    refs: ['E2', 'Q8 §4'], tryIt: 'Touchez « Me connecter ».' },
+  { id: 'connexion-erreur', group: 'Découvrir et se connecter', title: 'Connexion : erreur de saisie',
+    text: 'Le message dit quoi vérifier, en orange avec une icône. Le rouge n\'est jamais utilisé pour une erreur.',
+    refs: ['RG-15', 'Q9'], tryIt: '' },
+  { id: 'connexion-suspendue', group: 'Découvrir et se connecter', title: 'Connexion : trop d\'essais',
+    text: 'Après 5 mots de passe erronés, l\'accès est suspendu 15 minutes, avec un message rassurant.',
+    refs: ['RG-80', 'P-09'], tryIt: '' },
+  { id: 'avant-de-commencer', group: 'Première connexion', title: 'Avant de commencer',
+    text: 'Affiché une seule fois, avant toute saisie : pourquoi le portail collecte le niveau d\'études et le contact d\'urgence, et qui y a accès. Le consentement est obligatoire ; les messages WhatsApp sont facultatifs.',
+    refs: ['D-09', 'Q1', 'Q7 §2'], tryIt: 'Cochez la case obligatoire, puis touchez « Continuer vers mon espace ».' },
+  { id: 'tableau-de-bord', group: 'Compléter son profil', title: 'Mon tableau de bord',
+    text: '« Votre dossier est complet à 62 % » : 5 éléments sur 8. Chaque information manquante a son bouton. Le dépôt attend un profil complet, présenté comme un service.',
+    refs: ['RG-05', 'RG-07', 'P-05'], tryIt: 'Touchez « Renseigner » ou « Confirmer ».' },
+  { id: 'coordonnees', group: 'Compléter son profil', title: 'Mes coordonnées',
+    text: 'Téléphone, adresse et email, ou la case « Je n\'ai pas d\'adresse email ». Chaque champ manquant porte un message qui dit quoi faire.',
+    refs: ['Q1', 'RG-02', 'RG-10 → RG-12'], tryIt: 'Touchez « Enregistrer ».' },
+  { id: 'contact-etudes', group: 'Compléter son profil', title: 'Contact d\'urgence et niveau d\'études',
+    text: 'Le lien avec le contact se choisit dans une liste. Chaque niveau d\'études porte un exemple ; il sera confirmé par les certificats validés.',
+    refs: ['RG-13', 'RG-14', 'P-07', 'Q3 §2'], tryIt: 'Touchez « Enregistrer et continuer ».' },
+  { id: 'informations-rh', group: 'Compléter son profil', title: 'Mes informations RH',
+    text: 'Agence, poste et date d\'embauche viennent du système RH : l\'employé les confirme ou signale une erreur, sans pouvoir les modifier. Un signalement ne bloque pas son dossier.',
+    refs: ['Q1', 'RG-03', 'D-02'], tryIt: 'Touchez « Valider et terminer mon profil ».' },
+  { id: 'depot-verrouille', group: 'Déposer et suivre ses certificats', title: 'Dépôt pas encore disponible',
+    text: 'Tant que le profil n\'est pas complet : « Complétons votre profil pour valoriser votre certificat », avec un bouton vers chaque information qui manque.',
+    refs: ['RG-07', 'EF-207'], tryIt: 'Touchez « Ajouter mon contact d\'urgence ».' },
+  { id: 'deposer', group: 'Déposer et suivre ses certificats', title: 'Déposer un certificat',
+    text: 'Photo ou fichier (PDF, JPG, PNG, 5 Mo), puis type, niveau, intitulé, établissement et année. Le domaine devient obligatoire à partir de Bac + 2 ; le pays, pour un diplôme étranger.',
+    refs: ['RG-20 → RG-25', 'RG-31', 'P-01', 'P-08'], tryIt: 'Touchez « Envoyer mon certificat ».' },
+  { id: 'merci', group: 'Déposer et suivre ses certificats', title: 'Merci',
+    text: 'Remerciement, récapitulatif, statut « En vérification par les RH » sous 5 jours ouvrables, et ce que le certificat débloque une fois validé.',
+    refs: ['EF-307', 'D-10', 'RG-40'], tryIt: 'Touchez « Voir mes certificats ».' },
+  { id: 'mes-certificats', group: 'Déposer et suivre ses certificats', title: 'Mes certificats',
+    text: 'Chaque certificat montre son statut avec une icône et un texte : Validé, En vérification, ou À corriger avec un motif poli et un bouton pour redéposer.',
+    refs: ['RG-26', 'RG-46', 'Q2'], tryIt: 'Touchez « Redéposer ».' },
+];
+
+// Bouton touché dans l'écran → écran suivant. Les boutons non reliés gardent leur effet dans l'écran.
+const ROUTES = [
+  ['se connecter', 'connexion'],
+  ['me connecter', 'avant-de-commencer'],
+  ['continuer vers', 'tableau-de-bord'],
+  ['enregistrer et continuer', 'informations-rh'],
+  ['valider et terminer', 'deposer'],
+  ['ajouter mon contact', 'contact-etudes'],
+  ['renseigner', 'contact-etudes'],
+  ['compléter', 'contact-etudes'],
+  ['confirmer', 'informations-rh'],
+  ['enregistrer', 'contact-etudes'],
+  ['envoyer mon certificat', 'merci'],
+  ['voir mes certificats', 'mes-certificats'],
+  ['déposer un', 'deposer'],
+  ['redéposer', 'deposer'],
+  ['mon profil', 'coordonnees'],
+];
+const LOGIN = ['connexion', 'connexion-erreur', 'connexion-suspendue'];
+const AFTER_DEPOSIT = ['deposer', 'merci', 'mes-certificats'];
+
+const frame = document.getElementById('screen');
+let current = 0;
+
+function route(text) {
+  const t = text.toLowerCase();
+  const here = SCREENS[current].id;
+  if (/\baccueil\b/.test(t) && t.length < 20) return LOGIN.includes(here) ? 'accueil-public' : 'tableau-de-bord';
+  if (/mes certificats$/.test(t.trim()) && !t.includes('voir')) return AFTER_DEPOSIT.includes(here) ? 'mes-certificats' : 'depot-verrouille';
+  for (const [needle, target] of ROUTES) if (t.includes(needle)) return target;
+  return null;
+}
+
+function buildList() {
+  const nav = document.getElementById('steps');
+  let group = null, list = null;
+  SCREENS.forEach((s, i) => {
+    if (s.group !== group) {
+      group = s.group;
+      const g = document.createElement('section');
+      g.className = 'group';
+      g.innerHTML = '<h2></h2><ol></ol>';
+      g.querySelector('h2').textContent = group;
+      list = g.querySelector('ol');
+      nav.appendChild(g);
+    }
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'step'; b.dataset.index = i;
+    b.innerHTML = '<span class="n"></span><span></span>';
+    b.firstChild.textContent = String(i + 1).padStart(2, '0');
+    b.lastChild.textContent = s.title;
+    b.addEventListener('click', () => show(i));
+    li.appendChild(b); list.appendChild(li);
+  });
+}
+
+function show(i, push = true) {
+  current = Math.max(0, Math.min(SCREENS.length - 1, i));
+  const s = SCREENS[current];
+  if (!frame.src.endsWith('ecrans/' + s.id + '.html')) frame.src = 'ecrans/' + s.id + '.html';
+  document.querySelectorAll('.step').forEach(b => b.setAttribute('aria-current', String(+b.dataset.index === current)));
+  document.getElementById('s-group').textContent = s.group;
+  document.getElementById('s-title').textContent = s.title;
+  document.getElementById('s-text').textContent = s.text;
+  const refs = document.getElementById('s-refs'); refs.innerHTML = '';
+  s.refs.forEach(r => { const e = document.createElement('span'); e.className = 'ref'; e.textContent = r; refs.appendChild(e); });
+  const tryIt = document.getElementById('s-try');
+  tryIt.textContent = s.tryIt ? 'À essayer : ' + s.tryIt : '';
+  tryIt.hidden = !s.tryIt;
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + SCREENS.length;
+  document.getElementById('prev').disabled = current === 0;
+  document.getElementById('next').disabled = current === SCREENS.length - 1;
+  if (push) { try { history.replaceState(null, '', '#' + s.id); } catch (e) {} }
+}
+
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'proto-click') return;
+  const target = route(e.data.text || '');
+  if (target) show(SCREENS.findIndex(s => s.id === target));
+});
+document.getElementById('prev').addEventListener('click', () => show(current - 1));
+document.getElementById('next').addEventListener('click', () => show(current + 1));
+
+buildList();
+const start = SCREENS.findIndex(s => '#' + s.id === location.hash);
+show(start >= 0 ? start : 0, false);
+</script>

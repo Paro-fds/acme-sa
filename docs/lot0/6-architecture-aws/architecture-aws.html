@@ -1,0 +1,209 @@
+<title>Architecture AWS du portail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Même charte que les autres schémas du lot 0. Une page : schéma, coûts, VPN, base de données, questions à la DIT. */
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --fg: #2c2e44; --heading: #12124d; --muted: #6a6c80;
+  --border: #e3e3ee; --primary: #1e1e82; --accent: #cc1111; --primary-bg: #eeeefa; --lane: #f1f1f8;
+  --todo-bg: #fff6dc; --todo-fg: #7a5a00; --ok: #15803d; --warn: #b45309;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42; --lane: #13132a;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; --ok: #6fd69a; --warn: #f0a560; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42; --lane: #13132a;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; --ok: #6fd69a; --warn: #f0a560; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { color: var(--heading); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 21px; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+ul, ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; max-width: 76ch; }
+strong { color: var(--heading); }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 18px; }
+.note { font-size: 14px; color: var(--muted); }
+.todo { background: var(--todo-bg); color: var(--todo-fg); border-radius: 4px; padding: 0 5px; font-size: .92em; white-space: nowrap; }
+.rec { color: var(--ok); font-weight: 700; }
+.total { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.tile b { font-size: 26px; color: var(--heading); font-variant-numeric: tabular-nums; }
+.tile span { font-size: 14px; color: var(--muted); }
+figure { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.scroll svg { display: block; width: 100%; height: auto; min-width: 980px; color: var(--fg); }
+figcaption { font-size: 14px; color: var(--muted); max-width: 84ch; }
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: 0; }
+tr.sum td { font-weight: 700; color: var(--heading); background: var(--primary-bg); }
+th { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+td:first-child { font-weight: 600; color: var(--heading); }
+
+svg text { fill: currentColor; font-family: var(--font); }
+svg .t { font-size: 13px; font-weight: 600; }
+svg .s { font-size: 11px; fill: var(--muted); }
+svg .lbl { font-size: 11px; font-style: italic; fill: var(--muted); }
+svg .hd { font-size: 12px; font-weight: 700; letter-spacing: .06em; fill: var(--muted); }
+svg .lane { font-size: 12px; font-weight: 700; fill: var(--primary); }
+svg .box { fill: var(--surface); stroke: currentColor; stroke-width: 1.2; }
+svg .actor { fill: var(--primary-bg); stroke: var(--primary); stroke-width: 1.2; }
+svg .edge { fill: var(--primary-bg); stroke: var(--primary); stroke-width: 2; }
+svg .app { fill: var(--surface); stroke: var(--primary); stroke-width: 2; }
+svg .db { fill: var(--surface); stroke: var(--primary); stroke-width: 2; }
+svg .todo { fill: var(--todo-bg); stroke: var(--todo-fg); stroke-width: 1.2; stroke-dasharray: 5 4; }
+svg .region { fill: none; stroke: var(--warn); stroke-width: 1.6; stroke-dasharray: 8 5; }
+svg .vpc { fill: var(--lane); stroke: var(--primary); stroke-width: 1.4; }
+svg .pub { fill: var(--surface); stroke: var(--border); stroke-width: 1; }
+svg .priv { fill: var(--surface); stroke: var(--border); stroke-width: 1; }
+svg .ln { stroke: currentColor; stroke-width: 1.3; fill: none; }
+svg .dash { stroke-dasharray: 5 4; }
+@media (max-width: 520px) { h1 { font-size: 25px; } .tile b { font-size: 22px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Refonte du portail · Lot 0 · Livrable 6</span>
+    <h1>Architecture AWS : schéma, coûts, VPN et base de données</h1>
+    <p class="lead">Comment le portail sera hébergé sur le compte AWS d'ACME SA, combien cela coûte chaque mois, comment l'espace RH est réservé au réseau de l'institution, et pourquoi PostgreSQL.</p>
+    <p class="note">Version 0.1 du 7 octobre 2026, proposition à discuter avec la DIT. Ce qui vient du registre cite sa source (Q8). Les éléments marqués <span class="todo">[à confirmer]</span> attendent la DIT. <strong>Les coûts sont des estimations</strong> : prix publics à la demande d'AWS, en dollars américains, hors taxes, à vérifier dans le calculateur officiel d'AWS (AWS Pricing Calculator) avant de les présenter.</p>
+  </header>
+
+  <section>
+    <h2>Ce que le registre fixe déjà (Q8)</h2>
+    <ul>
+      <li><strong>Hébergement</strong> sur le compte AWS d'ACME SA <span class="rec">compte existant, géré par la DIT (précisé le 07/10/2026)</span>, à l'adresse <strong>carriere.acmehaiti.com</strong> ; région <span class="todo">[us-east-2, à confirmer par la DIT]</span>, celle de Cognito.</li>
+      <li><strong>HTTPS uniquement</strong>, certificat ACM, <strong>CloudFront</strong> en frontal.</li>
+      <li><strong>Deux environnements</strong> : production, et recette sur <strong>recette-carriere.acmehaiti.com</strong>, protégée par mot de passe, données fictives seulement.</li>
+      <li><strong>Documents</strong> dans un S3 privé, chiffré, versionné ; liens temporaires ; analyse antivirus au dépôt.</li>
+      <li><strong>Base PostgreSQL gérée (RDS)</strong> recommandée, sauvegardée chaque jour, conservée 30 jours.</li>
+      <li><strong>Comptes RH</strong> : double authentification (Cognito, SES) ; espace d'administration réservé au réseau de l'institution ou au VPN institutionnel. <strong>Secrets</strong> dans AWS Secrets Manager.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>1. Le schéma</h2>
+    <figure>
+      <div class="scroll"><svg viewBox="0 0 1180 580" role="img" aria-label="Architecture AWS du portail : les employés et les RH passent par CloudFront et un pare-feu ; l'application tourne dans des conteneurs Fargate en sous-réseau privé, avec une base PostgreSQL RDS, des documents S3 chiffrés, Cognito pour la double authentification des RH et une sortie Internet vers WhatsApp."><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs><text class="hd" x="20" y="34">UTILISATEURS</text><rect class="actor" x="20" y="70" width="160" height="60" rx="8"/><text class="t" x="100.0" y="96" text-anchor="middle">Employé</text><text class="s" x="100.0" y="112" text-anchor="middle">téléphone, Internet</text><rect class="actor" x="20" y="250" width="160" height="76" rx="8"/><text class="t" x="100.0" y="276" text-anchor="middle">Agents RH, Admin.</text><text class="s" x="100.0" y="292" text-anchor="middle">poste de travail</text><text class="s" x="100.0" y="308" text-anchor="middle">depuis les bureaux</text><rect class="box" x="205" y="40" width="180" height="50" rx="8"/><text class="t" x="295.0" y="61" text-anchor="middle">DNS</text><text class="s" x="295.0" y="77" text-anchor="middle">carriere.acmehaiti.com</text><rect class="edge" x="205" y="120" width="180" height="190" rx="8"/><text class="t" x="295.0" y="211" text-anchor="middle">CloudFront</text><text class="s" x="295.0" y="227" text-anchor="middle">HTTPS (certificat ACM)</text><text class="s" x="295" y="250" text-anchor="middle">+ pare-feu WAF</text><text class="s" x="295" y="266" text-anchor="middle">/admin : IP de</text><text class="s" x="295" y="282" text-anchor="middle">l'institution seulement</text><rect class="region" x="410" y="20" width="585" height="545" rx="12"/><text class="lane" x="422" y="38">AWS · compte d&#x27;ACME SA · us-east-2 [à confirmer]</text><rect class="box" x="430" y="46" width="210" height="52" rx="8"/><text class="t" x="535.0" y="68" text-anchor="middle">Site web (React)</text><text class="s" x="535.0" y="84" text-anchor="middle">S3, fichiers statiques</text><rect class="vpc" x="425" y="110" width="365" height="440" rx="12"/><text class="lane" x="437" y="128">VPC · 2 zones de disponibilité</text><rect class="pub" x="440" y="135" width="335" height="100" rx="12"/><text class="lane" x="452" y="153">Sous-réseaux publics</text><rect class="box" x="455" y="160" width="140" height="60" rx="8"/><text class="t" x="525.0" y="186" text-anchor="middle">Équilibreur</text><text class="s" x="525.0" y="202" text-anchor="middle">ALB</text><rect class="box" x="615" y="160" width="145" height="60" rx="8"/><text class="t" x="687.5" y="186" text-anchor="middle">Passerelle NAT</text><text class="s" x="687.5" y="202" text-anchor="middle">sortie Internet</text><rect class="priv" x="440" y="250" width="335" height="285" rx="12"/><text class="lane" x="452" y="268">Sous-réseaux privés</text><rect class="app" x="455" y="280" width="305" height="90" rx="8"/><text class="t" x="607.5" y="313" text-anchor="middle">Application (API FastAPI)</text><text class="s" x="607.5" y="329" text-anchor="middle">ECS Fargate, 1 à 2 conteneurs</text><text class="s" x="607.5" y="345" text-anchor="middle">aucun serveur à maintenir</text><rect class="db" x="455" y="410" width="305" height="100" rx="8"/><text class="t" x="607.5" y="448" text-anchor="middle">Base PostgreSQL · RDS</text><text class="s" x="607.5" y="464" text-anchor="middle">chiffrée, sauvegarde quotidienne</text><text class="s" x="607.5" y="480" text-anchor="middle">conservée 30 jours</text><text class="hd" x="808" y="190">SERVICES GÉRÉS</text><rect class="box" x="805" y="200" width="180" height="60" rx="8"/><text class="t" x="895.0" y="226" text-anchor="middle">Documents · S3 privé</text><text class="s" x="895.0" y="242" text-anchor="middle">chiffré, versionné, antivirus</text><rect class="box" x="805" y="270" width="180" height="48" rx="8"/><text class="t" x="895.0" y="290" text-anchor="middle">Cognito</text><text class="s" x="895.0" y="306" text-anchor="middle">double authentification RH</text><rect class="box" x="805" y="328" width="180" height="44" rx="8"/><text class="t" x="895.0" y="346" text-anchor="middle">SES</text><text class="s" x="895.0" y="362" text-anchor="middle">emails</text><rect class="box" x="805" y="382" width="180" height="44" rx="8"/><text class="t" x="895.0" y="408" text-anchor="middle">Secrets Manager</text><rect class="box" x="805" y="436" width="180" height="50" rx="8"/><text class="t" x="895.0" y="457" text-anchor="middle">CloudWatch, Budgets</text><text class="s" x="895.0" y="473" text-anchor="middle">journaux, alertes de coût</text><rect class="todo" x="805" y="496" width="180" height="50" rx="8"/><text class="t" x="895.0" y="517" text-anchor="middle">Textract (lot 2)</text><text class="s" x="895.0" y="533" text-anchor="middle">OCR des lettres</text><text class="hd" x="1015" y="34">EXTÉRIEUR</text><rect class="actor" x="1015" y="45" width="150" height="56" rx="8"/><text class="t" x="1090.0" y="69" text-anchor="middle">WhatsApp</text><text class="s" x="1090.0" y="85" text-anchor="middle">API officielle Meta</text><rect class="actor" x="1015" y="140" width="150" height="64" rx="8"/><text class="t" x="1090.0" y="160" text-anchor="middle">Export RH (CSV)</text><text class="s" x="1090.0" y="176" text-anchor="middle">système RH</text><text class="s" x="1090.0" y="192" text-anchor="middle">lecture seule</text><polyline class="ln" points="180,100 205,160" marker-end="url(#a)"/><text class="lbl" x="186" y="122" text-anchor="start">HTTPS</text><polyline class="ln" points="180,288 205,260" marker-end="url(#a)"/><polyline class="ln dash" points="295,90 295,120" marker-end="url(#a)"/><polyline class="ln" points="385,140 430,76" marker-end="url(#a)"/><text class="lbl" x="396" y="100" text-anchor="start">pages</text><polyline class="ln" points="385,190 455,190" marker-end="url(#a)"/><text class="lbl" x="420" y="184" text-anchor="middle">/api</text><polyline class="ln" points="525,220 525,280" marker-end="url(#a)"/><text class="lbl" x="532" y="242" text-anchor="start">requêtes</text><polyline class="ln" points="607,370 607,410" marker-end="url(#a)"/><text class="lbl" x="614" y="394" text-anchor="start">SQL</text><polyline class="ln" points="688,280 688,220" marker-end="url(#a)"/><text class="lbl" x="695" y="256">sortie</text><polyline class="ln" points="760,178 1015,75" marker-end="url(#a)"/><text class="lbl" x="905" y="112" text-anchor="middle">messages</text><polyline class="ln" points="760,300.0 805,230" marker-end="url(#a)"/><polyline class="ln" points="760,316.0 805,294" marker-end="url(#a)"/><polyline class="ln" points="760,330.0 805,350" marker-end="url(#a)"/><polyline class="ln" points="760,343.5 805,404" marker-end="url(#a)"/><polyline class="ln" points="760,357.75 805,461" marker-end="url(#a)"/><polyline class="ln dash" points="760,365 805,521" marker-end="url(#a)"/><polyline class="ln dash" points="1015,172 985,222" marker-end="url(#a)"/><text class="lbl" x="1090" y="222" text-anchor="middle">dépôt [à confirmer]</text></svg></div>
+      <figcaption>L'application lit et écrit les documents par des <strong>liens temporaires</strong>. Tout le trafic entre par <strong>CloudFront</strong> : les pages viennent de S3, les appels <code>/api</code> vont à l'application. Le <strong>pare-feu WAF</strong> n'ouvre l'espace RH qu'aux adresses IP de l'institution. L'application et la base sont dans des <strong>sous-réseaux privés</strong>, sans accès direct depuis Internet ; l'application sort vers WhatsApp par la passerelle NAT. La <strong>recette</strong> reprend le même schéma en plus petit (un conteneur, une petite base), dans le même VPC, avec sa propre base et son propre espace de documents. Comment l'export RH arrive dans le portail : <span class="todo">[à confirmer]</span>.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>2. Les choix, et pourquoi</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>Brique</th><th>Choix proposé</th><th>Alternatives écartées</th></tr></thead>
+        <tbody>
+          <tr><td>Application</td><td><span class="rec">ECS Fargate</span> : l'API actuelle (FastAPI) dans un conteneur ; AWS gère les serveurs, les mises à jour de sécurité et le redémarrage</td><td><strong>EC2</strong> : moins cher, mais un serveur à maintenir et corriger soi-même. <strong>App Runner</strong> : plus simple, mais plus cher pour une application allumée en permanence. <strong>Lambda</strong> : demanderait de réécrire l'application</td></tr>
+          <tr><td>Pages</td><td><span class="rec">S3 + CloudFront</span> : le site React compilé, servi depuis le point de présence le plus proche (Miami pour Haïti)</td><td>Servir les pages par l'application : plus lent sur téléphone</td></tr>
+          <tr><td>Base</td><td><span class="rec">RDS PostgreSQL</span>, petite instance Graviton (db.t4g.small), chiffrée, sauvegarde quotidienne 30 jours et restauration à la minute près</td><td>Voir §5</td></tr>
+          <tr><td>Documents</td><td><span class="rec">S3 privé</span>, chiffré, versionné, accès par liens temporaires ; analyse antivirus par <strong>GuardDuty Malware Protection for S3</strong></td><td>Antivirus maison (ClamAV) : moins cher, mais à maintenir</td></tr>
+          <tr><td>Comptes RH</td><td><span class="rec">Cognito</span> avec double authentification <strong>au choix de la personne</strong> : application TOTP (Microsoft Authenticator…), code par email (SES) ou code par WhatsApp <span class="todo">[technologie à choisir avec la DIT : Cognito ne gère pas WhatsApp nativement, il faut un développement en plus]</span></td><td>Code par SMS : payant et moins sûr</td></tr>
+          <tr><td>Accès RH</td><td><span class="rec">Pare-feu WAF</span> : <code>/admin</code> réservé aux adresses IP de l'institution</td><td>Voir §4</td></tr>
+          <tr><td>Sortie Internet</td><td><span class="rec">Une passerelle NAT</span>, pour joindre l'API WhatsApp</td><td>Conteneurs en sous-réseau public : économise ~33 $ par mois, mais expose davantage l'application</td></tr>
+          <tr><td>Recette</td><td><span class="rec">Même VPC, même équilibreur</span>, base et documents séparés ; arrêtée la nuit et le week-end</td><td>Un compte AWS séparé : plus isolé, plus d'administration <span class="todo">[à choisir avec la DIT]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Les coûts mensuels estimés</h2>
+    <div class="total">
+      <div class="tile"><b>~ 135 $</b><span>par mois, configuration recommandée (production + recette)</span></div>
+      <div class="tile"><b>~ 1 600 $</b><span>par an, avant réductions</span></div>
+      <div class="tile"><b>~ 200 $</b><span>par mois, avec base doublée (Multi-AZ) et VPN site à site</span></div>
+    </div>
+    <div class="table">
+      <table>
+        <thead><tr><th>Poste</th><th>Hypothèse</th><th class="n">Production</th><th class="n">Recette</th></tr></thead>
+        <tbody>
+          <tr><td>Équilibreur (ALB)</td><td>Un seul, partagé entre production et recette</td><td class="n">22 $</td><td class="n">—</td></tr>
+          <tr><td>Application (Fargate)</td><td>Production : 1 conteneur 0,5 vCPU / 1 Go, Graviton ; recette : 0,25 vCPU, arrêtée la nuit</td><td class="n">15 $</td><td class="n">4 $</td></tr>
+          <tr><td>Base RDS PostgreSQL</td><td>Production : db.t4g.small, 20 Go ; recette : db.t4g.micro, arrêtée la nuit ; sauvegardes 30 jours</td><td class="n">27 $</td><td class="n">8 $</td></tr>
+          <tr><td>Passerelle NAT</td><td>Une seule, peu de trafic</td><td class="n">34 $</td><td class="n">—</td></tr>
+          <tr><td>CloudFront + WAF</td><td>Trafic faible (~500 employés) ; 1 liste d'IP, 3 règles</td><td class="n">10 $</td><td class="n">—</td></tr>
+          <tr><td>S3 + antivirus</td><td>Moins de 20 Go de documents ; quelques milliers de fichiers analysés</td><td class="n">3 $</td><td class="n">1 $</td></tr>
+          <tr><td>CloudWatch, Secrets Manager, Route 53, ECR</td><td>Journaux 30 jours, ~5 secrets, une zone DNS</td><td class="n">8 $</td><td class="n">2 $</td></tr>
+          <tr><td>Cognito, SES</td><td>Une dizaine de comptes RH ; quelques milliers d'emails</td><td class="n">1 $</td><td class="n">—</td></tr>
+          <tr class="sum"><td>Total</td><td>Arrondi</td><td class="n">~ 120 $</td><td class="n">~ 15 $</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Options qui changent le total</h3>
+    <div class="table">
+      <table>
+        <thead><tr><th>Option</th><th>Effet</th><th class="n">Par mois</th></tr></thead>
+        <tbody>
+          <tr><td>Base doublée sur 2 zones (Multi-AZ)</td><td>La base continue de fonctionner si une zone tombe ; utile seulement si la disponibilité attendue l'exige (ENF-23, non définie)</td><td class="n">+ 25 $</td></tr>
+          <tr><td>Deuxième conteneur en production</td><td>Pas d'interruption lors d'une mise à jour ou d'une panne de conteneur</td><td class="n">+ 15 $</td></tr>
+          <tr><td>VPN site à site</td><td>Voir §4, option B</td><td class="n">+ 37 $</td></tr>
+          <tr><td>Engagement d'un an (Savings Plans, instance réservée)</td><td>Réduction sur Fargate et RDS contre un engagement</td><td class="n">− 10 à 15 $</td></tr>
+          <tr><td>OCR des lettres (Textract, lot 2)</td><td>Ponctuel : quelques milliers de pages à ~1,5 $ les 1 000</td><td class="n">&lt; 10 $ une fois</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Non compris : WhatsApp (livrable 7, facturé par Meta ou le prestataire), le temps de travail de la DIT, le nom de domaine. Une <strong>alerte de budget</strong> (AWS Budgets, gratuite) prévient si la facture dépasse un seuil, par exemple 150 $ par mois.</p>
+  </section>
+
+  <section>
+    <h2>4. Réserver l'espace RH au réseau de l'institution</h2>
+    <p>Le registre demande que l'administration soit « réservée au réseau de l'institution ou accessible via VPN institutionnel » (Q8 §4). Trois façons de le faire :</p>
+    <div class="table">
+      <table>
+        <thead><tr><th>Option</th><th>Comment</th><th>Coût</th><th>Pour</th><th>Contre</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rec">A. Liste d'IP au pare-feu</span> (recommandée)</td><td>Le WAF n'accepte <code>/admin</code> et <code>/api/admin</code> que depuis les adresses IP publiques de l'institution. Les RH et les administrateurs travaillent <strong>depuis les bureaux</strong> (précisé le 07/10/2026) : aucun VPN n'est nécessaire</td><td>Compris dans le WAF (~10 $)</td><td>Simple ; aucun équipement ; s'ajoute à la double authentification</td><td>Il faut des <strong>IP publiques fixes</strong> pour chaque bureau <span class="todo">[à confirmer par la DIT]</span></td></tr>
+          <tr><td>B. VPN site à site</td><td>Un tunnel chiffré entre le pare-feu de l'institution et le VPC ; l'espace RH n'a plus d'adresse publique</td><td>~ 37 $ par mois</td><td>L'espace RH devient invisible depuis Internet</td><td>Il faut un pare-feu compatible IPsec côté institution, et le configurer ; plus complexe</td></tr>
+          <tr><td>C. AWS Client VPN</td><td>Chaque RH installe un logiciel VPN sur son poste</td><td>~ 75 $ par mois et plus</td><td>Fonctionne de partout</td><td>Le plus cher ; un logiciel à gérer sur chaque poste ; fait doublon avec le VPN institutionnel</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Dans les trois cas, les comptes RH gardent la double authentification Cognito : le réseau ne remplace pas le mot de passe et le code.</p>
+  </section>
+
+  <section>
+    <h2>5. La base de données</h2>
+    <ul>
+      <li><strong>PostgreSQL sur RDS</strong> : c'est ce que recommande le registre (Q8 §3), et le choix SQL que justifie le modèle de données (§13 : données très liées, opérations qui doivent réussir ensemble, schéma stable, petit volume).</li>
+      <li><strong>Taille :</strong> une petite instance suffit pour ~500 employés et quelques milliers de certificats. On peut l'agrandir en quelques minutes si besoin.</li>
+      <li><strong>Sauvegardes :</strong> automatiques chaque jour, conservées 30 jours (Q8 §3), avec <strong>restauration à n'importe quelle minute</strong> de ces 30 jours. Les documents S3 sont versionnés : un fichier écrasé ou supprimé se récupère.</li>
+      <li><strong>Sécurité :</strong> chiffrée, dans un sous-réseau privé ; seule l'application peut s'y connecter ; mot de passe dans Secrets Manager.</li>
+      <li><strong>Une seule zone ou deux (Multi-AZ) ?</strong> <strong>Une seule.</strong> Un arrêt de quelques heures est acceptable (précisé le 07/10/2026) : la base sur deux zones (+25 $ par mois) n'est pas nécessaire au lancement. À confirmer par le directeur (ENF-23). En cas de panne d'une zone, la base serait restaurée en moins d'une heure, mais le portail serait arrêté pendant ce temps.</li>
+      <li><strong>Tests de restauration :</strong> à faire régulièrement, fréquence <span class="todo">[à fixer avec la DIT]</span> (ENF-22).</li>
+      <li>Le passage de la base actuelle du MVP (SQLite) à PostgreSQL se fait sans perte de données (conception technique, B-18).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. Questions à poser à la DIT</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>#</th><th>Question</th><th>Ce qu'elle change</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Région AWS : us-east-2 confirmée ? Le pool Cognito existant peut-il servir ?</td><td>Emplacement de tout le reste</td></tr>
+          <tr><td>2</td><td>Qui gère le DNS d'acmehaiti.com : Route 53, ou un autre fournisseur ?</td><td>Il suffit d'un enregistrement vers CloudFront ; Route 53 seulement si la zone y est déjà</td></tr>
+          <tr><td>3</td><td>Chaque bureau d'où travaillent les RH (siège, agences ?) a-t-il une <strong>adresse IP publique fixe</strong> ? Lesquelles ?</td><td>La liste d'IP du pare-feu (option A). Sans IP fixe : option B</td></tr>
+          <tr><td>4</td><td><s>Quelle disponibilité attendre ?</s> <span class="rec">Quelques heures d'arrêt acceptables (07/10/2026)</span> : reste à fixer les heures de service</td><td>Une zone, un conteneur</td></tr>
+          <tr><td>5</td><td>Le compte AWS existant de la DIT : recette et production dans ce même compte, ou un compte séparé pour la recette ? Qui nous y donne accès ?</td><td>Isolement et administration</td></tr>
+          <tr><td>6</td><td>Comment l'<strong>export RH</strong> arrivera-t-il : téléversé par les RH dans le portail, ou déposé automatiquement ?</td><td>Un écran d'import, ou un dépôt S3 programmé</td></tr>
+          <tr><td>7</td><td>Quel <strong>budget</strong> mensuel, et quel seuil d'alerte ?</td><td>Options retenues ; réglage d'AWS Budgets</td></tr>
+          <tr><td>8</td><td>Qui exploite au quotidien (comptes d'accès, mises à jour, surveillance) ?</td><td>Rôles d'accès AWS et procédures</td></tr>
+          <tr><td>9</td><td>À quelle fréquence tester la restauration des sauvegardes ?</td><td>ENF-22</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

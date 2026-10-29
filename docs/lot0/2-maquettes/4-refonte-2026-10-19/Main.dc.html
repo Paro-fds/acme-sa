@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil employé</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6FB}
+a{color:#1D3FA8;text-decoration:none}a:hover{color:#132C7A;text-decoration:underline}
+</style>
+</helmet>
+<div style="font-family: 'Public Sans', system-ui, sans-serif; color: #17213A; background: #F4F6FB; min-height: 1180px; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <nav aria-label="Menu principal" style="flex: 1 1 260px; max-width: 280px; min-width: 240px; position: sticky; top: 0; height: 100vh; align-self: flex-start; overflow-y: auto; background: #0F2A63; color: #FFFFFF; display: flex; flex-direction: column; padding: 24px 16px; box-sizing: border-box; gap: 32px">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D3FA8" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 20h18L12 3Z"></path><path d="M8.5 15h7"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px">ACME <span style="font-weight: 400">SA</span></span>
+        <span style="font-size: 13px; color: #C9D5F2">Microfinance, un avenir ensemble</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <a href="Main.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 18px; font-weight: 600; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"></path><path d="M5 10v10h5v-6h4v6h5V10"></path></svg>
+        Accueil
+      </a>
+      <a href="MonDossier.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; color: #E6ECFA; font-size: 18px; font-weight: 500; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V2.8h6V4"></path><circle cx="12" cy="11" r="2.4"></circle><path d="M8.5 17c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7"></path></svg>
+        Mon dossier
+      </a>
+      <a href="MesCertificats.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; color: #E6ECFA; font-size: 18px; font-weight: 500; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+        Mes certificats
+      </a>
+      <a href="MaCarriere.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; color: #E6ECFA; font-size: 18px; font-weight: 500; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path><path d="m9.5 13.5 2 2 3.5-3.5"></path></svg>
+        Ma carrière
+      </a>
+    </div>
+
+    <div style="flex-grow: 1"></div>
+
+    <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 16px; color: #E6ECFA; font-size: 17px; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"></path><path d="M17 8l4 4-4 4"></path><path d="M21 12H10"></path></svg>
+      Se déconnecter
+    </a>
+
+    <div style="position: relative; margin: 0 -16px -24px; height: 190px; overflow: hidden">
+      <svg width="100%" height="150" viewBox="0 0 280 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" style="position: absolute; left: 0; bottom: 0; display: block">
+        <path d="M0 150 L0 96 L38 70 L62 84 L104 40 L136 66 L160 52 L206 90 L240 72 L280 96 L280 150 Z" fill="#1A3A7E" opacity="0.7"></path>
+        <path d="M104 40 L118 52 L110 52 L100 60 L94 50 Z" fill="#3B5FA8" opacity="0.6"></path>
+        <path d="M0 150 L0 116 L46 92 L84 110 L128 82 L170 104 L214 86 L252 104 L280 96 L280 150 Z" fill="#163370"></path>
+        <path d="M0 150 L0 132 L60 118 L120 130 L190 116 L250 128 L280 122 L280 150 Z" fill="#12306B"></path>
+      </svg>
+      <p style="position: absolute; left: 24px; right: 16px; bottom: 26px; margin: 0; font-size: 17px; line-height: 1.45; font-weight: 500; color: #FFFFFF">Grandir ensemble<br>pour un impact durable</p>
+    </div>
+  </nav>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+    <header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E3E8F2; flex-wrap: wrap">
+      <span style="font-size: 16px; color: #4A5672">Lundi 19 octobre 2026</span>
+      <div style="display: flex; align-items: center; gap: 20px">
+        <button type="button" aria-label="Notifications : 2 non lues" style="position: relative; width: 44px; height: 44px; border: none; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #17213A">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+          <span style="position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; background: #C2410C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+        </button>
+        <div style="width: 1px; height: 36px; background: #E3E8F2"></div>
+        <button type="button" style="display: flex; align-items: center; gap: 12px; border: none; background: transparent; cursor: pointer; padding: 4px; font-family: inherit; text-align: left">
+          <span style="width: 44px; height: 44px; border-radius: 50%; background: #0F2A63; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center">JJ</span>
+          <span style="display: flex; flex-direction: column">
+            <span style="font-size: 16px; font-weight: 700; color: #17213A">Jean JOSEPH</span>
+            <span style="font-size: 14px; color: #4A5672">Agent de crédit · Pétion-Ville</span>
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <main style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 24px; max-width: 1180px; width: 100%; box-sizing: border-box">
+
+      <section style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px">
+        <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 10px; max-width: 560px">
+          <h1 style="margin: 0; font-size: 36px; font-weight: 800; color: #0F2A63; letter-spacing: -0.5px">Bonjour Jean</h1>
+          <p style="margin: 0; font-size: 18px; line-height: 1.55; color: #3A4664">Bienvenue sur votre espace carrière. Ici, vous pouvez suivre vos dossiers, consulter les opportunités et gérer vos documents.</p>
+          <a href="#" style="align-self: flex-start; display: flex; align-items: center; gap: 10px; min-height: 50px; margin-top: 6px; padding: 0 22px; border-radius: 10px; background: #1D3FA8; color: #FFFFFF; font-size: 17px; font-weight: 700; text-decoration: none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>
+            Déposer un certificat
+          </a>
+        </div>
+        <div style="flex: 1 1 460px; display: flex; align-items: center; min-height: 150px; border-radius: 16px; background: #E6EDFB; overflow: hidden">
+          <img src="/_blob/8e1cd9e260c516a97eb91afe39d76749" alt="" width="156" height="113" style="flex-shrink: 0; width: 156px; height: 113px; margin: 18px 12px 18px 28px; object-fit: contain">
+          <p style="margin: 0; padding: 0 28px 0 8px; font-size: 17px; line-height: 1.55; color: #1D3FA8">Votre engagement d’aujourd’hui construit votre avenir chez ACME SA.</p>
+        </div>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+        <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+            <a href="#" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #DCE4F5; border-radius: 14px; padding: 18px; color: #17213A; text-decoration: none">
+              <span style="width: 44px; height: 44px; border-radius: 50%; background: #E3EBFD; color: #1D3FA8; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path><path d="M3 13h18"></path></svg>
+              </span>
+              <span style="font-size: 17px; font-weight: 700">Postes pour vous</span>
+              <span style="font-size: 40px; font-weight: 800; color: #0F2A63; line-height: 1">2</span>
+              <span style="font-size: 15px; color: #4A5672; line-height: 1.4">postes ouverts dont vous remplissez tous les critères</span>
+              <span style="font-size: 16px; font-weight: 700; color: #1D3FA8; margin-top: auto">Voir les postes →</span>
+            </a>
+            <a href="#" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #D5EBDF; border-radius: 14px; padding: 18px; color: #17213A; text-decoration: none">
+              <span style="width: 44px; height: 44px; border-radius: 50%; background: #DDF3E6; color: #15803D; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+              </span>
+              <span style="font-size: 17px; font-weight: 700">Mes certificats</span>
+              <span style="font-size: 40px; font-weight: 800; color: #0F2A63; line-height: 1">1<span style="font-size: 22px; color: #4A5672; font-weight: 600"> / 3</span></span>
+              <span style="font-size: 15px; color: #4A5672; line-height: 1.4">validé sur 3 déposés · 1 en examen, 1 à corriger</span>
+              <span style="font-size: 16px; font-weight: 700; color: #15803D; margin-top: auto">Voir mes certificats →</span>
+            </a>
+            <a href="#" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #F3DCC8; border-radius: 14px; padding: 18px; color: #17213A; text-decoration: none">
+              <span style="width: 44px; height: 44px; border-radius: 50%; background: #FDEBDD; color: #C2410C; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V2.8h6V4"></path><path d="M9 10h6"></path><path d="M9 14h6"></path><path d="M9 18h3"></path></svg>
+              </span>
+              <span style="font-size: 17px; font-weight: 700">Ma candidature</span>
+              <span style="font-size: 40px; font-weight: 800; color: #C2410C; line-height: 1">3<span style="font-size: 22px; color: #4A5672; font-weight: 600"> / 7</span></span>
+              <span style="font-size: 15px; color: #4A5672; line-height: 1.4">Étape 3 : consultation du responsable du département</span>
+              <span style="font-size: 16px; font-weight: 700; color: #C2410C; margin-top: auto">Suivre ma candidature →</span>
+            </a>
+            <a href="#" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #DCE4F5; border-radius: 14px; padding: 18px; color: #17213A; text-decoration: none">
+              <span style="width: 44px; height: 44px; border-radius: 50%; background: #E8E6FB; color: #5B3FC4; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V2.8h6V4"></path><circle cx="12" cy="11" r="2.4"></circle><path d="M8.5 17c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7"></path></svg>
+              </span>
+              <span style="font-size: 17px; font-weight: 700">Mon dossier</span>
+              <span style="font-size: 40px; font-weight: 800; color: #0F2A63; line-height: 1">100<span style="font-size: 22px; color: #4A5672; font-weight: 600"> %</span></span>
+              <div style="height: 8px; border-radius: 4px; background: #E8E6FB"><div style="width: 100%; height: 8px; border-radius: 4px; background: #5B3FC4"></div></div>
+              <span style="font-size: 15px; color: #4A5672; line-height: 1.4">Complet. À confirmer avant le 9 oct. 2027</span>
+              <span style="font-size: 16px; font-weight: 700; color: #5B3FC4; margin-top: auto">Voir mon dossier →</span>
+            </a>
+          </div>
+
+          <section aria-labelledby="poste-titre" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+              <h2 id="poste-titre" style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: #0F2A63">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"></path></svg>
+                Poste ouvert pour vous
+              </h2>
+              <a href="#" style="font-size: 16px; font-weight: 600">Voir les 2 postes →</a>
+            </div>
+            <div style="display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap">
+              <span style="width: 56px; height: 56px; border-radius: 12px; background: #EEF2FB; color: #0F2A63; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path><path d="M3 13h18"></path></svg>
+              </span>
+              <div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 8px; min-width: 0">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+                  <span style="font-size: 20px; font-weight: 700; color: #17213A">Chargé de crédit</span>
+                  <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #DDF3E6; color: #166534; font-size: 14px; font-weight: 600">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
+                    Vous remplissez les 3 critères
+                  </span>
+                </div>
+                <span style="font-size: 16px; color: #4A5672">Agence de Delmas · date limite le 9 novembre 2026 · reste 21 jours</span>
+                <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #3A4664">Instruire les demandes de crédit de l’agence et suivre le remboursement des clients.</p>
+                <div>
+                  <a href="#" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px; margin-top: 4px; border-radius: 10px; background: #0F2A63; color: #FFFFFF; font-size: 16px; font-weight: 700; text-decoration: none">Voir le poste et postuler →</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="activite-titre" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px">
+              <h2 id="activite-titre" style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: #0F2A63">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                Activité récente
+              </h2>
+              <a href="#" style="font-size: 16px; font-weight: 600">Toutes mes notifications →</a>
+            </div>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+              <li style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid #EEF1F7; flex-wrap: wrap">
+                <span style="width: 42px; height: 42px; border-radius: 50%; background: #DDF3E6; color: #15803D; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+                </span>
+                <span style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 16px; font-weight: 600">Votre certificat a été validé</span>
+                  <span style="font-size: 15px; color: #4A5672">Licence en sciences comptables</span>
+                </span>
+                <span style="padding: 4px 12px; border-radius: 999px; background: #DDF3E6; color: #166534; font-size: 14px; font-weight: 600">Validé</span>
+                <span style="width: 110px; text-align: right; font-size: 15px; color: #4A5672">12 oct. 2026</span>
+              </li>
+              <li style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid #EEF1F7; flex-wrap: wrap">
+                <span style="width: 42px; height: 42px; border-radius: 50%; background: #FDEBDD; color: #C2410C; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V2.8h6V4"></path><path d="M9 10h6"></path><path d="M9 14h6"></path></svg>
+                </span>
+                <span style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 16px; font-weight: 600">Votre candidature est passée à l’étape 3</span>
+                  <span style="font-size: 15px; color: #4A5672">Agent d’entretien des équipements informatiques</span>
+                </span>
+                <span style="padding: 4px 12px; border-radius: 999px; background: #FDEBDD; color: #9A3412; font-size: 14px; font-weight: 600">Étape 3 sur 7</span>
+                <span style="width: 110px; text-align: right; font-size: 15px; color: #4A5672">10 oct. 2026</span>
+              </li>
+              <li style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid #EEF1F7; flex-wrap: wrap">
+                <span style="width: 42px; height: 42px; border-radius: 50%; background: #E8E6FB; color: #5B3FC4; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
+                </span>
+                <span style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 16px; font-weight: 600">Vous avez confirmé votre dossier</span>
+                  <span style="font-size: 15px; color: #4A5672">Prochaine confirmation dans un an</span>
+                </span>
+                <span style="padding: 4px 12px; border-radius: 999px; background: #E8E6FB; color: #4C1D95; font-size: 14px; font-weight: 600">Confirmé</span>
+                <span style="width: 110px; text-align: right; font-size: 15px; color: #4A5672">9 oct. 2026</span>
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        <aside aria-label="Dates et diplômes" style="flex: 1 1 300px; min-width: 280px; display: flex; flex-direction: column; gap: 24px">
+
+          <section aria-labelledby="dates-titre" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 22px 22px 10px; display: flex; flex-direction: column">
+            <h2 id="dates-titre" style="margin: 0 0 8px; display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #0F2A63">
+              <span style="width: 40px; height: 40px; border-radius: 50%; background: #DDF3E6; color: #15803D; display: flex; align-items: center; justify-content: center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18"></path><path d="M8 3v4"></path><path d="M16 3v4"></path></svg>
+              </span>
+              À ne pas manquer
+            </h2>
+            <a href="#" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid #EEF1F7; color: #17213A; text-decoration: none">
+              <span style="width: 60px; flex-shrink: 0; border: 1px solid #DCE4F5; border-radius: 10px; padding: 8px 0; display: flex; flex-direction: column; align-items: center">
+                <span style="font-size: 24px; font-weight: 800; color: #0F2A63; line-height: 1">09</span>
+                <span style="font-size: 13px; font-weight: 600; color: #4A5672">NOV.</span>
+              </span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                <span style="font-size: 16px; font-weight: 700">Date limite</span>
+                <span style="font-size: 15px; color: #4A5672">Chargé de crédit · reste 21 jours</span>
+              </span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+            </a>
+            <a href="#" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid #EEF1F7; color: #17213A; text-decoration: none">
+              <span style="width: 60px; flex-shrink: 0; border: 1px solid #DCE4F5; border-radius: 10px; padding: 8px 0; display: flex; flex-direction: column; align-items: center">
+                <span style="font-size: 24px; font-weight: 800; color: #0F2A63; line-height: 1">25</span>
+                <span style="font-size: 13px; font-weight: 600; color: #4A5672">DÉC.</span>
+              </span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                <span style="font-size: 16px; font-weight: 700">Date limite</span>
+                <span style="font-size: 15px; color: #4A5672">Agent d’entretien des équipements informatiques · candidature envoyée</span>
+              </span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+            </a>
+            <a href="#" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid #EEF1F7; color: #17213A; text-decoration: none">
+              <span style="width: 60px; flex-shrink: 0; border: 1px solid #DCE4F5; border-radius: 10px; padding: 8px 0; display: flex; flex-direction: column; align-items: center">
+                <span style="font-size: 24px; font-weight: 800; color: #0F2A63; line-height: 1">09</span>
+                <span style="font-size: 13px; font-weight: 600; color: #4A5672">OCT. 2027</span>
+              </span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                <span style="font-size: 16px; font-weight: 700">Confirmer mon dossier</span>
+                <span style="font-size: 15px; color: #4A5672">Une fois par an</span>
+              </span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+            </a>
+          </section>
+
+
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

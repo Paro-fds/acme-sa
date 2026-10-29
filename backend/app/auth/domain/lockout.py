@@ -4,5 +4,5 @@ from datetime import timedelta
 
 MAX_FAILED_ATTEMPTS = 5
 LOCK_DURATION = timedelta(minutes=15)
-SHOW_REMAINING_FROM = 3
-"""Le nombre de tentatives restantes est indiqué à partir de la 3ᵉ erreur."""
+MAX_LOCK_DURATION = timedelta(hours=24)
+"""US-1003 : plafond du verrouillage progressif des employés."""

@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 export const SEARCH_DELAY_MS = 300
 
 /**
- * US-18 : barre de recherche collée sous l'en-tête. La recherche part 300 ms après la dernière frappe.
+ * US-18, US-134 : « Rechercher un employé ». La recherche part 300 ms après la dernière frappe.
  * `value` : terme de l'adresse (?search=) ; `onSearch(term)` : nouveau terme à appliquer.
  */
 export default function EmployeeSearch({ value, onSearch }) {
   const [text, setText] = useState(value)
   const lastSent = useRef(value)
   const inputRef = useRef(null)
+  const id = useId()
 
   // L'adresse a changé sans passer par la saisie (bouton « Effacer la recherche », retour arrière).
   useEffect(() => {
@@ -43,19 +44,18 @@ export default function EmployeeSearch({ value, onSearch }) {
   }
 
   return (
-    <form
-      role="search"
-      onSubmit={handleSubmit}
-      className="sticky top-16 z-[5] -mx-4 -my-3 bg-canvas px-4 py-3"
-    >
+    <form role="search" onSubmit={handleSubmit} className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-semibold text-rh-strong">
+        Rechercher un employé
+      </label>
       <div className="flex min-h-12 items-center gap-2 rounded-lg border border-border-input bg-surface px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-info-border">
         <span className="material-symbols-outlined text-muted" aria-hidden="true">search</span>
         <input
           ref={inputRef}
+          id={id}
           type="search"
           enterKeyHint="search"
-          aria-label="Rechercher un employé"
-          placeholder="Rechercher par nom, prénom ou matricule…"
+          placeholder="Nom, prénom ou matricule"
           autoComplete="off"
           autoCorrect="off"
           spellCheck={false}

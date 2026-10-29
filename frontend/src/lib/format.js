@@ -1,6 +1,12 @@
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 const timeFormatter = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' })
 
+/** Date du jour en toutes lettres : « Lundi 19 octobre 2026 » (US-123, barre du haut d'US-127). */
+export function formatToday(today = new Date()) {
+  const text = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 /** "1996-03-15" → "15/03/1996" (date sans heure : pas de conversion de fuseau). */
 export function formatDate(isoDate) {
   if (!isoDate) return ''
@@ -47,4 +53,19 @@ export function formatGender(code) {
 /** "JOSEPH", "Jean" → "JJ" (avatar sans photo). */
 export function initials(lastName, firstName) {
   return `${lastName?.[0] ?? ''}${firstName?.[0] ?? ''}`.toUpperCase()
+}
+
+const monthFormatters = {
+  long: new Intl.DateTimeFormat('fr-FR', { month: 'long', timeZone: 'UTC' }),
+  short: new Intl.DateTimeFormat('fr-FR', { month: 'short', timeZone: 'UTC' }),
+}
+
+/** V2 (D-07) : "2021-06" → "juin 2021" ; `short` : "2016-01" → "janv. 2016". Valeur invalide → "". */
+export function formatMonth(yearMonth, { short = false } = {}) {
+  const match = /^(\d{4})-(\d{2})$/.exec(yearMonth ?? '')
+  if (!match) return ''
+  const [year, month] = [Number(match[1]), Number(match[2])]
+  if (month < 1 || month > 12) return ''
+  const name = monthFormatters[short ? 'short' : 'long'].format(new Date(Date.UTC(year, month - 1, 1)))
+  return `${name} ${year}`
 }

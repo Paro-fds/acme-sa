@@ -1,0 +1,161 @@
+import { useEffect, useId } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { listCertificates } from '../../api/certificates.js'
+import { getDossier, getFreshness } from '../../api/dossier.js'
+import { getProfile } from '../../api/employee.js'
+import { listMyApplications, listMyOpenings } from '../../api/openings.js'
+import Alert from '../../components/Alert.jsx'
+import Page from '../../components/Page.jsx'
+import { useLoader } from '../../lib/useLoader.js'
+import { ELEMENT_LINKS } from '../certificates/elementLinks.js'
+import { CONSENT_PATH } from '../dossier/paths.js'
+import { CorrectionRow, FeaturedOpening, Hero, Tiles, TodoSection } from './homeParts.jsx'
+import StillAccurateCard from './StillAccurateCard.jsx'
+
+export const HOME_PATH = '/accueil'
+
+/** Écran 06 : une icône, un titre, une phrase et un bouton par élément manquant. */
+const REMAINING = {
+  telephone: { icon: 'call', title: 'Téléphone', text: 'Votre numéro principal', button: 'Compléter' },
+  address: { icon: 'home_pin', title: 'Adresse', text: 'Votre adresse de résidence', button: 'Compléter' },
+  email: { icon: 'mail', title: 'Email', text: "Votre adresse, ou « Je n'ai pas d'adresse email »", button: 'Compléter' },
+  emergency_contact: {
+    icon: 'contact_phone',
+    title: "Contact d'urgence",
+    text: 'Personne à prévenir en cas d’urgence',
+    button: 'Renseigner',
+  },
+  education_level: { icon: 'school', title: "Niveau d'études", text: 'Votre plus haut niveau d’études', button: 'Compléter' },
+  agency_confirmed: { icon: 'apartment', title: 'Confirmer votre agence', text: 'Agence d’affectation', button: 'Confirmer' },
+  position_confirmed: { icon: 'badge', title: 'Confirmer votre poste', text: 'Votre fonction actuelle', button: 'Confirmer' },
+  hire_date_confirmed: {
+    icon: 'event',
+    title: "Confirmer votre date d'embauche",
+    text: 'Votre date d’entrée',
+    button: 'Confirmer',
+  },
+}
+
+/** Une donnée indisponible (hors connexion, service en panne) laisse sa partie vide sans bloquer l'accueil. */
+const optional = (promise) => promise.catch(() => null)
+
+/** US-123 : le profil d'abord ; les postes, certificats et candidatures si le dossier est complet. */
+async function load() {
+  const [profile, dossier, freshness] = await Promise.all([getProfile(), getDossier(), getFreshness()])
+  const base = { profile, freshness, consentGiven: Boolean(dossier.consent.information_notice_at) }
+  if (!profile.completion.is_complete) return base
+  const [openings, certificates, applications] = await Promise.all([
+    optional(listMyOpenings()),
+    optional(listCertificates()),
+    optional(listMyApplications()),
+  ])
+  return { ...base, openings, certificates, applications }
+}
+
+/** La candidature en cours la plus récente (une candidature clôturée ne compte plus). */
+function currentApplication(applications) {
+  const open = (applications?.items ?? []).filter((a) => a.step !== 'CLOSED')
+  return open.sort((a, b) => b.received_at.localeCompare(a.received_at))[0] ?? null
+}
+
+function Remaining({ elements }) {
+  const titleId = useId()
+  const n = elements.length
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
+      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-accent-bg px-2 py-0.5 text-sm font-semibold text-accent-text">
+        <span className="material-symbols-outlined text-[16px]" aria-hidden="true">schedule</span>~{n} min estimée
+        {n > 1 ? 's' : ''}
+      </span>
+      <div>
+        <h3 id={titleId} className="text-lg font-bold">
+          Il reste {n} information{n > 1 ? 's' : ''} à compléter
+        </h3>
+        <p className="text-base text-help">Indispensables avant de déposer votre certificat.</p>
+      </div>
+      <ul className="mt-2 flex flex-col gap-2">
+        {elements.map((element) => {
+          const item = REMAINING[element.key]
+          return (
+            <li key={element.key}>
+              <Link
+                to={ELEMENT_LINKS[element.key].to}
+                className="flex min-h-14 items-center gap-2 rounded-xl bg-canvas p-2 hover:bg-section"
+              >
+                <span
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-bg/60 text-accent-icon"
+                  aria-hidden="true"
+                >
+                  <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-base font-semibold text-heading">{item.title}</span>
+                  <span className="truncate text-base text-help">{item.text}</span>
+                </span>
+                <span className="flex min-h-11 min-w-24 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-base font-semibold text-white shadow-card">
+                  {item.button}
+                </span>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
+
+/**
+ * US-207 CA-01 : l'accueil de l'employé après la connexion ; à la première connexion, « Avant de commencer » d'abord.
+ * US-123 : tableau de bord. US-128 (refonte du 2026-10-19) : en-tête avec la phrase de bienvenue et le bandeau illustré,
+ * poste mis en avant. US-136 (2026-10-20) : page allégée : « À faire », trois chiffres sans phrase, le poste mis en avant.
+ */
+export default function EmployeeHomePage() {
+  const navigate = useNavigate()
+  const { data, error, loading } = useLoader(load)
+  const needsConsent = data && !data.consentGiven
+
+  // Écran 05 : à la première connexion, « Avant de commencer » passe d'abord.
+  useEffect(() => {
+    if (needsConsent) navigate(CONSENT_PATH, { replace: true, state: { next: HOME_PATH } })
+  }, [needsConsent, navigate])
+
+  const page = (children) => (
+    <Page account title="Accueil">
+      {children}
+    </Page>
+  )
+  if (loading || needsConsent) return page(<p role="status">Chargement…</p>)
+  if (error) return page(<Alert>{error.message}</Alert>)
+
+  const today = new Date()
+  const { profile, freshness } = data
+  const { completion } = profile
+  const complete = completion.is_complete
+  const missing = completion.elements.filter((element) => !element.complete)
+  const openings = data.openings?.items ?? []
+  const certificates = data.certificates?.certificates ?? []
+  const toCorrect = complete ? certificates.filter((certificate) => certificate.status === 'TO_CORRECT') : []
+  const stale = freshness.items.some((item) => item.state === 'STALE')
+  return page(
+    <>
+      <Hero firstName={profile.first_name} canDeposit={complete} />
+      {(stale || toCorrect.length > 0) && (
+        <TodoSection>
+          <StillAccurateCard freshness={freshness} />
+          {toCorrect.map((certificate) => (
+            <CorrectionRow key={certificate.id} certificate={certificate} />
+          ))}
+        </TodoSection>
+      )}
+      <Tiles
+        completion={completion}
+        missing={missing}
+        openings={openings}
+        certificates={certificates}
+        application={currentApplication(data.applications)}
+      />
+      {!complete && <Remaining elements={missing} />}
+      {complete && <FeaturedOpening openings={openings} today={today} />}
+    </>,
+  )
+}

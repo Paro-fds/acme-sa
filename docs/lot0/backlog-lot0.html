@@ -1,0 +1,153 @@
+<title>Backlog du lot 0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Mise en page : colonne de lecture large (~960 px) pour le tableau du backlog ; couleurs de la charte de l'institution (bleu marine principal, rouge d'accent rare). */
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --fg: #33354a; --heading: #12124d; --muted: #6a6c80;
+  --border: #e3e3ee; --primary: #1e1e82; --accent: #cc1111; --primary-bg: #eeeefa; --primary-border: #c9c9ee;
+  --c1-bg: #1e1e82; --c1-fg: #ffffff; --warn-bg: #fff4e0; --warn-fg: #8a4b00; --ext-bg: #f0f0f5; --ext-fg: #4a4c60;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0d1f; --surface: #15152e; --fg: #cfd0e0; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2a2a4d; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42; --primary-border: #34346e;
+  --c1-bg: #a9a9ff; --c1-fg: #0d0d1f; --warn-bg: #3a2a0a; --warn-fg: #fcd34d; --ext-bg: #20203d; --ext-fg: #cfd0e0; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0d1f; --surface: #15152e; --fg: #cfd0e0; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2a2a4d; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42; --primary-border: #34346e;
+  --c1-bg: #a9a9ff; --c1-fg: #0d0d1f; --warn-bg: #3a2a0a; --warn-fg: #fcd34d; --ext-bg: #20203d; --ext-fg: #cfd0e0; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 40px; }
+h1, h2 { color: var(--heading); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 21px; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+p { margin: 0; }
+section { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 600; }
+strong { color: var(--heading); }
+.figures { display: flex; flex-wrap: wrap; gap: 12px; }
+.fig { flex: 1 1 180px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.fig b { font-size: 26px; color: var(--primary); font-variant-numeric: tabular-nums; }
+.fig span { font-size: 14px; color: var(--muted); }
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; text-align: center; white-space: nowrap; }
+.id { font-weight: 700; color: var(--primary); white-space: nowrap; }
+.backlog td:nth-child(3) { min-width: 300px; }
+.backlog td:nth-child(6) { min-width: 140px; color: var(--muted); font-size: 14px; }
+tr.cycle1 td { background: var(--primary-bg); }
+.cyc { display: inline-block; min-width: 26px; padding: 1px 8px; border-radius: 6px; font-size: 13px; font-weight: 700; background: var(--ext-bg); color: var(--ext-fg); }
+tr.cycle1 .cyc { background: var(--c1-bg); color: var(--c1-fg); }
+.title { font-weight: 600; color: var(--heading); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card .id { font-size: 14px; }
+.card p { font-size: 15px; }
+.points td:first-child { white-space: nowrap; }
+.points td:nth-child(2), .points td:nth-child(3) { min-width: 260px; }
+.prop { color: var(--fg); }
+.flag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: var(--warn-bg); color: var(--warn-fg); margin-bottom: 4px; }
+.note { font-size: 14px; color: var(--muted); }
+@media (max-width: 520px) { h1 { font-size: 25px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Refonte du portail employés · Lot 0</span>
+    <h1>Backlog du lot 0 et premier cycle</h1>
+    <div class="meta">
+      <span><b>Version</b> 1.1</span>
+      <span><b>Date</b> 6 octobre 2026</span>
+      <span><b>Référence</b> Registre des décisions v1.8</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="figures">
+      <div class="fig"><b>20</b><span>éléments, classés par priorité</span></div>
+      <div class="fig"><b>19 j</b><span>de travail restants sur 20,5 estimés, hors attente des validations</span></div>
+      <div class="fig"><b>10</b><span>cycles de 48 heures environ</span></div>
+      <div class="fig"><b>9</b><span>points à vous signaler avant de continuer</span></div>
+    </div>
+    <p class="note">Vous pouvez réordonner cette liste à tout moment. Les estimations sont en jours de travail et seront revues à chaque point d'avancement.</p>
+  </section>
+
+  <section>
+    <h2>Premier cycle (48 heures)</h2>
+    <div class="cards">
+      <div class="card"><span class="id">B-01 · Anomalies de l'export RH</span><p>Agences et directions distinctes avec leurs effectifs, doublons de matricule, lignes sans email, problèmes d'encodage, écart entre 364 actifs et ~500 personnes. Rapport sans aucune donnée personnelle.</p></div>
+      <div class="card"><span class="id">B-02 · Tableau de correspondance</span><p>Fichier Excel à trois colonnes (valeur trouvée, libellé officiel proposé, effectif), prêt à être revu par Mme Nérius et Mme Jean.</p></div>
+      <div class="card"><span class="id">B-03 · Tableau des règles Q1 à Q3 · déjà rédigé</span><p>Complétude du dossier, statuts et motifs de rejet, niveaux et rangs. Une proposition par défaut pour chaque point encore à confirmer.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backlog priorisé</h2>
+    <div class="table"><table class="backlog">
+      <thead><tr><th>Prio</th><th>N°</th><th>Élément</th><th>Livrable</th><th>Estim.</th><th>Dépend de</th><th>Cycle</th></tr></thead>
+      <tbody>
+        <tr class="cycle1"><td class="num">1</td><td class="id">B-01</td><td><span class="title">Anomalies de l'export RH</span> : agences et directions avec effectifs, doublons de matricule, lignes sans email, encodage, écart 364 / ~500</td><td class="num">4</td><td class="num">0,5 j</td><td>—</td><td class="num"><span class="cyc">1</span></td></tr>
+        <tr class="cycle1"><td class="num">2</td><td class="id">B-02</td><td><span class="title">Tableau de correspondance</span> Excel, à valider par Mme Nérius et Mme Jean</td><td class="num">4</td><td class="num">0,5 j</td><td>B-01</td><td class="num"><span class="cyc">1</span></td></tr>
+        <tr class="cycle1"><td class="num">3</td><td class="id">B-03</td><td><span class="title">Tableau unique des règles</span>, partie Q1 à Q3, avec propositions par défaut <strong>· Rédigé</strong> (49 règles, au-delà de Q1 à Q3)</td><td class="num">1</td><td class="num">1 j (fait)</td><td>—</td><td class="num"><span class="cyc">1</span></td></tr>
+        <tr><td class="num">4</td><td class="id">B-04</td><td><span class="title">Modèle de données</span> du lot 1 : champs obligatoires, confirmations et historique, signalements, certificats et décisions, niveaux, référentiel avec historique des régions</td><td class="num">3</td><td class="num">1,5 j</td><td>B-03</td><td class="num"><span class="cyc">2</span></td></tr>
+        <tr><td class="num">5</td><td class="id">B-05</td><td><span class="title">Guide de style</span> d'une page : couleurs, typographie, composants, ton, mascotte</td><td class="num">8</td><td class="num">0,5 j</td><td>Logo, mascotte, police</td><td class="num"><span class="cyc">2</span></td></tr>
+        <tr><td class="num">6</td><td class="id">B-06</td><td><span class="title">Maquettes du parcours « certificat »</span> : accueil et progression, connexion, profil et checklist du verrou, confirmation ou signalement des champs RH, contact d'urgence, niveau d'études, consentement, dépôt avec aperçu, statuts</td><td class="num">2</td><td class="num">2,5 j</td><td>B-03, B-05</td><td class="num"><span class="cyc">3</span></td></tr>
+        <tr><td class="num">7</td><td class="id">B-07</td><td><span class="title">Maquettes de la file de validation RH</span> : alerte au-delà de 5 jours, visionneuse, Valider / Rejeter avec motif, correction du niveau, historique</td><td class="num">2</td><td class="num">1 j</td><td>B-03, B-05</td><td class="num"><span class="cyc">4</span></td></tr>
+        <tr><td class="num">8</td><td class="id">B-08</td><td><span class="title">Cahier des charges de la refonte</span> (remplace le PRD) <strong>· 7 chapitres sur 12 rédigés</strong> : besoin et critères de réussite, périmètre, personas et droits, parcours, 62 exigences priorisées (MoSCoW), 49 règles ; reste les données, le non fonctionnel, les contraintes, le plan de livraison</td><td class="num">1</td><td class="num">1 j (reste 0,5)</td><td>B-03</td><td class="num"><span class="cyc">1 → 4</span></td></tr>
+        <tr><td class="num">9</td><td class="id">B-09</td><td><span class="title">Architecture AWS</span> : schéma d'une page, PostgreSQL (RDS), S3 chiffré, antivirus, Cognito, VPN, DNS, recette et production, coût mensuel</td><td class="num">6</td><td class="num">1,5 j</td><td>Infos de la DIT</td><td class="num"><span class="cyc">5</span></td></tr>
+        <tr><td class="num">10</td><td class="id">B-10</td><td><span class="title">Mouvements de carrière et registre des demandes</span> (circuit en 7 étapes, fiche, historique)</td><td class="num">3</td><td class="num">1 j</td><td>B-04</td><td class="num"><span class="cyc">5</span></td></tr>
+        <tr><td class="num">11</td><td class="id">B-11</td><td><span class="title">Excel d'import</span> de l'historique des demandes, avec ses contrôles</td><td class="num">5</td><td class="num">0,5 j</td><td>B-10</td><td class="num"><span class="cyc">6</span></td></tr>
+        <tr><td class="num">12</td><td class="id">B-12</td><td><span class="title">Plan d'extraction des lettres scannées</span> : OCR, contrôle humain, exclusion des salaires</td><td class="num">5</td><td class="num">0,5 j</td><td>B-10</td><td class="num"><span class="cyc">6</span></td></tr>
+        <tr><td class="num">13</td><td class="id">B-13</td><td><span class="title">WhatsApp</span> : prestataires (API officielle Meta), coûts, consentement, modèles de messages</td><td class="num">7</td><td class="num">1 j</td><td>—</td><td class="num"><span class="cyc">6</span></td></tr>
+        <tr><td class="num">14</td><td class="id">B-14</td><td><span class="title">Envoi automatisé par email</span> depuis le domaine de l'institution</td><td class="num">7</td><td class="num">0,5 j</td><td>Accès DNS</td><td class="num"><span class="cyc">7</span></td></tr>
+        <tr><td class="num">15</td><td class="id">B-15</td><td><span class="title">Test d'extraction</span> sur 20 à 30 lettres, choix de l'outil d'OCR</td><td class="num">5</td><td class="num">1,5 j</td><td>B-12, échantillon, environnement sécurisé</td><td class="num"><span class="cyc">7</span></td></tr>
+        <tr><td class="num">16</td><td class="id">B-16</td><td><span class="title">Maquettes administration</span> : tableau de bord par agence, région, direction ; liste, filtres, export ; « À rattacher » ; signalements ; comptes et rôles</td><td class="num">2</td><td class="num">1,5 j</td><td>B-05</td><td class="num"><span class="cyc">8</span></td></tr>
+        <tr><td class="num">17</td><td class="id">B-17</td><td><span class="title">Esquisses du lot 4</span> : « Ma carrière », postes ouverts et éligibilité, « Mes demandes »</td><td class="num">2</td><td class="num">1 j</td><td>B-05</td><td class="num"><span class="cyc">8</span></td></tr>
+        <tr><td class="num">18</td><td class="id">B-18</td><td><span class="title">Solution Design</span> : réutilisation du code, migration non destructive vers PostgreSQL, sécurité</td><td class="num">1, 3</td><td class="num">1,5 j</td><td>B-04, B-09</td><td class="num"><span class="cyc">9</span></td></tr>
+        <tr><td class="num">19</td><td class="id">B-19</td><td><span class="title">Epics et user stories du lot 1</span>, avec critères d'acceptation et jeu de test</td><td class="num">1</td><td class="num">1 j</td><td>B-06, B-08</td><td class="num"><span class="cyc">9</span></td></tr>
+        <tr><td class="num">20</td><td class="id">B-20</td><td><span class="title">Démonstration d'ensemble</span>, validation écrite, bilan</td><td class="num">—</td><td class="num">0,5 j</td><td>Tout</td><td class="num"><span class="cyc">10</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Pièces dont j'ai besoin</h2>
+    <div class="table"><table>
+      <thead><tr><th>Pièce</th><th>Pour</th><th>Avant</th></tr></thead>
+      <tbody>
+        <tr><td>Logo, mascotte « La Penseuse », police</td><td>Guide de style, puis toutes les maquettes</td><td>Cycle 2</td></tr>
+        <tr><td>Grille de classification des postes</td><td>Rangs définitifs des niveaux, maquettes</td><td>Cycle 2</td></tr>
+        <tr><td>Fichier de correspondance agence → région</td><td>Tableau de correspondance, modèle de données</td><td>Cycle 2</td></tr>
+        <tr><td>Région AWS, comptes Cognito existants, VPN en place, gestion du DNS d'acmehaiti.com</td><td>Architecture AWS, envoi d'emails</td><td>Cycle 5</td></tr>
+        <tr><td>Échantillon de 20 à 30 lettres et environnement sécurisé pour les traiter</td><td>Test d'extraction</td><td>Cycle 7</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Points à vous signaler</h2>
+    <p>Vous m'avez demandé de signaler tôt toute contradiction ou tout risque. Chaque point porte une proposition par défaut ; je vous poserai les questions une par une.</p>
+    <div class="table"><table class="points">
+      <thead><tr><th>N°</th><th>Constat</th><th>Proposition par défaut</th></tr></thead>
+      <tbody>
+        <tr><td class="id">S-01</td><td><span class="flag">Contradiction</span><br><strong>Salaires dans les lettres scannées.</strong> Les lettres de promotion et de transfert contiennent probablement des montants. Les garder en pièce jointe (registre des demandes, contrôle des mouvements) revient à stocker ces montants.</td><td class="prop">Le portail ne garde que les champs extraits et validés. La lettre reste dans l'archive RH actuelle ; le portail n'en garde qu'une référence, ou une copie dont les montants sont masqués avant dépôt.</td></tr>
+        <tr><td class="id">S-02</td><td><span class="flag">Contradiction</span><br><strong>Test d'extraction sur de vraies lettres.</strong> Un échantillon réel est une donnée d'employé, interdite dans les environnements de test.</td><td class="prop">Le test tourne sur un poste de la DIT ou sur le compte AWS de l'institution, lancé par la DIT avec un outil fourni. Seuls les résultats chiffrés en sortent ; les lettres ne passent par aucun service d'IA externe.</td></tr>
+        <tr><td class="id">S-03</td><td><span class="flag">Risque</span><br><strong>Portail actuel.</strong> Il tourne sur le poste du développeur avec le vrai export et reste accessible par Internet via un tunnel temporaire.</td><td class="prop">Couper l'accès Internet dès maintenant et ne le rouvrir que pour une démonstration à votre demande. Les nouveaux travaux utilisent des données fictives.</td></tr>
+        <tr><td class="id">S-04</td><td><span class="flag">Précaution</span><br><strong>Analyse de l'export (B-01).</strong> Elle demande de lire le vrai fichier.</td><td class="prop">Un outil la fait hors ligne. Il n'affiche que des chiffres et des noms d'agences et de directions. Les listes nominatives (matricules en double, lignes sans email) sont remises seulement à Mme Nérius.</td></tr>
+        <tr><td class="id">S-05</td><td><span class="flag">Précision</span><br><strong>Séparation des tâches.</strong> Pour qu'un Agent RH ne valide jamais son propre certificat, le portail doit savoir à quel employé correspond chaque compte RH.</td><td class="prop">Chaque compte Administrateur ou Agent RH est rattaché à son matricule à sa création.</td></tr>
+        <tr><td class="id">S-06</td><td><span class="flag">Impact</span><br><strong>Comptes RH avec Cognito.</strong> La double authentification par Cognito remplace les comptes administrateurs actuels du portail.</td><td class="prop">Prévu au lot 3 ; d'ici là, les comptes actuels restent en place sans évolution.</td></tr>
+        <tr><td class="id">S-07</td><td><span class="flag">Précision</span><br><strong>Couleur des erreurs.</strong> Le rouge de la charte ne signale pas les erreurs : il faut une autre couleur, bien distincte. Le vert / orange de l'éligibilité doit aussi se lire sans les couleurs.</td><td class="prop">Le guide de style propose une couleur d'erreur distincte, et chaque indicateur porte un texte (« Éligible », « Pas encore éligible »).</td></tr>
+        <tr><td class="id">S-08</td><td><span class="flag">Risque</span><br><strong>Taille du lot 0.</strong> Il comprend maintenant l'architecture AWS, WhatsApp et l'OCR : 20,5 jours de travail estimés, 19 restants.</td><td class="prop">Garder sur le chemin critique ce qui conditionne le lot 1 (B-01 à B-08, B-19) ; mener B-09 à B-15 en parallèle sans retarder la validation des maquettes.</td></tr>
+        <tr><td class="id">S-09</td><td><span class="flag">À expliquer</span><br><strong>364 actifs contre ~500.</strong> L'export compte 1 198 lignes : 364 actives, 834 inactives.</td><td class="prop">Chiffré au cycle 1 ; la cause (indicateur « actif », extraction partielle, employés absents du système) est à confirmer avec la DRH.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</div>

@@ -1,4 +1,4 @@
-"""Employés fictifs du CSV de test (docs/epics/README.md, « Jeu de données de test commun »)."""
+"""Employés fictifs du CSV de test (docs/03-plan-implementation.md §4.1)."""
 
 from dataclasses import dataclass
 
@@ -12,6 +12,12 @@ class TestEmployee:
     last_name: str
     first_name: str
     birth_date: str  # format API AAAA-MM-JJ
+
+    @property
+    def typed_birth_date(self) -> str:
+        """US-1014 : la date telle qu'elle se tape à l'écran de connexion, JJMMAAAA."""
+        year, month, day = self.birth_date.split("-")
+        return f"{day}{month}{year}"
 
     def identity(self, **overrides) -> dict:
         return {

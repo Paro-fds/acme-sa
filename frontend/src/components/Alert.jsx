@@ -4,13 +4,17 @@ const TONES = {
   success: { box: 'border-status-done-border bg-status-done-bg text-status-done-text', icon: 'check_circle' },
 }
 
-export default function Alert({ tone = 'error', children }) {
+/** `title` : première ligne en gras, au-dessus du message (US-101). */
+export default function Alert({ tone = 'error', title, children }) {
   if (!children) return null
   const { box, icon } = TONES[tone]
   return (
     <div role={tone === 'error' ? 'alert' : 'status'} className={`flex gap-2 rounded-lg border p-3 text-base ${box}`}>
       <span className="material-symbols-outlined shrink-0" aria-hidden="true">{icon}</span>
-      <p>{children}</p>
+      <div className="flex flex-col gap-1">
+        {title && <p className="font-semibold">{title}</p>}
+        <p>{children}</p>
+      </div>
     </div>
   )
 }

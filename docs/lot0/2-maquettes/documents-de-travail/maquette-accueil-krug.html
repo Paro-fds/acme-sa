@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil revu (Krug)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  /* Jetons du portail (frontend/src/index.css) */
+  :root {
+    --primary: #1e1e82; --primary-active: #060068; --info-bg: #e7eeff; --canvas: #f9f9ff;
+    --surface: #ffffff; --section: #f0f3ff; --border: #d8e3fb; --heading: #111c2d; --help: #464652;
+    --note: #b45309; --note-bg: #fff6dc; --page: #eef1f8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--heading); font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+  .ms { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; display: inline-block; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 32px 16px 64px; display: flex; flex-direction: column; gap: 32px; }
+  .intro h1 { margin: 0 0 6px; font-size: 26px; color: var(--primary); }
+  .intro p { margin: 0; color: var(--help); max-width: 75ch; }
+  .boards { display: grid; grid-template-columns: 390px 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 1000px) { .boards { grid-template-columns: 1fr; } }
+  .board-title { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--help); margin: 0 0 10px; }
+
+  /* Pastilles d'annotation */
+  .pin { position: absolute; z-index: 5; width: 26px; height: 26px; border-radius: 50%; background: var(--note); color: #fff;
+         font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #fff; }
+  .rel { position: relative; }
+
+  /* Écran (commun) */
+  .screen { background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding: 12px 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; color: var(--primary); }
+  .logo { width: 40px; height: 40px; border-radius: 8px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
+          display: flex; align-items: center; justify-content: center; letter-spacing: .02em; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; border-radius: 8px;
+         background: var(--primary); color: #fff; font-weight: 600; font-size: 17px; }
+  .btn-outline { min-height: 44px; padding: 0 18px; border: 1.5px solid var(--primary); border-radius: 8px; color: var(--primary); font-weight: 600; display: inline-flex; align-items: center; }
+  .link { color: var(--primary); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .photo { border-radius: 16px; background: linear-gradient(135deg, #f6c445 0%, #e9a90f 45%, #1e1e82 140%); color: #fff;
+           display: flex; align-items: flex-end; padding: 14px; font-size: 14px; font-weight: 600; }
+  .photo span { background: rgba(17,28,45,.55); padding: 4px 10px; border-radius: 6px; }
+  h2 { font-size: 20px; margin: 0; }
+  .benefit { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--border); }
+  .benefit:last-child { border-bottom: 1px solid var(--border); }
+  .benefit .ms { color: var(--primary); }
+  .benefit h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; }
+  .benefit p, .step span:last-child { margin: 0; color: var(--help); font-size: 16px; }
+  .step { display: flex; align-items: baseline; gap: 12px; }
+  .num { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--info-bg); color: var(--primary); font-weight: 700; font-size: 16px;
+         display: flex; align-items: center; justify-content: center; }
+  .muted { color: var(--help); font-size: 14px; }
+
+  /* Téléphone */
+  .phone { width: 390px; max-width: 100%; border-radius: 28px; box-shadow: 0 10px 30px rgba(17,28,45,.12); }
+  .phone .body { padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 22px; }
+  .phone h1 { margin: 0; font-size: 28px; line-height: 35px; color: var(--primary); letter-spacing: -.01em; }
+  .phone .lead { margin: 0; font-size: 17px; color: var(--help); }
+  .sticky { border-top: 1px solid var(--border); padding: 12px 16px 18px; display: flex; flex-direction: column; gap: 8px; text-align: center;
+            box-shadow: 0 -6px 16px rgba(17,28,45,.06); background: var(--surface); }
+
+  /* Ordinateur : rendu à 1280 px, réduit pour tenir dans la colonne */
+  .desk-frame { width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 30px rgba(17,28,45,.12); background: var(--surface); }
+  .desk { width: 1280px; transform-origin: top left; }
+  .desk .hdr { padding: 14px 48px; }
+  .desk main { padding: 48px; display: flex; flex-direction: column; gap: 56px; }
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .desk h1 { margin: 0; font-size: 46px; line-height: 54px; color: var(--primary); letter-spacing: -.015em; }
+  .desk .lead { margin: 0; font-size: 18px; color: var(--help); }
+  .below { display: grid; grid-template-columns: 7fr 5fr; gap: 40px; }
+  .benefits-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .benefits-row .benefit { flex-direction: column; gap: 8px; border-top: 2px solid var(--primary); border-bottom: 0; }
+  .desk footer { border-top: 1px solid var(--border); padding: 20px 48px; }
+
+  /* Légende */
+  .legend { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+  .legend h2 { color: var(--primary); }
+  .item { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; }
+  .item .pin { position: static; box-shadow: none; }
+  .item p { margin: 0; }
+  .item small { display: block; color: var(--help); font-size: 14px; margin-top: 2px; }
+  .ask { background: var(--note-bg); border-radius: 8px; padding: 12px 14px; }
+  .ask p { margin: 0 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>Accueil public — maquette revue selon Krug</h1>
+    <p>Corrige les points de la revue UX du 13/10/2026 (skill <code>ux-krug</code>). Même charte que le portail ; la photo de l'équipe est remplacée par un emplacement, le temps de confirmer le droit à l'image. Les pastilles orange renvoient à la légende.</p>
+  </header>
+
+  <div class="boards">
+    <!-- TÉLÉPHONE -->
+    <section>
+      <p class="board-title">Téléphone · 390 px</p>
+      <div class="screen phone">
+        <div class="hdr rel">
+          <a class="brand" href="#" aria-label="Portail Carrière, accueil"><span class="logo">ACME</span>Portail Carrière</a>
+          <span class="pin" style="left:150px;top:4px">5</span>
+        </div>
+        <div class="body">
+          <div class="photo" style="height:200px"><span>Photo de l'équipe ACME SA</span></div>
+          <div class="rel" style="display:flex;flex-direction:column;gap:10px">
+            <span class="pin" style="right:-6px;top:-8px">3</span>
+            <h1>Faites valider vos diplômes et voyez les postes ouverts pour vous</h1>
+            <p class="lead">Une fois validés par les RH, vos diplômes comptent pour les promotions.</p>
+          </div>
+          <section class="rel" style="display:flex;flex-direction:column;gap:6px">
+            <span class="pin" style="right:-6px;top:-4px">4</span>
+            <h2>Ce que vous y gagnez</h2>
+            <div>
+              <div class="benefit"><span class="ms">person_search</span><div><h3>Les postes faits pour vous</h3><p>Les postes ouverts dont vous remplissez les critères. Vous postulez en ligne.</p></div></div>
+              <div class="benefit"><span class="ms">task_alt</span><div><h3>Vos diplômes suivis</h3><p>Reçu, en examen, validé : vous savez toujours où ils en sont.</p></div></div>
+              <div class="benefit"><span class="ms">photo_camera</span><div><h3>Tout depuis votre téléphone</h3><p>Une photo suffit pour déposer un diplôme.</p></div></div>
+            </div>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <h2>Trois étapes</h2>
+            <div class="step"><span class="num">1</span><span>Créez votre mot de passe avec votre nom, votre prénom et votre date de naissance.</span></div>
+            <div class="step"><span class="num">2</span><span>Vérifiez les 8 informations de votre profil.</span></div>
+            <div class="step"><span class="num">3</span><span>Déposez vos diplômes en photo.</span></div>
+          </section>
+          <p class="muted" style="text-align:center;margin:0">Réservé aux employés d'ACME SA. Vos informations restent confidentielles.</p>
+        </div>
+        <div class="sticky rel">
+          <span class="pin" style="right:10px;top:-12px">1</span>
+          <a class="btn" href="#">Se connecter</a>
+          <p style="margin:0;font-size:16px">Première visite ? <a class="link" href="#">Créez votre mot de passe</a></p>
+          <p class="muted" style="margin:0">Une question ? Le service RH de votre agence.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDINATEUR -->
+    <section>
+      <p class="board-title">Ordinateur · 1280 px (réduit)</p>
+      <div class="desk-frame" id="deskFrame">
+        <div class="desk" id="desk">
+          <div class="hdr rel">
+            <a class="brand" href="#" aria-label="Portail Carrière, accueil"><span class="logo">ACME</span>Portail Carrière</a>
+            <span class="pin" style="left:270px;top:10px">5</span>
+            <a class="btn-outline rel" href="#">Se connecter<span class="pin" style="right:-14px;top:-14px">2</span></a>
+          </div>
+          <main>
+            <section class="hero">
+              <div class="rel" style="display:flex;flex-direction:column;gap:20px">
+                <span class="pin" style="left:-34px;top:6px">3</span>
+                <h1>Faites valider vos diplômes et voyez les postes ouverts pour vous</h1>
+                <p class="lead">Une fois validés par les RH, vos diplômes comptent pour les promotions.</p>
+                <div class="rel" style="display:flex;flex-direction:column;align-items:flex-start;gap:10px">
+                  <span class="pin" style="left:-34px;top:12px">2</span>
+                  <a class="btn" href="#">Se connecter</a>
+                  <p style="margin:0">Première visite ? <a class="link" href="#">Créez votre mot de passe</a></p>
+                  <p class="muted" style="margin:0">Une question ? Adressez-vous au service RH de votre agence.</p>
+                </div>
+              </div>
+              <div class="photo" style="height:384px"><span>Photo de l'équipe ACME SA</span></div>
+            </section>
+            <div class="below">
+              <section class="rel" style="display:flex;flex-direction:column;gap:12px">
+                <span class="pin" style="left:-34px;top:0">4</span>
+                <h2>Ce que vous y gagnez</h2>
+                <div class="benefits-row">
+                  <div class="benefit"><span class="ms">person_search</span><div><h3>Les postes faits pour vous</h3><p>Les postes ouverts dont vous remplissez les critères. Vous postulez en ligne.</p></div></div>
+                  <div class="benefit"><span class="ms">task_alt</span><div><h3>Vos diplômes suivis</h3><p>Reçu, en examen, validé : vous savez toujours où ils en sont.</p></div></div>
+                  <div class="benefit"><span class="ms">photo_camera</span><div><h3>Tout depuis votre téléphone</h3><p>Une photo suffit pour déposer un diplôme.</p></div></div>
+                </div>
+              </section>
+              <section style="display:flex;flex-direction:column;gap:16px">
+                <h2>Trois étapes</h2>
+                <div class="step"><span class="num">1</span><span>Créez votre mot de passe avec votre nom, votre prénom et votre date de naissance.</span></div>
+                <div class="step"><span class="num">2</span><span>Vérifiez les 8 informations de votre profil.</span></div>
+                <div class="step"><span class="num">3</span><span>Déposez vos diplômes en photo.</span></div>
+              </section>
+            </div>
+          </main>
+          <footer><p class="muted" style="margin:0">Réservé aux employés d'ACME SA. Vos informations restent confidentielles.</p></footer>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="legend">
+    <h2>Ce qui change, et pourquoi</h2>
+    <div class="item"><span class="pin">1</span><p><strong>Se connecter, visible sur téléphone.</strong> Avant, ce bouton était caché sous 640 px : l'employé qui revient devait deviner que « Compléter mon dossier » menait à la connexion.<small>Krug : des choix sans ambiguïté (§6).</small></p></div>
+    <div class="item"><span class="pin">2</span><p><strong>Un seul libellé pour la même page.</strong> « Se connecter » dans l'en-tête et dans le bouton principal, et pour qui vient pour la première fois, « Créez votre mot de passe ». Le mot cliqué se retrouve sur l'écran suivant, qui commence par « C'est votre première fois ? ».<small>Krug : le lien annonce la page qu'il ouvre (parfum de l'information, §6).</small></p></div>
+    <div class="item"><span class="pin">3</span><p><strong>Un titre qui dit ce que l'employé y gagne</strong>, au lieu d'une exigence (« un dossier complet »). Le sous-titre perd sa deuxième phrase (« Encore faut-il que les RH les connaissent »), qui pouvait sonner comme un reproche.<small>Krug : une page d'accueil dit ce qu'on peut faire ici et pourquoi (§8) ; supprimer les mots inutiles.</small></p></div>
+    <div class="item"><span class="pin">4</span><p><strong>Plus de doublon.</strong> Le premier bénéfice répétait le sous-titre ; il devient « Vos diplômes suivis » (statuts déjà en service, US-303). Tous les textes passent à 16 px (règle du projet).<small>Krug : tout est du bruit jusqu'à preuve du contraire (§5) ; accessibilité (§12).</small></p></div>
+    <div class="item"><span class="pin">5</span><p><strong>Logo et « Portail Carrière » cliquables vers l'accueil</strong>, aussi sur la page de connexion qui partage cet en-tête.<small>Krug : les conventions sont des alliées (§3).</small></p></div>
+    <div class="ask">
+      <p><strong>À trancher par M. Hilaire</strong></p>
+      <p>• Le titre proposé, et le bouton « Se connecter » à la place de « Compléter mon dossier » (maquette « Après 3 », US-110).</p>
+      <p>• Le droit à l'image des personnes de la photo.</p>
+      <p>• Avant de coder : un test express avec 3 employés (« Vous venez d'obtenir un diplôme, faites-le connaître aux RH »).</p>
+    </div>
+  </section>
+</div>
+<script>
+  // Réduit la maquette ordinateur (1280 px) à la largeur de sa colonne.
+  (function () {
+    var frame = document.getElementById('deskFrame'), desk = document.getElementById('desk');
+    function fit() {
+      var s = Math.min(1, frame.clientWidth / 1280);
+      desk.style.transform = 'scale(' + s + ')';
+      frame.style.height = desk.offsetHeight * s + 'px';
+    }
+    window.addEventListener('resize', fit); window.addEventListener('load', fit); fit();
+  })();
+</script>
+</body>
+</html>

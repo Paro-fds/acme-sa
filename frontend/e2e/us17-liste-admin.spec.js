@@ -1,16 +1,14 @@
 import { expect, test } from '@playwright/test'
+import { adminLogin } from './admin.js'
 
 /** US-17 CA-04 : cartes à 390 px, tableau à 1280 px. */
 test('liste des employés : cartes sur mobile, tableau sur ordinateur', async ({ page }) => {
-  await page.goto('/admin/connexion')
-  await page.getByLabel('Identifiant').fill('admin')
-  await page.getByLabel('Mot de passe', { exact: true }).fill('Admin-Test-2026')
-  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await adminLogin(page)
   await expect(page).toHaveURL(/\/admin$/)
   await page.goto('/admin/employes')
 
   // 390 px : cartes
-  await expect(page.getByText('7 employés')).toBeVisible()
+  await expect(page.getByText('7 employés sur 7')).toBeVisible()
   const cards = page.getByRole('list', { name: 'Employés' })
   await expect(cards).toBeVisible()
   await expect(cards.getByRole('listitem')).toHaveCount(7)

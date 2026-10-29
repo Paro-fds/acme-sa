@@ -1,29 +1,38 @@
 @import 'tailwindcss';
 
 /*
- * Design system « ACME Enterprise Clarity »
- * (stitch_portail_dossier_collaborateur_acme/acme_enterprise_clarity/DESIGN.md)
+ * Système de design de PAM (anciennement « Portail Carrière ACME SA »), validé avec les écrans (D-47) :
+ * docs/lot0/2-maquettes/2-espace-employe-ecrans/systeme-de-design/DESIGN.md.
+ * Bleu de la charte #1E1E82 (ENF-44, Q9) ; entre parenthèses, le nom du jeton dans DESIGN.md.
  */
 @theme {
   --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
 
   /* Couleurs principales */
-  --color-primary: #0f2557;
-  --color-primary-active: #1e3a8a;
-  --color-info-bg: #eff6ff;
-  --color-info-text: #1d4ed8;
-  --color-info-border: #bfdbfe;
+  --color-primary: #1e1e82; /* primary-container */
+  --color-primary-active: #060068; /* primary */
+  --color-info-bg: #e7eeff; /* surface-container */
+  --color-info-text: #1e1e82;
+  --color-info-border: #c0c1ff; /* primary-fixed-dim */
 
   /* Neutres et surfaces */
-  --color-canvas: #f8fafc;
-  --color-surface: #ffffff;
-  --color-section: #eef2ff;
-  --color-border: #e2e8f0;
-  --color-border-input: #cbd5e1;
-  --color-heading: #0f172a;
-  --color-body: #334155;
-  --color-muted: #64748b;
-  --color-help: #475569;
+  --color-canvas: #f9f9ff; /* surface */
+  --color-surface: #ffffff; /* surface-container-lowest */
+  --color-section: #f0f3ff; /* surface-container-low */
+  --color-border: #d8e3fb; /* surface-container-highest */
+  --color-border-input: #c7c5d4; /* outline-variant */
+  --color-heading: #111c2d; /* on-surface */
+  --color-body: #111c2d; /* on-surface */
+  --color-muted: #777683; /* outline */
+  --color-help: #464652; /* on-surface-variant */
+
+  /* Accent orange des éléments à compléter (tertiary-fixed, on-tertiary-fixed, on-tertiary-container) */
+  --color-accent-bg: #ffdbca;
+  --color-accent-text: #331200;
+  --color-accent-icon: #e67932;
+  --color-highlight: #dee8ff; /* surface-container-high */
+  --color-primary-soft: #e1e0ff; /* primary-fixed : pastilles « Obligatoire », étape */
+  --color-brand-red: #cc1111; /* rouge de la charte (ENF-44) : accent seulement, jamais une erreur */
 
   /* Statuts */
   --color-status-neutral-bg: #f1f5f9;
@@ -38,15 +47,76 @@
   --color-status-done-border: #86efac;
   --color-status-done-text: #15803d;
   --color-status-done-dot: #16a34a;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #fca5a5;
-  --color-error-text: #b91c1c;
-  --color-error-dot: #dc2626;
+  /* Erreur bienveillante, orange comme sur les écrans validés (08) : jamais le rouge de la charte (ENF-44) */
+  --color-error-bg: #fff1ea;
+  --color-error-border: #ffb68e; /* tertiary-fixed-dim */
+  --color-error-text: #763300; /* on-tertiary-fixed-variant */
+  --color-error-dot: #e67932; /* on-tertiary-container */
+
+  /* Espace RH (écrans A02 → A11, US-108) : neutres ardoise des maquettes */
+  --color-rh-canvas: #f8fafc; /* fond de page (slate-50) */
+  --color-rh-line: #e2e8f0; /* bordures et séparateurs (slate-200) */
+  --color-rh-hover: #f1f5f9; /* survol d'une ligne ou d'un lien du menu (slate-100) */
+  --color-rh-strong: #0f172a; /* chiffres et textes forts (slate-900) */
+  --color-rh-text: #334155; /* texte courant et menu (slate-700) */
+  --color-rh-muted: #64748b; /* légendes et en-têtes de tableau (slate-500) */
+  --color-rh-chart-incomplete: #fbbf24; /* « Profil incomplet » de la répartition (A02) */
+  --color-rh-chart-profile: #3b82f6; /* « Profil complet » de la répartition (A02) */
+
+  /* Panneau de menu des deux espaces (US-127, refonte du 2026-10-19) : bleu de la charte et ses nuances */
+  --color-nav-bg: #1e1e82; /* = primary */
+  --color-nav-hover: #2b2b94; /* survol d'une rubrique */
+  --color-nav-active: #3d3db8; /* rubrique de la page en cours */
+  --color-nav-text: #e1e0ff; /* rubriques et liens (contraste 11:1 sur nav-bg) */
+  --color-nav-muted: #c0c1ff; /* sous-titre de la marque */
+  --color-nav-mountain-far: #34349e; /* montagnes du bas, de la plus lointaine à la plus proche */
+  --color-nav-mountain-snow: #5252c0;
+  --color-nav-mountain-mid: #262690;
+  --color-nav-mountain-near: #16166c;
 
   /* Ombres */
-  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-card: 0 1px 3px 0 rgb(17 28 45 / 0.08), 0 1px 2px -1px rgb(17 28 45 / 0.06); /* shadow-sm des écrans */
   --shadow-sticky: 0 -4px 12px 0 rgb(15 23 42 / 0.08);
   --shadow-modal: 0 10px 25px -5px rgb(15 23 42 / 0.12);
+}
+
+/*
+ * US-109 : police d'icônes réduite aux icônes du portail (12 Ko au lieu de 4 Mo), fabriquée par `npm run icons`
+ * et préchargée dans index.html. En attendant qu'elle arrive, l'icône reste une case vide de 1em :
+ * son nom (« login », « rocket_launch »…) ne s'affiche jamais en texte (`icons-ready`, posé par main.jsx).
+ * La règle de l'icône est dans la couche de base : les tailles et couleurs des écrans (`text-sm`…) s'y appliquent.
+ */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/material-symbols.woff2') format('woff2');
+}
+
+html:not(.icons-ready) .material-symbols-outlined {
+  color: transparent;
+}
+
+@layer base {
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  width: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+}
 }
 
 @layer base {

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>ACME SA — Code de vérification PAM</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f9f9ff; font-family:Inter, Segoe UI, Helvetica, Arial, sans-serif;">
+
+<!-- Couleurs : jetons de frontend/src/index.css (US-1016, « on garde notre design »).
+      Pré-en-tête (texte d'aperçu dans la boîte de réception) -->
+<div style="display:none; max-height:0; overflow:hidden; opacity:0; font-size:1px; line-height:1px; color:#f9f9ff;">
+  Votre code de vérification PAM : {{CODE}} — valable {{VALIDITE}} minutes.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f9f9ff">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:560px; background-color:#ffffff; border-radius:8px; overflow:hidden; border:1px solid #d8e3fb;">
+
+        <!-- En-tête -->
+        <tr>
+          <td align="center" bgcolor="#1e1e82" style="background-color:#1e1e82; padding:24px 20px;">
+            <div style="font-size:22px; font-weight:bold; color:#ffffff; letter-spacing:1px;">ACME SA</div>
+            <div style="font-size:13px; color:#c0c1ff; margin-top:4px;">Plateforme ACME Multifonction (PAM)</div>
+          </td>
+        </tr>
+
+        <!-- Corps -->
+        <tr>
+          <td style="padding:32px 32px 8px 32px; color:#111c2d; font-size:15px; line-height:24px;">
+            <p style="margin:0 0 16px 0; font-size:18px; font-weight:bold;">Bonjour {{PRENOM}},</p>
+            <p style="margin:0 0 8px 0;">
+              Voici votre code de vérification pour vous connecter à la plateforme PAM :
+            </p>
+          </td>
+        </tr>
+
+        <!-- Bloc code -->
+        <tr>
+          <td align="center" style="padding:16px 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" bgcolor="#e7eeff" style="background-color:#e7eeff; border:2px dashed #1e1e82; border-radius:8px; padding:16px 36px;">
+                  <span style="font-family:Consolas, 'Courier New', monospace; font-size:36px; font-weight:bold; letter-spacing:10px; color:#1e1e82;">{{CODE}}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Validité -->
+        <tr>
+          <td align="center" style="padding:0 32px 8px 32px; color:#464652; font-size:14px; line-height:22px;">
+            Ce code est valable <strong>{{VALIDITE}} minutes</strong> et ne peut être utilisé <strong>qu'une seule fois</strong>.
+          </td>
+        </tr>
+
+        <!-- Étapes -->
+        <tr>
+          <td style="padding:16px 32px 8px 32px; color:#111c2d; font-size:14px; line-height:22px;">
+            <p style="margin:0 0 6px 0; font-weight:bold;">Comment l'utiliser ?</p>
+            <p style="margin:0;">
+              1. Retournez sur la page de connexion de PAM.<br>
+              2. Saisissez le code ci-dessus dans le champ prévu.<br>
+              3. Validez pour accéder à votre espace.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Avertissement sécurité -->
+        <tr>
+          <td style="padding:16px 32px 28px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td bgcolor="#fff1ea" style="background-color:#fff1ea; border-left:4px solid #e67932; padding:12px 14px; font-size:13px; line-height:20px; color:#763300;">
+                  <strong>Sécurité :</strong> ne communiquez jamais ce code, à personne, y compris à un collègue ou à un membre de la DIT.
+                  Si vous n'êtes pas à l'origine de cette demande, ignorez ce message et contactez la DRH.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Pied de page -->
+        <tr>
+          <td align="center" bgcolor="#f0f3ff" style="background-color:#f0f3ff; border-top:1px solid #d8e3fb; padding:18px 24px; font-size:12px; line-height:18px; color:#777683;">
+            Ceci est un message automatique, merci de ne pas y répondre.<br>
+            Pour toute assistance, contactez la Direction des Ressources Humaines.<br>
+            &copy; {{ANNEE}} ACME SA — Tous droits réservés.
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

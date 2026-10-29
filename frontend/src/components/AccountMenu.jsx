@@ -5,14 +5,22 @@ import { useLogout } from '../lib/useLogout.js'
 const MENU_ITEM =
   'flex min-h-11 items-center gap-3 rounded-md px-3 text-left font-semibold text-heading hover:bg-canvas disabled:opacity-60'
 
-/** Liens supplémentaires de l'espace admin (US-23). */
-const ADMIN_LINKS = [
-  { to: '/admin/administrateurs', icon: 'manage_accounts', label: 'Administrateurs' },
-  { to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' },
-]
+/** Liens supplémentaires de l'espace employé : aucun depuis US-114 (« Mon parcours » est dans « Ma carrière »). */
+const EMPLOYEE_LINKS = []
 
-/** Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23). */
-export default function AccountMenu({ space = 'employee' }) {
+/**
+ * Liens supplémentaires de l'espace admin (US-23) : seulement ce qui concerne le compte lui-même.
+ * Retirés le 2026-10-13 : « Administrateurs » (doublon de « Comptes et rôles »), « Référentiel » et
+ * « Ma double authentification » (la page /admin/securite reste joignable par son adresse).
+ */
+const ADMIN_LINKS = [{ to: '/admin/mot-de-passe', icon: 'password', label: 'Changer mon mot de passe' }]
+
+/**
+ * Avatar de l'en-tête et son menu (« Se déconnecter » : US-04 employé, US-15 admin ; liens admin : US-23).
+ * `person` (US-127, barre du haut blanche) : `{ name, detail, avatar }` ; nom et poste (ou rôle) à côté de l'avatar,
+ * l'avatar seul sur un petit écran.
+ */
+export default function AccountMenu({ space = 'employee', person }) {
   const logout = useLogout(space)
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -55,23 +63,37 @@ export default function AccountMenu({ space = 'employee' }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        className="-mr-2 flex size-11 items-center justify-center rounded-full text-primary hover:bg-canvas"
+        className={
+          person
+            ? 'flex min-h-11 items-center gap-3 rounded-lg px-1.5 py-1 text-left hover:bg-canvas'
+            : '-mr-2 flex size-11 items-center justify-center rounded-full text-primary hover:bg-canvas'
+        }
       >
-        <span className="material-symbols-outlined text-[32px]" aria-hidden="true">account_circle</span>
+        {person ? (
+          <>
+            {person.avatar}
+            <span className="hidden min-w-0 flex-col sm:flex">
+              <span className="max-w-56 truncate text-base font-bold text-heading">{person.name}</span>
+              {person.detail && <span className="max-w-56 truncate text-sm text-help">{person.detail}</span>}
+            </span>
+            <span className="material-symbols-outlined hidden text-xl text-help sm:inline" aria-hidden="true">keyboard_arrow_down</span>
+          </>
+        ) : (
+          <span className="material-symbols-outlined text-[32px]" aria-hidden="true">account_circle</span>
+        )}
       </button>
       {open && (
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
+          className="absolute right-0 z-40 mt-2 flex w-60 flex-col gap-2 rounded-lg border border-border bg-surface p-2 shadow-modal"
         >
-          {space === 'admin' &&
-            ADMIN_LINKS.map((link) => (
-              <Link key={link.to} to={link.to} role="menuitem" onClick={() => setOpen(false)} className={MENU_ITEM}>
-                <span className="material-symbols-outlined" aria-hidden="true">{link.icon}</span>
-                {link.label}
-              </Link>
-            ))}
+          {(space === 'admin' ? ADMIN_LINKS : EMPLOYEE_LINKS).map((link) => (
+            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setOpen(false)} className={MENU_ITEM}>
+              <span className="material-symbols-outlined" aria-hidden="true">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
           <button type="button" role="menuitem" onClick={handleLogout} disabled={sending} className={MENU_ITEM}>
             <span className="material-symbols-outlined" aria-hidden="true">logout</span>
             {sending ? 'Déconnexion…' : 'Se déconnecter'}

@@ -1,0 +1,501 @@
+<title>Portail carrière : le système</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Mise en page : colonne de lecture (~1000 px) ; trois schémas en SVG, chacun dans sa propre zone de défilement horizontal sur téléphone. Couleurs de la charte : bleu marine pour le portail, rouge réservé au verrou. */
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --fg: #2c2e44; --heading: #12124d; --muted: #6a6c80;
+  --border: #e3e3ee; --primary: #1e1e82; --accent: #cc1111; --primary-bg: #eeeefa; --lane: #f1f1f8;
+  --todo-bg: #fff6dc; --todo-fg: #7a5a00;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42; --lane: #13132a;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42; --lane: #13132a;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2 { color: var(--heading); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 21px; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+p { margin: 0; max-width: 72ch; }
+ul, ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; max-width: 72ch; }
+td ul, td ol { gap: 2px; padding-left: 18px; }
+strong { color: var(--heading); }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 18px; }
+.note { font-size: 14px; color: var(--muted); }
+.todo { background: var(--todo-bg); color: var(--todo-fg); border-radius: 4px; padding: 0 5px; font-size: .92em; white-space: nowrap; }
+.callout { border-left: 4px solid var(--primary); background: var(--primary-bg); padding: 12px 16px; border-radius: 0 8px 8px 0; max-width: 80ch; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.scroll svg { display: block; width: 100%; height: auto; min-width: 900px; color: var(--fg); }
+figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+td:first-child { font-weight: 600; color: var(--heading); }
+td.src { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+/* Éléments des schémas */
+svg text { fill: currentColor; font-family: var(--font); }
+svg .t { font-size: 13px; font-weight: 600; }
+svg .s { font-size: 11px; fill: var(--muted); }
+svg .lbl { font-size: 11px; font-style: italic; fill: var(--muted); }
+svg .hd { font-size: 12px; font-weight: 700; letter-spacing: .06em; fill: var(--muted); }
+svg .box { fill: var(--surface); stroke: currentColor; stroke-width: 1.2; }
+svg .actor { fill: var(--primary-bg); stroke: var(--primary); stroke-width: 1.2; }
+svg .portal { fill: none; stroke: var(--primary); stroke-width: 2; }
+svg .ptitle { font-size: 13px; font-weight: 700; fill: var(--primary); }
+svg .dash { stroke-dasharray: 5 4; }
+svg .ln { stroke: currentColor; stroke-width: 1.3; fill: none; }
+svg .acc { stroke: var(--accent); }
+svg .acct { fill: var(--accent); font-weight: 700; }
+svg .accbox { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+svg .lane { fill: var(--lane); }
+svg .lanesep { stroke: var(--border); stroke-width: 1; }
+svg .lanelbl { font-size: 12px; font-weight: 700; fill: var(--primary); }
+svg .ref { fill: var(--primary-bg); stroke: var(--primary); stroke-width: 2; }
+svg .todo { fill: var(--todo-fg); font-weight: 600; }
+@media (max-width: 520px) { h1 { font-size: 25px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Refonte du portail · Lot 0 · Version 2</span>
+    <h1>Le système, ses acteurs et ses flux</h1>
+    <p class="lead">Ce que sera le portail carrière une fois la refonte livrée, d'après le registre des décisions v1.8, le message de lancement et le cahier des charges : qui intervient, par où, comment circulent les données, et ce que le lot 0 doit livrer avant tout développement.</p>
+    <p class="note">Version 2 du 6 octobre 2026, corrigée après l'analyse de conformité du directeur. Les éléments marqués <span class="todo">[à confirmer]</span> sont des recommandations ou des propositions par défaut : ils ne sont pas tranchés.</p>
+  </header>
+
+  <section>
+    <h2>Le système en bref</h2>
+    <ul>
+      <li><strong>Un seul portail</strong> à l'adresse carriere.acmehaiti.com, sur le compte AWS de l'institution (région <span class="todo">[us-east-2, à confirmer par la DIT]</span>), avec deux portes d'entrée : l'<strong>espace employé</strong>, pensé pour le téléphone, et l'<strong>espace RH</strong>, accessible seulement depuis le réseau de l'institution ou par VPN <span class="todo">[solution à confirmer]</span>, avec double authentification.</li>
+      <li><strong>Deux environnements :</strong> la <strong>recette</strong> (recette-carriere.acmehaiti.com), protégée par mot de passe et sur données fictives uniquement, puis la <strong>production</strong>. <strong>Aucune ouverture aux employés avant la fin du lot 3.</strong></li>
+      <li><strong>Derrière, neuf domaines</strong> (D1 à D9, les futurs epics) font le travail, tous selon le <strong>tableau unique des règles</strong>.</li>
+      <li><strong>Les données</strong> sont dans une base gérée, PostgreSQL (RDS) <span class="todo">[recommandé, à confirmer]</span> ; les <strong>fichiers</strong> (certificats, lettres) dans un stockage S3 privé, chiffré, versionné et analysé contre les virus.</li>
+      <li><strong>L'export RH</strong> alimente le portail sans jamais être modifié ; ses agences et directions passent par le <strong>tableau de correspondance</strong> pour devenir des unités officielles.</li>
+      <li><strong>Vers l'extérieur</strong>, le portail notifie par WhatsApp (prestataire <span class="todo">[à choisir]</span>), puis par email institutionnel, puis par email personnel avec consentement ; plus tard, il renverra les mouvements de carrière vers le système RH.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>1. Les composants et leurs échanges</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 1160 770" role="img" aria-label="Diagramme de composants : sept types d'utilisateurs, dont deux au lot 4, passent par l'espace employé ou l'espace RH, qui appellent les neuf domaines du portail par l'API ; les domaines appliquent le tableau unique des règles et lisent et écrivent dans la base et le stockage des documents ; à droite, l'export RH, le fichier agence-région, les lettres scannées, l'historique des demandes et la grille de classification alimentent le portail, qui notifie par WhatsApp puis par email.">
+          <defs>
+            <marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+
+          <text class="hd" x="110" y="44" text-anchor="middle">UTILISATEURS</text>
+          <text class="hd" x="1025" y="44" text-anchor="middle">EXTÉRIEUR</text>
+
+          <!-- Acteurs -->
+          <rect class="actor" x="20" y="73" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="94" text-anchor="middle">Employé</text>
+          <text class="s" x="110" y="110" text-anchor="middle">téléphone, connexion lente</text>
+
+          <rect class="actor" x="20" y="153" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="174" text-anchor="middle">Agent RH</text>
+          <text class="s" x="110" y="190" text-anchor="middle">Mme Nérius, R.-H. Joseph</text>
+
+          <rect class="actor" x="20" y="233" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="254" text-anchor="middle">Resp. du référentiel</text>
+          <text class="s" x="110" y="270" text-anchor="middle">Mme Nérius, Mme Jean</text>
+
+          <rect class="actor" x="20" y="313" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="334" text-anchor="middle">Administrateur</text>
+          <text class="s" x="110" y="350" text-anchor="middle">G. Hilaire, S. Raymond</text>
+
+          <rect class="actor" x="20" y="393" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="414" text-anchor="middle">Lecture seule</text>
+          <text class="s" x="110" y="430" text-anchor="middle">Direction Générale, audit</text>
+
+          <rect class="actor dash" x="20" y="473" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="494" text-anchor="middle">Resp. de département</text>
+          <text class="s" x="110" y="510" text-anchor="middle">confirme une disponibilité</text>
+
+          <rect class="actor dash" x="20" y="553" width="180" height="50" rx="8"/>
+          <text class="t" x="110" y="574" text-anchor="middle">Direction Générale</text>
+          <text class="s" x="110" y="590" text-anchor="middle">approuve une demande</text>
+
+          <!-- Portail -->
+          <rect class="portal" x="240" y="20" width="590" height="700" rx="14"/>
+          <text class="ptitle" x="260" y="46">Portail carrière · carriere.acmehaiti.com (AWS)</text>
+
+          <rect class="box" x="260" y="73" width="190" height="50" rx="8"/>
+          <text class="t" x="355" y="94" text-anchor="middle">Espace employé</text>
+          <text class="s" x="355" y="110" text-anchor="middle">téléphone d'abord, charte Q9</text>
+
+          <rect class="box" x="260" y="145" width="190" height="445" rx="8"/>
+          <text class="t" x="355" y="330" text-anchor="middle">Espace RH</text>
+          <text class="s" x="355" y="348" text-anchor="middle">réseau de l'institution</text>
+          <text class="s" x="355" y="363" text-anchor="middle">ou VPN <tspan class="todo">[à confirmer]</tspan></text>
+          <text class="s" x="355" y="378" text-anchor="middle">double authentification</text>
+          <text class="s" x="355" y="393" text-anchor="middle">à partir du lot 2</text>
+
+          <!-- Flèches acteurs -> espaces -->
+          <line class="ln" x1="200" y1="98" x2="258" y2="98" marker-end="url(#ar1)"/>
+          <line class="ln" x1="200" y1="178" x2="258" y2="178" marker-end="url(#ar1)"/>
+          <line class="ln" x1="200" y1="258" x2="258" y2="258" marker-end="url(#ar1)"/>
+          <line class="ln" x1="200" y1="338" x2="258" y2="338" marker-end="url(#ar1)"/>
+          <line class="ln" x1="200" y1="418" x2="258" y2="418" marker-end="url(#ar1)"/>
+          <line class="ln dash" x1="200" y1="498" x2="258" y2="498" marker-end="url(#ar1)"/>
+          <line class="ln dash" x1="200" y1="578" x2="258" y2="578" marker-end="url(#ar1)"/>
+          <text class="lbl" x="229" y="90" text-anchor="middle">utilise</text>
+          <text class="lbl" x="229" y="542" text-anchor="middle">lot 4,</text>
+          <text class="lbl" x="229" y="555" text-anchor="middle">accès ?</text>
+
+          <!-- API -->
+          <text class="lbl" x="490" y="66" text-anchor="middle">API</text>
+          <line class="ln" x1="450" y1="98" x2="488" y2="98"/>
+          <line class="ln" x1="450" y1="325" x2="488" y2="325"/>
+          <line class="ln" x1="490" y1="80" x2="490" y2="506"/>
+          <line class="ln" x1="490" y1="93" x2="508" y2="93" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="143" x2="508" y2="143" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="193" x2="508" y2="193" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="243" x2="508" y2="243" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="293" x2="508" y2="293" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="343" x2="508" y2="343" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="393" x2="508" y2="393" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="443" x2="508" y2="443" marker-end="url(#ar1)"/>
+          <line class="ln" x1="490" y1="493" x2="508" y2="493" marker-end="url(#ar1)"/>
+
+          <!-- Domaines -->
+          <rect class="box" x="510" y="73" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="98">D1 Accès et comptes</text><text class="s" x="780" y="98" text-anchor="end">lots 1–3</text>
+          <rect class="box" x="510" y="123" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="148">D2 Dossier, verrou, consentement</text><text class="s" x="780" y="148" text-anchor="end">lot 1</text>
+          <rect class="box" x="510" y="173" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="198">D3 Certificats</text><text class="s" x="780" y="198" text-anchor="end">lots 1–2</text>
+          <rect class="box" x="510" y="223" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="248">D4 Validation RH</text><text class="s" x="780" y="248" text-anchor="end">lot 2</text>
+          <rect class="box" x="510" y="273" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="298">D5 Référentiel des unités</text><text class="s" x="780" y="298" text-anchor="end">lots 0–1</text>
+          <rect class="box" x="510" y="323" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="348">D6 Pilotage et journal d'audit</text><text class="s" x="780" y="348" text-anchor="end">lot 2</text>
+          <rect class="box" x="510" y="373" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="398">D7 Notifications</text><text class="s" x="780" y="398" text-anchor="end">lots 1–4</text>
+          <rect class="box dash" x="510" y="423" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="448">D8 Carrière et postes</text><text class="s" x="780" y="448" text-anchor="end">lot 4</text>
+          <rect class="box" x="510" y="473" width="280" height="40" rx="6"/>
+          <text class="t" x="522" y="498">D9 Demandes et mouvements</text><text class="s" x="780" y="498" text-anchor="end">lots 2–4</text>
+
+          <!-- Tableau unique des règles -->
+          <rect class="ref" x="600" y="530" width="190" height="52" rx="8"/>
+          <text class="t" x="695" y="551" text-anchor="middle">Tableau unique des règles</text>
+          <text class="s" x="695" y="568" text-anchor="middle">D1–D9 · sans code au lot 4</text>
+
+          <!-- Stockage -->
+          <rect class="box" x="270" y="640" width="250" height="56" rx="8"/>
+          <text class="t" x="395" y="664" text-anchor="middle">Base de données</text>
+          <text class="s" x="395" y="681" text-anchor="middle">PostgreSQL (RDS) <tspan class="todo">[à confirmer]</tspan></text>
+          <rect class="box" x="550" y="640" width="260" height="56" rx="8"/>
+          <text class="t" x="680" y="664" text-anchor="middle">Stockage des documents</text>
+          <text class="s" x="680" y="681" text-anchor="middle">S3 privé, chiffré, versionné, antivirus</text>
+          <line class="ln" x1="530" y1="515" x2="452" y2="638" marker-end="url(#ar1)"/>
+          <text class="lbl" x="478" y="612">lit et écrit</text>
+          <line class="ln" x1="575" y1="515" x2="575" y2="638" marker-end="url(#ar1)"/>
+          <text class="lbl" x="582" y="612">certificats, lettres</text>
+
+          <!-- Extérieur -->
+          <rect class="box" x="910" y="115" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="136" text-anchor="middle">Export RH (CSV)</text>
+          <text class="s" x="1025" y="152" text-anchor="middle">système RH, lecture seule</text>
+          <line class="ln" x1="908" y1="140" x2="792" y2="143" marker-end="url(#ar1)"/>
+          <text class="lbl" x="850" y="132" text-anchor="middle">employés</text>
+          <line class="ln" x1="912" y1="160" x2="794" y2="288" marker-end="url(#ar1)"/>
+          <text class="lbl" x="872" y="210">agences,</text>
+          <text class="lbl" x="872" y="223">directions</text>
+
+          <rect class="box" x="910" y="268" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="289" text-anchor="middle">Fichier agence → région</text>
+          <text class="s" x="1025" y="305" text-anchor="middle">DRH, reçu le 6 octobre</text>
+          <line class="ln" x1="908" y1="296" x2="792" y2="296" marker-end="url(#ar1)"/>
+          <text class="lbl" x="850" y="288" text-anchor="middle">régions</text>
+
+          <rect class="box" x="910" y="368" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="389" text-anchor="middle">① WhatsApp Business (Meta)</text>
+          <text class="s" x="1025" y="405" text-anchor="middle">prestataire <tspan class="todo">[à choisir]</tspan>, consentement</text>
+          <line class="ln" x1="792" y1="393" x2="908" y2="393" marker-end="url(#ar1)"/>
+          <text class="lbl" x="850" y="385" text-anchor="middle">notifie</text>
+
+          <rect class="box" x="910" y="430" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="451" text-anchor="middle">② ③ Email</text>
+          <text class="s" x="1025" y="467" text-anchor="middle">institutionnel ; personnel si consenti</text>
+          <line class="ln" x1="792" y1="402" x2="908" y2="452" marker-end="url(#ar1)"/>
+          <text class="lbl" x="836" y="440">puis</text>
+
+          <rect class="box" x="910" y="486" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="507" text-anchor="middle">Lettres scannées</text>
+          <text class="s" x="1025" y="523" text-anchor="middle">OCR + Agent RH · salaires exclus</text>
+          <line class="ln" x1="908" y1="508" x2="792" y2="496" marker-end="url(#ar1)"/>
+          <text class="lbl" x="850" y="494" text-anchor="middle">mouvements</text>
+
+          <rect class="box dash" x="910" y="552" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="573" text-anchor="middle">Système RH (retour)</text>
+          <text class="s" x="1025" y="589" text-anchor="middle">lot distinct</text>
+          <line class="ln dash" x1="792" y1="506" x2="908" y2="572" marker-end="url(#ar1)"/>
+          <text class="lbl" x="826" y="552">export</text>
+
+          <rect class="box" x="910" y="618" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="639" text-anchor="middle">Excel des demandes passées</text>
+          <text class="s" x="1025" y="655" text-anchor="middle">import de l'historique</text>
+          <line class="ln" x1="908" y1="640" x2="792" y2="512" marker-end="url(#ar1)"/>
+
+          <rect class="box" x="910" y="684" width="230" height="50" rx="8"/>
+          <text class="t" x="1025" y="705" text-anchor="middle">Grille de classification</text>
+          <text class="s" x="1025" y="721" text-anchor="middle">DRH · <tspan class="todo">attendue</tspan></text>
+          <line class="ln" x1="908" y1="709" x2="792" y2="560" marker-end="url(#ar1)"/>
+          <text class="lbl" x="808" y="624">niveaux,</text>
+          <text class="lbl" x="808" y="637">rangs</text>
+
+          <!-- Légende -->
+          <rect class="box dash" x="260" y="738" width="34" height="18" rx="4"/>
+          <text class="s" x="302" y="751">pointillés : lot 4 ou lot distinct</text>
+          <text class="s" x="520" y="751"><tspan class="todo">[…]</tspan> : non tranché, proposition par défaut</text>
+        </svg>
+      </div>
+      <figcaption>Les utilisateurs n'entrent que par deux portes ; tout le reste passe par l'API du portail, et chaque domaine applique le même tableau de règles. Les numéros ①②③ donnent l'ordre des canaux de notification. Les éléments en pointillés arrivent au lot 4 ou dans un lot distinct.</figcaption>
+    </figure>
+
+    <div class="table"><table>
+      <thead><tr><th>Qui</th><th>Par où</th><th>Ce qu'il fait</th><th>Domaines</th></tr></thead>
+      <tbody>
+        <tr><td>Employé</td><td>Espace employé</td><td>Complète son profil, donne son consentement, dépose ses certificats, suit leur statut ; au lot 4, voit les postes et dépose ses demandes</td><td>D1, D2, D3, D7, D8, D9</td></tr>
+        <tr><td>Agent RH</td><td>Espace RH</td><td>Valide ou rejette les certificats, <strong>jamais le sien</strong> ; traite les signalements ; enregistre les demandes reçues par lettre ; contrôle les mouvements extraits</td><td>D4, D6, D9, D8</td></tr>
+        <tr><td>Resp. du référentiel</td><td>Lot 1 : fichier Excel importé par un Administrateur <span class="todo">[P-13, à confirmer]</span> · lot 2 : espace RH · lot 4 : écran de gestion</td><td>Valide la correspondance, rattache les valeurs inconnues, tient la liste des unités et des régions</td><td>D5</td></tr>
+        <tr><td>Administrateur</td><td>Espace RH</td><td>Pilote, gère les comptes, réaffecte un dossier, valide les postes avant publication, peut aussi valider un certificat</td><td>D1, D4, D5, D6, D8</td></tr>
+        <tr><td>Lecture seule</td><td>Espace RH</td><td>Consulte les dossiers et les tableaux de bord, sans rien modifier</td><td>D6</td></tr>
+        <tr><td>Resp. de département <span class="note">(lot 4)</span></td><td><span class="todo">[accès à préciser]</span></td><td>Est consulté sur une demande : « Disponibilité confirmée » ou « Pas de disponibilité » (étape 3 du circuit)</td><td>D9</td></tr>
+        <tr><td>Direction Générale <span class="note">(lot 4)</span></td><td><span class="todo">[accès à préciser]</span></td><td>Approuve ou non une demande (étape 6 du circuit) ; consulte aussi en lecture seule</td><td>D9</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>2. Le parcours d'un certificat</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 1180 320" role="img" aria-label="Diagramme en couloirs : l'employé se connecte et complète son profil en donnant son consentement ; le portail vérifie le verrou ; si le profil est complet, l'employé dépose un certificat ; le portail l'enregistre en vérification ; un Agent RH, qui ne reçoit jamais son propre certificat, l'examine et décide ; le portail met à jour le statut et notifie l'employé.">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            <marker id="ar2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cc1111"/></marker>
+          </defs>
+          <rect class="lane" x="0" y="10" width="1180" height="100"/>
+          <rect class="lane" x="0" y="210" width="1180" height="100"/>
+          <line class="lanesep" x1="0" y1="110" x2="1180" y2="110"/>
+          <line class="lanesep" x1="0" y1="210" x2="1180" y2="210"/>
+          <text class="lanelbl" x="14" y="64">Employé</text>
+          <text class="lanelbl" x="14" y="164">Portail</text>
+          <text class="lanelbl" x="14" y="264">Agent RH</text>
+
+          <rect class="box" x="120" y="28" width="135" height="64" rx="8"/>
+          <text class="t" x="132" y="50">① Se connecte</text>
+          <text class="s" x="132" y="66">nom, prénom, naissance,</text>
+          <text class="s" x="132" y="80">mot de passe</text>
+
+          <rect class="box" x="275" y="28" width="135" height="64" rx="8"/>
+          <text class="t" x="287" y="50">② Complète</text>
+          <text class="s" x="287" y="66">8 éléments, % affiché ;</text>
+          <text class="s" x="287" y="80">mention, consentement</text>
+
+          <rect class="accbox" x="430" y="128" width="135" height="64" rx="8"/>
+          <text class="t acct" x="442" y="150">③ Verrou</text>
+          <text class="s" x="442" y="166">le profil est-il</text>
+          <text class="s" x="442" y="180">complet ?</text>
+
+          <rect class="box" x="585" y="28" width="135" height="64" rx="8"/>
+          <text class="t" x="597" y="50">④ Dépose</text>
+          <text class="s" x="597" y="66">type, niveau, année…</text>
+          <text class="s" x="597" y="80">aperçu avant envoi</text>
+
+          <rect class="box" x="740" y="128" width="135" height="64" rx="8"/>
+          <text class="t" x="752" y="150">⑤ Enregistre</text>
+          <text class="s" x="752" y="166">« En vérification »,</text>
+          <text class="s" x="752" y="180">fichier chiffré</text>
+
+          <rect class="box" x="895" y="228" width="135" height="64" rx="8"/>
+          <text class="t" x="907" y="250">⑥ Examine</text>
+          <text class="s" x="907" y="266">document | profil ;</text>
+          <text class="s" x="907" y="280">Valider ou Rejeter</text>
+
+          <rect class="box" x="1035" y="128" width="135" height="64" rx="8"/>
+          <text class="t" x="1047" y="150">⑦ Met à jour</text>
+          <text class="s" x="1047" y="166">statut, niveau d'études,</text>
+          <text class="s" x="1047" y="180">notification</text>
+
+          <rect class="box" x="1035" y="28" width="135" height="64" rx="8"/>
+          <text class="t" x="1047" y="50">⑧ Voit le résultat</text>
+          <text class="s" x="1047" y="66">À corriger : motif,</text>
+          <text class="s" x="1047" y="80">il redépose (④)</text>
+
+          <line class="ln" x1="255" y1="60" x2="273" y2="60" marker-end="url(#ar2)"/>
+          <line class="ln" x1="390" y1="92" x2="455" y2="126" marker-end="url(#ar2)"/>
+          <text class="lbl" x="432" y="104">vérifie</text>
+          <line class="ln acc" x1="440" y1="192" x2="335" y2="96" marker-end="url(#ar2a)"/>
+          <text class="lbl" x="250" y="160">non : liste de ce qui manque,</text>
+          <text class="lbl" x="250" y="174">un lien par élément</text>
+          <line class="ln acc" x1="548" y1="126" x2="612" y2="94" marker-end="url(#ar2a)"/>
+          <text class="acct" x="586" y="122" font-size="11">oui</text>
+          <line class="ln" x1="705" y1="92" x2="765" y2="126" marker-end="url(#ar2)"/>
+          <text class="lbl" x="742" y="106">envoie</text>
+          <line class="ln" x1="850" y1="192" x2="918" y2="226" marker-end="url(#ar2)"/>
+          <text class="lbl" x="885" y="250" text-anchor="end">file commune, sous 5 jours ouvrables ;</text>
+          <text class="lbl" x="885" y="264" text-anchor="end">jamais son propre certificat :</text>
+          <text class="lbl" x="885" y="278" text-anchor="end">il va à l'autre Agent RH ou à un Administrateur</text>
+          <line class="ln" x1="1010" y1="226" x2="1060" y2="194" marker-end="url(#ar2)"/>
+          <text class="lbl" x="1044" y="222">décision</text>
+          <line class="ln" x1="1102" y1="126" x2="1102" y2="94" marker-end="url(#ar2)"/>
+          <text class="lbl" x="1108" y="114">WhatsApp</text>
+        </svg>
+      </div>
+      <figcaption>Le verrou (③, en rouge) est le seul point où le portail renvoie l'employé en arrière : il lui montre exactement ce qui manque. À l'étape ②, l'employé lit la mention d'information et donne son consentement pour les nouvelles données (niveau d'études, contact d'urgence) et pour WhatsApp. À l'étape ⑥, la séparation des tâches s'applique : un Agent RH ne valide jamais son propre certificat.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>3. Le chemin des agences et des directions</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 1100 290" role="img" aria-label="Schéma du référentiel : chaque valeur d'agence ou de direction de l'export RH passe par le tableau de correspondance, qui la traduit en unité officielle du référentiel ; une valeur inconnue va dans la liste À rattacher ; le fichier agence-région rattache les agences aux régions ; la responsable du référentiel valide la correspondance et rattache les inconnues ; le référentiel sert à tout le portail.">
+          <defs>
+            <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+          <rect class="box" x="20" y="40" width="190" height="60" rx="8"/>
+          <text class="t" x="115" y="64" text-anchor="middle">Export RH</text>
+          <text class="s" x="115" y="82" text-anchor="middle">agency_code, department</text>
+
+          <rect class="box" x="290" y="40" width="210" height="60" rx="8"/>
+          <text class="t" x="395" y="64" text-anchor="middle">Tableau de correspondance</text>
+          <text class="s" x="395" y="82" text-anchor="middle">valeur trouvée → code officiel</text>
+
+          <rect class="ref" x="580" y="40" width="220" height="60" rx="8"/>
+          <text class="t" x="690" y="64" text-anchor="middle">Référentiel des unités</text>
+          <text class="s" x="690" y="82" text-anchor="middle">agences, régions, directions</text>
+
+          <rect class="box" x="580" y="180" width="220" height="60" rx="8"/>
+          <text class="t" x="690" y="204" text-anchor="middle">Fichier agence → région</text>
+          <text class="s" x="690" y="222" text-anchor="middle">DRH, date de début <tspan class="todo">[à fixer]</tspan></text>
+
+          <rect class="box" x="290" y="180" width="210" height="60" rx="8"/>
+          <text class="t" x="395" y="204" text-anchor="middle">« À rattacher »</text>
+          <text class="s" x="395" y="222" text-anchor="middle">employé : « Unité à confirmer »</text>
+
+          <rect class="actor" x="20" y="180" width="190" height="60" rx="8"/>
+          <text class="t" x="115" y="204" text-anchor="middle">Resp. du référentiel</text>
+          <text class="s" x="115" y="222" text-anchor="middle">Mme Nérius, Mme Jean</text>
+
+          <rect class="box" x="880" y="20" width="200" height="190" rx="8"/>
+          <text class="t" x="896" y="44">Sert à tout le portail</text>
+          <text class="s" x="896" y="68">• affichage des noms</text>
+          <text class="s" x="896" y="88">• confirmation par l'employé</text>
+          <text class="s" x="896" y="108">• tableau de bord</text>
+          <text class="s" x="896" y="128">• recherche RH par région</text>
+          <text class="s" x="896" y="148">• postes ouverts (lot 4)</text>
+          <text class="s" x="896" y="168">• éligibilité (lot 4)</text>
+
+          <line class="ln" x1="210" y1="70" x2="288" y2="70" marker-end="url(#ar3)"/>
+          <text class="lbl" x="249" y="62" text-anchor="middle">chaque valeur</text>
+          <line class="ln" x1="500" y1="70" x2="578" y2="70" marker-end="url(#ar3)"/>
+          <text class="lbl" x="539" y="62" text-anchor="middle">traduit</text>
+          <line class="ln" x1="395" y1="100" x2="395" y2="178" marker-end="url(#ar3)"/>
+          <text class="lbl" x="402" y="144">valeur inconnue</text>
+          <line class="ln" x1="690" y1="180" x2="690" y2="102" marker-end="url(#ar3)"/>
+          <text class="lbl" x="697" y="144">rattache les agences</text>
+          <line class="ln" x1="800" y1="70" x2="878" y2="70" marker-end="url(#ar3)"/>
+          <line class="ln" x1="210" y1="200" x2="300" y2="102" marker-end="url(#ar3)"/>
+          <text class="lbl" x="196" y="140">valide chaque ligne</text>
+          <line class="ln" x1="210" y1="225" x2="288" y2="225" marker-end="url(#ar3)"/>
+          <text class="lbl" x="249" y="217" text-anchor="middle">rattache</text>
+          <text class="lbl" x="20" y="272">Lot 1 : dans un fichier Excel, importé par un Administrateur [P-13] · lot 2 : espace RH · lot 4 : écran de gestion</text>
+        </svg>
+      </div>
+      <figcaption>L'export n'est jamais corrigé : c'est le tableau de correspondance qui traduit ses valeurs, et il se réapplique à chaque nouvel export. Une valeur nouvelle n'est jamais ignorée : elle attend dans « À rattacher » que la responsable du référentiel la relie à une unité.</figcaption>
+    </figure>
+    <div class="callout">
+      <p><strong>Comment Mme Nérius gère le référentiel au lot 1, avant l'espace RH ?</strong> Le registre prévoit au lot 1 « un fichier ou une table modifiable par la responsable du référentiel, son assistante et les Administrateurs » (Q4 §5), sans dire comment. <strong>Proposition P-13 <span class="todo">[à confirmer]</span> :</strong> elle tient le référentiel et le tableau de correspondance dans un fichier Excel ; un Administrateur l'importe à chaque modification ; l'import refuse un fichier incohérent (code en double, agence sans région) et produit la liste « À rattacher », envoyée à Mme Nérius. L'écran de gestion arrive au lot 4.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Les règles qui s'appliquent partout</h2>
+    <div class="table"><table>
+      <thead><tr><th>Règle</th><th>Ce qu'elle impose</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>Tableau unique des règles</td><td>Toutes les règles (complétude, formats, niveaux et rangs, délais, motifs, relances) sont dans un seul tableau commenté, codé au lot 1 et modifiable sans code au lot 4. Il figure au chapitre 7 du cahier des charges (49 règles).</td><td class="src">Lancement §2.1 ; Q3 §4</td></tr>
+        <tr><td>Mention et consentement</td><td>Avant de collecter le niveau d'études et le contact d'urgence, le portail dit pourquoi il les collecte et qui y a accès, et recueille le consentement. Le consentement WhatsApp est recueilli dans le profil.</td><td class="src">Q1 ; Q7 §2</td></tr>
+        <tr><td>Salaires exclus</td><td>Aucun salaire ni montant de rémunération n'est extrait ni stocké, y compris des lettres scannées.</td><td class="src">Lancement §5 ; Q5 §6</td></tr>
+        <tr><td>Séparation des tâches</td><td>Un Agent RH ne valide jamais son propre certificat : il va à l'autre Agent RH, à défaut à un Administrateur.</td><td class="src">Q2 §1</td></tr>
+        <tr><td>Données fictives</td><td>Aucune donnée réelle d'employé en recette ni en développement.</td><td class="src">Lancement §5 ; Q8 §2</td></tr>
+        <tr><td>Export en lecture seule</td><td>L'export RH n'est jamais modifié ; les noms d'unités ne sont jamais corrigés dans le code.</td><td class="src">Q4 §6</td></tr>
+        <tr><td>Relances</td><td>Ordre des canaux : WhatsApp, puis email institutionnel, puis email personnel avec consentement. Relances entre 1 et 7 jours, puis à 14 jours, au plus <span class="todo">[3]</span> par campagne ; du lundi au vendredi, <span class="todo">[8 h – 18 h]</span> ; arrêt dès que le dossier est complet. Au lot 4, résumé périodique des postes ouverts (par exemple hebdomadaire).</td><td class="src">Q7 §1 → §3</td></tr>
+        <tr><td>Charte graphique</td><td>Bleu marine <code>#1E1E82</code> en couleur principale ; rouge <code>#CC1111</code> en accent, jamais pour une erreur ou un rejet ; mascotte « La Penseuse » à la connexion, à l'accueil et dans les encouragements, jamais sur un refus ; logo officiel ; téléphone d'abord.</td><td class="src">Q9</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>5. Deux environnements, une seule date d'ouverture</h2>
+    <div class="table"><table>
+      <thead><tr><th>Environnement</th><th>Adresse</th><th>Données</th><th>Pour qui, quand</th></tr></thead>
+      <tbody>
+        <tr><td>Recette</td><td>recette-carriere.acmehaiti.com, protégée par mot de passe</td><td>Fictives uniquement</td><td>Démonstrations et validations des lots 1 à 3</td></tr>
+        <tr><td>Production</td><td>carriere.acmehaiti.com</td><td>Réelles</td><td>Mise en place au lot 3 ; <strong>ouverture aux employés à la fin du lot 3, pas avant</strong></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>6. Ce que le portail attend des autres</h2>
+    <div class="table"><table>
+      <thead><tr><th>Pièce</th><th>Fournie par</th><th>Sert à</th><th>État</th></tr></thead>
+      <tbody>
+        <tr><td>Export RH</td><td>Directeur</td><td>Employés, agences, directions</td><td>Reçu (1er octobre)</td></tr>
+        <tr><td>Fichier agence → région</td><td>DRH</td><td>Régions</td><td>Reçu le 6 octobre : 35 agences, 8 régions, sans directions ni dates</td></tr>
+        <tr><td>Liste officielle des directions et services</td><td>Mme Nérius, Mme Jean</td><td>Référentiel, tableau de bord par direction</td><td><span class="todo">Demandée</span></td></tr>
+        <tr><td>Grille de classification des postes</td><td>DRH</td><td>Niveaux de certificat et leurs rangs (Q3), avant de finaliser les maquettes</td><td><span class="todo">Attendue</span></td></tr>
+        <tr><td>Logo, mascotte, police</td><td>Directeur</td><td>Guide de style et maquettes (Q9)</td><td><span class="todo">Attendus</span></td></tr>
+        <tr><td>Échantillon de 20 à 30 lettres</td><td>Directeur</td><td>Test d'extraction, dans un environnement sécurisé</td><td><span class="todo">Attendu</span></td></tr>
+        <tr><td>Historique des demandes</td><td>DRH</td><td>Import Excel dans le registre des demandes</td><td><span class="todo">Modèle à livrer au lot 0</span></td></tr>
+        <tr><td>Région AWS, VPN, DNS, Cognito</td><td>DIT</td><td>Architecture et mise en service</td><td><span class="todo">Attendus</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>7. Ce qui arrive, et quand</h2>
+    <div class="table"><table>
+      <thead><tr><th>Lot</th><th>Ce qui est livré</th><th>Où</th></tr></thead>
+      <tbody>
+        <tr><td>Lot 0 · Cadrage</td><td><strong>Aucun développement.</strong> Huit livrables, validés par écrit avant le lot 1 :
+          <ol>
+            <li>Spécifications et tableau unique des règles</li>
+            <li>Maquettes des écrans employé et administration</li>
+            <li>Modèle de données</li>
+            <li>Référentiel des unités et tableau de correspondance</li>
+            <li>Fichier d'import de l'historique des demandes et plan d'extraction des lettres, testé sur 20 à 30 lettres</li>
+            <li>Architecture AWS : schéma, coût, VPN, base de données</li>
+            <li>WhatsApp : prestataire, coût, modèles ; test d'envoi d'email</li>
+            <li>Guide de style d'une page</li>
+          </ol></td><td>Documents</td></tr>
+        <tr><td>Lot 1</td><td>Espace employé : accueil, profil, mention et consentement, verrou, dépôt des certificats avec leur statut ; référentiel des unités (fichier Excel, P-13)</td><td>Recette</td></tr>
+        <tr><td>Lot 2</td><td>Espace RH : file de validation avec séparation des tâches, signalements, tableau de bord, liste et export, journal d'audit, rôles ; registre des demandes reçues par lettre ; mouvements extraits des lettres, sans salaires</td><td>Recette</td></tr>
+        <tr><td>Lot 3</td><td>Mise en ligne sur AWS, double authentification et VPN pour les RH, sauvegardes, guide RH, message de lancement ; <strong>ouverture aux employés</strong></td><td>Production</td></tr>
+        <tr><td>Lot 4</td><td>« Ma carrière », postes ouverts et éligibilité, demandes en ligne avec le responsable de département et la Direction Générale dans le circuit, résumé des postes, péremption, règles et référentiel modifiables sans code</td><td>Production</td></tr>
+        <tr><td>Lot distinct</td><td>Lettres produites par le système, retour des mouvements vers le système RH</td><td>Production</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</div>

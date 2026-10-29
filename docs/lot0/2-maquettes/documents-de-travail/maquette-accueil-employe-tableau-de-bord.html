@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil tableau de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  /* Jetons du portail (frontend/src/index.css) */
+  :root {
+    --primary: #1e1e82; --primary-active: #060068; --info-bg: #e7eeff; --canvas: #f9f9ff; --surface: #fff;
+    --section: #f0f3ff; --border: #d8e3fb; --heading: #111c2d; --help: #464652;
+    --done-bg: #dcfce7; --done: #166534; --progress-bg: #fef3c7; --progress: #92400e; --accent-bg: #ffedd5; --accent: #9a3412;
+    --note: #b45309; --note-bg: #fff6dc; --page: #eef1f8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--heading); font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+  .ms { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; display: inline-block; }
+  a { color: inherit; text-decoration: none; }
+  p { margin: 0; }
+  h1, h2, h3 { margin: 0; }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 16px 64px; display: flex; flex-direction: column; gap: 32px; }
+  .intro h1 { margin: 0 0 6px; font-size: 26px; color: var(--primary); }
+  .intro p { color: var(--help); max-width: 80ch; }
+  .board-title { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--help); margin: 0 0 10px; }
+  .phones { display: flex; flex-wrap: wrap; gap: 32px; }
+  .phones > section { min-width: 0; max-width: 100%; }
+  .rel { position: relative; }
+  .pin { position: absolute; z-index: 5; width: 26px; height: 26px; border-radius: 50%; background: var(--note); color: #fff;
+         font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #fff; }
+  .muted { color: var(--help); }
+  .small { font-size: 14px; }
+
+  /* En-tête de page */
+  .today { font-size: 14px; font-weight: 600; color: var(--help); }
+  .hello { font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
+  .page-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .page-top > div { flex: 1; min-width: 0; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 10px;
+         background: var(--primary); color: #fff; font-weight: 600; font-size: 16px; }
+  .btn-ghost { background: var(--surface); color: var(--primary); border: 1.5px solid var(--border); }
+
+  /* Tuiles chiffrées */
+  .kpis { display: grid; gap: 12px; }
+  .kpi { border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px; min-height: 150px; background: var(--surface);
+         border: 1px solid var(--border); }
+  .kpi .label { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .kpi .label .ms { font-size: 20px; }
+  .kpi .value { font-size: 44px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+  .kpi .value small { font-size: 18px; font-weight: 700; letter-spacing: 0; }
+  .kpi .go { margin-top: auto; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+  .kpi .go .ms { font-size: 18px; }
+  .kpi.solid { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .kpi.solid .muted { color: rgba(255,255,255,.8); }
+  .bar { height: 8px; border-radius: 4px; background: var(--section); display: flex; overflow: hidden; gap: 2px; }
+  .bar i { display: block; height: 100%; }
+  .steps { display: flex; gap: 3px; }
+  .steps i { height: 8px; flex: 1; border-radius: 2px; background: var(--border); }
+  .steps i.on { background: var(--accent); }
+  .ring { display: flex; align-items: center; gap: 12px; }
+
+  .lead { font-size: 18px; font-weight: 600; color: var(--primary); margin-top: 2px; }
+  .sub { font-size: 14px; color: var(--help); margin-top: -8px; }
+  .promo { background: var(--info-bg); border-radius: 14px; padding: 18px 20px; display: flex; gap: 16px; align-items: center; }
+  .promo .ico { width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+  .promo h2 { font-size: 18px; color: var(--primary); }
+  .promo .txt { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+  /* Panneaux */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .panel-head h2 { font-size: 18px; }
+  .link { color: var(--primary); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+  .link .ms { font-size: 18px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .chip .ms { font-size: 16px; }
+  .done { background: var(--done-bg); color: var(--done); }
+  .progress { background: var(--progress-bg); color: var(--progress); }
+  .info { background: var(--info-bg); color: var(--primary); }
+
+  /* Tableau des postes */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 13px; font-weight: 700; color: var(--help); padding: 0 12px 8px 0; border-bottom: 1px solid var(--border); }
+  td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  td strong { display: block; }
+  .left { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+  .left .bar i { background: var(--note); }
+
+  /* Échéances */
+  .dates { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .dates li { display: grid; grid-template-columns: 52px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: center; }
+  .dates li:last-child { border-bottom: 0; }
+  .cal { border: 1.5px solid var(--border); border-radius: 10px; text-align: center; overflow: hidden; }
+  .cal b { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fff; background: var(--primary); padding: 1px 0; }
+  .cal span { display: block; font-size: 20px; font-weight: 800; padding: 2px 0; }
+  .cal.warn b { background: var(--note); }
+
+  /* Parcours en chiffres */
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .facts div { padding: 4px 16px; border-left: 1px solid var(--border); }
+  .facts div:first-child { border-left: 0; padding-left: 0; }
+  .facts b { display: block; font-size: 26px; font-weight: 800; color: var(--primary); }
+
+  /* Téléphone */
+  .phone { width: 390px; max-width: 100%; background: var(--canvas); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; box-shadow: 0 10px 30px rgba(17,28,45,.12); }
+  .p-head { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--primary); }
+  .logo { width: 34px; height: 34px; border-radius: 8px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .p-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .p-body .kpis { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+  .p-body .kpi { min-height: 132px; padding: 14px; }
+  .p-body .kpi .value { font-size: 36px; }
+  .p-body .hello { font-size: 24px; }
+  .job-card { display: flex; flex-direction: column; gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .job-card:last-child { border-bottom: 0; padding-bottom: 0; }
+  .job-card:first-of-type { padding-top: 0; }
+  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--border); }
+  .tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 12px; font-size: 12px; color: var(--help); min-height: 56px; }
+  .tabbar a.on { color: var(--primary); font-weight: 700; }
+  .locked { opacity: .55; }
+
+  /* Ordinateur (rendu à 1280 px, réduit) */
+  .desk-frame { width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 30px rgba(17,28,45,.12); background: var(--canvas); }
+  .desk { width: 1280px; transform-origin: top left; display: grid; grid-template-columns: 240px 1fr; min-height: 820px; }
+  .d-head { grid-column: 1 / -1; background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .d-nav { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .d-nav a { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border-radius: 10px; font-weight: 600; color: var(--heading); }
+  .d-nav a.on { background: var(--primary); color: #fff; }
+  .d-main { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+  .d-main .kpis { grid-template-columns: repeat(4, 1fr); }
+  .d-row { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+
+  /* Légende */
+  .legend { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+  .legend h2 { color: var(--primary); font-size: 20px; }
+  .item { display: grid; grid-template-columns: 26px 1fr; gap: 12px; }
+  .item .pin { position: static; box-shadow: none; }
+  .item small { display: block; color: var(--help); font-size: 14px; margin-top: 2px; }
+  .ask { background: var(--note-bg); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>Accueil employé : version tableau de bord</h1>
+    <p>Remplace la version précédente, jugée trop fade et trop « IA ». Ici, l'employé voit d'abord ses chiffres et ses dates, puis le détail. Tout vient de ce que le portail sait déjà (postes éligibles US-801, certificats US-303, candidature US-902, confirmation annuelle US-205). Les données sont fictives. Les pastilles orange renvoient à la légende.</p>
+  </header>
+
+  <!-- ORDINATEUR -->
+  <section>
+    <p class="board-title">Ordinateur · 1280 px (réduit) · dossier complet</p>
+    <div class="desk-frame" id="deskFrame">
+      <div class="desk" id="desk">
+        <div class="d-head">
+          <a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a>
+          <span class="ms" style="font-size:32px;color:var(--primary)">account_circle</span>
+        </div>
+        <nav class="d-nav">
+          <a class="on" href="#"><span class="ms">home</span>Accueil</a>
+          <a href="#"><span class="ms">person</span>Mon dossier</a>
+          <a href="#"><span class="ms">verified</span>Mes certificats</a>
+          <a href="#"><span class="ms">work</span>Ma carrière</a>
+        </nav>
+        <div class="d-main">
+          <div class="page-top rel">
+            <span class="pin" style="left:-30px;top:20px">1</span>
+            <div>
+              <p class="today">Lundi 13 octobre 2026</p>
+              <h1 class="hello">Bonjour Jean</h1>
+              <p class="lead">Deux postes correspondent déjà à votre profil. Votre prochaine étape commence peut-être ici.</p>
+              <p class="muted small">Agent de crédit · Agence Démo Nord</p>
+            </div>
+            <a class="btn" href="#"><span class="ms">upload_file</span>Déposer un certificat</a>
+          </div>
+
+          <div class="kpis rel">
+            <span class="pin" style="left:-14px;top:-10px">2</span>
+            <a class="kpi solid" href="#">
+              <span class="label"><span class="ms">work</span>Postes ouverts pour vous</span>
+              <span class="value num">2</span>
+              <span class="small muted">Vous remplissez tous les critères : il ne reste qu'à postuler.</span>
+              <span class="go">Voir les postes<span class="ms">chevron_right</span></span>
+            </a>
+            <a class="kpi" href="#">
+              <span class="label" style="color:var(--done)"><span class="ms">verified</span>Mes certificats</span>
+              <span class="value num">1<small> validé sur 2</small></span>
+              <span class="bar"><i style="width:50%;background:var(--done)"></i><i style="width:50%;background:#f59e0b"></i></span>
+              <span class="small muted">Chaque diplôme validé peut vous ouvrir un poste. 1 en examen.</span>
+              <span class="go" style="color:var(--primary)">Voir le suivi<span class="ms">chevron_right</span></span>
+            </a>
+            <a class="kpi" href="#">
+              <span class="label" style="color:var(--accent)"><span class="ms">send</span>Ma candidature</span>
+              <span class="value num">2<small> étape sur 7</small></span>
+              <span class="steps"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="small muted">Chargé de crédit · votre dossier est entre les mains des RH</span>
+              <span class="go" style="color:var(--primary)">Suivre<span class="ms">chevron_right</span></span>
+            </a>
+            <a class="kpi" href="#">
+              <span class="label" style="color:var(--primary)"><span class="ms">person</span>Mon dossier</span>
+              <span class="ring">
+                <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--section)" stroke-width="7"/><circle cx="28" cy="28" r="23" fill="none" stroke="var(--done)" stroke-width="7" stroke-dasharray="144.5 144.5" transform="rotate(-90 28 28)"/></svg>
+                <span class="value num" style="font-size:34px">100<small> %</small></span>
+              </span>
+              <span class="small muted">À jour : les RH voient votre vrai profil</span>
+              <span class="go" style="color:var(--primary)">Voir mon dossier<span class="ms">chevron_right</span></span>
+            </a>
+          </div>
+
+          <div class="d-row">
+            <section class="panel rel">
+              <span class="pin" style="left:-14px;top:-12px">3</span>
+              <div class="panel-head"><h2>Postes ouverts pour vous</h2><a class="link" href="#">Tous les postes<span class="ms">chevron_right</span></a></div>
+              <p class="sub">Vous cochez déjà tous les critères. Ne laissez pas passer la date limite.</p>
+              <table>
+                <thead><tr><th>Poste</th><th>Critères</th><th>Temps restant</th><th></th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Chef d'agence adjoint</strong><span class="small muted">Agence Démo Sud</span></td>
+                    <td><span class="chip done"><span class="ms">check</span>3 sur 3</span></td>
+                    <td><div class="left"><span class="small"><b class="num">33 jours</b> · 15 nov.</span><span class="bar"><i style="width:30%"></i></span></div></td>
+                    <td style="text-align:right;padding-right:0"><a class="btn btn-ghost" href="#" style="min-height:44px">Voir et postuler</a></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Analyste crédit senior</strong><span class="small muted">Direction Démo des crédits</span></td>
+                    <td><span class="chip done"><span class="ms">check</span>2 sur 2</span></td>
+                    <td><div class="left"><span class="small"><b class="num">48 jours</b> · 30 nov.</span><span class="bar"><i style="width:15%"></i></span></div></td>
+                    <td style="text-align:right;padding-right:0"><a class="btn btn-ghost" href="#" style="min-height:44px">Voir et postuler</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="panel rel">
+              <span class="pin" style="right:-12px;top:-12px">4</span>
+              <div class="panel-head"><h2>À ne pas manquer</h2></div>
+              <p class="sub">Vos dates à retenir, pour ne rater aucune occasion.</p>
+              <ul class="dates">
+                <li><span class="cal"><b>nov.</b><span class="num">15</span></span><div><strong>Date limite</strong><p class="small muted">Chef d'agence adjoint</p></div></li>
+                <li><span class="cal"><b>nov.</b><span class="num">30</span></span><div><strong>Date limite</strong><p class="small muted">Analyste crédit senior</p></div></li>
+                <li><span class="cal warn"><b>déc.</b><span class="num">12</span></span><div><strong>Confirmer mon dossier</strong><p class="small muted">Une fois par an · <a class="link" href="#">Tout est exact</a></p></div></li>
+              </ul>
+            </section>
+          </div>
+
+          <section class="promo rel">
+            <span class="pin" style="left:-14px;top:-12px">7</span>
+            <span class="ico"><span class="ms">school</span></span>
+            <div class="txt">
+              <h2>Vos diplômes travaillent pour vous</h2>
+              <p class="muted">Une formation suivie, un master obtenu, une certification : une fois validé par les RH, chaque diplôme compte dans les postes qui vous sont proposés.</p>
+            </div>
+            <a class="btn" href="#"><span class="ms">add</span>Ajouter un diplôme</a>
+          </section>
+
+          <section class="panel rel">
+            <span class="pin" style="left:-14px;top:-12px">5</span>
+            <div class="panel-head"><h2>Mon parcours en chiffres</h2><a class="link" href="#">Voir la frise<span class="ms">chevron_right</span></a></div>
+            <p class="sub">Votre expérience compte : elle entre dans le calcul de chaque poste proposé.</p>
+            <div class="facts">
+              <div><b class="num">8 ans</b><span class="small muted">chez ACME SA</span></div>
+              <div><b class="num">3</b><span class="small muted">postes occupés</span></div>
+              <div><b>Licence</b><span class="small muted">plus haut diplôme validé</span></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TÉLÉPHONES -->
+  <div class="phones">
+    <section>
+      <p class="board-title">Téléphone · 390 px · dossier complet</p>
+      <div class="phone">
+        <div class="p-head"><a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a><span class="ms" style="font-size:30px;color:var(--primary)">account_circle</span></div>
+        <div class="p-body">
+          <div>
+            <p class="today">Lundi 13 octobre</p>
+            <h1 class="hello">Bonjour Jean</h1>
+            <p class="lead" style="font-size:16px">2 postes correspondent déjà à votre profil.</p>
+          </div>
+          <div class="kpis">
+            <a class="kpi solid" href="#">
+              <span class="label"><span class="ms">work</span>Postes pour vous</span>
+              <span class="value num">2</span>
+              <span class="go">Voir<span class="ms">chevron_right</span></span>
+            </a>
+            <a class="kpi" href="#">
+              <span class="label" style="color:var(--done)"><span class="ms">verified</span>Certificats</span>
+              <span class="value num">1<small>/2</small></span>
+              <span class="bar"><i style="width:50%;background:var(--done)"></i><i style="width:50%;background:#f59e0b"></i></span>
+              <span class="go" style="color:var(--primary)">1 en examen<span class="ms">chevron_right</span></span>
+            </a>
+            <a class="kpi" href="#">
+              <span class="label" style="color:var(--accent)"><span class="ms">send</span>Candidature</span>
+              <span class="value num">2<small>/7</small></span>
+              <span class="steps"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="go" style="color:var(--primary)">Suivre<span class="ms">chevron_right</span></span>
+            </a>
+            <a class="kpi" href="#">
+              <span class="label" style="color:var(--primary)"><span class="ms">person</span>Dossier</span>
+              <span class="value num">100<small> %</small></span>
+              <span class="bar"><i style="width:100%;background:var(--done)"></i></span>
+              <span class="go" style="color:var(--primary)">Voir<span class="ms">chevron_right</span></span>
+            </a>
+          </div>
+          <a class="btn" href="#"><span class="ms">upload_file</span>Déposer un certificat</a>
+          <section class="panel">
+            <div class="panel-head"><h2>Postes ouverts pour vous</h2></div>
+            <p class="sub">Vous cochez tous les critères : à vous de jouer.</p>
+            <a class="job-card" href="#">
+              <div style="display:flex;justify-content:space-between;gap:8px"><strong>Chef d'agence adjoint</strong><span class="ms" style="color:var(--primary)">chevron_right</span></div>
+              <span class="small muted">Agence Démo Sud</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip done"><span class="ms">check</span>3 critères sur 3</span><span class="chip progress"><span class="ms">schedule</span>33 jours</span></div>
+            </a>
+            <a class="job-card" href="#">
+              <div style="display:flex;justify-content:space-between;gap:8px"><strong>Analyste crédit senior</strong><span class="ms" style="color:var(--primary)">chevron_right</span></div>
+              <span class="small muted">Direction Démo des crédits</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip done"><span class="ms">check</span>2 critères sur 2</span><span class="chip info"><span class="ms">schedule</span>48 jours</span></div>
+            </a>
+          </section>
+          <section class="promo" style="flex-direction:column;align-items:stretch;gap:10px">
+            <div style="display:flex;gap:12px;align-items:center"><span class="ico" style="width:40px;height:40px"><span class="ms">school</span></span><h2 style="font-size:17px">Vos diplômes travaillent pour vous</h2></div>
+            <p class="small muted">Chaque diplôme validé par les RH compte dans les postes qui vous sont proposés.</p>
+            <a class="link" href="#">Ajouter un diplôme<span class="ms">chevron_right</span></a>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h2>À ne pas manquer</h2></div>
+            <ul class="dates">
+              <li><span class="cal"><b>nov.</b><span class="num">15</span></span><div><strong>Date limite</strong><p class="small muted">Chef d'agence adjoint</p></div></li>
+              <li><span class="cal warn"><b>déc.</b><span class="num">12</span></span><div><strong>Confirmer mon dossier</strong><p class="small muted">Une fois par an</p></div></li>
+            </ul>
+          </section>
+        </div>
+        <nav class="tabbar"><a class="on" href="#"><span class="ms">home</span>Accueil</a><a href="#"><span class="ms">person</span>Mon dossier</a><a href="#"><span class="ms">verified</span>Certificats</a><a href="#"><span class="ms">work</span>Ma carrière</a></nav>
+      </div>
+    </section>
+
+    <section>
+      <p class="board-title">Téléphone · 390 px · dossier incomplet</p>
+      <div class="phone">
+        <div class="p-head"><a class="brand" href="#"><span class="logo">ACME</span>Portail Carrière</a><span class="ms" style="font-size:30px;color:var(--primary)">account_circle</span></div>
+        <div class="p-body">
+          <div>
+            <p class="today">Lundi 13 octobre</p>
+            <h1 class="hello">Bonjour Marie</h1>
+            <p class="lead" style="font-size:16px">Plus que 3 informations, et vos diplômes pourront vous ouvrir de nouveaux postes.</p>
+          </div>
+          <a class="kpi solid rel" href="#" style="min-height:0">
+            <span class="pin" style="right:-8px;top:-10px">6</span>
+            <span class="label"><span class="ms">person</span>Mon dossier</span>
+            <span style="display:flex;align-items:baseline;justify-content:space-between"><span class="value num">5<small> sur 8</small></span><span class="small muted">environ 3 min</span></span>
+            <span class="bar" style="background:rgba(255,255,255,.25)"><i style="width:62%;background:#fff"></i></span>
+            <span class="small muted">Il manque : contact d'urgence, niveau d'études, date d'embauche.</span>
+            <span class="btn" style="background:#fff;color:var(--primary);margin-top:4px">Continuer mon dossier</span>
+          </a>
+          <div class="kpis">
+            <div class="kpi locked">
+              <span class="label"><span class="ms">verified</span>Certificats</span>
+              <span class="value num">0</span>
+              <span class="small muted">Après le dossier</span>
+            </div>
+            <div class="kpi locked">
+              <span class="label"><span class="ms">work</span>Postes pour vous</span>
+              <span class="value num">–</span>
+              <span class="small muted">Après le dossier</span>
+            </div>
+          </div>
+          <section class="panel" style="background:var(--section);border:0">
+            <p class="small"><strong>Pourquoi finir ?</strong> Vos diplômes validés par les RH vous ouvrent les postes de « Ma carrière ».</p>
+          </section>
+        </div>
+        <nav class="tabbar"><a class="on" href="#"><span class="ms">home</span>Accueil</a><a href="#"><span class="ms">person</span>Mon dossier</a><a href="#"><span class="ms">verified</span>Certificats</a><a href="#"><span class="ms">work</span>Ma carrière</a></nav>
+      </div>
+    </section>
+  </div>
+
+  <section class="legend">
+    <h2>Ce qui change par rapport à la version précédente</h2>
+    <div class="item"><span class="pin">1</span><p><strong>Plus de bandeau en dégradé avec avatar.</strong> Une ligne sobre : la date du jour, « Bonjour Jean », le poste, et l'action principale à droite. C'est le dégradé et les pastilles d'icônes qui donnaient l'effet « modèle tout fait ».<small>Krug : tout est du bruit jusqu'à preuve du contraire ; l'action principale reste la plus visible.</small></p></div>
+    <div class="item"><span class="pin">2</span><p><strong>Quatre tuiles chiffrées, lisibles en 2 secondes</strong> : postes ouverts pour lui (en bleu plein, c'est ce qui donne envie), certificats validés, étape de candidature, dossier. Chaque tuile a un grand chiffre, une barre qui le montre, une phrase et un lien. Une tuile sans objet (pas de candidature) disparaît.<small>Krug : rendre évident ce que les gens viennent faire ; ce qui est cliquable en a l'air.</small></p></div>
+    <div class="item"><span class="pin">3</span><p><strong>Les postes en tableau</strong>, avec le nombre de critères remplis et le temps restant en jours (barre orange qui se remplit à l'approche de la date limite). Sur téléphone, le tableau devient une liste de cartes.<small>Seulement les postes publiés auxquels il est éligible (US-801).</small></p></div>
+    <div class="item"><span class="pin">4</span><p><strong>« À ne pas manquer » : de vraies dates</strong>, sous forme de petits calendriers. La confirmation annuelle (US-205) y apparaît à son échéance au lieu d'occuper une carte entière.<small>Krug : l'utilisateur sait ce qu'il doit faire, et quand.</small></p></div>
+    <div class="item"><span class="pin">5</span><p><strong>« Mon parcours en chiffres »</strong> : ancienneté, postes occupés, plus haut diplôme validé, avec le lien vers la frise (US-114). Sans grade depuis US-122 (2026-10-15).<small>Un avant-goût valorisant, sans encombrer.</small></p></div>
+    <div class="item"><span class="pin">6</span><p><strong>Dossier incomplet : la tuile du dossier passe en premier, en grand</strong>, avec ce qui manque et le temps estimé. Les autres tuiles sont grisées et disent ce qui les débloque.<small>Krug : une seule chose à faire, évidente.</small></p></div>
+    <div class="item"><span class="pin">7</span><p><strong>Des textes qui donnent envie, sans phrases creuses.</strong> Une phrase d'accroche sous « Bonjour » (« Deux postes correspondent déjà à votre profil »), une ligne sous chaque titre, et un encart « Vos diplômes travaillent pour vous » qui explique l'intérêt de déposer un diplôme. Chaque phrase dit un fait réel ou un bénéfice concret ; aucune ne promet un poste.<small>Krug : pas de « Bienvenue sur votre espace » ; un texte qui sert la tâche reste, les autres partent.</small></p></div>
+    <div class="ask">
+      <p><strong>À trancher</strong></p>
+      <p>• Charger sur l'accueil les postes, les certificats et les candidatures : les API existent, il faut une nouvelle story pour les appeler depuis l'accueil.</p>
+      <p>• « Postes occupés » demande des données de parcours que le CSV ne donne peut-être pas : à défaut, ce chiffre est retiré. Le grade n’apparaît plus nulle part (US-122, choix du 2026-10-15).</p>
+      <p>• Le ton des accroches est à faire valider par les RH : elles ne doivent rien promettre (un poste proposé n'est pas un poste obtenu).</p>
+      <p>• Validation par M. Hilaire, puis un test express avec 3 employés.</p>
+    </div>
+  </section>
+</div>
+<script>
+  // Réduit la maquette ordinateur (1280 px) à la largeur disponible.
+  (function () {
+    var frame = document.getElementById('deskFrame'), desk = document.getElementById('desk');
+    function fit() {
+      var s = Math.min(1, frame.clientWidth / 1280);
+      desk.style.transform = 'scale(' + s + ')';
+      frame.style.height = desk.offsetHeight * s + 'px';
+    }
+    window.addEventListener('resize', fit); window.addEventListener('load', fit); fit();
+  })();
+</script>
+</body>
+</html>

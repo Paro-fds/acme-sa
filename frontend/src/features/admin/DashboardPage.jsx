@@ -1,111 +1,149 @@
-import { Link } from 'react-router'
-import { getStatistics } from '../../api/admin.js'
+import { useState } from 'react'
+import { getAdminMe, getEngagement, getPilotDashboard } from '../../api/admin.js'
 import Alert from '../../components/Alert.jsx'
-import Button from '../../components/Button.jsx'
 import Page from '../../components/Page.jsx'
 import { useLoader } from '../../lib/useLoader.js'
+import { AgencyChart, DashboardHero, KeyFigures, TodoList, WeeklyEngagement } from './dashboardParts.jsx'
 
-const LIST = '/admin/employes'
+const LOGIN_PATH = '/admin/connexion'
 
-/** Cartes du tableau de bord ; chacune ouvre la liste filtrée correspondante (US-19). */
-const CARDS = [
-  { key: 'total', label: 'Total', help: 'employés actifs', icon: 'groups', to: LIST, tone: 'bg-info-bg text-info-text' },
-  {
-    key: 'updated',
-    label: 'Effectuées',
-    help: 'mises à jour soumises',
-    icon: 'check_circle',
-    to: `${LIST}?status=UPDATED`,
-    tone: 'bg-status-done-bg text-status-done-text',
-  },
-  {
-    key: 'not_updated',
-    label: 'Non effectuées',
-    help: 'restent à faire',
-    icon: 'pending',
-    to: `${LIST}?status=NOT_UPDATED`,
-    tone: 'bg-status-neutral-bg text-status-neutral-text',
-  },
-]
-
-function StatCard({ label, help, icon, to, tone, value }) {
-  return (
-    <Link
-      to={to}
-      aria-label={`${label} : ${value}, ${help}`}
-      className="flex min-h-11 items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-card hover:border-primary"
-    >
-      <span className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${tone}`} aria-hidden="true">
-        <span className="material-symbols-outlined">{icon}</span>
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="font-semibold text-heading">{label}</span>
-        <span className="text-sm text-help">{help}</span>
-      </span>
-      <span className="text-[28px] leading-8 font-bold text-heading">{value}</span>
-      <span className="material-symbols-outlined text-muted" aria-hidden="true">chevron_right</span>
-    </Link>
-  )
+/** Le compte RH et l'engagement sont un plus : s'ils ne se chargent pas, le tableau de bord s'affiche quand même. */
+async function load() {
+  const [dashboard, me, engagement] = await Promise.all([
+    getPilotDashboard(),
+    getAdminMe().catch(() => null),
+    getEngagement().catch(() => null),
+  ])
+  return { ...dashboard, me, engagement }
 }
 
-function ProgressCard({ progress, updated, total }) {
-  return (
-    <section className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
-      <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-lg font-semibold">Avancement</h3>
-        <p className="font-semibold text-heading">{progress} % de la campagne</p>
-      </div>
-      <div
-        role="progressbar"
-        aria-label="Avancement de la campagne"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={progress}
-        className="h-3 overflow-hidden rounded-full bg-status-neutral-bg"
-      >
-        <div className="h-full rounded-full bg-status-done-dot" style={{ width: `${progress}%` }} />
-      </div>
-      <p className="text-sm text-help">
-        {updated} sur {total} employés ont effectué leur mise à jour.
-      </p>
-    </section>
-  )
-}
-
-/** US-16 : tableau de bord de la campagne (lecture seule). */
+/**
+ * US-601 (écran A02), US-132 (refonte du 2026-10-19) : bonjour et ce qui attend, quatre tuiles, dossiers complets par
+ * agence, « À faire », engagement des employés ; le tableau « Par unité » en bas.
+ */
 export default function DashboardPage() {
-  const { data, error, loading, reload } = useLoader(getStatistics, { loginPath: '/admin/connexion' })
+  const [unitTab, setUnitTab] = useState('AGENCE') // 'AGENCE' | 'REGION' | 'DIRECTION'
 
-  if (loading) return <Page account="admin" title="Tableau de bord"><p role="status">Chargement…</p></Page>
-  if (error) return <Page account="admin" title="Tableau de bord"><Alert>{error.message}</Alert></Page>
+  const { data, error, loading } = useLoader(load, { loginPath: LOGIN_PATH })
+
+  if (loading) {
+    return (
+      <Page account="admin" wide title="Tableau de bord">
+        <p role="status" className="p-8 text-center text-rh-muted">Chargement du tableau de bord…</p>
+      </Page>
+    )
+  }
+
+  if (error) {
+    return (
+      <Page account="admin" wide title="Tableau de bord">
+        <Alert>{error.message}</Alert>
+      </Page>
+    )
+  }
+
+  const { kpi, to_process, by_agency, by_region, by_direction, me, engagement } = data
+  const role = me?.role ?? null
+  const firstName = me?.display_name?.split(' ')[0] ?? ''
+  const agencies = by_agency.filter((agency) => agency.employees_count > 0 && agency.unit_code !== 'AUTRE')
+
+  const currentUnits =
+    unitTab === 'AGENCE' ? by_agency : unitTab === 'REGION' ? by_region : by_direction
+
+  const totalEmployees = currentUnits.reduce((acc, u) => acc + u.employees_count, 0)
+  const totalReceivedCerts = currentUnits.reduce((acc, u) => acc + u.received_certificates, 0)
+  const totalWaitingCerts = currentUnits.reduce((acc, u) => acc + u.waiting_certificates, 0)
+  const totalRejectedCerts = currentUnits.reduce((acc, u) => acc + u.rejected_certificates, 0)
 
   return (
-    <Page account="admin" title="Tableau de bord">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-[26px] leading-8 font-bold">Suivi de la campagne</h2>
-        <p className="text-help">Mise à jour des dossiers des employés.</p>
-      </div>
+    <Page account="admin" wide title="Tableau de bord">
+      <div className="flex flex-col gap-6">
+        <DashboardHero firstName={firstName} waiting={kpi.waiting_certificates} overdue={kpi.overdue_certificates} role={role} />
+        <KeyFigures kpi={kpi} toProcess={to_process} agencies={agencies.length} role={role} />
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <AgencyChart agencies={agencies} target={kpi.target_percent} />
+          <aside aria-label="À faire et engagement" className="flex flex-col gap-6">
+            <TodoList toProcess={to_process} role={role} />
+            {engagement?.weekly_employees?.length > 0 && <WeeklyEngagement weekly={engagement.weekly_employees} />}
+          </aside>
+        </div>
 
-      <ProgressCard progress={data.progress} updated={data.updated} total={data.total} />
+        {/* Bloc Par unité */}
+        <div className="bg-surface rounded-xl border border-rh-line p-6 shadow-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rh-line pb-3">
+            <h2 className="text-base font-semibold text-rh-strong">Par unité</h2>
 
-      <div className="flex flex-col gap-3">
-        {CARDS.map(({ key, ...card }) => (
-          <StatCard key={key} {...card} value={data[key]} />
-        ))}
-      </div>
+            {/* Sélecteur à trois onglets Agence / Région / Direction */}
+            <div className="inline-flex p-1 bg-rh-hover rounded-lg text-xs font-medium text-rh-text">
+              <button
+                type="button"
+                onClick={() => setUnitTab('AGENCE')}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  unitTab === 'AGENCE' ? 'bg-surface text-primary font-semibold shadow-xs' : 'hover:text-rh-strong'
+                }`}
+              >
+                Agence
+              </button>
+              <button
+                type="button"
+                onClick={() => setUnitTab('REGION')}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  unitTab === 'REGION' ? 'bg-surface text-primary font-semibold shadow-xs' : 'hover:text-rh-strong'
+                }`}
+              >
+                Région
+              </button>
+              <button
+                type="button"
+                onClick={() => setUnitTab('DIRECTION')}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  unitTab === 'DIRECTION' ? 'bg-surface text-primary font-semibold shadow-xs' : 'hover:text-rh-strong'
+                }`}
+              >
+                Direction
+              </button>
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-3 md:flex-row">
-        <Link
-          to={LIST}
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 font-semibold text-white hover:bg-primary-active"
-        >
-          <span className="material-symbols-outlined" aria-hidden="true">list</span>
-          Voir la liste des employés
-        </Link>
-        <Button variant="secondary" onClick={() => reload()}>
-          <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
-          Actualiser
-        </Button>
+          {/* Tableau par unité */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <caption className="sr-only">Par unité</caption>
+              <thead>
+                <tr className="border-b border-rh-line text-xs font-semibold uppercase text-rh-muted tracking-wider">
+                  <th className="py-3 px-4">Unité</th>
+                  <th className="py-3 px-4 text-right">Employés</th>
+                  <th className="py-3 px-4 text-right">Dossiers complets</th>
+                  <th className="py-3 px-4 text-right">Certificats reçus</th>
+                  <th className="py-3 px-4 text-right">En attente</th>
+                  <th className="py-3 px-4 text-right">Rejetés</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-rh-hover text-rh-text">
+                {currentUnits.map((u) => (
+                  <tr key={u.unit_code} className="hover:bg-rh-canvas/70 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-rh-strong">{u.unit_label}</td>
+                    <td className="py-3.5 px-4 text-right">{u.employees_count}</td>
+                    <td className="py-3.5 px-4 text-right">{u.complete_folders_percent} %</td>
+                    <td className="py-3.5 px-4 text-right">{u.received_certificates}</td>
+                    <td className="py-3.5 px-4 text-right">{u.waiting_certificates}</td>
+                    <td className="py-3.5 px-4 text-right">{u.rejected_certificates}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-border-input font-semibold text-rh-strong bg-rh-canvas/50">
+                  <td className="py-3.5 px-4">Total</td>
+                  <td className="py-3.5 px-4 text-right">{totalEmployees}</td>
+                  <td className="py-3.5 px-4 text-right">{kpi.complete_folders_percent} %</td>
+                  <td className="py-3.5 px-4 text-right">{totalReceivedCerts}</td>
+                  <td className="py-3.5 px-4 text-right">{totalWaitingCerts}</td>
+                  <td className="py-3.5 px-4 text-right">{totalRejectedCerts}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </Page>
   )

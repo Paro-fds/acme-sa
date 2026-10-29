@@ -1,0 +1,201 @@
+# Epics et user stories de la refonte
+
+| | |
+|---|---|
+| **Version** | 0.1, 2026-10-07 — première rédaction, à relire avec les maquettes puis à valider par M. Hilaire |
+| **Source** | `../cahier-des-charges.md` (exigences EF, ENF), `../tableau-unique-des-regles.md` (RG), `../decisions-a-valider.md` (D) |
+| **Numérotation** | Une story porte le numéro de son epic, comme les exigences : US-301 = 1re story de l'epic D3 (EF-301…). Elle est **indépendante** des US-01 → US-35 du MVP et de la V2, retirées de la branche `v2` le 2026-10-08 (historique git, branche `main`) |
+| **Statuts** | Cet index est la source de vérité des statuts ; le fichier de chaque story et `agent.md` §0 les reprennent |
+
+11 epics, 85 user stories. Chaque fichier de story contient le récit, le pourquoi, les critères d'acceptation et la Definition of Done.
+
+## Plan par lots
+
+Une story appartient au lot où elle est livrée ; quand un complément arrive plus tard, il est indiqué entre parenthèses.
+
+### [Démonstrateur](demonstrateur/README.md)
+
+**But :** Montrer tôt à la direction générale ce qui se construit, sur données fictives. **Démonstration de fin :** Parcours de 5 minutes, en ligne (plan du démonstrateur).
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-001](demonstrateur/US-001-mettre-en-ligne-un-socle-deployable.md) | D0 | Mettre en ligne un socle déployable | Must | — | Fait |
+
+### [Lot 1 — Parcours « certificat »](lot-1-parcours-certificat/README.md)
+
+**But :** Un employé complète son profil et dépose ses certificats. **Démonstration de fin :** Un employé au dossier complet et un au dossier incomplet, en recette.
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-101](lot-1-parcours-certificat/US-101-me-connecter-sans-adresse-email.md) | D1 | Me connecter sans adresse email | Must | — | Fait |
+| [US-105](lot-1-parcours-certificat/US-105-decouvrir-le-portail-avant-de-me-connecter.md) | D1 | Découvrir le portail avant de me connecter | Must | — | Fait |
+| [US-107](lot-1-parcours-certificat/US-107-aligner-la-connexion-rh-sur-l-ecran-valide.md) | D1 | Aligner la connexion RH sur l'écran validé | Must | — | Fait |
+| [US-118](lot-1-parcours-certificat/US-118-voir-le-fichier-de-mon-certificat.md) | D3 | Voir le fichier de mon certificat | Must | — | Fait |
+| [US-201](lot-1-parcours-certificat/US-201-voir-mon-dossier-et-ma-progression.md) | D2 | Voir mon dossier et ma progression | Must | — | Fait |
+| [US-202](lot-1-parcours-certificat/US-202-completer-mes-coordonnees.md) | D2 | Compléter mes coordonnées | Must | — | Fait |
+| [US-203](lot-1-parcours-certificat/US-203-confirmer-ou-signaler-mon-agence-mon-poste-ma-date-d-embauch.md) | D2 | Confirmer ou signaler mon agence, mon poste, ma date d'embauche | Must (Should pour la cohérence) | — | Fait |
+| [US-204](lot-1-parcours-certificat/US-204-savoir-ce-qui-me-reste-avant-de-deposer.md) | D2 | Savoir ce qui me reste avant de déposer | Must | — | Fait |
+| [US-206](lot-1-parcours-certificat/US-206-retirer-l-ancien-parcours-de-mise-a-jour.md) | D2 | Retirer l'ancien parcours de mise à jour | Must | — | Fait |
+| [US-207](lot-1-parcours-certificat/US-207-aligner-l-espace-employe-sur-les-ecrans-valides.md) | D2 | Aligner l'espace employé sur les écrans validés | Must | — | Fait |
+| [US-301](lot-1-parcours-certificat/US-301-deposer-un-certificat-depuis-mon-telephone.md) | D3 | Déposer un certificat depuis mon téléphone | Must | antivirus et stockage chiffré au lot 3, avec US-002 | Fait |
+| [US-302](lot-1-parcours-certificat/US-302-savoir-ce-que-mon-certificat-m-apporte.md) | D3 | Savoir ce que mon certificat m'apporte | Must (Should pour « ce que ça débloque » et l'avis) | — | Fait |
+| [US-303](lot-1-parcours-certificat/US-303-suivre-mon-certificat.md) | D3 | Suivre mon certificat | Must | « À corriger » et redépôt au lot 2 ; notification avec US-701 | Fait |
+| [US-501](lot-1-parcours-certificat/US-501-tenir-le-referentiel-officiel.md) | D5 | Tenir le référentiel officiel | Must (Should pour l'interface) | interface de gestion au lot 4 | Fait |
+| [US-502](lot-1-parcours-certificat/US-502-rattacher-les-valeurs-inconnues.md) | D5 | Rattacher les valeurs inconnues | Must | — | Fait |
+| [US-605](lot-1-parcours-certificat/US-605-mesurer-si-les-employes-reviennent.md) | D6 | Mesurer si les employés reviennent | Must (Should pour l'avis) | — | Fait |
+| [US-701](lot-1-parcours-certificat/US-701-etre-prevenu-par-le-bon-canal.md) | D7 | Être prévenu par le bon canal | Must (Should pour l'ordre des canaux) | — | Pas encore |
+| [US-702](lot-1-parcours-certificat/US-702-etre-relance-sans-etre-harcele.md) | D7 | Être relancé sans être harcelé | Should | — | Pas encore |
+
+### [Lot 2 — Traitement RH](lot-2-traitement-rh/README.md)
+
+**But :** Les RH valident, pilotent et enregistrent les demandes. **Démonstration de fin :** File de validation et tableau de bord sur données fictives.
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-103](lot-2-traitement-rh/US-103-donner-un-role-a-chaque-compte-rh.md) | D1 | Donner un rôle à chaque compte RH | Must | — | Fait |
+| [US-104](lot-2-traitement-rh/US-104-gerer-les-comptes-et-debloquer-un-employe.md) | D1 | Gérer les comptes et débloquer un employé | Must | — | Fait |
+| [US-108](lot-2-traitement-rh/US-108-aligner-l-espace-rh-sur-les-ecrans-valides.md) | D1 | Aligner l'espace RH sur les écrans validés | Must | — | Fait |
+| [US-109](lot-2-traitement-rh/US-109-charger-les-pages-sans-texte-d-icone.md) | D1 | Charger les pages sans texte d'icône | Must | — | Fait |
+| [US-110](lot-2-traitement-rh/US-110-refaire-l-accueil-et-la-connexion-pour-donner-envie.md) | D1 | Refaire l'accueil et la connexion pour donner envie | Must | — | Fait |
+| [US-111](lot-2-traitement-rh/US-111-refaire-la-connexion-de-l-espace-de-gestion.md) | D1 | Refaire la connexion de l'espace de gestion | Must | — | Fait |
+| [US-112](lot-2-traitement-rh/US-112-me-connecter-a-l-espace-de-gestion-sans-code.md) | D1 | Me connecter à l'espace de gestion sans code | Must | — | Fait |
+| [US-113](lot-2-traitement-rh/US-113-retrouver-mon-espace-sur-ordinateur-avec-ma-photo.md) | D2 | Retrouver mon espace sur ordinateur, avec ma photo | Must | — | Fait |
+| [US-114](lot-2-traitement-rh/US-114-retracer-mon-parcours-dans-ma-carriere.md) | D2 | Retracer mon parcours dans Ma carrière | Should | — | Fait |
+| [US-115](lot-2-traitement-rh/US-115-choisir-qui-verra-un-poste.md) | D3 | Choisir qui verra un poste | Should | — | Fait |
+| [US-116](lot-2-traitement-rh/US-116-etre-prevenu-de-ce-qui-arrive-dans-l-espace-de-gestion.md) | D3 | Être prévenu de ce qui arrive dans l'espace de gestion | Should | — | Fait |
+| [US-117](lot-2-traitement-rh/US-117-creer-un-poste-sans-le-referentiel.md) | D8 | Créer un poste sans le référentiel | Must | — | Fait |
+| [US-119](lot-2-traitement-rh/US-119-publier-un-poste-a-partir-du-catalogue-des-postes-acme.md) | D8 | Publier un poste à partir du catalogue des postes ACME | Should | — | Fait |
+| [US-120](lot-2-traitement-rh/US-120-etre-prevenu-dans-le-portail-d-un-poste-ouvert-pour-moi-et-d.md) | D7 | Être prévenu dans le portail d'un poste ouvert pour moi et du sort de mes certificats | Should | — | Fait |
+| [US-121](lot-2-traitement-rh/US-121-publier-un-poste-a-partir-de-la-matrice-des-postes-du-direct.md) | D8 | Publier un poste à partir de la matrice des postes du directeur | Should | — | Fait |
+| [US-122](lot-2-traitement-rh/US-122-saisir-un-poste-sans-grade.md) | D8 | Saisir un poste sans grade | Should | — | Fait |
+| [US-123](lot-2-traitement-rh/US-123-voir-mon-tableau-de-bord-sur-l-accueil.md) | D2 | Voir mon tableau de bord sur l'accueil | Should | — | Fait |
+| [US-124](lot-2-traitement-rh/US-124-publier-un-poste-avec-la-lettre-du-directeur-rh.md) | D8 | Publier un poste avec la lettre du directeur RH | Should | — | Fait |
+| [US-125](lot-2-traitement-rh/US-125-etre-deconnecte-apres-15-minutes-sans-activite.md) | D1 | Être déconnecté après 15 minutes sans activité | Should | — | Fait |
+| [US-126](lot-2-traitement-rh/US-126-trouver-un-poste-et-preparer-sa-publication-plus-clairement.md) | D8 | Trouver un poste et préparer sa publication plus clairement | Should | — | Fait |
+| [US-127](lot-2-traitement-rh/US-127-retrouver-le-meme-cadre-dans-les-deux-espaces.md) | D1 | Retrouver le même cadre dans les deux espaces | Should | — | Fait |
+| [US-128](lot-2-traitement-rh/US-128-retrouver-l-accueil-de-la-refonte.md) | D2 | Retrouver l'accueil de la refonte | Should | — | Fait |
+| [US-129](lot-2-traitement-rh/US-129-retrouver-mon-dossier-de-la-refonte.md) | D2 | Retrouver « Mon dossier » de la refonte | Should | — | Fait |
+| [US-130](lot-2-traitement-rh/US-130-retrouver-mes-certificats-de-la-refonte.md) | D3 | Retrouver « Mes certificats » de la refonte | Should | Redépôt d'un certificat « À corriger » | Fait |
+| [US-131](lot-2-traitement-rh/US-131-retrouver-ma-carriere-de-la-refonte.md) | D8 | Retrouver « Ma carrière » de la refonte | Should | — | Fait |
+| [US-132](lot-2-traitement-rh/US-132-retrouver-le-tableau-de-bord-rh-de-la-refonte.md) | D6 | Retrouver le tableau de bord RH de la refonte | Should | — | Fait |
+| [US-133](lot-2-traitement-rh/US-133-retrouver-la-file-de-validation-de-la-refonte.md) | D4 | Retrouver la file de validation et l'examen de la refonte | Should | — | Fait |
+| [US-134](lot-2-traitement-rh/US-134-retrouver-la-liste-des-employes-de-la-refonte.md) | D6 | Retrouver la liste des employés de la refonte | Should | — | Fait |
+| [US-135](lot-2-traitement-rh/US-135-retrouver-la-publication-de-postes-de-la-refonte.md) | D8 | Retrouver la publication de postes de la refonte | Should | — | Fait |
+| [US-136](lot-2-traitement-rh/US-136-alleger-la-page-d-accueil.md) | D2 | Alléger la page d'accueil | Should | — | Fait |
+| [US-304](lot-2-traitement-rh/US-304-garder-la-preuve-des-certificats.md) | D3 | Garder la preuve des certificats | Must | — | Fait |
+| [US-305](lot-2-traitement-rh/US-305-un-niveau-d-etudes-prouve.md) | D3 | Un niveau d'études prouvé | Should | — | Pas encore |
+| [US-401](lot-2-traitement-rh/US-401-prendre-le-dossier-suivant.md) | D4 | Prendre le dossier suivant | Must (Should pour la réaffectation) | — | Fait |
+| [US-402](lot-2-traitement-rh/US-402-examiner-et-decider.md) | D4 | Examiner et décider | Must | — | Fait |
+| [US-403](lot-2-traitement-rh/US-403-traiter-les-signalements.md) | D4 | Traiter les signalements | Must | — | Fait |
+| [US-601](lot-2-traitement-rh/US-601-voir-l-etat-des-dossiers-d-un-coup-d-il.md) | D6 | Voir l'état des dossiers d'un coup d'œil | Must | — | Fait |
+| [US-602](lot-2-traitement-rh/US-602-trouver-les-employes-qualifies-en-une-minute.md) | D6 | Trouver les employés qualifiés en une minute | Must | — | Fait |
+| [US-603](lot-2-traitement-rh/US-603-exporter-une-liste.md) | D6 | Exporter une liste | Should | — | Fait |
+| [US-604](lot-2-traitement-rh/US-604-rendre-compte-de-chaque-action.md) | D6 | Rendre compte de chaque action | Must | — | Fait |
+| [US-901](lot-2-traitement-rh/US-901-enregistrer-une-demande-recue-par-lettre.md) | D9 | Enregistrer une demande reçue par lettre | Must | — | Pas encore |
+| [US-903](lot-2-traitement-rh/US-903-controler-les-mouvements-lus-dans-les-lettres.md) | D9 | Contrôler les mouvements lus dans les lettres | Should (Must pour l'ancienneté) | ancienneté dans le poste au lot 4 | Pas encore |
+| [US-904](lot-2-traitement-rh/US-904-reprendre-l-historique-des-demandes.md) | D9 | Reprendre l'historique des demandes | Should | — | Pas encore |
+
+### [Lot 3 — Mise en service](lot-3-mise-en-service/README.md)
+
+**But :** Le portail est hébergé, sécurisé et annoncé. **Démonstration de fin :** Test complet en recette ; guide RH ; message de lancement ; ouverture aux employés.
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-002](lot-3-mise-en-service/US-002-heberger-la-production-en-securite.md) | D0 | Héberger la production en sécurité | Must | — | Pas encore |
+| [US-003](lot-3-mise-en-service/US-003-former-les-rh-avec-un-guide-d-une-page.md) | D0 | Former les RH avec un guide d'une page | Must | — | Pas encore |
+| [US-102](lot-3-mise-en-service/US-102-choisir-ma-double-authentification.md) | D1 | Choisir ma double authentification | Must | — | En cours |
+| [US-106](lot-3-mise-en-service/US-106-proteger-mon-acces-par-une-double-authentification.md) | D1 | Protéger mon accès par une double authentification | Must | — | Pas encore |
+| [US-703](lot-3-mise-en-service/US-703-annoncer-le-portail-et-les-postes-ouverts.md) | D7 | Annoncer le portail et les postes ouverts | Must (Should pour le résumé) | résumé des postes au lot 4 | Pas encore |
+
+### [Lot 4 — Carrière et engagement](lot-4-carriere-et-engagement/README.md)
+
+**But :** L'employé voit ses postes éligibles et suit ses demandes. **Démonstration de fin :** Un employé avec un champ périmé ; un poste publié avec indicateurs vert et orange.
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-205](lot-4-carriere-et-engagement/US-205-confirmer-mes-informations-chaque-annee.md) | D2 | Confirmer mes informations chaque année | Must | envoi du rappel avec US-701 | Fait |
+| [US-503](lot-4-carriere-et-engagement/US-503-gerer-le-referentiel-a-l-ecran.md) | D5 | Gérer le référentiel à l'écran | Should | — | Pas encore |
+| [US-606](lot-4-carriere-et-engagement/US-606-changer-une-regle-sans-developpeur.md) | D6 | Changer une règle sans développeur | Should | — | Pas encore |
+| [US-801](lot-4-carriere-et-engagement/US-801-voir-les-postes-auxquels-je-suis-eligible.md) | D8 | Voir les postes auxquels je suis éligible | Must | — | En cours |
+| [US-802](lot-4-carriere-et-engagement/US-802-publier-un-poste.md) | D8 | Publier un poste | Must (Should pour la confidentialité) | poste confidentiel (EF-807, Should) plus tard | Fait |
+| [US-803](lot-4-carriere-et-engagement/US-803-ajouter-mes-formations-et-experiences.md) | D8 | Ajouter mes formations et expériences | Should | — | Pas encore |
+| [US-902](lot-4-carriere-et-engagement/US-902-deposer-et-suivre-ma-demande-en-ligne.md) | D9 | Déposer et suivre ma demande en ligne | Must | demande spontanée (sans poste ouvert) plus tard | Fait |
+
+### [Lot distinct — Lettres et retour au système RH](lot-distinct-lettres-et-systeme-rh/README.md)
+
+**But :** Le portail produit les lettres et renvoie les mouvements. **Démonstration de fin :** À préciser.
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-905](lot-distinct-lettres-et-systeme-rh/US-905-produire-les-lettres-de-promotion.md) | D9 | Produire les lettres de promotion | Could (à préciser) | — | Pas encore |
+| [US-906](lot-distinct-lettres-et-systeme-rh/US-906-renvoyer-les-mouvements-au-systeme-rh.md) | D9 | Renvoyer les mouvements au système RH | Could (à préciser) | — | Pas encore |
+
+### [Lot 5 — PAM](lot-5-pam/README.md)
+
+**But :** Le portail devient PAM : nourri par Carrières, connexion par code à usage unique, PER, production sur AWS. **Démonstration de fin :** Un employé fictif se connecte par code, voit son dossier Carrières et dépose une pièce, en recette sur AWS.
+
+| Story | Epic | Titre | Priorité | Complément plus tard | Statut |
+|---|---|---|---|---|---|
+| [US-1000](lot-5-pam/US-1000-travailler-sur-une-base-carrieres-fictive.md) | D10 | Travailler sur une base Carrières fictive | Must | — | Fait |
+| [US-1001](lot-5-pam/US-1001-lire-les-employes-dans-la-copie-vault-sur-s3.md) | D10 | Lire les employés dans la copie Vault sur S3 | Must | — | Fait |
+| [US-1003](lot-5-pam/US-1003-me-connecter-avec-un-code-recu-par-courriel.md) | D10 | Me connecter avec un code reçu par courriel | Must | WhatsApp : US-1004 ; contact récent : US-1005 | Fait |
+| [US-1004](lot-5-pam/US-1004-recevoir-le-code-par-whatsapp.md) | D10 | Recevoir le code par WhatsApp | Must | — | Fait |
+| [US-1005](lot-5-pam/US-1005-bloquer-un-contact-recemment-change.md) | D10 | Bloquer un contact récemment changé | Must | — | Fait |
+| [US-1006](lot-5-pam/US-1006-retrouver-pam.md) | D10 | Retrouver PAM | Must | — | Fait |
+| [US-1007](lot-5-pam/US-1007-deposer-une-piece-dans-carrieres.md) | D10 | Déposer une pièce dans Carrières | Must | — | Fait |
+| [US-1008](lot-5-pam/US-1008-suivre-mes-pieces.md) | D10 | Suivre mes pièces | Must | — | Fait |
+| [US-1011](lot-5-pam/US-1011-coordonnees-en-lecture-seule.md) | D10 | Coordonnées en lecture seule | Must | — | Fait |
+| [US-1012](lot-5-pam/US-1012-consulter-ma-balance-per.md) | D10 | Consulter ma balance PER | Must | — | Fait |
+| [US-1014](lot-5-pam/US-1014-saisir-la-date-en-huit-chiffres.md) | D10 | Saisir la date en huit chiffres | Must | — | Fait |
+| [US-1015](lot-5-pam/US-1015-captcha-et-verrous-par-code-et-par-adresse.md) | D10 | Captcha et verrous par code et par adresse | Must | — | Fait |
+| [US-1016](lot-5-pam/US-1016-code-et-courriels-du-modele.md) | D10 | Code et courriels du modèle | Must | — | Fait |
+| [US-1017](lot-5-pam/US-1017-session-du-modele.md) | D10 | Session du modèle | Must | — | Fait |
+| [US-1018](lot-5-pam/US-1018-whatsapp-indisponible-sans-meta.md) | D10 | WhatsApp indisponible sans Meta | Must | — | Fait |
+| [US-1020](lot-5-pam/US-1020-voir-mes-bulletins-de-paie.md) | D10 | Voir mes bulletins de paie | Must | — | Fait |
+| [US-1021](lot-5-pam/US-1021-telecharger-ma-fiche-de-paie-en-pdf.md) | D10 | Télécharger ma fiche de paie en PDF | Must | — | Fait |
+| [US-1022](lot-5-pam/US-1022-voir-ma-fiche-de-paie-au-format-du-directeur.md) | D10 | Voir ma fiche de paie au format du directeur | Must | — | Fait |
+| [US-1023](lot-5-pam/US-1023-choisir-mon-document-dans-le-menu-de-mon-per.md) | D10 | Choisir mon document dans le menu de « Mon PER » | Must | — | Fait |
+| [US-1024](lot-5-pam/US-1024-voir-mon-releve-per-entre-deux-dates-et-l-enregistrer-en-pdf.md) | D10 | Voir mon relevé PER entre deux dates et l'enregistrer en PDF | Must | — | Fait |
+| [US-1025](lot-5-pam/US-1025-recevoir-les-avis-de-securite-en-html-comme-le-directeur.md) | D10 | Recevoir les avis de sécurité en HTML, comme le directeur | Must | — | Fait |
+| [US-1026](lot-5-pam/US-1026-lever-le-gel-de-72-heures-d-un-employe-depuis-l-espace-de-ge.md) | D10 | Lever le gel de 72 heures d'un employé depuis l'espace de gestion | Must | — | Fait |
+| [US-1027](lot-5-pam/US-1027-lire-les-secrets-de-pam-dans-secrets-manager.md) | D10 | Lire les secrets de PAM dans Secrets Manager | Must | — | Fait |
+
+### Enchaînements à respecter
+
+| Avant | Après | Pourquoi |
+|---|---|---|
+| Référentiel validé (US-501) | Lot 1 en recette | L'employé voit les libellés officiels |
+| Dépôt (US-301) | Validation (US-401, US-402) | Rien à valider sans dépôt |
+| Certificats validés, mouvements contrôlés (lot 2) | Éligibilité (US-801) | L'éligibilité ne compte que les données validées |
+| Hébergement sécurisé (US-002) | Données réelles, ouverture aux employés | Aucune donnée réelle hors production sécurisée |
+| Socle déployable (US-001) | Démonstrateur, puis chaque lot en recette | Chaque story se montre en ligne dès qu'elle est finie |
+
+### Le démonstrateur pioche dans plusieurs lots
+
+Parcours du démonstrateur (`../../9-demonstrateur/plan-demonstrateur.md`) : US-001 → US-101, US-201, US-202, US-301 (lot 1) → US-401, US-402 (lot 2) → US-601 (lot 2) → US-901 (lot 2) → US-801 (lot 4). Une story montrée au démonstrateur garde son statut « Pas encore » tant que sa Definition of Done n'est pas cochée.
+
+## Epics
+
+Un epic regroupe les stories d'un même bloc fonctionnel, souvent sur plusieurs lots ; chaque story indique son epic dans son en-tête.
+
+| Epic | Objectif | Pourquoi | Stories |
+|---|---|---|---|
+| D0 Socle et mise en service | Le portail tourne en ligne, sécurisé, sauvegardé, et les RH savent s'en servir. | Sans socle fiable, aucune donnée réelle ne peut entrer (Aucune donnée réelle hors production sécurisée) et la direction ne voit rien fonctionner. | [US-001](demonstrateur/US-001-mettre-en-ligne-un-socle-deployable.md), [US-002](lot-3-mise-en-service/US-002-heberger-la-production-en-securite.md), [US-003](lot-3-mise-en-service/US-003-former-les-rh-avec-un-guide-d-une-page.md) |
+| D1 Accès et compte | Chacun entre dans le portail simplement, et les comptes RH sont fortement protégés. | Un employé sans email doit pouvoir entrer ; les comptes RH voient les dossiers de tous les employés. | [US-101](lot-1-parcours-certificat/US-101-me-connecter-sans-adresse-email.md), [US-102](lot-3-mise-en-service/US-102-choisir-ma-double-authentification.md), [US-103](lot-2-traitement-rh/US-103-donner-un-role-a-chaque-compte-rh.md), [US-104](lot-2-traitement-rh/US-104-gerer-les-comptes-et-debloquer-un-employe.md), [US-105](lot-1-parcours-certificat/US-105-decouvrir-le-portail-avant-de-me-connecter.md), [US-106](lot-3-mise-en-service/US-106-proteger-mon-acces-par-une-double-authentification.md), [US-107](lot-1-parcours-certificat/US-107-aligner-la-connexion-rh-sur-l-ecran-valide.md), [US-108](lot-2-traitement-rh/US-108-aligner-l-espace-rh-sur-les-ecrans-valides.md), [US-109](lot-2-traitement-rh/US-109-charger-les-pages-sans-texte-d-icone.md), [US-110](lot-2-traitement-rh/US-110-refaire-l-accueil-et-la-connexion-pour-donner-envie.md), [US-111](lot-2-traitement-rh/US-111-refaire-la-connexion-de-l-espace-de-gestion.md), [US-112](lot-2-traitement-rh/US-112-me-connecter-a-l-espace-de-gestion-sans-code.md), [US-125](lot-2-traitement-rh/US-125-etre-deconnecte-apres-15-minutes-sans-activite.md), [US-127](lot-2-traitement-rh/US-127-retrouver-le-meme-cadre-dans-les-deux-espaces.md) |
+| D2 Dossier de l'employé | Chaque employé complète et confirme son dossier lui-même, en quelques minutes. | Besoin 1 : des données fiables. Critère de réussite n°4 : 9 actifs sur 10 au dossier complet. | [US-113](lot-2-traitement-rh/US-113-retrouver-mon-espace-sur-ordinateur-avec-ma-photo.md), [US-114](lot-2-traitement-rh/US-114-retracer-mon-parcours-dans-ma-carriere.md), [US-123](lot-2-traitement-rh/US-123-voir-mon-tableau-de-bord-sur-l-accueil.md), [US-201](lot-1-parcours-certificat/US-201-voir-mon-dossier-et-ma-progression.md), [US-202](lot-1-parcours-certificat/US-202-completer-mes-coordonnees.md), [US-203](lot-1-parcours-certificat/US-203-confirmer-ou-signaler-mon-agence-mon-poste-ma-date-d-embauch.md), [US-204](lot-1-parcours-certificat/US-204-savoir-ce-qui-me-reste-avant-de-deposer.md), [US-205](lot-4-carriere-et-engagement/US-205-confirmer-mes-informations-chaque-annee.md), [US-206](lot-1-parcours-certificat/US-206-retirer-l-ancien-parcours-de-mise-a-jour.md), [US-207](lot-1-parcours-certificat/US-207-aligner-l-espace-employe-sur-les-ecrans-valides.md), [US-128](lot-2-traitement-rh/US-128-retrouver-l-accueil-de-la-refonte.md), [US-129](lot-2-traitement-rh/US-129-retrouver-mon-dossier-de-la-refonte.md), [US-136](lot-2-traitement-rh/US-136-alleger-la-page-d-accueil.md) |
+| D3 Certificats | L'employé fait valoir ses qualifications en déposant ses certificats et suit leur sort. | Besoin 2 : des qualifications prouvées. Sans certificat validé, personne n'apparaît dans les recherches des RH. | [US-115](lot-2-traitement-rh/US-115-choisir-qui-verra-un-poste.md), [US-116](lot-2-traitement-rh/US-116-etre-prevenu-de-ce-qui-arrive-dans-l-espace-de-gestion.md), [US-118](lot-1-parcours-certificat/US-118-voir-le-fichier-de-mon-certificat.md), [US-301](lot-1-parcours-certificat/US-301-deposer-un-certificat-depuis-mon-telephone.md), [US-302](lot-1-parcours-certificat/US-302-savoir-ce-que-mon-certificat-m-apporte.md), [US-303](lot-1-parcours-certificat/US-303-suivre-mon-certificat.md), [US-304](lot-2-traitement-rh/US-304-garder-la-preuve-des-certificats.md), [US-305](lot-2-traitement-rh/US-305-un-niveau-d-etudes-prouve.md), [US-130](lot-2-traitement-rh/US-130-retrouver-mes-certificats-de-la-refonte.md) |
+| D4 Validation RH | Les RH valident vite, sans conflit d'intérêts, et chaque décision se justifie. | Un certificat ne vaut que validé ; délai cible 5 jours ouvrables (Q2). | [US-401](lot-2-traitement-rh/US-401-prendre-le-dossier-suivant.md), [US-402](lot-2-traitement-rh/US-402-examiner-et-decider.md), [US-403](lot-2-traitement-rh/US-403-traiter-les-signalements.md), [US-133](lot-2-traitement-rh/US-133-retrouver-la-file-de-validation-de-la-refonte.md) |
+| D5 Référentiel des unités | Chaque employé est rattaché à la bonne agence, région et direction. | Sans libellés officiels, les recherches et tableaux de bord par région sont faux (critère n°1). | [US-501](lot-1-parcours-certificat/US-501-tenir-le-referentiel-officiel.md), [US-502](lot-1-parcours-certificat/US-502-rattacher-les-valeurs-inconnues.md), [US-503](lot-4-carriere-et-engagement/US-503-gerer-le-referentiel-a-l-ecran.md) |
+| D6 Pilotage | La direction et les RH savent qui est qualifié, où, et où en sont les dossiers. | Critère de réussite n°1 : une liste de candidats qualifiés en une minute ; décisions traçables. | [US-601](lot-2-traitement-rh/US-601-voir-l-etat-des-dossiers-d-un-coup-d-il.md), [US-602](lot-2-traitement-rh/US-602-trouver-les-employes-qualifies-en-une-minute.md), [US-603](lot-2-traitement-rh/US-603-exporter-une-liste.md), [US-604](lot-2-traitement-rh/US-604-rendre-compte-de-chaque-action.md), [US-605](lot-1-parcours-certificat/US-605-mesurer-si-les-employes-reviennent.md), [US-606](lot-4-carriere-et-engagement/US-606-changer-une-regle-sans-developpeur.md), [US-132](lot-2-traitement-rh/US-132-retrouver-le-tableau-de-bord-rh-de-la-refonte.md), [US-134](lot-2-traitement-rh/US-134-retrouver-la-liste-des-employes-de-la-refonte.md) |
+| D7 Notifications | L'employé est prévenu au bon moment, par le canal qu'il utilise, sans être harcelé. | Un quart des employés n'ont pas d'email ; WhatsApp touche presque tout le monde (Q7). | [US-120](lot-2-traitement-rh/US-120-etre-prevenu-dans-le-portail-d-un-poste-ouvert-pour-moi-et-d.md), [US-701](lot-1-parcours-certificat/US-701-etre-prevenu-par-le-bon-canal.md), [US-702](lot-1-parcours-certificat/US-702-etre-relance-sans-etre-harcele.md), [US-703](lot-3-mise-en-service/US-703-annoncer-le-portail-et-les-postes-ouverts.md) |
+| D8 Carrière et postes | L'employé voit les postes ouverts auxquels il est éligible et ce qui lui manque. | Besoin 3 : une raison de participer. Critère n°3 : les employés reviennent d'eux-mêmes. | [US-117](lot-2-traitement-rh/US-117-creer-un-poste-sans-le-referentiel.md), [US-119](lot-2-traitement-rh/US-119-publier-un-poste-a-partir-du-catalogue-des-postes-acme.md), [US-121](lot-2-traitement-rh/US-121-publier-un-poste-a-partir-de-la-matrice-des-postes-du-direct.md), [US-122](lot-2-traitement-rh/US-122-saisir-un-poste-sans-grade.md), [US-124](lot-2-traitement-rh/US-124-publier-un-poste-avec-la-lettre-du-directeur-rh.md), [US-126](lot-2-traitement-rh/US-126-trouver-un-poste-et-preparer-sa-publication-plus-clairement.md), [US-801](lot-4-carriere-et-engagement/US-801-voir-les-postes-auxquels-je-suis-eligible.md), [US-802](lot-4-carriere-et-engagement/US-802-publier-un-poste.md), [US-803](lot-4-carriere-et-engagement/US-803-ajouter-mes-formations-et-experiences.md), [US-131](lot-2-traitement-rh/US-131-retrouver-ma-carriere-de-la-refonte.md), [US-135](lot-2-traitement-rh/US-135-retrouver-la-publication-de-postes-de-la-refonte.md) |
+| D9 Demandes et mouvements de carrière | Les demandes de promotion et de mobilité sont enregistrées, suivies et traitées plus vite. | Critère de réussite n°2 : une demande traitée en quelques jours au lieu de quelques semaines. | [US-901](lot-2-traitement-rh/US-901-enregistrer-une-demande-recue-par-lettre.md), [US-902](lot-4-carriere-et-engagement/US-902-deposer-et-suivre-ma-demande-en-ligne.md), [US-903](lot-2-traitement-rh/US-903-controler-les-mouvements-lus-dans-les-lettres.md), [US-904](lot-2-traitement-rh/US-904-reprendre-l-historique-des-demandes.md), [US-905](lot-distinct-lettres-et-systeme-rh/US-905-produire-les-lettres-de-promotion.md), [US-906](lot-distinct-lettres-et-systeme-rh/US-906-renvoyer-les-mouvements-au-systeme-rh.md) |
+| D10 PAM et Carrières | PAM est nourri par Carrières, protège l'accès par un code à usage unique et tourne en production sur AWS. | Choix du 2026-10-27 : le portail devient PAM, l'interface des collaborateurs de Carrières (plan : `../../../../pam/plan-pam.md`). | [US-1000](lot-5-pam/US-1000-travailler-sur-une-base-carrieres-fictive.md), [US-1001](lot-5-pam/US-1001-lire-les-employes-dans-la-copie-vault-sur-s3.md), [US-1003](lot-5-pam/US-1003-me-connecter-avec-un-code-recu-par-courriel.md), [US-1004](lot-5-pam/US-1004-recevoir-le-code-par-whatsapp.md), [US-1005](lot-5-pam/US-1005-bloquer-un-contact-recemment-change.md), [US-1006](lot-5-pam/US-1006-retrouver-pam.md), [US-1007](lot-5-pam/US-1007-deposer-une-piece-dans-carrieres.md), [US-1008](lot-5-pam/US-1008-suivre-mes-pieces.md), [US-1011](lot-5-pam/US-1011-coordonnees-en-lecture-seule.md), [US-1012](lot-5-pam/US-1012-consulter-ma-balance-per.md), [US-1014](lot-5-pam/US-1014-saisir-la-date-en-huit-chiffres.md), [US-1015](lot-5-pam/US-1015-captcha-et-verrous-par-code-et-par-adresse.md), [US-1016](lot-5-pam/US-1016-code-et-courriels-du-modele.md), [US-1017](lot-5-pam/US-1017-session-du-modele.md), [US-1018](lot-5-pam/US-1018-whatsapp-indisponible-sans-meta.md), [US-1020](lot-5-pam/US-1020-voir-mes-bulletins-de-paie.md), [US-1021](lot-5-pam/US-1021-telecharger-ma-fiche-de-paie-en-pdf.md), [US-1022](lot-5-pam/US-1022-voir-ma-fiche-de-paie-au-format-du-directeur.md), [US-1023](lot-5-pam/US-1023-choisir-mon-document-dans-le-menu-de-mon-per.md), [US-1024](lot-5-pam/US-1024-voir-mon-releve-per-entre-deux-dates-et-l-enregistrer-en-pdf.md), [US-1025](lot-5-pam/US-1025-recevoir-les-avis-de-securite-en-html-comme-le-directeur.md), [US-1026](lot-5-pam/US-1026-lever-le-gel-de-72-heures-d-un-employe-depuis-l-espace-de-ge.md), [US-1027](lot-5-pam/US-1027-lire-les-secrets-de-pam-dans-secrets-manager.md) |
+
+## Statuts
+
+| Statut | Signification |
+|---|---|
+| **Pas encore** | Aucun code écrit |
+| **En cours** | Commencée |
+| **Fait** | Tous les critères d'acceptation couverts par des tests verts, Definition of Done cochée |

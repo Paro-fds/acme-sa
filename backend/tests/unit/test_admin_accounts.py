@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from app.auth.application.admin_accounts import ImportConfiguredAdmin
-from app.auth.domain.admin import AdminAccount, validate_admin_password, validate_username
+from app.auth.domain.admin import AdminAccount, AdminRole, validate_admin_password, validate_username
 from app.auth.domain.errors import AdminPasswordTooShort, InvalidUsername
 from tests.fake_clock import FakeClock
 
@@ -109,3 +109,32 @@ def test_ca03_nothing_is_imported_without_a_complete_configuration(username, pas
     ImportConfiguredAdmin(admins, FakeClock(), username, password_hash).execute()
 
     assert admins.count() == 0
+
+
+def test_configured_admin_updates_existing_account_password_and_unlocks():
+    existing = _admin("a1", "admin")
+    existing.password_hash = "$old_hash"
+    existing.failed_attempts = 5
+    existing.locked_until = NOW + timedelta(minutes=15)
+    admins = InMemoryAdmins(existing)
+
+    ImportConfiguredAdmin(admins, FakeClock(), "admin", "$new_argon2id_hash").execute()
+
+    updated = admins.get("a1")
+    assert updated.password_hash == "$new_argon2id_hash"
+    assert updated.role == AdminRole.ADMIN
+    assert updated.failed_attempts == 0
+    assert updated.locked_until is None
+
+
+def test_configured_admin_keeps_the_lock_when_the_password_is_unchanged():
+    """US-15 CA-03 : l'import tourne à chaque démarrage (Lambda) ; il ne doit pas lever un blocage en cours."""
+    existing = _admin("a1", "admin")
+    existing.password_hash = "$argon2id$hash"
+    existing.failed_attempts = 5
+    existing.locked_until = NOW + timedelta(minutes=15)
+    admins = InMemoryAdmins(existing)
+
+    ImportConfiguredAdmin(admins, FakeClock(), "admin", "$argon2id$hash").execute()
+
+    assert admins.get("a1").locked_until == NOW + timedelta(minutes=15)

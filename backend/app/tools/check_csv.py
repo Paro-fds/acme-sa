@@ -191,22 +191,24 @@ def collect_responses(csv_path: Path, data_dir: Path) -> tuple[list[str], str, s
                 for path in ("/api/me/profile", "/api/me/update", "/api/me/update/fields", "/api/me/documents"):
                     texts.append(client.get(path).text)
 
-        # Parcours d'identification réel sur un employé sans homonyme : mot de passe créé puis saisi.
+        # Parcours de connexion réel (US-1003) sur un employé qui a un courriel : date fausse, puis code reçu
+        # (rendu par l'API sur le poste local, aucun courriel ne part), code faux puis code juste.
         set_cookie = ""
-        identities = Counter((normalize(e.last_name), normalize(e.first_name), e.birth_date) for e in employees)
-        probe = next((e for e in employees if identities[(normalize(e.last_name), normalize(e.first_name), e.birth_date)] == 1), None)
+        probe = next((e for e in employees if "@" in e.email_address), None)
         if probe is not None:
-            identity = {"last_name": probe.last_name, "first_name": probe.first_name, "birth_date": probe.birth_date.isoformat()}
+            right = {"employee_code": probe.employee_code, "birth_date": probe.birth_date.strftime("%d%m%Y")}
+            wrong = {**right, "birth_date": "01011900"}
             with TestClient(app) as client:
-                texts.append(client.post("/api/auth/identify", json=identity).text)
-                created = client.post(
-                    "/api/auth/register",
-                    json={**identity, "password": PROBE_PASSWORD, "password_confirmation": PROBE_PASSWORD},
-                )
-                set_cookie = created.headers.get("set-cookie", "")
-                client.post("/api/auth/logout")
-                texts.append(client.post("/api/auth/login", json={**identity, "password": "mauvais-mot-de-passe"}).text)
-                texts.append(client.post("/api/auth/login", json={**identity, "password": PROBE_PASSWORD}).text)
+                texts.append(client.post("/api/auth/identify", json=wrong).text)
+                texts.append(client.post("/api/auth/identify", json=right).text)
+                sent = client.post("/api/auth/code", json={"channel": "EMAIL"})
+                texts.append(sent.text)
+                code = sent.json().get("local_code") if sent.status_code == 200 else None
+                if code:
+                    other = f"{(int(code) + 1) % 1_000_000:06d}"
+                    texts.append(client.post("/api/auth/verify", json={"code": other}).text)
+                    opened = client.post("/api/auth/verify", json={"code": code})
+                    set_cookie = opened.headers.get("set-cookie", "")
         container.close()
     finally:
         logging.getLogger().removeHandler(handler)

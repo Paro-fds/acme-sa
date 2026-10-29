@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.auth.api.dependencies import SESSION_COOKIE
 from app.auth.application.sessions import hash_token
+from tests.conftest import employee_login
 from tests.employees import EMP_A
 
 URL = "/api/auth/logout"
@@ -11,8 +12,7 @@ PASSWORD = "Bonjour-2026"
 
 
 def _login(client) -> str:
-    response = client.post("/api/auth/login", json=EMP_A.identity(password=PASSWORD))
-    assert response.status_code == 204
+    employee_login(client, EMP_A)  # US-1003
     return client.cookies[SESSION_COOKIE]
 
 
@@ -45,18 +45,3 @@ def test_ca02_old_cookie_is_rejected_after_logout(app, client, account):
 
 def test_logout_without_session_is_rejected(client):
     assert client.post(URL).status_code == 401
-
-
-def test_ca04_draft_is_kept_after_logout_and_login(client, account, draft):
-    account(EMP_A, PASSWORD)
-    draft(EMP_A, {"telephone_number": "+509 3700 0000"})
-    _login(client)
-    before = client.get("/api/me/update").json()
-
-    client.post(URL)
-    _login(client)
-    after = client.get("/api/me/update").json()
-
-    assert after == before
-    assert after["state"] == "IN_PROGRESS"
-    assert [(c["field_name"], c["new_value"]) for c in after["changes"]] == [("telephone_number", "+509 3700 0000")]

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mes certificats</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6FB}
+a{color:#1D3FA8;text-decoration:none}a:hover{color:#132C7A;text-decoration:underline}
+</style>
+</helmet>
+<div style="font-family: 'Public Sans', system-ui, sans-serif; color: #17213A; background: #F4F6FB; min-height: 1200px; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <nav aria-label="Menu principal" style="flex: 1 1 260px; max-width: 280px; min-width: 240px; position: sticky; top: 0; height: 100vh; align-self: flex-start; overflow-y: auto; background: #0F2A63; color: #FFFFFF; display: flex; flex-direction: column; padding: 24px 16px; box-sizing: border-box; gap: 32px">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D3FA8" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 20h18L12 3Z"></path><path d="M8.5 15h7"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px">ACME <span style="font-weight: 400">SA</span></span>
+        <span style="font-size: 13px; color: #C9D5F2">Microfinance, un avenir ensemble</span>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; color: #E6ECFA; font-size: 18px; font-weight: 500; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"></path><path d="M5 10v10h5v-6h4v6h5V10"></path></svg>
+        Accueil
+      </a>
+      <a href="MonDossier.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; color: #E6ECFA; font-size: 18px; font-weight: 500; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V2.8h6V4"></path><circle cx="12" cy="11" r="2.4"></circle><path d="M8.5 17c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7"></path></svg>
+        Mon dossier
+      </a>
+      <a href="MesCertificats.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 18px; font-weight: 600; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+        Mes certificats
+      </a>
+      <a href="MaCarriere.dc.html" style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 10px; color: #E6ECFA; font-size: 18px; font-weight: 500; text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path><path d="m9.5 13.5 2 2 3.5-3.5"></path></svg>
+        Ma carrière
+      </a>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 16px; color: #E6ECFA; font-size: 17px; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"></path><path d="M17 8l4 4-4 4"></path><path d="M21 12H10"></path></svg>
+      Se déconnecter
+    </a>
+    <div style="position: relative; margin: 0 -16px -24px; height: 190px; overflow: hidden">
+      <svg width="100%" height="150" viewBox="0 0 280 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" style="position: absolute; left: 0; bottom: 0; display: block">
+        <path d="M0 150 L0 96 L38 70 L62 84 L104 40 L136 66 L160 52 L206 90 L240 72 L280 96 L280 150 Z" fill="#1A3A7E" opacity="0.7"></path>
+        <path d="M104 40 L118 52 L110 52 L100 60 L94 50 Z" fill="#3B5FA8" opacity="0.6"></path>
+        <path d="M0 150 L0 116 L46 92 L84 110 L128 82 L170 104 L214 86 L252 104 L280 96 L280 150 Z" fill="#163370"></path>
+        <path d="M0 150 L0 132 L60 118 L120 130 L190 116 L250 128 L280 122 L280 150 Z" fill="#12306B"></path>
+      </svg>
+      <p style="position: absolute; left: 24px; right: 16px; bottom: 26px; margin: 0; font-size: 17px; line-height: 1.45; font-weight: 500; color: #FFFFFF">Grandir ensemble<br>pour un impact durable</p>
+    </div>
+  </nav>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E3E8F2; flex-wrap: wrap">
+      <span style="font-size: 16px; color: #4A5672">Lundi 19 octobre 2026</span>
+      <div style="display: flex; align-items: center; gap: 20px">
+        <button type="button" aria-label="Notifications : 2 non lues" style="position: relative; width: 44px; height: 44px; border: none; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #17213A">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+          <span style="position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; background: #C2410C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+        </button>
+        <div style="width: 1px; height: 36px; background: #E3E8F2"></div>
+        <button type="button" style="display: flex; align-items: center; gap: 12px; border: none; background: transparent; cursor: pointer; padding: 4px; font-family: inherit; text-align: left">
+          <span style="width: 44px; height: 44px; border-radius: 50%; background: #0F2A63; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center">JJ</span>
+          <span style="display: flex; flex-direction: column">
+            <span style="font-size: 16px; font-weight: 700; color: #17213A">Jean JOSEPH</span>
+            <span style="font-size: 14px; color: #4A5672">Agent de crédit · Pétion-Ville</span>
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <main style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 24px; max-width: 1180px; width: 100%; box-sizing: border-box">
+
+      <section style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px">
+        <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 10px; max-width: 560px">
+          <h1 style="margin: 0; font-size: 36px; font-weight: 800; color: #0F2A63; letter-spacing: -0.5px">Mes certificats</h1>
+          <p style="margin: 0; font-size: 18px; line-height: 1.55; color: #3A4664">Déposez vos diplômes et attestations. Les RH les vérifient, puis ils comptent pour les postes qui vous sont proposés.</p>
+          <a href="#" style="align-self: flex-start; display: flex; align-items: center; gap: 10px; min-height: 50px; margin-top: 6px; padding: 0 22px; border-radius: 10px; background: #1D3FA8; color: #FFFFFF; font-size: 17px; font-weight: 700; text-decoration: none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>
+            Déposer un certificat
+          </a>
+        </div>
+        <div style="flex: 1 1 460px; display: flex; align-items: center; gap: 8px; min-height: 150px; border-radius: 16px; background: #E6EDFB; overflow: hidden">
+          <svg width="200" height="150" viewBox="0 0 200 150" aria-hidden="true" style="flex-shrink: 0">
+            <path d="M0 150 C25 100 55 90 85 102 C110 72 150 58 200 84 L200 150 Z" fill="#D3DFF7"></path>
+            <rect x="40" y="30" width="112" height="82" rx="6" fill="#FFFFFF" stroke="#93B0EC" stroke-width="2"></rect>
+            <rect x="48" y="38" width="96" height="66" rx="3" fill="none" stroke="#C7D7F6" stroke-width="2"></rect>
+            <rect x="66" y="50" width="60" height="7" rx="3.5" fill="#0F2A63"></rect>
+            <rect x="60" y="64" width="72" height="5" rx="2.5" fill="#C7D7F6"></rect>
+            <rect x="68" y="75" width="56" height="5" rx="2.5" fill="#C7D7F6"></rect>
+            <path d="M138 104 L132 132 L142 126 L150 134 L152 106 Z" fill="#1D4ED8"></path>
+            <circle cx="142" cy="102" r="16" fill="#F59E0B"></circle>
+            <circle cx="142" cy="102" r="10" fill="none" stroke="#FFFFFF" stroke-width="2.5"></circle>
+            <path d="m137 102 4 4 7-8" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <p style="margin: 0; padding: 0 28px 0 4px; font-size: 17px; line-height: 1.55; color: #1D3FA8">Chaque diplôme validé peut vous ouvrir de nouveaux postes.</p>
+        </div>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+          <section aria-labelledby="niveau" style="display: flex; align-items: center; gap: 18px; background: #0F2A63; color: #FFFFFF; border-radius: 14px; padding: 20px 24px; flex-wrap: wrap">
+            <span style="width: 52px; height: 52px; border-radius: 14px; background: #1D4ED8; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Z"></path><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"></path></svg>
+            </span>
+            <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px">
+              <h2 id="niveau" style="margin: 0; font-size: 15px; font-weight: 600; color: #C9D5F2">Niveau d’études validé</h2>
+              <span style="font-size: 24px; font-weight: 800">Licence · Comptabilité</span>
+              <span style="font-size: 15px; color: #C9D5F2">Établi par vos certificats validés par les RH</span>
+            </div>
+          </section>
+
+          <div role="tablist" aria-label="Filtrer mes certificats" style="display: flex; gap: 8px; flex-wrap: wrap">
+            <button type="button" role="tab" aria-selected="true" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #0F2A63; background: #0F2A63; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Tous · 3</button>
+            <button type="button" role="tab" aria-selected="false" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #D5DCEB; background: #FFFFFF; color: #17213A; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Validés · 1</button>
+            <button type="button" role="tab" aria-selected="false" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #D5DCEB; background: #FFFFFF; color: #17213A; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">En cours d’examen · 1</button>
+            <button type="button" role="tab" aria-selected="false" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #D5DCEB; background: #FFFFFF; color: #17213A; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">À corriger · 1</button>
+          </div>
+
+          <ul aria-label="Mes certificats" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
+
+            <li style="background: #FFFFFF; border: 1px solid #F3C9A8; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+              <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+                <span style="width: 48px; height: 48px; border-radius: 12px; background: #FDEBDD; color: #C2410C; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3Z"></path><path d="M12 10v4"></path><path d="M12 17h.01"></path></svg>
+                </span>
+                <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                  <span style="font-size: 18px; font-weight: 700">Attestation de formation en microfinance</span>
+                  <span style="font-size: 15px; color: #4A5672">Formation · 2024 · déposée le 2 oct. 2026</span>
+                </div>
+                <span style="padding: 4px 12px; border-radius: 999px; background: #FDEBDD; color: #9A3412; font-size: 14px; font-weight: 700">À corriger</span>
+              </div>
+              <p style="margin: 0; padding: 12px 14px; border-radius: 10px; background: #FFF6EE; font-size: 16px; line-height: 1.5; color: #7C2D12"><strong>Message des RH :</strong> la photo est floue, le nom de l’organisme ne se lit pas. Déposez une photo plus nette.</p>
+              <div>
+                <a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 10px; background: #C2410C; color: #FFFFFF; font-size: 16px; font-weight: 700; text-decoration: none">Corriger et renvoyer</a>
+              </div>
+            </li>
+
+            <li style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+              <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+                <span style="width: 48px; height: 48px; border-radius: 12px; background: #E3EBFD; color: #1D3FA8; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                </span>
+                <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                  <span style="font-size: 18px; font-weight: 700">Certificat Excel avancé</span>
+                  <span style="font-size: 15px; color: #4A5672">Formation · 2025 · déposé le 15 oct. 2026</span>
+                </div>
+                <span style="padding: 4px 12px; border-radius: 999px; background: #E3EBFD; color: #1E3A8A; font-size: 14px; font-weight: 700">En cours d’examen</span>
+              </div>
+              <ol aria-label="Avancement" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+                <li style="display: flex; flex-direction: column; gap: 6px">
+                  <span style="height: 6px; border-radius: 3px; background: #1D3FA8"></span>
+                  <span style="font-size: 14px; font-weight: 600; color: #1D3FA8">Reçu</span>
+                </li>
+                <li style="display: flex; flex-direction: column; gap: 6px">
+                  <span style="height: 6px; border-radius: 3px; background: #1D3FA8"></span>
+                  <span style="font-size: 14px; font-weight: 600; color: #1D3FA8">En cours d’examen</span>
+                </li>
+                <li style="display: flex; flex-direction: column; gap: 6px">
+                  <span style="height: 6px; border-radius: 3px; background: #E3E8F2"></span>
+                  <span style="font-size: 14px; color: #4A5672">Décision</span>
+                </li>
+              </ol>
+              <span style="font-size: 15px; color: #4A5672">Réponse des RH sous 5 jours ouvrables, au plus tard le 22 oct.</span>
+            </li>
+
+            <li style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+              <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+                <span style="width: 48px; height: 48px; border-radius: 12px; background: #DDF3E6; color: #15803D; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"></circle><path d="m9.6 9 1.7 1.7 3.2-3.3"></path><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"></path></svg>
+                </span>
+                <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                  <span style="font-size: 18px; font-weight: 700">Licence en sciences comptables</span>
+                  <span style="font-size: 15px; color: #4A5672">Diplôme · Licence · Comptabilité · 2019</span>
+                </div>
+                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #DDF3E6; color: #166534; font-size: 14px; font-weight: 700">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
+                  Validé
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+                <span style="font-size: 15px; color: #4A5672">Validé par les RH le 12 oct. 2026</span>
+                <a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; font-weight: 700">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  Voir le fichier
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <aside aria-label="Comment ça marche" style="flex: 1 1 300px; min-width: 280px; display: flex; flex-direction: column; gap: 20px">
+          <section aria-labelledby="etapes" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+            <h2 id="etapes" style="margin: 0; font-size: 19px; font-weight: 700; color: #0F2A63">Comment ça marche</h2>
+            <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px">
+              <li style="display: flex; gap: 14px; align-items: flex-start">
+                <span style="width: 34px; height: 34px; border-radius: 50%; background: #1D3FA8; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">1</span>
+                <span style="display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 16px; font-weight: 700">Vous déposez</span>
+                  <span style="font-size: 15px; color: #4A5672; line-height: 1.45">Une photo ou un PDF, depuis votre téléphone</span>
+                </span>
+              </li>
+              <li style="display: flex; gap: 14px; align-items: flex-start">
+                <span style="width: 34px; height: 34px; border-radius: 50%; background: #1D3FA8; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">2</span>
+                <span style="display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 16px; font-weight: 700">Les RH vérifient</span>
+                  <span style="font-size: 15px; color: #4A5672; line-height: 1.45">En 5 jours ouvrables au plus</span>
+                </span>
+              </li>
+              <li style="display: flex; gap: 14px; align-items: flex-start">
+                <span style="width: 34px; height: 34px; border-radius: 50%; background: #1D3FA8; color: #FFFFFF; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">3</span>
+                <span style="display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 16px; font-weight: 700">Il compte pour vous</span>
+                  <span style="font-size: 15px; color: #4A5672; line-height: 1.45">Votre niveau est mis à jour et de nouveaux postes peuvent s’ouvrir</span>
+                </span>
+              </li>
+            </ol>
+          </section>
+
+          <section aria-labelledby="formats" style="background: #E9EFFC; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+            <h2 id="formats" style="margin: 0; font-size: 18px; font-weight: 700; color: #0F2A63">Fichiers acceptés</h2>
+            <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #3A4664">PDF, JPG ou PNG, 5 Mo au plus. Une photo nette, à plat, bien éclairée.</p>
+          </section>
+
+          <section aria-labelledby="question" style="background: #FFFFFF; border: 1px solid #E3E8F2; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 8px">
+            <h2 id="question" style="margin: 0; font-size: 18px; font-weight: 700; color: #0F2A63">Une question sur vos documents ?</h2>
+            <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #3A4664">Adressez-vous au service RH de votre agence.</p>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

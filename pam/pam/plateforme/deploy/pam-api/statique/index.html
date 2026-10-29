@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ACME SA | PAM</title>
+  <link rel="stylesheet" href="pam.css">
+</head>
+<body>
+  <header>
+    <p class="marque">ACME SA</p>
+    <h1>PAM</h1>
+    <p>Plateforme ACME Multifonctions</p>
+  </header>
+  <main>
+    <section id="ecran-identification">
+      <h2>1. Vous identifier</h2>
+      <label>Code employé <span class="etoile">*</span>
+        <input id="code" autocomplete="username" inputmode="text" required>
+      </label>
+      <label>Date de naissance <span class="etoile">*</span>
+        <span class="secret">
+          <input id="naissance" type="password" placeholder="JJMMAAAA" inputmode="numeric" maxlength="8" autocomplete="off" spellcheck="false" required>
+          <button id="voir-naissance" class="voir" type="button">Afficher</button>
+        </span>
+      </label>
+      <p id="captcha" hidden></p>
+      <label id="ligne-captcha" hidden>Réponse <span class="etoile">*</span>
+        <input id="reponse-captcha" inputmode="numeric">
+      </label>
+      <button id="continuer" type="button">Continuer</button>
+      <p id="message-identification" class="message" role="alert"></p>
+    </section>
+    <section id="ecran-canal" hidden>
+      <h2>2. Recevoir le code</h2>
+      <button id="canal-email" type="button"></button>
+      <button id="canal-whatsapp" type="button" disabled>WhatsApp — Indisponible</button>
+      <p id="message-canal" class="message" role="alert"></p>
+    </section>
+    <section id="ecran-otp" hidden>
+      <h2>3. Saisir le code</h2>
+      <label>Code à 6 chiffres <span class="etoile">*</span>
+        <input id="otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      </label>
+      <p id="compte-a-rebours"></p>
+      <button id="valider" type="button">Ouvrir ma balance</button>
+      <button id="renvoyer" type="button">Renvoyer</button>
+      <p id="message-otp" class="message" role="alert"></p>
+    </section>
+    <section id="ecran-balance" hidden>
+      <h2>4. Balance PER</h2>
+      <p id="montant"></p>
+      <p id="date-maj"></p>
+      <p id="message-balance" class="message"></p>
+      <button id="sortir" type="button">Fermer la session</button>
+    </section>
+  </main>
+  <footer>ACME SA · PAM · La session se ferme après 5 minutes sans action.</footer>
+  <script src="pam.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 """US-20 — Consulter le dossier d'un employé (T-20.1 → T-20.4)."""
 
+from tests.conftest import employee_login
 from tests.employees import EMP_A, EMP_B, EMP_E, EMP_H1, EMP_I
 
 
@@ -102,8 +103,9 @@ def test_ca04_no_write_route_on_admin_employees(app):
         for method in operations
         if method.lower() in {"post", "put", "patch", "delete"}
     ]
-    # Seule exception prévue : la réinitialisation d'accès (US-22).
-    assert all(path.endswith("/reset-access") and method == "POST" for method, path in writes), writes
+    # Exceptions prévues : débloquer l'accès (US-22) et lever le gel de 72 heures (US-1026, D-64) ;
+    # aucune ne modifie le dossier.
+    assert all(path.endswith(("/reset-access", "/lift-hold")) and method == "POST" for method, path in writes), writes
 
 
 def test_ca04_write_methods_are_refused_and_change_nothing(admin_client):
@@ -148,8 +150,8 @@ def test_ca06_unknown_employee_gives_404(admin_client):
 # --- CA-07 : état du compte ------------------------------------------------------------
 
 
-def test_ca07_account_state(admin_client, account):
-    account(EMP_A)
+def test_ca07_account_state(admin_client, client):
+    employee_login(client, EMP_A)  # US-1003 : « activé » = s'est déjà connecté
 
     assert admin_client.get(url(EMP_A.id)).json()["account_activated"] is True
     assert admin_client.get(url(EMP_B.id)).json()["account_activated"] is False

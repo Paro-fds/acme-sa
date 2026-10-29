@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from tests.conftest import rh_login
 from tests.employees import ADMIN_PASSWORD, ADMIN_USERNAME, EMP_A
 
 ADMINS = "/api/admin/admins"
@@ -17,7 +18,8 @@ CHOSEN = "Mon-propre-mot-2026"
 
 
 def _login(client, username, password):
-    return client.post(LOGIN, json={"username": username, "password": password})
+    """Connexion complète, double authentification comprise (US-102)."""
+    return rh_login(client, username, password)
 
 
 def _add(admin_client, username="marie.pierre", password=PROVISIONAL):
@@ -100,7 +102,11 @@ def test_ca04_me(admin_client):
     assert admin_client.get(ME).json() == {
         "id": admin_client.get(ME).json()["id"],
         "username": ADMIN_USERNAME,
+        "display_name": ADMIN_USERNAME,
+        "role": "ADMIN",
+        "role_label": "Administrateur",
         "must_change_password": False,
+        "mfa_required": True,  # US-112 : réglage des tests
     }
 
 

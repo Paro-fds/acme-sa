@@ -1,0 +1,533 @@
+<title>Modèle de données du portail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Même charte que les autres schémas du lot 0. Cinq vues entités-relations, puis le contrôle de cohérence avec les besoins. */
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --fg: #2c2e44; --heading: #12124d; --muted: #6a6c80;
+  --border: #e3e3ee; --primary: #1e1e82; --accent: #cc1111; --primary-bg: #eeeefa;
+  --todo-bg: #fff6dc; --todo-fg: #7a5a00; --ok: #15803d;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; --ok: #6fd69a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0d1f; --surface: #16162f; --fg: #d4d5e6; --heading: #f1f1fb; --muted: #9a9cb5;
+  --border: #2c2c50; --primary: #a9a9ff; --accent: #ff7a7a; --primary-bg: #1c1c42;
+  --todo-bg: #3a3012; --todo-fg: #f2d27a; --ok: #6fd69a; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2 { color: var(--heading); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 21px; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+p { margin: 0; max-width: 72ch; }
+ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; max-width: 72ch; }
+strong { color: var(--heading); }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 18px; }
+.note { font-size: 14px; color: var(--muted); }
+.todo { background: var(--todo-bg); color: var(--todo-fg); border-radius: 4px; padding: 0 5px; font-size: .92em; white-space: nowrap; }
+nav ul { flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; max-width: none; }
+nav a { display: inline-block; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; }
+nav a:hover { border-color: var(--primary); }
+figure { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.scroll pre.mermaid { margin: 0; min-width: 760px; color: #2c2e44; background: #ffffff; }
+.scroll pre.mermaid svg { max-width: none !important; height: auto; }
+figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 15px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.card b { color: var(--heading); }
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+td:first-child { font-weight: 600; color: var(--heading); }
+td.ok { color: var(--ok); font-weight: 600; white-space: nowrap; }
+code { font-size: .9em; background: var(--primary-bg); padding: 1px 5px; border-radius: 4px; }
+@media (max-width: 520px) { h1 { font-size: 25px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Refonte du portail · Lot 0 · Livrable 3</span>
+    <h1>Modèle de données : entités et relations</h1>
+    <p class="lead">Les données que le portail garde, comment elles se relient, et pour chaque besoin du cahier des charges, les données qui y répondent.</p>
+    <p class="note">Version 0.5 du 7 octobre 2026 (normalisée en 3NF, contrôlée par les garde-fous du cours de modélisation), tirée de <code>modele-de-donnees.md</code> (modèle logique, décisions DM-01 à DM-07 validées par le développeur). Noms de tables, types et index : conception technique (B-18). Aucune donnée réelle.</p>
+    <nav aria-label="Vues">
+      <ul>
+        <li><a href="#principes">Principes</a></li>
+        <li><a href="#v1">1. Employé et dossier</a></li>
+        <li><a href="#v2">2. Certificats</a></li>
+        <li><a href="#v3">3. Unités</a></li>
+        <li><a href="#v4">4. Carrière</a></li>
+        <li><a href="#v5">5. Accès et traces</a></li>
+        <li><a href="#normalisation">Normalisation</a></li>
+        <li><a href="#besoins">Réponse aux besoins</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section id="principes">
+    <h2>Ce qui guide le modèle</h2>
+    <div class="cards">
+      <div class="card"><b>L'export RH est rangé à part</b><span>Tel qu'il est lu, jamais modifié. Ce que l'employé saisit est ailleurs : un nouvel import ne l'écrase jamais (Q4 §6).</span></div>
+      <div class="card"><b>On n'efface rien</b><span>Certificats remplacés, demandes, décisions, confirmations restent dans l'historique (Q2 §2, Q6 §5).</span></div>
+      <div class="card"><b>Chaque information est datée</b><span>Chaque saisie ou confirmation est une ligne datée, avec son auteur : l'historique demandé ; la dernière date se calcule, et sert à la péremption à 12 mois (Q10).</span></div>
+      <div class="card"><b>Ce qui se calcule ne se stocke pas</b><span>Pourcentage, profil complet, niveau validé, ancienneté, retard : jamais faux, jamais périmés.</span></div>
+      <div class="card"><b>Aucun salaire</b><span>Ni colonne exclue de l'export, ni montant tiré des lettres, nulle part (message de lancement §5).</span></div>
+      <div class="card"><b>Les listes sont des données</b><span>Niveaux et rangs, motifs, domaines : modifiables sans toucher au code au lot 4 (Q3 §4).</span></div>
+    </div>
+    <p class="note">Lecture des diagrammes : <strong>||</strong> exactement un · <strong>o|</strong> zéro ou un · <strong>|{</strong> un ou plusieurs · <strong>o{</strong> zéro ou plusieurs. Trait plein : lien enregistré ; pointillés : lien logique (par une valeur, ou calculé). PK : identifiant ; FK : lien vers une autre entité.</p>
+  </section>
+
+  <section id="v1">
+    <h2>1. Employé et dossier (lot 1)</h2>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+erDiagram
+  Import ||--o{ Employe : "charge"
+  Employe ||--|| Compte_employe : "se connecte avec"
+  Employe ||--o{ Connexion : "se connecte"
+  Employe ||--o| Dossier : "saisit"
+  Employe ||--o| Contact_urgence : "désigne"
+  Lien_contact ||--o{ Contact_urgence : "lien"
+  Niveau ||--o{ Dossier : "niveau déclaré"
+  Employe ||--o{ Confirmation : "historique des 8 informations"
+  Employe ||--o{ Signalement : "signale"
+  Employe ||--o{ Consentement : "donne ou retire"
+  Employe ||--o{ Avis : "répond"
+  Import {
+    id id PK
+    date charge_le
+    date date_export
+    string empreinte_fichier UK
+    int nb_lignes "instantané"
+    int nb_actifs "instantané"
+    int nb_a_rattacher "instantané"
+  }
+  Employe {
+    id id PK "identifiant interne (DM-01)"
+    string matricule UK "unique parmi les actifs"
+    string nom
+    string prenom
+    date date_naissance
+    string sexe
+    string grade
+    string nature_contrat
+    string agence_export "valeur telle quelle"
+    string direction_export "valeur telle quelle"
+    string poste
+    date date_embauche
+    string telephone_export
+    string email_export
+    string adresse_export
+    string statut "Actif ou Parti : état courant"
+    id dernier_import FK
+  }
+  Compte_employe {
+    id employe PK, FK
+    string empreinte_mot_de_passe
+    int tentatives_echouees
+    date bloque_jusqu_a
+    date acces_reinitialise_le
+  }
+  Connexion {
+    id id PK
+    id employe FK
+    date le "critère de réussite 3"
+  }
+  Dossier {
+    id employe PK, FK "un par employé"
+    string telephone
+    string adresse
+    string email
+    bool pas_d_adresse_email
+    string niveau_declare FK
+  }
+  Contact_urgence {
+    id employe PK, FK
+    string nom
+    string lien FK
+    string telephone
+  }
+  Confirmation {
+    id id PK
+    id employe FK
+    string information "une des 8"
+    string geste "saisie, modification, confirmation"
+    string ancienne_valeur "instantané"
+    string nouvelle_valeur "instantané"
+    date le
+    string auteur
+  }
+  Signalement {
+    id id PK
+    id employe FK
+    string information
+    string origine "employé ou contrôle automatique"
+    string valeur_actuelle "instantané"
+    string valeur_indiquee
+    string precision
+    string statut "4 statuts"
+    id decide_par FK "compte RH"
+    date decide_le
+  }
+  Consentement {
+    id id PK
+    id employe FK
+    string objet "information, WhatsApp, email personnel"
+    bool donne
+    date le
+    string version_texte
+  }
+  Avis {
+    id id PK
+    id employe FK
+    id certificat FK "le dépôt concerné"
+    int reponse "en un clic"
+    date le
+  }
+      </pre></div>
+      <figcaption>L'export alimente <strong>Employé</strong> ; ce que l'employé saisit va dans <strong>Dossier</strong> et <strong>Contact d'urgence</strong>, chaque champ avec son type ; chaque saisie ou confirmation des 8 informations du verrou ajoute une ligne à <strong>Confirmation</strong>. Agence, poste et date d'embauche restent dans Employé : l'employé les confirme sans les modifier. Calculés, pas stockés : date de dernière confirmation, pourcentage (D-03), profil complet (D-01), information périmée (Q10, lot 4).</figcaption>
+    </figure>
+  </section>
+
+  <section id="v2">
+    <h2>2. Certificats et listes de référence (lots 1 et 2)</h2>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+erDiagram
+  Employe ||--o{ Certificat : "dépose"
+  Certificat ||--o{ Fichier : "pages"
+  Certificat ||--o{ Decision : "reçoit"
+  Certificat ||--o{ Correction : "corrigé"
+  Certificat ||--o{ Reaffectation : "réaffecté"
+  Certificat |o--o| Certificat : "remplace"
+  Niveau ||--o{ Certificat : "classe"
+  Type_document ||--o{ Certificat : "type"
+  Domaine |o--o{ Certificat : "domaine"
+  Motif_rejet |o--o{ Decision : "motive"
+  Compte_RH ||--o{ Decision : "décide"
+  Compte_RH |o--o{ Certificat : "prend en charge"
+  Certificat ||--o{ Avis : "déclenche"
+  Certificat {
+    id id PK
+    id employe FK
+    string type FK
+    string niveau FK "valeur actuelle"
+    string intitule "valeur actuelle"
+    string etablissement "valeur actuelle"
+    int annee "valeur actuelle"
+    string domaine FK
+    string pays
+    string statut "état courant"
+    date depose_le
+    id pris_par FK "état courant"
+    id remplace FK "l'ancien reste archivé"
+  }
+  Fichier {
+    id id PK
+    id certificat FK "un seul des trois liens"
+    id demande FK
+    id lettre FK
+    string nom_origine
+    string nom_stockage UK "aléatoire"
+    string type
+    int taille "5 Mo au plus"
+    string antivirus
+  }
+  Decision {
+    id id PK
+    id certificat FK
+    string decision "Validé ou À corriger"
+    int motif FK
+    string commentaire
+    id valideur FK "jamais l'employé lui-même"
+    date le
+  }
+  Correction {
+    id id PK
+    id certificat FK
+    string champ "niveau, intitulé, établissement, année, domaine"
+    string valeur_origine "instantané"
+    string nouvelle_valeur
+    id par FK
+    date le
+  }
+  Reaffectation {
+    id id PK
+    id certificat FK
+    id de FK
+    id vers FK
+    id par_administrateur FK
+    date le
+  }
+  Niveau {
+    string code PK
+    string libelle
+    int rang "1 à 8, vide si hors échelle"
+    string exemples
+  }
+  Motif_rejet {
+    int numero PK "1 à 10"
+    string libelle
+    string message_poli
+    bool commentaire_obligatoire "Autre"
+  }
+      </pre></div>
+      <figcaption>Calculés, pas stockés : <strong>en retard</strong> (plus de 5 jours ouvrables, RG-40) ; <strong>niveau d'études validé</strong> = rang le plus élevé des certificats validés, hors échelle exclue (Q3) ; <strong>dossier complet</strong> = profil complet et au moins un certificat validé (D-01). Le lien « valideur » interdit le propre certificat de l'agent par son matricule (RG-42).</figcaption>
+    </figure>
+  </section>
+
+  <section id="v3">
+    <h2>3. Référentiel des unités (lot 1)</h2>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+erDiagram
+  Unite ||--o{ Rattachement : "est rattachée"
+  Unite ||--o{ Rattachement : "regroupe"
+  Unite ||--o{ Ancien_libelle : "a porté"
+  Unite |o--o{ Correspondance : "traduit"
+  Import ||--o{ Correspondance : "première apparition"
+  Employe }o..o| Correspondance : "agence et direction de l'export"
+  Employe |o..o{ Unite : "responsable DA ou DR"
+  Unite {
+    string code PK "ne change jamais"
+    string libelle_officiel
+    string type "Agence, Région, Direction, Service, Siège"
+    date debut
+    date fin "actif = calculé"
+    id responsable FK "D-26, à confirmer"
+  }
+  Rattachement {
+    id id PK
+    string unite FK "agence ou service"
+    string rattachee_a FK "région ou direction"
+    date debut
+    date fin "vide = en cours"
+    string fichier_origine
+  }
+  Ancien_libelle {
+    id id PK
+    string unite FK
+    string libelle
+  }
+  Correspondance {
+    string colonne_export PK "agence ou direction"
+    string valeur_trouvee PK "ex. PB"
+    string unite FK "vide = À rattacher"
+    id premiere_apparition FK
+    string validee_par
+    date validee_le
+  }
+      </pre></div>
+      <figcaption>Une agence appartient à une seule région à la fois, mais la région change avec le temps : le rattachement est daté, ce qui permet les tableaux de bord par région à toute date (Q4 §3). Une correspondance sans unité est « À rattacher » et l'employé est « Unité à confirmer » (RG-17). Responsable d'agence ou de région : <span class="todo">[à confirmer, D-26]</span>.</figcaption>
+    </figure>
+  </section>
+
+  <section id="v4">
+    <h2>4. Demandes et mouvements de carrière (lots 2 à 4)</h2>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+erDiagram
+  Employe ||--o{ Demande : "fait"
+  Demande ||--|{ Etape : "7 étapes"
+  Demande ||--o{ Fichier : "lettre jointe"
+  Poste_ouvert |o--o{ Demande : "visé par"
+  Compte_RH ||--o{ Demande : "traite"
+  Employe ||--o{ Lettre : "a reçu"
+  Lettre ||--o{ Fichier : "copie sans montants"
+  Lettre |o--o{ Mouvement : "propose"
+  Employe ||--o{ Mouvement : "carrière"
+  Unite |o--o{ Mouvement : "avant, après"
+  Unite ||--o{ Poste_ouvert : "dans"
+  Poste_ouvert ||--o{ Critere_poste : "exige"
+  Poste_ouvert ||--|{ Statut_poste : "historique"
+  Poste_ouvert ||--o{ Interet : "reçoit"
+  Employe ||--o{ Interet : "manifeste"
+  Demande {
+    id id PK
+    id employe FK
+    date recue_le
+    string canal "lettre ou portail"
+    string type "promotion ou mobilité"
+    id poste_vise FK "vide si non publié ou spontanée"
+    string poste_vise_texte
+    string motivation
+    int etape_en_cours "état courant"
+    string cloture "état courant"
+    string copie_profil "instantané (DM-05)"
+    id responsable FK
+    date accuse_reception_le
+    string origine "saisie ou import Excel"
+  }
+  Etape {
+    id id PK
+    id demande FK
+    int numero "1 à 7 ; la 5 = décision DRH"
+    string resultat
+    date le
+    string commentaire
+    id saisie_par FK
+  }
+  Lettre {
+    id id PK
+    id employe FK
+    string reference "dossier papier"
+    date numerisee_le "D-38"
+    string statut_extraction
+  }
+  Mouvement {
+    id id PK
+    id employe FK "même que la lettre"
+    string type "promotion, transfert, nomination"
+    date date_effet "ancienneté dans le poste"
+    string poste_avant "instantané"
+    string poste_apres
+    string grade_avant "instantané"
+    string grade_apres
+    string unite_avant FK
+    string unite_apres FK
+    id lettre FK "vide si saisi"
+    bool propose_par_extraction
+    id valide_par FK "toujours un humain"
+  }
+  Poste_ouvert {
+    id id PK
+    string intitule
+    string code_poste
+    string unite FK
+    string grade_vise
+    date ouverture
+    date limite
+    bool confidentiel
+    string statut "état courant"
+  }
+  Critere_poste {
+    id id PK
+    id poste FK
+    string type "niveau, domaine, anciennetés, grade, unité"
+    string valeur
+  }
+  Statut_poste {
+    id id PK
+    id poste FK
+    string statut "Brouillon, Publié, Clôturé, Pourvu"
+    date le
+    id par FK
+  }
+  Interet {
+    id id PK
+    id employe FK
+    id poste FK
+    date le
+    bool hors_criteres "instantané"
+  }
+      </pre></div>
+      <figcaption>Aucun montant de salaire n'existe dans <strong>Lettre</strong> ni dans <strong>Mouvement</strong> (Q5 §6) ; garder ou non une copie masquée de la lettre : <span class="todo">[à confirmer, D-33]</span>. Ancienneté dans le poste, calculée : aujourd'hui moins la date d'effet du dernier mouvement validé, ou la date d'embauche (Q5 §6). Poste ouvert et intérêt : esquisse, à détailler avant le lot 4.</figcaption>
+    </figure>
+  </section>
+
+  <section id="v5">
+    <h2>5. Accès et traces (lots 1 et 2)</h2>
+    <figure>
+      <div class="scroll"><pre class="mermaid">
+erDiagram
+  Compte_RH ||--|{ Role_compte : "a un ou plusieurs (DM-03)"
+  Compte_RH |o..o| Employe : "matricule rattaché"
+  Compte_RH ||--o{ Journal_audit : "laisse une trace"
+  Employe ||--o{ Message : "reçoit"
+  Modele_message ||--o{ Message : "texte et canal"
+  Compte_RH {
+    id id PK
+    string nom
+    string email
+    id employe FK "jamais ses propres certificats"
+    string identifiant_double_authentification
+    string statut
+    date derniere_connexion
+  }
+  Role_compte {
+    id compte PK, FK
+    string role PK "Administrateur, Agent RH, Resp. référentiel, Lecture seule"
+  }
+  Journal_audit {
+    id id PK
+    date le
+    id compte FK
+    string role "instantané"
+    string action "8 types"
+    string objet
+    string detail
+  }
+  Message {
+    id id PK
+    id employe FK
+    string modele FK "le canal vient du modèle"
+    string raison "statut, relance, lancement, postes"
+    date envoye_le
+    string resultat
+  }
+  Modele_message {
+    string code PK
+    string canal "WhatsApp, email institutionnel, email personnel"
+    string texte
+    bool approuve
+  }
+      </pre></div>
+      <figcaption>Le journal d'audit ne se complète que par ajout : personne ne peut modifier ni supprimer une ligne. Les gestes de l'employé sur son dossier n'y vont pas : ils sont dans <strong>Confirmation</strong> (DM-06). Deux accès distincts pour un Agent RH qui est aussi employé, reliés par le matricule (DM-04).</figcaption>
+    </figure>
+  </section>
+
+  <section id="normalisation">
+    <h2>Normalisation</h2>
+    <p>Le modèle est en <strong>troisième forme normale (3NF)</strong> : chaque valeur est atomique, chaque champ dépend de toute la clé et de rien d'autre. Les quelques exceptions sont <strong>volontaires</strong>, et chacune a sa raison.</p>
+    <div class="cards">
+      <div class="card"><b>Corrigé en v0.4</b><span>Champs regroupés séparés ; Contact d'urgence, Rôle d'un compte, Ancien libellé, Critère et Statut d'un poste en entités ; Dossier typé ; trois liens explicites pour un fichier ; statut d'unité, nombre d'employés, date de dernière confirmation, canal d'un message et décision d'une demande retirés, car déductibles.</span></div>
+      <div class="card"><b>États courants gardés</b><span>Statut et valideur d'un certificat, étape d'une demande, statut d'un poste, statut d'un employé : à côté de leur historique, mis à jour dans la même opération, pour une file et des listes rapides.</span></div>
+      <div class="card"><b>Instantanés</b><span>Ancienne valeur, valeur d'origine, rôle dans le journal, profil au moment de la demande, poste avant un mouvement : des faits historiques, recopiés exprès pour que l'histoire ne change pas.</span></div>
+    </div>
+    <p class="note">Le détail, ligne par ligne, est au §11 de <code>modele-de-donnees.md</code>.</p>
+  </section>
+
+  <section id="besoins">
+    <h2>Le modèle répond-il aux besoins ?</h2>
+    <p>Chaque critère de réussite et chaque exigence qui demande une donnée, avec les entités qui la portent. Une ligne sans réponse serait un trou dans le modèle.</p>
+    <div class="table">
+      <table>
+        <thead><tr><th>Besoin</th><th>Source</th><th>Données qui y répondent</th><th>Réponse</th></tr></thead>
+        <tbody>
+          <tr><td>Trouver en une minute les employés titulaires d'une Licence en comptabilité dans une région</td><td>Critère 1</td><td>Certificat <em>validé</em> → Niveau (rang) et Domaine ; Employé → Correspondance → Unité → Rattachement daté (région)</td><td class="ok">✅</td></tr>
+          <tr><td>Traiter une promotion en quelques jours, et le prouver</td><td>Critère 2</td><td>Demande (reçue le) et Étape (date de chaque étape) : le délai se calcule</td><td class="ok">✅</td></tr>
+          <tr><td>Mesurer les connexions spontanées</td><td>Critère 3</td><td>Connexion, comparée à Message envoyé (une connexion sans message récent)</td><td class="ok">✅ ajouté en v0.3</td></tr>
+          <tr><td>9 dossiers complets sur 10</td><td>Critère 4</td><td>Dossier, Contact d'urgence, Confirmation + Certificat validé : calculé au tableau de bord, par unité</td><td class="ok">✅</td></tr>
+          <tr><td>Plaisir d'utiliser ; profil complété en moins de 10 minutes</td><td>Critère « + »</td><td>Avis (question en un clic) ; durée tirée des Confirmations</td><td class="ok">✅ ajouté en v0.3</td></tr>
+          <tr><td>Moins de temps et moins d'erreurs côté RH</td><td>Critère « + »</td><td>Certificat (déposé le) et Décision (le, motif) : délai et taux de rejet</td><td class="ok">✅</td></tr>
+          <tr><td>Verrou : dépôt débloqué par un profil complet, checklist de ce qui manque</td><td>Q1 ; EF-207</td><td>Dossier, Contact d'urgence, Confirmation (8 informations)</td><td class="ok">✅</td></tr>
+          <tr><td>Historique des confirmations ; péremption à 12 mois</td><td>Message de lancement §2.3 ; Q10</td><td>Confirmation ; date de dernière confirmation</td><td class="ok">✅</td></tr>
+          <tr><td>Signaler une erreur sans modifier l'export ; contrôle automatique sans bloquer</td><td>Q1 ; D-02</td><td>Signalement (origine, valeurs, statut, décision)</td><td class="ok">✅</td></tr>
+          <tr><td>Consentement aux nouvelles données et à WhatsApp</td><td>Q1 ; Q7 §2</td><td>Consentement (objet, date, version du texte)</td><td class="ok">✅</td></tr>
+          <tr><td>Certificat validé jamais supprimé, ancien archivé si remplacé</td><td>Q2 §2</td><td>Certificat → remplace</td><td class="ok">✅</td></tr>
+          <tr><td>Qui a validé, quand, avec quel motif ; corrections tracées</td><td>Q2 §1 ; D-13</td><td>Décision, Correction, Réaffectation</td><td class="ok">✅</td></tr>
+          <tr><td>Ne jamais valider son propre certificat</td><td>Q2 §1 ; RG-42</td><td>Compte RH → matricule rattaché ; comparé à Certificat → employé</td><td class="ok">✅</td></tr>
+          <tr><td>Niveau d'études = plus haut validé ; écart avec le déclaré signalé</td><td>Q3 §1</td><td>Niveau (rang), Certificat validé, Dossier → niveau déclaré : calculé</td><td class="ok">✅</td></tr>
+          <tr><td>Libellés officiels, région datée, « À rattacher »</td><td>Q4</td><td>Unité, Rattachement, Ancien libellé, Correspondance</td><td class="ok">✅</td></tr>
+          <tr><td>Journal d'audit : qui a consulté ou modifié quoi</td><td>Q2 ; EF-605</td><td>Journal d'audit</td><td class="ok">✅</td></tr>
+          <tr><td>Relances : 3 au plus, arrêt dès le dossier complet</td><td>Q7 §3</td><td>Message envoyé (raison, date) + profil complet calculé</td><td class="ok">✅</td></tr>
+          <tr><td>Registre des demandes, deux voies, 7 étapes, rien supprimé, historique importé</td><td>Q6</td><td>Demande (canal, origine), Étape, Fichier (lettre jointe)</td><td class="ok">✅</td></tr>
+          <tr><td>Ancienneté dans le poste tirée des lettres, validée par un humain, sans salaire</td><td>Q5 §6</td><td>Lettre, Mouvement (date d'effet, validé par)</td><td class="ok">✅</td></tr>
+          <tr><td>Éligibilité aux postes sur données validées seulement</td><td>Q5 §3 (lot 4)</td><td>Poste ouvert (critères) ; Certificat validé, Employé (embauche, grade), Mouvement</td><td class="ok">✅ esquisse</td></tr>
+          <tr><td>Un employé qui part reste dans l'historique</td><td>D-31 ; Q4 §5</td><td>Employé → statut « Parti »</td><td class="ok">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Encore ouverts, sans effet sur la structure : photo de l'employé <span class="todo">[D-39]</span> ; copie masquée des lettres <span class="todo">[D-33]</span> ; qui numérise les lettres <span class="todo">[D-38]</span> ; responsable d'agence ou de région <span class="todo">[D-26]</span> ; alignement des niveaux sur la grille de classification de la DRH (Q3 §5).</p>
+  </section>
+</div>

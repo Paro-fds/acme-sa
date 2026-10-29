@@ -13,6 +13,8 @@ class DomainError(Exception):
         if message is not None:
             self.message = message
         self.field = field
+        self.extra: dict[str, object] = {}
+        """Informations complémentaires ajoutées à la réponse (par exemple `retry_after`)."""
         super().__init__(self.message)
 
 
